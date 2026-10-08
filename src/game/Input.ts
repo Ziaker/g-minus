@@ -6,10 +6,11 @@ export class InputManager {
   public boost = false;
   public sideAttackLeft = false;
   public sideAttackRight = false;
+  public spinAttack = false;
 
   private lastLeftPress = 0;
   private lastRightPress = 0;
-  private readonly DOUBLE_TAP_MS = 260;
+  private readonly DOUBLE_TAP_MS = 280;
 
   constructor() {
     window.addEventListener('keydown', this.onKeyDown.bind(this));
@@ -47,6 +48,11 @@ export class InputManager {
       this.sideAttackRight = true;
     }
 
+    // F-Zero X Spin Attack (Z or Shift)
+    if (code === 'KeyZ' || code === 'ShiftLeft' || code === 'ShiftRight') {
+      this.spinAttack = true;
+    }
+
     if (code === 'Space') {
       this.boost = true;
       e.preventDefault();
@@ -62,6 +68,9 @@ export class InputManager {
     if (code === 'KeyQ') this.sideAttackLeft = false;
     if (code === 'KeyE') this.sideAttackRight = false;
     if (code === 'Space') this.boost = false;
+    if (code === 'KeyZ' || code === 'ShiftLeft' || code === 'ShiftRight') {
+      this.spinAttack = false;
+    }
   }
 
   public consumeSideAttack(): -1 | 0 | 1 {
@@ -74,5 +83,13 @@ export class InputManager {
       return 1;
     }
     return 0;
+  }
+
+  public consumeSpinAttack(): boolean {
+    if (this.spinAttack) {
+      this.spinAttack = false;
+      return true;
+    }
+    return false;
   }
 }

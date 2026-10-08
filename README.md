@@ -1,11 +1,11 @@
 # ⚡ G-MINUS // Anti-Gravity High-Speed Racing
 
 <p align="center">
-  <strong>Jogo de corrida anti-gravidade 3D em alta velocidade inspirado puramente em F-Zero.</strong>
+  <strong>Jogo de corrida anti-gravidade 3D em alta velocidade inspirado na essência e física de F-Zero X.</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Inspira%C3%A7%C3%A3o-F--Zero-red?style=for-the-badge" alt="F-Zero" />
+  <img src="https://img.shields.io/badge/Inspira%C3%A7%C3%A3o-F--Zero%20X-red?style=for-the-badge" alt="F-Zero X" />
   <img src="https://img.shields.io/badge/Three.js-0.170-black?style=for-the-badge&logo=threedotjs" alt="Three.js" />
   <img src="https://img.shields.io/badge/TypeScript-5.6-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite" alt="Vite" />
@@ -15,25 +15,46 @@
 
 ## 🚀 A Ideia do Projeto
 
-**G-MINUS** é um jogo de corrida futurista de altíssima velocidade focado em pilotagem técnica, reflexos rápidos e contato veicular direto na pista — seguindo fielmente as raízes e a essência da franquia **F-Zero**.
+**G-MINUS** é um jogo de corrida futurista focado em pilotagem técnica a mais de 1000 km/h, física anti-gravidade de alta precisão e contato veicular agressivo na pista — inspirado diretamente na arquitetura e dinâmica de **F-Zero X**.
 
-### 🚫 Sem Armas. Velocidade Pura & Habilidade.
-Aqui não existem projéteis, lasers ou armas de fogo. Toda a disputa é decidida no traçado, na aerodinâmica e no impacto físico direto entre as máquinas:
-- **Side-Attack**: Golpes laterais agressivos de carroceria para empurrar, desestabilizar e arremessar naves rivais contra as muretas de energia.
-- **Risk-Reward Autêntico**: A barra de energia é ao mesmo tempo seu **escudo vital** e seu **combustível para o Super Boost**.
+### 🚫 Sem Armas. Velocidade Pura & Domínio da Pista.
+Aqui não existem lasers ou projéteis. As disputas são decididas na trajetória, no peso e no impacto entre as fuselagens:
+- **Side-Attack (<kbd>Q</kbd> / <kbd>E</kbd>)**: Golpes laterais de impacto seco para esmagar adversários contra as bordas de contenção.
+- **Spin Attack (<kbd>Z</kbd> / <kbd>SHIFT</kbd>)**: Rotação axial violenta em 360° com campo de força neon que varre múltiplos rivais ao redor.
+- **Regra Clássica de Boost**: Na Volta 1 o turbo é bloqueado (`BOOST LOCKED`). A partir da Volta 2, o sinal **BOOST OK!** se acende e o piloto pode queimar seu próprio escudo para atingir velocidades insanas.
 
-> **"Gastar energia para alcançar a liderança ou economizar para sobreviver às colisões da corrida?"**
+---
+
+## 🏎️ Máquinas & Estatísticas (Body / Boost / Grip)
+
+Assim como no clássico, cada máquina possui atributos distintos que moldam a pilotagem:
+
+| Máquina | Piloto | Body (Peso/Blindagem) | Boost (Turbo) | Grip (Aderência) | Estilo de Pilotagem |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| **Blue Falcon** | Captain Falcon | **B** | **C** | **B** | Equilibrada, ágil e versátil para qualquer traçado. |
+| **Golden Fox** | Dr. Stewart | **D** | **A** | **D** | Arrancada e turbo brutais; exige cuidado nas colisões. |
+| **Wild Goose** | Pico | **A** | **B** | **C** | Tanque pesado de combate; domina empurrões e K.O.s. |
+| **Fire Stingray** | Samurai Goroh | **A** | **D** | **B** | Excelente velocidade final e blindagem maciça. |
+
+### ⚙️ Engine Settings (Aceleração vs Velocidade Máxima)
+Antes da largada, ajuste o balanço do motor no seletor:
+- **Foco em Aceleração**: Recuperação rápida após colisões e saídas de curva.
+- **Foco em Velocidade Máxima**: Tração superior nas retas longas.
 
 ---
 
 ## ✨ Mecânicas Principais
 
-- 🏎️ **Física Anti-Gravidade 3D**: Naves flutuando sobre pistas tubulares e curvas sinuosas, com inclinação dinâmica de asa (*banking roll*), inércia e sensação extrema de velocidade (+1000 km/h).
-- ⚡ **Sistema Escudo = Boost**: Ative o Super Boost a qualquer instante ao custo de drenar parte de sua blindagem energética. Se a energia chegar a zero, a nave não suporta e explode (Crash / K.O.).
-- 💥 **Impacto Físico & Side-Attack (`Q` / `E`)**: Manobras laterais de impacto brusco para acertar rivais no traçado, infligir dano por colisão e buscar o K.O.
-- 🔋 **Pit Strip (Faixa de Recarga)**: Faixa de indução magnética verde na pista que restaura seu escudo conforme você passa sobre ela.
-- 🤖 **Grid de Rivais com IA**: Pilotos agressivos disputando posições, usando impulsos e reagindo ao traçado.
-- 🔊 **Áudio Procedural Dinâmico**: Sons de turbina, boosts, colisões metálicas e explosões sintetizados em tempo real via **Web Audio API** (sem arquivos pesados).
+- 🏎️ **Física Anti-Gravidade 3D**: Naves flutuando sobre pista tubular com inclinação dinâmica de asa (*banking roll*), atrito de grip e sensação visceral de aceleração.
+- ⚡ **Sistema Escudo = Boost**: Ative o Super Boost a qualquer instante ao custo de drenar parte de sua blindagem energética. Se a energia chegar a zero, a máquina explode (K.O.).
+- 💥 **Combate Físico Autêntico**:
+  - **Side-Attack (`Q` / `E`)**: Manobra lateral ofensiva para arremessar naves adversárias para fora do traçado.
+  - **Spin Attack (`Z` / `SHIFT`)**: Giro 360° em área para repelir grupos de oponentes.
+- 🔋 **Pit Strip & Dash Plates**:
+  - **Pit Strip (Faixa Verde)**: Recupera os escudos em tempo real.
+  - **Dash Plates (Setas Amarelas)**: Impulso imediato de velocidade ao passar por cima.
+- 🤖 **Grid Completo com 8 Máquinas**: Disputa acirrada de posições com inteligência artificial combativa.
+- 🔊 **Áudio Procedural F-Zero X**: Sons sintetizados em tempo real via **Web Audio API** (turbinas dinâmicas, Boost OK fanfare, alarmes de baixa energia, Spin Attack e colisões).
 
 ---
 
@@ -43,8 +64,9 @@ Aqui não existem projéteis, lasers ou armas de fogo. Toda a disputa é decidid
 | :--- | :--- |
 | **Acelerar / Frear** | <kbd>W</kbd> / <kbd>S</kbd> ou <kbd>↑</kbd> / <kbd>↓</kbd> |
 | **Curva / Direção** | <kbd>A</kbd> / <kbd>D</kbd> ou <kbd>←</kbd> / <kbd>→</kbd> |
-| **Side-Attack (Ataque Lateral / Bater)** | <kbd>Q</kbd> (Esquerda) / <kbd>E</kbd> (Direita) |
-| **Super Boost** | <kbd>Espaço</kbd> *(Consome Escudo)* |
+| **Side-Attack (Ataque Lateral)** | <kbd>Q</kbd> / <kbd>E</kbd> ou duplo-toque em <kbd>A</kbd>/<kbd>D</kbd> |
+| **Spin Attack (Giro 360° em Área)** | <kbd>Z</kbd> ou <kbd>SHIFT</kbd> |
+| **Super Boost** | <kbd>Espaço</kbd> *(Consome Escudo / Liberado na Volta 2)* |
 
 ---
 
