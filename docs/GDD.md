@@ -56,7 +56,7 @@
 1. [31] Acionamento e duração do boost;
 2. [32] Relação entre custo energético e ganho de velocidade;
 3. [33] Limites, condições e possível intervalo entre ativações;
-4. [34] Resultado de energia/escurdo esgotado e eventual eliminação;
+4. [34] Resultado de energia/escudo esgotado e eventual eliminação;
 5. [35] Existência ou ausência de recuperação passiva;
 6. [36] Risco, velocidade e posicionamento nas áreas de recarga;
 7. [37] Efeito temporal das plataformas de aceleração;
