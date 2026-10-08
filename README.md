@@ -98,3 +98,15 @@ O projeto conta com GitHub Actions automatizado em `.github/workflows/deploy.yml
 ## 📄 Licença
 
 Distribuído sob a licença MIT. Consulte o arquivo `LICENSE` para mais detalhes.
+
+
+---
+
+## 📘 Game Design Document e processo de prototipação
+
+As decisões atuais de gameplay, visual e processo de desenvolvimento estão registradas no **[GDD inicial](docs/GDD.md)**. O documento diferencia requisitos definidos, detalhes pendentes e recursos já presentes no código; não significa que os novos recursos estejam implementados.
+
+**Regra de desenvolvimento:** toda feature passa por protótipo HTML com **3 alternativas distintas**, sliders independentes e configuração copiável/colável, acompanhada de especificação completa e aprovação **antes** de ser integrada ao jogo. A integração deve ser fiel à versão aprovada. Novas mudanças exigem consulta ao repositório atualizado, atualização documental, telemetria/debug e atualização do README.
+
+**Jogar via GitHub Pages (endereço previsto):** https://ziaker.github.io/g-minus/  
+**Aviso de disponibilidade (2026-10-08):** o endereço ainda não foi validado como jogável. A última publicação consultada falhou na etapa *Setup Pages*, apesar de o build ter passado. [Ver workflow](https://github.com/Ziaker/g-minus/actions/runs/37830599287). O jogo pode ser iniciado localmente pelas instruções acima; a falha de publicação não foi corrigida nesta alteração.
