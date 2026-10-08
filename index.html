@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>G-MINUS // F-Zero Combat Racing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #030308;
+      font-family: 'Rajdhani', sans-serif;
+      color: #fff;
+    }
+    #game-canvas {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      z-index: 1;
+    }
+
+    /* HUD Overlay */
+    #hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.8);
+    }
+
+    .pos-lap {
+      background: rgba(10, 15, 30, 0.7);
+      backdrop-filter: blur(8px);
+      border-left: 4px solid #00f0ff;
+      padding: 12px 20px;
+      border-radius: 4px;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    }
+    .pos-lap .pos-val {
+      font-size: 32px;
+      font-weight: 900;
+      color: #00f0ff;
+    }
+    .pos-lap .lap-val {
+      font-size: 18px;
+      color: #a0c0ff;
+      margin-top: 4px;
+    }
+
+    .rival-status {
+      background: rgba(10, 15, 30, 0.7);
+      backdrop-filter: blur(8px);
+      border-right: 4px solid #ff0055;
+      padding: 12px 20px;
+      border-radius: 4px;
+      text-align: right;
+      box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
+    }
+    .rival-status .rival-title {
+      font-size: 13px;
+      color: #ff88a8;
+      letter-spacing: 2px;
+    }
+    .rival-status .rival-count {
+      font-size: 28px;
+      font-weight: 900;
+      color: #ff0055;
+    }
+
+    /* Center crosshair / Combat Lock */
+    .crosshair-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      opacity: 0.6;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .crosshair {
+      width: 44px;
+      height: 44px;
+      border: 2px solid rgba(0, 240, 255, 0.6);
+      border-radius: 50%;
+      position: relative;
+    }
+    .crosshair::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 6px;
+      height: 6px;
+      background: #00f0ff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* HUD Bottom */
+    .hud-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .energy-container {
+      background: rgba(10, 15, 30, 0.75);
+      backdrop-filter: blur(8px);
+      padding: 14px 20px;
+      border-radius: 6px;
+      width: 320px;
+      border-bottom: 3px solid #ffcc00;
+      box-shadow: 0 0 25px rgba(255, 204, 0, 0.25);
+    }
+    .energy-label {
+      font-size: 13px;
+      letter-spacing: 2px;
+      display: flex;
+      justify-content: space-between;
+      color: #ffde59;
+      margin-bottom: 8px;
+    }
+    .energy-bar-bg {
+      width: 100%;
+      height: 16px;
+      background: rgba(20, 25, 40, 0.9);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 204, 0, 0.4);
+      position: relative;
+    }
+    .energy-bar-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #ff0055, #ffcc00, #00f0ff);
+      transition: width 0.1s ease-out;
+      box-shadow: 0 0 10px #ffcc00;
+    }
+
+    .speed-container {
+      background: rgba(10, 15, 30, 0.75);
+      backdrop-filter: blur(8px);
+      padding: 14px 24px;
+      border-radius: 6px;
+      text-align: right;
+      border-bottom: 3px solid #00f0ff;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+    }
+    .speed-val {
+      font-size: 48px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 15px #00f0ff;
+      line-height: 1;
+    }
+    .speed-unit {
+      font-size: 14px;
+      color: #00f0ff;
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    /* Screen alerts (Damage, Boost, Warning) */
+    #damage-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      background: radial-gradient(circle, transparent 40%, rgba(255, 0, 50, 0.6) 100%);
+      opacity: 0;
+      transition: opacity 0.15s ease-out;
+    }
+    #boost-flash {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.25) 0%, transparent 80%);
+      opacity: 0;
+      transition: opacity 0.25s ease-out;
+    }
+
+    /* Start / Game Over Modal */
+    #overlay-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(3, 5, 15, 0.88);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 24px;
+    }
+
+    .title-glitch {
+      font-family: 'Orbitron', monospace;
+      font-size: 64px;
+      font-weight: 900;
+      color: #00f0ff;
+      letter-spacing: 6px;
+      text-shadow: 0 0 20px #00f0ff, 0 0 40px #ff0055;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .subtitle {
+      font-size: 20px;
+      letter-spacing: 4px;
+      color: #ffde59;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+    }
+
+    .controls-panel {
+      background: rgba(15, 22, 45, 0.8);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 8px;
+      padding: 20px 30px;
+      margin-bottom: 30px;
+      max-width: 580px;
+      text-align: left;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .controls-panel h3 {
+      font-family: 'Orbitron', monospace;
+      color: #00f0ff;
+      margin-bottom: 12px;
+      font-size: 17px;
+      text-transform: uppercase;
+    }
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 4px;
+    }
+    .key-badge {
+      background: #00f0ff22;
+      border: 1px solid #00f0ff88;
+      color: #00f0ff;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #00f0ff, #0088ff);
+      color: #050a14;
+      font-family: 'Orbitron', monospace;
+      font-size: 22px;
+      font-weight: 900;
+      padding: 16px 48px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.7);
+      transition: all 0.2s ease;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .btn-start:hover {
+      background: linear-gradient(135deg, #38f9d7, #43e97b);
+      box-shadow: 0 0 45px rgba(67, 233, 123, 0.9);
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+  <div id="damage-flash"></div>
+  <div id="boost-flash"></div>
+  
+  <canvas id="game-canvas"></canvas>
+
+  <div id="hud">
+    <div class="hud-top">
+      <div class="pos-lap">
+        <div class="pos-val" id="hud-pos">POS: 1 / 4</div>
+        <div class="lap-val" id="hud-lap">LAP: 1 / 3</div>
+      </div>
+      <div class="rival-status">
+        <div class="rival-title">RIVAIS ABATIDOS</div>
+        <div class="rival-count" id="hud-kills">0 KILLS</div>
+      </div>
+    </div>
+
+    <div class="crosshair-container">
+      <div class="crosshair"></div>
+    </div>
+
+    <div class="hud-bottom">
+      <div class="energy-container">
+        <div class="energy-label">
+          <span>SHIELD / BOOST</span>
+          <span id="hud-energy-pct">100%</span>
+        </div>
+        <div class="energy-bar-bg">
+          <div class="energy-bar-fill" id="hud-energy-fill"></div>
+        </div>
+      </div>
+      <div class="speed-container">
+        <div class="speed-val" id="hud-speed">0</div>
+        <div class="speed-unit">KM / H</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="overlay-screen">
+    <h1 class="title-glitch">G - MINUS</h1>
+    <div class="subtitle">Sci-Fi 3D Combat Anti-Gravity Racing</div>
+
+    <div class="controls-panel">
+      <h3>Comandos da Nave</h3>
+      <div class="control-row">
+        <span>Acelerar / Frear:</span>
+        <div><span class="key-badge">W</span> / <span class="key-badge">S</span> ou <span class="key-badge">↑</span> / <span class="key-badge">↓</span></div>
+      </div>
+      <div class="control-row">
+        <span>Curva / Direção:</span>
+        <div><span class="key-badge">A</span> / <span class="key-badge">D</span> ou <span class="key-badge">←</span> / <span class="key-badge">→</span></div>
+      </div>
+      <div class="control-row">
+        <span>Side-Attack (Ataque Lateral / Giro):</span>
+        <div><span class="key-badge">Q</span> / <span class="key-badge">E</span> (Golpeie naves rivais!)</div>
+      </div>
+      <div class="control-row">
+        <span>Atirar Canhão de Plasma:</span>
+        <div><span class="key-badge">J</span> ou <span class="key-badge">Botão Esquerdo Mouse</span></div>
+      </div>
+      <div class="control-row">
+        <span>Super Boost (Consome Shield):</span>
+        <div><span class="key-badge">ESPAÇO</span></div>
+      </div>
+      <div class="control-row">
+        <span>Dica de Sobrevivência:</span>
+        <span style="color:#ffcc00;">Passe na faixa verde de recarga (Pit Strip) para regenerar escudo!</span>
+      </div>
+    </div>
+
+    <button class="btn-start" id="btn-play">INICIAR CORRIDA</button>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

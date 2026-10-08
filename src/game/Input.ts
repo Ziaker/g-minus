@@ -1,0 +1,98 @@
+export class InputManager {
+  public forward = false;
+  public backward = false;
+  public left = false;
+  public right = false;
+  public boost = false;
+  public fire = false;
+  public sideAttackLeft = false;
+  public sideAttackRight = false;
+
+  private lastLeftPress = 0;
+  private lastRightPress = 0;
+  private readonly DOUBLE_TAP_MS = 260;
+
+  constructor() {
+    window.addEventListener('keydown', this.onKeyDown.bind(this));
+    window.addEventListener('keyup', this.onKeyUp.bind(this));
+    window.addEventListener('mousedown', this.onMouseDown.bind(this));
+    window.addEventListener('mouseup', this.onMouseUp.bind(this));
+  }
+
+  private onKeyDown(e: KeyboardEvent): void {
+    const code = e.code;
+    const now = performance.now();
+
+    if (code === 'KeyW' || code === 'ArrowUp') this.forward = true;
+    if (code === 'KeyS' || code === 'ArrowDown') this.backward = true;
+
+    if (code === 'KeyA' || code === 'ArrowLeft') {
+      if (!this.left && (now - this.lastLeftPress < this.DOUBLE_TAP_MS)) {
+        this.sideAttackLeft = true;
+      }
+      this.lastLeftPress = now;
+      this.left = true;
+    }
+
+    if (code === 'KeyD' || code === 'ArrowRight') {
+      if (!this.right && (now - this.lastRightPress < this.DOUBLE_TAP_MS)) {
+        this.sideAttackRight = true;
+      }
+      this.lastRightPress = now;
+      this.right = true;
+    }
+
+    // Direct side-attack keys (Q / E) like classic airbrakes / side bash
+    if (code === 'KeyQ') {
+      this.sideAttackLeft = true;
+    }
+    if (code === 'KeyE') {
+      this.sideAttackRight = true;
+    }
+
+    if (code === 'Space') {
+      this.boost = true;
+      e.preventDefault();
+    }
+
+    if (code === 'KeyJ') {
+      this.fire = true;
+    }
+  }
+
+  private onKeyUp(e: KeyboardEvent): void {
+    const code = e.code;
+    if (code === 'KeyW' || code === 'ArrowUp') this.forward = false;
+    if (code === 'KeyS' || code === 'ArrowDown') this.backward = false;
+    if (code === 'KeyA' || code === 'ArrowLeft') this.left = false;
+    if (code === 'KeyD' || code === 'ArrowRight') this.right = false;
+    if (code === 'KeyQ') this.sideAttackLeft = false;
+    if (code === 'KeyE') this.sideAttackRight = false;
+    if (code === 'Space') this.boost = false;
+    if (code === 'KeyJ') this.fire = false;
+  }
+
+  private onMouseDown(e: MouseEvent): void {
+    if (e.button === 0) {
+      this.fire = true;
+    }
+  }
+
+  private onMouseUp(e: MouseEvent): void {
+    if (e.button === 0) {
+      this.fire = false;
+    }
+  }
+
+  public consumeSideAttack(): -1 | 0 | 1 {
+    if (this.sideAttackLeft) {
+      this.sideAttackLeft = false;
+      return -1;
+    }
+    if (this.sideAttackRight) {
+      this.sideAttackRight = false;
+      return 1;
+    }
+    return 0;
+  }
+}
