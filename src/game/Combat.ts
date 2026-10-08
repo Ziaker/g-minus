@@ -1,15 +1,5 @@
 import * as THREE from 'three';
 
-export interface Laser {
-  mesh: THREE.Mesh;
-  position: THREE.Vector3;
-  velocity: THREE.Vector3;
-  ownerId: string;
-  damage: number;
-  life: number;
-  maxLife: number;
-}
-
 export interface SparkParticle {
   position: THREE.Vector3;
   velocity: THREE.Vector3;
@@ -20,12 +10,8 @@ export interface SparkParticle {
 
 export class CombatSystem {
   private scene: THREE.Scene;
-  public lasers: Laser[] = [];
-  private laserGeo: THREE.BufferGeometry;
-  private laserMatPlayer: THREE.MeshBasicMaterial;
-  private laserMatRival: THREE.MeshBasicMaterial;
 
-  // Particle System
+  // Particle System (Sparks, Crashes, Explosions)
   private particleCount = 200;
   private particleGeo: THREE.BufferGeometry;
   private particleMat: THREE.PointsMaterial;
@@ -36,12 +22,6 @@ export class CombatSystem {
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
-
-    // Laser visuals
-    this.laserGeo = new THREE.CylinderGeometry(0.18, 0.18, 3.5, 6);
-    this.laserGeo.rotateX(Math.PI / 2);
-    this.laserMatPlayer = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
-    this.laserMatRival = new THREE.MeshBasicMaterial({ color: 0xff0055 });
 
     // Sparks / Explosions
     this.particleGeo = new THREE.BufferGeometry();
@@ -62,33 +42,6 @@ export class CombatSystem {
 
     this.particlePoints = new THREE.Points(this.particleGeo, this.particleMat);
     this.scene.add(this.particlePoints);
-  }
-
-  public fireLaser(
-    origin: THREE.Vector3,
-    direction: THREE.Vector3,
-    baseVelocity: THREE.Vector3,
-    ownerId: string
-  ): void {
-    const isPlayer = ownerId === 'player';
-    const mesh = new THREE.Mesh(this.laserGeo, isPlayer ? this.laserMatPlayer : this.laserMatRival);
-    mesh.position.copy(origin);
-    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction);
-
-    const laserSpeed = 380; // Fast plasma bolt
-    const vel = direction.clone().multiplyScalar(laserSpeed).add(baseVelocity.clone().multiplyScalar(0.3));
-
-    this.scene.add(mesh);
-
-    this.lasers.push({
-      mesh,
-      position: origin.clone(),
-      velocity: vel,
-      ownerId,
-      damage: 18,
-      life: 0,
-      maxLife: 1.2
-    });
   }
 
   public spawnSparks(origin: THREE.Vector3, count: number, colorHex: number = 0x00f0ff): void {
@@ -115,28 +68,12 @@ export class CombatSystem {
   }
 
   public spawnExplosion(origin: THREE.Vector3): void {
-    // Large cyber burst
     this.spawnSparks(origin, 60, 0xff0055);
     this.spawnSparks(origin, 40, 0xffaa00);
     this.spawnSparks(origin, 20, 0x00f0ff);
   }
 
   public update(dt: number): void {
-    // Update Lasers
-    for (let i = this.lasers.length - 1; i >= 0; i--) {
-      const laser = this.lasers[i];
-      laser.life += dt;
-
-      if (laser.life >= laser.maxLife) {
-        this.scene.remove(laser.mesh);
-        this.lasers.splice(i, 1);
-        continue;
-      }
-
-      laser.position.addScaledVector(laser.velocity, dt);
-      laser.mesh.position.copy(laser.position);
-    }
-
     // Update Particles
     for (let i = this.activeSparks.length - 1; i >= 0; i--) {
       const p = this.activeSparks[i];
@@ -172,12 +109,5 @@ export class CombatSystem {
 
     this.particleGeo.attributes.position.needsUpdate = true;
     this.particleGeo.attributes.color.needsUpdate = true;
-  }
-
-  public removeLaser(index: number): void {
-    if (this.lasers[index]) {
-      this.scene.remove(this.lasers[index].mesh);
-      this.lasers.splice(index, 1);
-    }
   }
 }

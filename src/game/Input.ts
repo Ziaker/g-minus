@@ -4,7 +4,6 @@ export class InputManager {
   public left = false;
   public right = false;
   public boost = false;
-  public fire = false;
   public sideAttackLeft = false;
   public sideAttackRight = false;
 
@@ -15,8 +14,6 @@ export class InputManager {
   constructor() {
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
-    window.addEventListener('mousedown', this.onMouseDown.bind(this));
-    window.addEventListener('mouseup', this.onMouseUp.bind(this));
   }
 
   private onKeyDown(e: KeyboardEvent): void {
@@ -54,10 +51,6 @@ export class InputManager {
       this.boost = true;
       e.preventDefault();
     }
-
-    if (code === 'KeyJ') {
-      this.fire = true;
-    }
   }
 
   private onKeyUp(e: KeyboardEvent): void {
@@ -69,19 +62,6 @@ export class InputManager {
     if (code === 'KeyQ') this.sideAttackLeft = false;
     if (code === 'KeyE') this.sideAttackRight = false;
     if (code === 'Space') this.boost = false;
-    if (code === 'KeyJ') this.fire = false;
-  }
-
-  private onMouseDown(e: MouseEvent): void {
-    if (e.button === 0) {
-      this.fire = true;
-    }
-  }
-
-  private onMouseUp(e: MouseEvent): void {
-    if (e.button === 0) {
-      this.fire = false;
-    }
   }
 
   public consumeSideAttack(): -1 | 0 | 1 {

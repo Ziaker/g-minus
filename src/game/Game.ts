@@ -195,7 +195,6 @@ export class Game {
       left: this.input.left,
       right: this.input.right,
       boost: this.input.boost,
-      fire: this.input.fire,
       sideAttack: playerSideAttack
     });
 
@@ -207,59 +206,21 @@ export class Game {
         left: false,
         right: false,
         boost: false,
-        fire: false,
         sideAttack: 0
       });
     }
 
-    // 3. Update Combat Projectiles & Particle FX
+    // 3. Update Particle FX (Sparks, Collisions)
     this.combat.update(dt);
 
-    // 4. Combat Collisions (Lasers vs Vehicles)
-    this.checkLaserCollisions();
-
-    // 5. Vehicle vs Vehicle Ramming Collisions
+    // 4. Vehicle vs Vehicle Ramming Collisions
     this.checkVehicleCollisions();
 
-    // 6. Update Camera
+    // 5. Update Camera
     this.updateCamera(dt);
 
-    // 7. Update HUD
+    // 6. Update HUD
     this.updateHUD();
-  }
-
-  private checkLaserCollisions(): void {
-    const laserRadius = 0.6;
-    const craftRadius = 2.2;
-
-    for (let lIdx = this.combat.lasers.length - 1; lIdx >= 0; lIdx--) {
-      const laser = this.combat.lasers[lIdx];
-
-      for (const vehicle of this.allVehicles) {
-        if (vehicle.isDestroyed) continue;
-        if (laser.ownerId === vehicle.config.id) continue;
-
-        const dist = laser.position.distanceTo(vehicle.group.position);
-        if (dist < laserRadius + craftRadius) {
-          // Hit!
-          const wasAlive = !vehicle.isDestroyed;
-          vehicle.takeDamage(laser.damage, true);
-          this.combat.spawnSparks(laser.position, 16, 0xff0055);
-
-          if (!vehicle.config.isAI) {
-            this.audio.playImpact();
-            this.addCameraShake(0.3);
-          }
-
-          if (laser.ownerId === 'player' && wasAlive && vehicle.isDestroyed) {
-            this.playerKills++;
-          }
-
-          this.combat.removeLaser(lIdx);
-          break;
-        }
-      }
-    }
   }
 
   private checkVehicleCollisions(): void {
@@ -399,9 +360,9 @@ export class Game {
       this.hudPos.textContent = `POS: ${playerRank} / ${this.allVehicles.length}`;
     }
 
-    // Kills
+    // K.O.s (F-Zero Style)
     if (this.hudKills) {
-      this.hudKills.textContent = `${this.playerKills} KILLS`;
+      this.hudKills.textContent = `${this.playerKills} K.O.`;
     }
   }
 

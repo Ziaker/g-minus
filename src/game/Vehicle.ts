@@ -51,8 +51,6 @@ export class Vehicle {
   private thrusterPlumes: THREE.Mesh[] = [];
   public currentRoll = 0;
 
-  // Weapon cooldown
-  private fireCooldown = 0;
 
   // AI behavior
   private aiTargetOffset = 0;
@@ -135,17 +133,15 @@ export class Vehicle {
     rightWing.rotation.z = -0.1;
     ship.add(rightWing);
 
-    // Wingtip Cannons
-    const cannonGeo = new THREE.CylinderGeometry(0.12, 0.14, 2.2, 6);
-    cannonGeo.rotateX(Math.PI / 2);
+    // Wingtip aerodynamic pods
+    const podGeo = new THREE.BoxGeometry(0.2, 0.35, 1.6);
+    const leftPod = new THREE.Mesh(podGeo, cockpitMat);
+    leftPod.position.set(-2.8, 0.05, -0.4);
+    ship.add(leftPod);
 
-    const leftCannon = new THREE.Mesh(cannonGeo, cockpitMat);
-    leftCannon.position.set(-2.8, 0.05, 0);
-    ship.add(leftCannon);
-
-    const rightCannon = new THREE.Mesh(cannonGeo, cockpitMat);
-    rightCannon.position.set(2.8, 0.05, 0);
-    ship.add(rightCannon);
+    const rightPod = new THREE.Mesh(podGeo, cockpitMat);
+    rightPod.position.set(2.8, 0.05, -0.4);
+    ship.add(rightPod);
 
     // Vertical stabilizers / Fins
     const finGeo = new THREE.BoxGeometry(0.1, 1.2, 1.4);
@@ -184,7 +180,6 @@ export class Vehicle {
       left: boolean;
       right: boolean;
       boost: boolean;
-      fire: boolean;
       sideAttack: -1 | 0 | 1;
     }
   ): void {
@@ -194,10 +189,6 @@ export class Vehicle {
         this.respawn();
       }
       return;
-    }
-
-    if (this.fireCooldown > 0) {
-      this.fireCooldown -= dt;
     }
 
     if (this.config.isAI) {
@@ -315,10 +306,6 @@ export class Vehicle {
       }
     }
 
-    // Firing Weapons
-    if (input.fire && this.fireCooldown <= 0) {
-      this.fireWeapon();
-    }
 
     // Update 3D orientation & position
     this.updateTransform(dt, steerDir);
@@ -389,24 +376,6 @@ export class Vehicle {
     }
   }
 
-  private fireWeapon(): void {
-    this.fireCooldown = 0.22;
-    const forward = new THREE.Vector3();
-    this.group.getWorldDirection(forward);
-
-    const leftCannonPos = this.group.position.clone().add(new THREE.Vector3(-1.8, 0, 0).applyQuaternion(this.group.quaternion));
-    const rightCannonPos = this.group.position.clone().add(new THREE.Vector3(1.8, 0, 0).applyQuaternion(this.group.quaternion));
-
-    const vel = forward.clone().multiplyScalar(this.speed);
-
-    this.combat.fireLaser(leftCannonPos, forward, vel, this.config.id);
-    this.combat.fireLaser(rightCannonPos, forward, vel, this.config.id);
-
-    if (!this.config.isAI) {
-      this.audio.playLaser();
-    }
-  }
-
   public takeDamage(amount: number, flash = true): void {
     this.shield = Math.max(this.shield - amount, 0);
 
@@ -448,7 +417,6 @@ export class Vehicle {
       left: boolean;
       right: boolean;
       boost: boolean;
-      fire: boolean;
       sideAttack: -1 | 0 | 1;
     }
   ): void {
@@ -472,9 +440,9 @@ export class Vehicle {
       inputState.boost = true;
     }
 
-    // Shoot weapon at vehicles in front
-    if (Math.random() < 0.03) {
-      inputState.fire = true;
+    // Aggressive AI side-attack when jostling nearby rivals
+    if (Math.random() < 0.005) {
+      inputState.sideAttack = Math.random() > 0.5 ? 1 : -1;
     }
   }
 
