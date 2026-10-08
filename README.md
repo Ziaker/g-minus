@@ -1,65 +1,111 @@
-# G-MINUS // Sci-Fi 3D Combat Anti-Gravity Racing
+# ⚡ G-MINUS // Sci-Fi Combat Anti-Gravity Racing
 
-Jogo de corrida e combate antigravidade 3D em terceira pessoa inspirado em **F-Zero**, desenvolvido em **TypeScript** com **Three.js** e **Vite**, projetado para rodar direto no navegador e pronto para deploy automático no **GitHub Pages**.
+<p align="center">
+  <strong>Jogo de corrida anti-gravidade 3D com combate veicular inspirado em clássicos como F-Zero e WipEout.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Em%20Desenvolvimento-cyan?style=for-the-badge" alt="Status" />
+  <img src="https://img.shields.io/badge/Three.js-0.170-black?style=for-the-badge&logo=threedotjs" alt="Three.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5.6-blue?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite" alt="Vite" />
+</p>
 
 ---
 
-## 🚀 Como Jogar / Executar Localmente
+## 🚀 A Ideia do Projeto
 
-1. **Instalar dependências**:
+**G-MINUS** é um protótipo de corrida futurista em alta velocidade focado em pilotagem precisa, reflexos rápidos e combate veicular direto na pista.
+
+Diferente de jogos de corrida tradicionais, o núcleo do jogo segue a filosofia *Risk-Reward* de **F-Zero**:
+> **Sua barra de energia é ao mesmo tempo seu escudo e seu combustível de aceleração extrema.**
+
+Usar o **Super Boost** consome sua vida útil; sofrer ataques de oponentes reduz sua capacidade de acelerar. Para vencer, o piloto deve equilibrar agressividade, velocidade máxima e uso estratégico das zonas de recarga na pista.
+
+---
+
+## ✨ Principais Mecânicas
+
+- 🏎️ **Física Anti-Gravidade**: Flutuação sobre a pista com inclinações nas curvas (*banking*), inércia e sensação visceral de aceleração.
+- ⚡ **Sistema Escudo = Boost**: Ative o Super Boost a qualquer instante ao custo de drenar parte do seu escudo de energia vital.
+- 💥 **Combate Veicular**:
+  - **Canhões de Plasma (`J` / Botão Esquerdo)**: Rajadas energéticas para desgastar a blindagem de rivais à frente.
+  - **Side-Attack (`Q` / `E`)**: Manobra agressiva com giro em 360° para arremessar naves adversárias para fora do traçado ou contra barreiras.
+- 🔋 **Pit Strip (Faixa de Recarga)**: Zonas energéticas na pista que regeneram escudos durante a passagem.
+- 🤖 **Grid com IA Competitiva**: Naves rivais com comportamento combativo, disputando posições e reagindo ao traçado.
+- 🔊 **Áudio Procedural**: Efeitos sonoros gerados dinamicamente via **Web Audio API** para turbinas, boosts, tiros e colisões.
+
+---
+
+## 🎮 Comandos & Controles
+
+| Ação | Teclas / Atalho |
+| :--- | :--- |
+| **Acelerar / Frear** | <kbd>W</kbd> / <kbd>S</kbd> ou <kbd>↑</kbd> / <kbd>↓</kbd> |
+| **Curva / Direção** | <kbd>A</kbd> / <kbd>D</kbd> ou <kbd>←</kbd> / <kbd>→</kbd> |
+| **Side-Attack (Giro Lateral)** | <kbd>Q</kbd> (Esquerda) / <kbd>E</kbd> (Direita) |
+| **Canhão de Plasma** | <kbd>J</kbd> ou <kbd>Clique Esquerdo</kbd> |
+| **Super Boost** | <kbd>Espaço</kbd> *(Consome Escudo)* |
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **[Three.js](https://threejs.org/)** – Renderização gráfica 3D WebGL (iluminação dinâmica, materiais emissores, névoa e sombras).
+- **[TypeScript](https://www.typescriptlang.org/)** – Arquitetura tipada para física, vetores, colisões e controle de entidades.
+- **[Vite](https://vitejs.dev/)** – Ambiente ultrarrápido para desenvolvimento e empacotamento modular.
+- **Web Audio API** – Síntese procedural de áudio em tempo real sem arquivos pesados.
+
+---
+
+## 🏁 Como Executar Localmente
+
+### Pré-requisitos
+- [Node.js](https://nodejs.org/) (versão 18 ou superior)
+- Gerenciador de pacotes `npm` (ou `pnpm` / `yarn`)
+
+### Passos
+
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/Ziaker/g-minus.git
+   cd g-minus
+   ```
+
+2. **Instale as dependências:**
    ```bash
    npm install
    ```
-2. **Iniciar servidor de desenvolvimento**:
+
+3. **Inicie o servidor de desenvolvimento:**
    ```bash
    npm run dev
    ```
-3. Abra no navegador em `http://localhost:3000` (ou a porta informada pelo Vite).
 
----
-
-## 🎮 Controles
-
-| Ação | Teclado | Mouse |
-| :--- | :--- | :--- |
-| **Acelerar / Frear** | `W` / `S` ou `↑` / `↓` | - |
-| **Curva / Direção** | `A` / `D` ou `←` / `→` | - |
-| **Side-Attack (Ataque Lateral / Giro)** | `Q` / `E` ou duplo-toque em `A`/`D` | - |
-| **Disparo de Plasma (Canhão)** | `J` | Botão Esquerdo do Mouse |
-| **Super Boost (Gasta Escudo)** | `ESPAÇO` | - |
-
----
-
-## ⚡ Mecânicas Implementadas (Protótipo Base)
-
-- **Física Antigravidade 3D**: Flutuação suave sobre a pista, inclinação dinâmica (*banking roll*), inércia lateral e atrito aerodinâmico.
-- **Pista 3D Tridimensional Fechada**: Circuito em *Catmull-Rom spline* com elevações, curvas fechadas, declives e barreiras de contenção com detecção de colisão.
-- **Combate de Naves**:
-  - **Ataque Lateral (*Side Attack / Spin*)**: Aceleração súbita lateral com rotação que causa dano massivo e arremessa naves rivais para fora da trajetória.
-  - **Canhões de Plasma**: Projéteis duplos com detecção de impacto e efeito de faíscas.
-  - **Colisão e Impulso**: Choques entre veículos e nas paredes com impacto e perda de velocidade/escudo.
-  - **Contador de Abates (Kills)**: Destrua os rivais para pontuar no HUD.
-- **Sistema de Energia F-Zero (Shield / Boost)**:
-  - Usar o Boost aumenta a velocidade mas drena o escudo.
-  - Pistas contam com **Pit Strip (faixa verde fluorescente)** que recarrega os escudos em tempo real.
-  - **Pads de Boost (setas amarelas)** espalhadas pelo circuito para impulsos instantâneos.
-- **Câmera Dinâmica em 3ª Pessoa**: Câmera de perseguição com FOV dinâmico que se abre conforme a velocidade ultrapassa 1000 km/h e tremores (*screen shake*) em impactos.
-- **Áudio Sintetizado Procedural (Web Audio API)**: Sons de turbina com pitch dinâmico, tiros de plasma, ativação de boost, impactos metálicos e explosões com **zero arquivos externos** (garante carregamento instantâneo no GitHub Pages sem erro de CORS/404).
-- **IA de Rivais**: Naves oponentes que disputam a liderança e reagem no circuito.
+4. **Acesse no navegador:**
+   Abra a URL exibida no terminal (geralmente `http://localhost:5173`).
 
 ---
 
 ## 🌐 Publicação no GitHub Pages
 
-O projeto já está configurado com `base: './'` no [vite.config.ts](file:///c:/Users/zerke/OneDrive/%C3%81rea%20de%20Trabalho/G%20Minus/vite.config.ts) e possui uma automação pronta em [.github/workflows/deploy.yml](file:///c:/Users/zerke/OneDrive/%C3%81rea%20de%20Trabalho/G%20Minus/.github/workflows/deploy.yml):
+O projeto conta com GitHub Actions automatizado em `.github/workflows/deploy.yml`. Para habilitar a página online:
+1. No repositório no GitHub, acesse **Settings > Pages**.
+2. Em **Build and deployment > Source**, selecione **GitHub Actions**.
+3. A cada push na branch `main`, a versão atualizada do jogo será disponibilizada publicamente.
 
-1. Crie um repositório no GitHub.
-2. Faça o push dos arquivos:
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: prototipo inicial F-Zero combat racing"
-   git remote add origin <URL_DO_SEU_REPOSITORIO>
-   git push -u origin main
-   ```
-3. No GitHub, acesse **Settings > Pages** e certifique-se de que a fonte está definida como **GitHub Actions**. O jogo será publicado automaticamente em sua URL pública do Pages!
+---
+
+## 📦 Build para Produção
+
+Para gerar os arquivos otimizados prontos para publicação:
+```bash
+npm run build
+```
+Os arquivos finais serão gerados na pasta `dist/`.
+
+---
+
+## 📄 Licença
+
+Distribuído sob a licença MIT. Consulte o arquivo `LICENSE` para mais detalhes.
