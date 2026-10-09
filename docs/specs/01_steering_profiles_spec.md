@@ -1,95 +1,73 @@
-# Especificação Técnica — Protótipo 01: Perfis de Direção e Dinâmica Lateral
+# Especificação Técnica — Protótipo 01: Laboratório Completo de Física, Combate e IA
 
-**Status:** Proposta de Protótipo e Especificação conforme GDD (Seção 3 [21–30]).  
+**Status:** Laboratório de Prototipação e Especificação Técnica Integrada (GDD Seções 1 a 11).  
 **Data:** 2026-10-08  
 **Arquivo do Protótipo:** `prototypes/01_steering_profiles.html`  
-**Referência GDD:** Itens [21] (3 Perfis de Direção), [22] (Instabilidade por Velocidade), [23] (Auto-estabilização ao soltar), [24] (Mecânica de Drift e Inércia) e [26] (Airbrakes <kbd>Q</kbd>/<kbd>E</kbd>).
+**Referência GDD:** Itens [21] (3 Perfis de Direção), [22] (Instabilidade em Alta Velocidade), [23] (Auto-estabilização ao soltar), [24] (Mecânica de Drift e Inércia), [26] (Airbrakes <kbd>Q</kbd>/<kbd>E</kbd>), [31–40] (Escudo, Boost, Pit Zones, Dash Plates), [41–50] (Side-Attack, Spin Attack, Clash Duel Mashing), [51–60] (Grid de IA e K.O.s), [61–70] (Circuitos e Tubo Zero-G), [91–94] (Câmeras Múltiplas e FOV dinâmico) e [101–102] (Telemetria, Controle de Tempo e Exportação JSON).
 
 ---
 
-## 1. Objetivo do Protótipo
+## 1. Visão Geral do Laboratório de Prototipação
 
-Validar em ambiente isolado e interativo as três abordagens de pilotagem para o **G-MINUS**, permitindo testar em tempo real em traçado sinuoso e pista reta de testes, com telemetria de ângulo de derrapagem (*slip angle*), aceleração lateral (*G-force*), estado de aderência e exportação/importação de parâmetros em formato JSON.
+O arquivo `prototypes/01_steering_profiles.html` é o ambiente de teste e calibração definitiva do **G-MINUS**. Ele reúne em uma única aplicação web interativa:
 
----
-
-## 2. Sistema de Coordenadas e Referencial da Pista
-
-Para garantir a coerência tridimensional sem inversão de eixos, a nave e a câmera utilizam o referencial ortonormal dextrógiro da curva da pista (Frenet-Serret ajustado):
-
-$$\vec{T} = \text{Tangente normalizada da curva (Direção de avanço)}$$
-$$\vec{B} = \frac{\vec{up} \times \vec{T}}{\|\vec{up} \times \vec{T}\|} \quad (\text{Vetor lateral direito: } +X)$$
-$$\vec{N} = \frac{\vec{T} \times \vec{B}}{\|\vec{T} \times \vec{B}\|} \quad (\text{Vetor normal superior da pista: } +Y)$$
-
-* **Posicionamento:** $\vec{P}_{\text{nave}} = \vec{P}_{\text{pista}}(t) + \vec{B} \cdot \text{lateralOffset} + \vec{N} \cdot h_{\text{hover}}$
-* **Direção dos Comandos:**
-  * Pressionar <kbd>A</kbd> / Seta Esquerda: $\text{steerDir} < 0 \implies$ deslocamento em $-\vec{B}$ (**Esquerda da tela**).
-  * Pressionar <kbd>D</kbd> / Seta Direita: $\text{steerDir} > 0 \implies$ deslocamento em $+\vec{B}$ (**Direita da tela**).
-* **Inclinação de Asa (*Banking Roll*):**
-  * Curva para a esquerda: rotação positiva no eixo Z local (asa esquerda desce, asa direita sobe).
-  * Curva para a direita: rotação negativa no eixo Z local (asa direita desce, asa esquerda sobe).
-
----
-
-## 3. Os 3 Perfis de Direção Propostos
-
-### Perfil A: Resposta Direta / Precisa (Arcade F-Zero GX)
-* **Conceito:** Resposta instantânea aos comandos digitais, sem atraso perceptível de esterço. Aderência alta que mantém a nave nos trilhos da trajetória desejada.
-* **Parâmetros Base:**
-  * `steerRate`: 65
-  * `progressivity`: 1.0 (Linear, sem rampa de atraso)
-  * `inertia`: 18 (Baixa inércia lateral)
-  * `grip`: 92% (Aderência firme)
-  * `recenter`: 14.0 (Auto-centralização vigorosa ao soltar os direcionais)
-  * `speedInstability`: 0.15 (Perda sutil de tração em velocidade máxima)
-  * `airbrakeForce`: 40
-
-### Perfil B: Progressivo / Suave (Filtro Dinâmico)
-* **Conceito:** A taxa de esterço aumenta progressivamente conforme a tecla é mantida pressionada. Permite ajustes finos em toques rápidos e curvas amplas em toques longos.
-* **Parâmetros Base:**
-  * `steerRate`: 52
-  * `progressivity`: 2.2 (Rampa exponencial de entrada)
-  * `inertia`: 28 (Inércia moderada)
-  * `grip`: 85%
-  * `recenter`: 9.0
-  * `speedInstability`: 0.30
-  * `airbrakeForce`: 55
-
-### Perfil C: Inercial / Drift (F-Zero X Clássico)
-* **Conceito:** Nave pesada com grande inércia lateral. Em alta velocidade, curvas fechadas causam derrapagem controlada (*slip angle* acentuado), exigindo contra-esterço e uso ativo de airbrakes (<kbd>Q</kbd>/<kbd>E</kbd>) para dominar a curva.
-* **Parâmetros Base:**
-  * `steerRate`: 75
-  * `progressivity`: 1.4
-  * `inertia`: 55 (Alta inércia com transferência de massa)
-  * `grip`: 68% (Quebra de tração mais fácil)
-  * `recenter`: 4.5 (Permite manter o ângulo de drift)
-  * `speedInstability`: 0.60 (Forte influência da velocidade na perda de grip)
-  * `airbrakeForce`: 80 (Airbrakes vitais para ancorar a traseira)
+1. **Os 3 Perfis de Direção do GDD [21]:**
+   * **Perfil A (Direto / Preciso - F-Zero GX):** Resposta imediata, sem rampa de atraso, tração firme nos trilhos.
+   * **Perfil B (Progressivo / Suave - Filtro Dinâmico):** Rampa exponencial de aceleração angular para toques curtos vs longos.
+   * **Perfil C (Inercial / Drift - F-Zero X):** Grande inércia lateral e transferência de massa, exigindo contra-esterço deliberado em curvas fechadas.
+2. **Ambientes e Pistas:**
+   * **Circuito 3D Neo-Tokyo:** Curvas fechadas, elevações e declives em alta velocidade.
+   * **Reta de Ensaio Slalom:** Pista reta de 2600m com cones de referência para avaliar tempo de resposta isolado.
+   * **Tubo Zero-G (Cilíndrico):** Pista tubular fechada em 360° para testar condução invertida e giros de câmera.
+3. **Mecânicas de Combate Físico e Manobras:**
+   * **Side-Attack (<kbd>Q</kbd> / <kbd>E</kbd>):** Deslocamento lateral explosivo para arremessar oponentes contra guardrails.
+   * **Spin Attack (<kbd>Z</kbd> / <kbd>SHIFT</kbd>):** Rotação radial em 360° que repele múltiplos adversários ao redor.
+   * **Clash Duel [GDD 45]:** Disputa de colisão mashing entre duas naves em alta velocidade com indicador visual de equilíbrio de força.
+4. **Sistema de Grid & IA Configurável:**
+   * Slider de 0 a 29 rivais simultâneos na pista.
+   * Colisões físicas entre veículos, perda de escudo e contagem de K.O.s.
+5. **Boost, Escudo & Elementos de Pista:**
+   * Super Boost (<kbd>ESPAÇO</kbd>) com consumo de blindagem.
+   * Dash Plates (placas amarelas de aceleração instantânea).
+   * Pit Recharge Strips (faixas de recarga de escudo neon verde).
+6. **Múltiplas Perspectivas de Câmera (<kbd>C</kbd>):**
+   * Câmera de Perseguição Dinâmica (Chase Cam com FOV proporcional à velocidade).
+   * Câmera Cockpit / Primeira Pessoa.
+   * Câmera Orbital 360° para inspeção estética das naves e peças.
+7. **Áudio Procedural Web Audio API:**
+   * Síntese de motor em tempo real com pitch por velocidade, sons de impacto, boost e recarga.
+8. **Controle de Tempo e Telemetria Completa:**
+   * Slider de Time Scale (0.1x Slow-Mo a 2.0x Fast-Forward) e Pausa (<kbd>P</kbd>).
+   * Importação e Exportação de Configurações em JSON com cópia em 1 clique.
 
 ---
 
-## 4. Controles do Protótipo
+## 2. Parâmetros e Intervalos de Calibração
 
-| Tecla | Função |
+| Parâmetro | Tipo / Range | Default (A) | Descrição |
+| :--- | :---: | :---: | :--- |
+| `steerRate` | 20 a 120 | 65 | Força base de esterço lateral. |
+| `progressivity` | 1.0 a 3.5 | 1.0 | Expoente da curva de resposta temporal ao segurar a direção. |
+| `inertia` | 5 a 80 | 18 | Massa inercial da nave durante mudanças de direção. |
+| `grip` | 30% a 100% | 92% | Aderência dos repulsores da nave contra derrapagem. |
+| `recenter` | 1.0 a 25.0 | 14.0 | Velocidade de auto-estabilização ao soltar os controles. |
+| `speedInstability` | 0.0 a 1.0 | 0.15 | Taxa de perda de aderência quando a velocidade supera a marca base. |
+| `sideAttackForce` | 80 a 350 | 190 | Impulso lateral gerado pelo golpe de Side-Attack (<kbd>Q</kbd>/<kbd>E</kbd>). |
+
+---
+
+## 3. Tabela Completa de Comandos
+
+| Tecla / Atalho | Ação no Protótipo |
 | :--- | :--- |
-| <kbd>W</kbd> / <kbd>↑</kbd> | Aceleração |
-| <kbd>S</kbd> / <kbd>↓</kbd> | Freio |
+| <kbd>W</kbd> / <kbd>↑</kbd> | Acelerar nave |
+| <kbd>S</kbd> / <kbd>↓</kbd> | Frear nave |
 | <kbd>A</kbd> / <kbd>←</kbd> | Esterço para a Esquerda |
 | <kbd>D</kbd> / <kbd>→</kbd> | Esterço para a Direita |
-| <kbd>Q</kbd> | Airbrake Esquerdo (arrasto e torque lateral à esquerda) |
-| <kbd>E</kbd> | Airbrake Direito (arrasto e torque lateral à direita) |
-| <kbd>Espaço</kbd> | Boost de Teste |
-| <kbd>R</kbd> | Reiniciar posição na pista |
-
----
-
-## 5. Telemetria e Indicadores do HUD
-
-1. **Velocidade:** Apresentada em KM/H e unidades/segundo.
-2. **Slip Angle (°):** Diferença angular entre o vetor de movimento real da nave e o eixo longitudinal do veículo.
-3. **G-Force:** Estimativa da força centrífuga lateral suportada pela nave.
-4. **Estado de Aderência:**
-   * `TRAÇÃO TOTAL`: Desvio lateral mínimo ($< 4^\circ$).
-   * `SLIP MODERADO`: Início de deslizamento ($4^\circ - 9^\circ$).
-   * `DRIFT CONTROLADO`: Ângulo ideal de derrapagem ($9^\circ - 18^\circ$).
-   * `OVERSTEER / DERRAPAGEM`: Perda acentuada de tração ($> 18^\circ$).
+| <kbd>Q</kbd> | Side-Attack / Airbrake para a Esquerda |
+| <kbd>E</kbd> | Side-Attack / Airbrake para a Direita |
+| <kbd>Z</kbd> / <kbd>SHIFT</kbd> | Spin Attack 360° em área |
+| <kbd>ESPAÇO</kbd> | Super Boost (consome escudo) |
+| <kbd>C</kbd> | Alternar perspectiva de câmera (Perseguição / Cockpit / Órbita) |
+| <kbd>R</kbd> | Reposicionar / Resetar posição na pista |
+| <kbd>P</kbd> | Pausar / Despausar simulação |
