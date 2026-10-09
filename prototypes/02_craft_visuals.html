@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G-MINUS // Laboratório Visual das 3 Primeiras Naves (4 Peças Modulares & 3 Estilos)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #04060d;
+      --panel-bg: rgba(8, 14, 28, 0.92);
+      --panel-border: #162a48;
+      --accent-cyan: #00f0ff;
+      --accent-magenta: #ff0055;
+      --accent-amber: #ffaa00;
+      --accent-green: #00ff88;
+      --accent-purple: #b537f2;
+      --text-main: #d0e4ff;
+      --text-muted: #6f89a8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Rajdhani', sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+    }
+
+    #viewport-container {
+      flex: 1;
+      position: relative;
+      height: 100%;
+      background: radial-gradient(circle at center, #09152a 0%, #020409 100%);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Top Left Overlay Card */
+    #hud-top-left {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hud-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-left: 4px solid var(--accent-cyan);
+      backdrop-filter: blur(12px);
+      padding: 12px 18px;
+      border-radius: 6px;
+      min-width: 280px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
+    }
+
+    .hud-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .hud-title {
+      font-size: 26px;
+      font-weight: 900;
+      font-family: 'Orbitron', monospace;
+      color: #fff;
+      text-shadow: 0 0 16px rgba(0, 240, 255, 0.5);
+      line-height: 1.1;
+    }
+
+    .hud-subtitle {
+      font-size: 13px;
+      color: var(--accent-amber);
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .part-pill-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .part-pill {
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 800;
+      border-radius: 3px;
+      background: rgba(0, 240, 255, 0.12);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+      font-family: 'Orbitron', monospace;
+    }
+
+    /* Bottom Quick Navigation Toolbar */
+    #bottom-toolbar {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(12px);
+      padding: 10px 18px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 10;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+    }
+
+    .btn-tool {
+      background: #0d1a2d;
+      border: 1px solid #1c3558;
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .btn-tool:hover {
+      background: #152c4d;
+      color: #fff;
+      border-color: var(--accent-cyan);
+    }
+    .btn-tool.active {
+      background: rgba(0, 240, 255, 0.22);
+      border-color: var(--accent-cyan);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Toast Msg */
+    #toast-msg {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 240, 255, 0.95);
+      color: #040914;
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 900;
+      font-family: 'Orbitron', monospace;
+      box-shadow: 0 4px 20px rgba(0, 240, 255, 0.6);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* Sidebar Control Panel */
+    #sidebar {
+      width: 480px;
+      height: 100%;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--panel-border);
+      backdrop-filter: blur(20px);
+      padding: 22px 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.75);
+      z-index: 20;
+    }
+
+    #sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    #sidebar::-webkit-scrollbar-thumb {
+      background: #182e4e;
+      border-radius: 3px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 900;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 1px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-title span {
+      color: var(--accent-cyan);
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1.5px;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      font-family: 'Orbitron', monospace;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #162844;
+      padding-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Grid Buttons */
+    .btn-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .btn-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .btn-option {
+      background: #0b1424;
+      border: 1px solid #1a2f4c;
+      color: var(--text-muted);
+      padding: 10px 8px;
+      font-size: 12px;
+      font-weight: 800;
+      font-family: 'Orbitron', monospace;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .btn-option:hover {
+      background: #13243d;
+      color: #fff;
+      border-color: #2b4d7c;
+    }
+    .btn-option.active {
+      background: rgba(0, 240, 255, 0.18);
+      border-color: var(--accent-cyan);
+      color: #fff;
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+    }
+
+    /* Preset Style Cards */
+    .preset-card {
+      background: #091222;
+      border: 1px solid #172a44;
+      border-radius: 6px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+    .preset-card:hover {
+      background: #101f35;
+      border-color: #294c7a;
+    }
+    .preset-card.active {
+      background: rgba(0, 240, 255, 0.14);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
+    }
+    .preset-card-title {
+      font-size: 13px;
+      font-weight: 900;
+      color: #fff;
+      font-family: 'Orbitron', monospace;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+    .preset-card-title span {
+      font-size: 10px;
+      color: var(--accent-amber);
+    }
+    .preset-card-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Sliders */
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .slider-header span:first-child {
+      color: var(--text-main);
+    }
+    .slider-header span:last-child {
+      color: var(--accent-cyan);
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #0e1a2f;
+      outline: none;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+    }
+
+    /* Color Pickers */
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .color-picker-item {
+      background: #091222;
+      border: 1px solid #162842;
+      border-radius: 6px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .color-picker-item label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-family: 'Orbitron', monospace;
+    }
+    input[type="color"] {
+      border: 1px solid #274166;
+      border-radius: 4px;
+      width: 32px;
+      height: 24px;
+      background: none;
+      cursor: pointer;
+      outline: none;
+    }
+
+    /* JSON Area */
+    .json-area {
+      width: 100%;
+      height: 90px;
+      background: #040810;
+      border: 1px solid #162a48;
+      color: #98badf;
+      font-family: monospace;
+      font-size: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      resize: none;
+      outline: none;
+      user-select: text;
+    }
+
+    .btn-action {
+      background: #0d1a2d;
+      border: 1px solid #1c3558;
+      color: var(--text-main);
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      font-family: 'Orbitron', monospace;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-action:hover {
+      background: #162b49;
+      color: #fff;
+      border-color: var(--accent-cyan);
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- 3D Canvas Viewport -->
+  <div id="viewport-container">
+    <canvas id="render-canvas"></canvas>
+
+    <!-- Top Left Telemetry Card -->
+    <div id="hud-top-left">
+      <div class="hud-card">
+        <div class="hud-label">MÁQUINA SELECIONADA</div>
+        <div class="hud-title" id="hud-ship-name">BLUE FALCON</div>
+        <div class="hud-subtitle" id="hud-ship-pilot">PILOTO: CAPTAIN FALCON</div>
+        <div class="part-pill-row">
+          <span class="part-pill">PEÇA 1: NOSE</span>
+          <span class="part-pill">PEÇA 2: COCKPIT</span>
+          <span class="part-pill">PEÇA 3: WINGS</span>
+          <span class="part-pill">PEÇA 4: ENGINES</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-msg">Mensagem</div>
+
+    <!-- Bottom Quick Controls -->
+    <div id="bottom-toolbar">
+      <span>INSPEÇÃO:</span>
+      <button class="btn-tool active" id="focus-all" onclick="setFocusTarget('all')">Nave Completa</button>
+      <button class="btn-tool" id="focus-p1" onclick="setFocusTarget('p1')">P1: Bico</button>
+      <button class="btn-tool" id="focus-p2" onclick="setFocusTarget('p2')">P2: Cockpit</button>
+      <button class="btn-tool" id="focus-p3" onclick="setFocusTarget('p3')">P3: Asas</button>
+      <button class="btn-tool" id="focus-p4" onclick="setFocusTarget('p4')">P4: Motores</button>
+      <span style="color:#1f3656;">|</span>
+      <button class="btn-tool" id="toggle-wireframe" onclick="toggleWireframe()">Arame</button>
+      <button class="btn-tool active" id="toggle-autorotate" onclick="toggleAutoRotate()">Auto Giro</button>
+    </div>
+  </div>
+
+  <!-- Sidebar Configuration Panel -->
+  <div id="sidebar">
+    <div>
+      <div class="header-title">
+        G-MINUS // <span>CRAFT LAB</span>
+        <button id="btn-audio-toggle" class="btn-tool" style="padding:4px 8px;font-size:10px;" onclick="toggleAudio()">🔊 ÁUDIO: ON</button>
+      </div>
+      <div class="header-subtitle">Laboratório de validação visual modular e direção de arte para as 3 primeiras naves (GDD [71–78, 81–90, 101]).</div>
+    </div>
+
+    <!-- 1. Ship Selection -->
+    <div>
+      <div class="section-label">1. Seleção da Máquina (GDD [71])</div>
+      <div class="btn-grid-3">
+        <button id="ship-falcon" class="btn-option active" onclick="selectShip('falcon')">Blue Falcon</button>
+        <button id="ship-fox" class="btn-option" onclick="selectShip('fox')">Golden Fox</button>
+        <button id="ship-goose" class="btn-option" onclick="selectShip('goose')">Wild Goose</button>
+      </div>
+    </div>
+
+    <!-- 2. The 3 Architectural Style Options (GDD [101]) -->
+    <div>
+      <div class="section-label">2. As 3 Opções Visuais de Design (GDD [101])</div>
+
+      <div class="preset-card active" id="preset-opt-a" onclick="selectStyleOption('A')">
+        <div class="preset-card-title">Opção A: Retro-Anime GX Classic <span>ANIME 90S</span></div>
+        <div class="preset-card-desc">Silhueta esguia e aerodinâmica clássica, contornos pretos expressivos (*cel outlines*), Toon Shading com iluminação em bandas e cores primárias saturadas.</div>
+      </div>
+
+      <div class="preset-card" id="preset-opt-b" onclick="selectStyleOption('B')">
+        <div class="preset-card-title">Opção B: Cyberpunk Cyber-Vector <span>ALTA TECNOLOGIA</span></div>
+        <div class="preset-card-desc">Placas de carbono e compósito em camadas angulares, conduítes de energia néon expostos, canópia facetada furtiva (*stealth*) e micro-propulsores vetoriais.</div>
+      </div>
+
+      <div class="preset-card" id="preset-opt-c" onclick="selectStyleOption('C')">
+        <div class="preset-card-title">Opção C: Heavy Armored Mecha <span>BLINDAGEM & RAM</span></div>
+        <div class="preset-card-desc">Aríete pesado de abalroamento frontal com pinças duplas, blindagens laterais espessas para Side-Attacks, cabine em viseira blindada e bocais de turbina de grande porte.</div>
+      </div>
+    </div>
+
+    <!-- 3. Exploded View Slider (4 Modular Pieces [GDD 72, 78]) -->
+    <div>
+      <div class="section-label">3. Desmontagem Modular em 4 Peças (GDD [72, 78])</div>
+      <div class="slider-row">
+        <div class="slider-header">
+          <span>Visão Explodida (Separação das 4 Peças):</span>
+          <span id="val-explodedOffset">0.0 m</span>
+        </div>
+        <input type="range" id="slider-explodedOffset" min="0" max="6" step="0.1" value="0" oninput="updateParam('explodedOffset', this.value)" />
+      </div>
+    </div>
+
+    <!-- 4. Visual & Shader Sliders -->
+    <div>
+      <div class="section-label">4. Parâmetros Visuais & Shaders (GDD [81, 88])</div>
+      <div class="slider-group">
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Espessura do Contorno Preto (Cel Outline):</span>
+            <span id="val-outlineThickness">2.0 px</span>
+          </div>
+          <input type="range" id="slider-outlineThickness" min="0" max="5" step="0.1" value="2.0" oninput="updateParam('outlineThickness', this.value)" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Níveis de Luz Toon Shading (Bandas):</span>
+            <span id="val-celBands">4</span>
+          </div>
+          <input type="range" id="slider-celBands" min="2" max="8" step="1" value="4" oninput="updateParam('celBands', this.value)" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Acabamento Metálico do Casco:</span>
+            <span id="val-metalness">0.85</span>
+          </div>
+          <input type="range" id="slider-metalness" min="0" max="1" step="0.05" value="0.85" oninput="updateParam('metalness', this.value)" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Rugosidade da Pintura (Gloss vs Matte):</span>
+            <span id="val-roughness">0.25</span>
+          </div>
+          <input type="range" id="slider-roughness" min="0" max="1" step="0.05" value="0.25" oninput="updateParam('roughness', this.value)" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Extensão do Plasma dos Motores:</span>
+            <span id="val-plasmaLength">1.8x</span>
+          </div>
+          <input type="range" id="slider-plasmaLength" min="0.5" max="3.5" step="0.1" value="1.8" oninput="updateParam('plasmaLength', this.value)" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Brilho do Núcleo de Plasma:</span>
+            <span id="val-plasmaIntensity">2.2x</span>
+          </div>
+          <input type="range" id="slider-plasmaIntensity" min="0.5" max="5.0" step="0.1" value="2.2" oninput="updateParam('plasmaIntensity', this.value)" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Envergadura das Asas (Escala):</span>
+            <span id="val-wingSpan">1.00x</span>
+          </div>
+          <input type="range" id="slider-wingSpan" min="0.6" max="1.6" step="0.05" value="1.00" oninput="updateParam('wingSpan', this.value)" />
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-header">
+            <span>Ângulo Diedro das Asas:</span>
+            <span id="val-wingDihedral">0.0°</span>
+          </div>
+          <input type="range" id="slider-wingDihedral" min="-25" max="25" step="1" value="0" oninput="updateParam('wingDihedral', this.value)" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Color Palette Customization (GDD [78]) -->
+    <div>
+      <div class="section-label">5. Paleta de Cores e Materiais (GDD [78])</div>
+      <div class="color-grid">
+        <div class="color-picker-item">
+          <label>Cor Primária</label>
+          <input type="color" id="color-primary" value="#0044ff" onchange="updateColor('primary', this.value)" />
+        </div>
+        <div class="color-picker-item">
+          <label>Cor Secundária</label>
+          <input type="color" id="color-accent" value="#00f0ff" onchange="updateColor('accent', this.value)" />
+        </div>
+        <div class="color-picker-item">
+          <label>Vidro Cockpit</label>
+          <input type="color" id="color-cockpit" value="#050f1a" onchange="updateColor('cockpit', this.value)" />
+        </div>
+        <div class="color-picker-item">
+          <label>Chama Plasma</label>
+          <input type="color" id="color-plasma" value="#00f0ff" onchange="updateColor('plasma', this.value)" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. Studio Lighting Environment (GDD [84]) -->
+    <div>
+      <div class="section-label">6. Cenário & Iluminação de Estúdio (GDD [84])</div>
+      <div class="btn-grid-3">
+        <button id="env-cyber" class="btn-option active" onclick="setEnvironment('cyber')">Neo Cyber</button>
+        <button id="env-void" class="btn-option" onclick="setEnvironment('void')">Orbital Void</button>
+        <button id="env-sunset" class="btn-option" onclick="setEnvironment('sunset')">Sunset Bay</button>
+      </div>
+    </div>
+
+    <!-- 7. JSON Config IO (GDD [101]) -->
+    <div>
+      <div class="section-label">7. Serialização & Exportação JSON (GDD [101])</div>
+      <textarea id="json-config" class="json-area" spellcheck="false"></textarea>
+      <div class="btn-grid-2" style="margin-top:6px;">
+        <button class="btn-action" onclick="copyJSON()">📋 Copiar JSON</button>
+        <button class="btn-action" onclick="applyJSON()">💾 Aplicar JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------------
+    // SOUND EFFECTS (Web Audio API)
+    // -------------------------------------------------------------------
+    class LabAudio {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      }
+      playClick() {
+        if (!this.enabled || !this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, this.ctx.currentTime + 0.06);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.07);
+      }
+      playDetach() {
+        if (!this.enabled || !this.ctx) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(780, this.ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.19);
+      }
+    }
+    const audioSys = new LabAudio();
+
+    function toggleAudio() {
+      audioSys.enabled = !audioSys.enabled;
+      if (audioSys.enabled) audioSys.init();
+      const btn = document.getElementById('btn-audio-toggle');
+      btn.textContent = audioSys.enabled ? '🔊 ÁUDIO: ON' : '🔇 ÁUDIO: OFF';
+      btn.style.color = audioSys.enabled ? '#00f0ff' : '#708aa8';
+      showToast(audioSys.enabled ? "Áudio Ativado" : "Áudio Desativado");
+    }
+
+    // -------------------------------------------------------------------
+    // PARAMETERS & DEFAULT CONFIGURATIONS (GDD [101])
+    // -------------------------------------------------------------------
+    const SHIPS_DATA = {
+      falcon: {
+        name: "BLUE FALCON",
+        pilot: "PILOTO: CAPTAIN FALCON",
+        primary: "#0044ff",
+        accent: "#00f0ff",
+        cockpit: "#050f1a",
+        plasma: "#00f0ff",
+        darkMetal: "#101622"
+      },
+      fox: {
+        name: "GOLDEN FOX",
+        pilot: "PILOTO: DR. STEWART",
+        primary: "#f5b800",
+        accent: "#ffffff",
+        cockpit: "#0a0a0e",
+        plasma: "#ffaa00",
+        darkMetal: "#1a1610"
+      },
+      goose: {
+        name: "WILD GOOSE",
+        pilot: "PILOTO: PICO",
+        primary: "#228b22",
+        accent: "#9400d3",
+        cockpit: "#08120a",
+        plasma: "#7700ff",
+        darkMetal: "#121812"
+      }
+    };
+
+    let currentShip = 'falcon';
+    let currentStyleOption = 'A'; // 'A' (Anime Classic), 'B' (Cyber Vector), 'C' (Heavy Mecha)
+    let currentEnv = 'cyber';
+
+    let params = {
+      outlineThickness: 2.0,
+      celBands: 4,
+      metalness: 0.85,
+      roughness: 0.25,
+      plasmaLength: 1.8,
+      plasmaIntensity: 2.2,
+      wingSpan: 1.0,
+      wingDihedral: 0,
+      explodedOffset: 0.0,
+      hoverHeight: 1.35,
+      hoverBobSpeed: 2.5,
+      primaryColor: "#0044ff",
+      accentColor: "#00f0ff",
+      cockpitColor: "#050f1a",
+      plasmaColor: "#00f0ff"
+    };
+
+    // -------------------------------------------------------------------
+    // THREE.JS SCENE, CAMERA & LIGHTING
+    // -------------------------------------------------------------------
+    const canvas = document.getElementById('render-canvas');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x040814, 0.015);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 4.2, 11.5);
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setSize(window.innerWidth - 480, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    // Stage Studio Grid & Anti-Gravity Docking Pad
+    const stageGroup = new THREE.Group();
+    scene.add(stageGroup);
+
+    const gridHelper = new THREE.GridHelper(40, 40, 0x00f0ff, 0x12243d);
+    gridHelper.position.y = -0.01;
+    stageGroup.add(gridHelper);
+
+    // Docking Pad Circle Ring
+    const padGeo = new THREE.RingGeometry(3.5, 3.8, 48);
+    padGeo.rotateX(-Math.PI / 2);
+    const padMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide });
+    const padMesh = new THREE.Mesh(padGeo, padMat);
+    padMesh.position.y = 0.01;
+    stageGroup.add(padMesh);
+
+    const padInnerGeo = new THREE.CircleGeometry(3.4, 48);
+    padInnerGeo.rotateX(-Math.PI / 2);
+    const padInnerMat = new THREE.MeshStandardMaterial({ color: 0x060c18, roughness: 0.8, metalness: 0.9 });
+    const padInnerMesh = new THREE.Mesh(padInnerGeo, padInnerMat);
+    stageGroup.add(padInnerMesh);
+
+    // Studio Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+
+    const mainSpot = new THREE.SpotLight(0xffffff, 1.8, 40, Math.PI / 4, 0.5);
+    mainSpot.position.set(5, 14, 8);
+    mainSpot.castShadow = true;
+    scene.add(mainSpot);
+
+    const cyanRim = new THREE.PointLight(0x00f0ff, 2.4, 25);
+    cyanRim.position.set(-8, 3, -6);
+    scene.add(cyanRim);
+
+    const magentaRim = new THREE.PointLight(0xff0055, 2.0, 25);
+    magentaRim.position.set(8, 3, -6);
+    scene.add(magentaRim);
+
+    const underGlow = new THREE.PointLight(0x00f0ff, 2.0, 10);
+    underGlow.position.set(0, 0.4, 0);
+    scene.add(underGlow);
+
+    // -------------------------------------------------------------------
+    // 3D CRAFT BUILDER (4 MODULAR PIECES ACROSS 3 DESIGN OPTIONS)
+    // -------------------------------------------------------------------
+    let currentCraftRoot = new THREE.Group();
+    scene.add(currentCraftRoot);
+
+    let piece1Group = new THREE.Group();
+    let piece2Group = new THREE.Group();
+    let piece3Group = new THREE.Group();
+    let piece4Group = new THREE.Group();
+    let laserLinesGroup = new THREE.Group();
+
+    let thrusterPlumes = [];
+    let thrusterLight = null;
+
+    function buildCraftModular() {
+      // Clear previous
+      while(currentCraftRoot.children.length > 0) {
+        const obj = currentCraftRoot.children[0];
+        currentCraftRoot.remove(obj);
+        disposeHierarchy(obj);
+      }
+
+      thrusterPlumes = [];
+
+      piece1Group = new THREE.Group(); piece1Group.name = 'Piece1_Nose';
+      piece2Group = new THREE.Group(); piece2Group.name = 'Piece2_Cockpit';
+      piece3Group = new THREE.Group(); piece3Group.name = 'Piece3_Wings';
+      piece4Group = new THREE.Group(); piece4Group.name = 'Piece4_Engines';
+      laserLinesGroup = new THREE.Group(); laserLinesGroup.name = 'LaserGuides';
+
+      const primaryColorHex = parseInt(params.primaryColor.replace('#', '0x'));
+      const accentColorHex = parseInt(params.accentColor.replace('#', '0x'));
+      const cockpitColorHex = parseInt(params.cockpitColor.replace('#', '0x'));
+      const plasmaColorHex = parseInt(params.plasmaColor.replace('#', '0x'));
+
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: primaryColorHex,
+        roughness: params.roughness,
+        metalness: params.metalness
+      });
+
+      const accentMat = new THREE.MeshStandardMaterial({
+        color: accentColorHex,
+        roughness: params.roughness * 0.8,
+        metalness: params.metalness
+      });
+
+      const cockpitMat = new THREE.MeshStandardMaterial({
+        color: cockpitColorHex,
+        roughness: 0.05,
+        metalness: 0.98,
+        transparent: true,
+        opacity: 0.92
+      });
+
+      const darkMetalMat = new THREE.MeshStandardMaterial({
+        color: 0x121722,
+        roughness: 0.35,
+        metalness: 0.95
+      });
+
+      const glowMat = new THREE.MeshBasicMaterial({ color: plasmaColorHex });
+
+      // Outlines Inverted Hull Material
+      const outlineMat = new THREE.MeshBasicMaterial({
+        color: 0x000000,
+        side: THREE.BackSide
+      });
+
+      function addMeshWithOutline(geo, mat, parent, pos = null, rot = null, scale = null) {
+        const mesh = new THREE.Mesh(geo, mat);
+        if (pos) mesh.position.copy(pos);
+        if (rot) mesh.rotation.copy(rot);
+        if (scale) mesh.scale.copy(scale);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        parent.add(mesh);
+
+        if (params.outlineThickness > 0.1) {
+          const outlineScale = 1.0 + (params.outlineThickness * 0.035);
+          const outlineMesh = new THREE.Mesh(geo, outlineMat);
+          outlineMesh.scale.multiplyScalar(outlineScale);
+          mesh.add(outlineMesh);
+        }
+        return mesh;
+      }
+
+      // BUILD ACCORDING TO SHIP AND DESIGN OPTION (A: Retro-Anime, B: Cyber Vector, C: Heavy Mecha)
+      if (currentShip === 'falcon') {
+        // ===============================================================
+        // 1. BLUE FALCON
+        // ===============================================================
+        if (currentStyleOption === 'A') {
+          // OPTION A: Classic Retro-Anime Dart
+          // P1: Nose
+          const noseGeo = new THREE.ConeGeometry(1.2, 4.8, 5).rotateX(Math.PI / 2).scale(1.1, 0.45, 1.0);
+          addMeshWithOutline(noseGeo, bodyMat, piece1Group, new THREE.Vector3(0, 0, 0.4));
+          const intakeL = new THREE.BoxGeometry(0.35, 0.22, 1.3);
+          addMeshWithOutline(intakeL, darkMetalMat, piece1Group, new THREE.Vector3(-0.75, -0.05, 0.7));
+          addMeshWithOutline(intakeL, darkMetalMat, piece1Group, new THREE.Vector3(0.75, -0.05, 0.7));
+
+          // P2: Cockpit
+          const canopyGeo = new THREE.SphereGeometry(0.68, 10, 8).scale(0.8, 0.45, 1.8);
+          addMeshWithOutline(canopyGeo, cockpitMat, piece2Group, new THREE.Vector3(0, 0.35, 0.3));
+          const crestGeo = new THREE.BoxGeometry(0.1, 0.18, 1.4);
+          addMeshWithOutline(crestGeo, accentMat, piece2Group, new THREE.Vector3(0, 0.52, 0.2));
+
+          // P3: Wings
+          const wingGeoL = new THREE.BoxGeometry(2.3 * params.wingSpan, 0.12, 1.7).rotateY(0.2);
+          const wingL = addMeshWithOutline(wingGeoL, accentMat, piece3Group, new THREE.Vector3(-1.8 * params.wingSpan, 0, -0.6));
+          wingL.rotation.z = 0.1 + (params.wingDihedral * Math.PI / 180);
+          const finGeoL = new THREE.BoxGeometry(0.1, 1.2, 1.4);
+          const finL = addMeshWithOutline(finGeoL, accentMat, piece3Group, new THREE.Vector3(-1.1, 0.7, -1.2));
+          finL.rotation.z = -0.25;
+
+          const wingGeoR = new THREE.BoxGeometry(2.3 * params.wingSpan, 0.12, 1.7).rotateY(-0.2);
+          const wingR = addMeshWithOutline(wingGeoR, accentMat, piece3Group, new THREE.Vector3(1.8 * params.wingSpan, 0, -0.6));
+          wingR.rotation.z = -0.1 - (params.wingDihedral * Math.PI / 180);
+          const finR = addMeshWithOutline(finGeoL, accentMat, piece3Group, new THREE.Vector3(1.1, 0.7, -1.2));
+          finR.rotation.z = 0.25;
+
+          // P4: Engines
+          const engGeo = new THREE.CylinderGeometry(0.44, 0.44, 1.8, 8).rotateX(Math.PI / 2);
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(-0.65, 0, -1.8));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0.65, 0, -1.8));
+
+        } else if (currentStyleOption === 'B') {
+          // OPTION B: Cyber Vector (Faceted stealth, neon edge strips, quad exhausts)
+          // P1: Layered Faceted Prow
+          const prowGeo = new THREE.ConeGeometry(1.35, 5.2, 4).rotateX(Math.PI / 2).scale(1.2, 0.38, 1.0);
+          addMeshWithOutline(prowGeo, bodyMat, piece1Group, new THREE.Vector3(0, 0, 0.5));
+          const neonSplitter = new THREE.BoxGeometry(1.6, 0.08, 0.9);
+          addMeshWithOutline(neonSplitter, glowMat, piece1Group, new THREE.Vector3(0, -0.12, 1.5));
+
+          // P2: Stealth Poly-Canopy
+          const canopyGeo = new THREE.ConeGeometry(0.72, 2.8, 6).rotateX(Math.PI / 2).scale(0.85, 0.4, 1.0);
+          addMeshWithOutline(canopyGeo, cockpitMat, piece2Group, new THREE.Vector3(0, 0.36, 0.4));
+
+          // P3: Inverted Forward-Swept Wings
+          const wingGeoL = new THREE.BoxGeometry(2.6 * params.wingSpan, 0.08, 1.9).rotateY(-0.25);
+          const wingL = addMeshWithOutline(wingGeoL, bodyMat, piece3Group, new THREE.Vector3(-1.9 * params.wingSpan, 0.05, -0.4));
+          wingL.rotation.z = -0.1 + (params.wingDihedral * Math.PI / 180);
+          const podL = new THREE.BoxGeometry(0.3, 0.4, 1.8);
+          addMeshWithOutline(podL, accentMat, piece3Group, new THREE.Vector3(-3.0 * params.wingSpan, 0.1, -0.3));
+
+          const wingGeoR = new THREE.BoxGeometry(2.6 * params.wingSpan, 0.08, 1.9).rotateY(0.25);
+          const wingR = addMeshWithOutline(wingGeoR, bodyMat, piece3Group, new THREE.Vector3(1.9 * params.wingSpan, 0.05, -0.4));
+          wingR.rotation.z = 0.1 - (params.wingDihedral * Math.PI / 180);
+          const podR = new THREE.BoxGeometry(0.3, 0.4, 1.8);
+          addMeshWithOutline(podR, accentMat, piece3Group, new THREE.Vector3(3.0 * params.wingSpan, 0.1, -0.3));
+
+          // P4: Quad Micro-Vector Thrusters
+          const engGeo = new THREE.BoxGeometry(0.36, 0.36, 1.7);
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(-0.85, 0.1, -1.8));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(-0.35, -0.05, -1.8));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0.35, -0.05, -1.8));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0.85, 0.1, -1.8));
+
+        } else {
+          // OPTION C: Heavy Mecha Predator (Reinforced ramming prow, armor side skirts, heavy cowlings)
+          // P1: Heavy Ramming Nose with Assault Pincers
+          const prowGeo = new THREE.BoxGeometry(1.6, 0.6, 3.8);
+          addMeshWithOutline(prowGeo, bodyMat, piece1Group, new THREE.Vector3(0, 0, 0.3));
+          const pincerL = new THREE.ConeGeometry(0.4, 2.2, 4).rotateX(Math.PI / 2);
+          addMeshWithOutline(pincerL, accentMat, piece1Group, new THREE.Vector3(-0.9, -0.05, 1.8));
+          const pincerR = new THREE.ConeGeometry(0.4, 2.2, 4).rotateX(Math.PI / 2);
+          addMeshWithOutline(pincerR, accentMat, piece1Group, new THREE.Vector3(0.9, -0.05, 1.8));
+
+          // P2: Armored Slitted Visor Pod
+          const visorGeo = new THREE.BoxGeometry(0.9, 0.45, 1.6);
+          addMeshWithOutline(visorGeo, darkMetalMat, piece2Group, new THREE.Vector3(0, 0.4, 0.1));
+          const slitGeo = new THREE.BoxGeometry(0.8, 0.12, 1.1);
+          addMeshWithOutline(slitGeo, cockpitMat, piece2Group, new THREE.Vector3(0, 0.45, 0.2));
+
+          // P3: Ballistic Armor Skirts & Heavy Wings
+          const skirtGeoL = new THREE.BoxGeometry(0.5, 0.7, 3.4);
+          addMeshWithOutline(skirtGeoL, bodyMat, piece3Group, new THREE.Vector3(-1.6 * params.wingSpan, 0.05, -0.2));
+          const wingGeoL = new THREE.BoxGeometry(1.8 * params.wingSpan, 0.16, 1.8).rotateY(0.1);
+          addMeshWithOutline(wingGeoL, accentMat, piece3Group, new THREE.Vector3(-2.2 * params.wingSpan, 0.1, -0.8));
+
+          const skirtGeoR = new THREE.BoxGeometry(0.5, 0.7, 3.4);
+          addMeshWithOutline(skirtGeoR, bodyMat, piece3Group, new THREE.Vector3(1.6 * params.wingSpan, 0.05, -0.2));
+          const wingGeoR = new THREE.BoxGeometry(1.8 * params.wingSpan, 0.16, 1.8).rotateY(-0.1);
+          addMeshWithOutline(wingGeoR, accentMat, piece3Group, new THREE.Vector3(2.2 * params.wingSpan, 0.1, -0.8));
+
+          // P4: Massive Heavy Combustion Turbines
+          const engGeo = new THREE.CylinderGeometry(0.58, 0.65, 2.0, 8).rotateX(Math.PI / 2);
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(-0.75, 0.1, -1.9));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0.75, 0.1, -1.9));
+        }
+
+      } else if (currentShip === 'fox') {
+        // ===============================================================
+        // 2. GOLDEN FOX
+        // ===============================================================
+        if (currentStyleOption === 'A') {
+          // OPTION A: Needle Dart Classic
+          const noseGeo = new THREE.ConeGeometry(0.85, 5.8, 6).rotateX(Math.PI / 2).scale(0.9, 0.36, 1.1);
+          addMeshWithOutline(noseGeo, bodyMat, piece1Group, new THREE.Vector3(0, 0.05, 0.6));
+          const canardL = new THREE.BoxGeometry(0.7, 0.06, 0.9).rotateY(0.3);
+          addMeshWithOutline(canardL, accentMat, piece1Group, new THREE.Vector3(-0.75, 0.05, 1.3));
+          const canardR = new THREE.BoxGeometry(0.7, 0.06, 0.9).rotateY(-0.3);
+          addMeshWithOutline(canardR, accentMat, piece1Group, new THREE.Vector3(0.75, 0.05, 1.3));
+
+          const canopyGeo = new THREE.SphereGeometry(0.5, 10, 8).scale(0.65, 0.4, 1.5);
+          addMeshWithOutline(canopyGeo, cockpitMat, piece2Group, new THREE.Vector3(0, 0.3, 0.2));
+
+          const wingGeoL = new THREE.BoxGeometry(1.9 * params.wingSpan, 0.08, 1.5).rotateY(0.2);
+          const wingL = addMeshWithOutline(wingGeoL, accentMat, piece3Group, new THREE.Vector3(-1.4 * params.wingSpan, 0.05, -0.7));
+          wingL.rotation.z = 0.15 + (params.wingDihedral * Math.PI / 180);
+          const finL = addMeshWithOutline(new THREE.BoxGeometry(0.08, 1.3, 1.1), bodyMat, piece3Group, new THREE.Vector3(-0.75, 0.7, -1.4));
+
+          const wingGeoR = new THREE.BoxGeometry(1.9 * params.wingSpan, 0.08, 1.5).rotateY(-0.2);
+          const wingR = addMeshWithOutline(wingGeoR, accentMat, piece3Group, new THREE.Vector3(1.4 * params.wingSpan, 0.05, -0.7));
+          wingR.rotation.z = -0.15 - (params.wingDihedral * Math.PI / 180);
+          const finR = addMeshWithOutline(new THREE.BoxGeometry(0.08, 1.3, 1.1), bodyMat, piece3Group, new THREE.Vector3(0.75, 0.7, -1.4));
+
+          const engGeo = new THREE.CylinderGeometry(0.38, 0.42, 1.6, 8).rotateX(Math.PI / 2);
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(-0.55, 0, -1.7));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0.55, 0, -1.7));
+
+        } else if (currentStyleOption === 'B') {
+          // OPTION B: Cyber Dart High-Boost
+          const noseGeo = new THREE.ConeGeometry(0.7, 6.2, 4).rotateX(Math.PI / 2).scale(0.8, 0.3, 1.2);
+          addMeshWithOutline(noseGeo, bodyMat, piece1Group, new THREE.Vector3(0, 0.05, 0.8));
+
+          const canopyGeo = new THREE.BoxGeometry(0.45, 0.32, 1.6).rotateX(-0.1);
+          addMeshWithOutline(canopyGeo, cockpitMat, piece2Group, new THREE.Vector3(0, 0.32, 0.1));
+
+          const wingGeoL = new THREE.BoxGeometry(2.4 * params.wingSpan, 0.06, 1.4).rotateY(-0.3);
+          addMeshWithOutline(wingGeoL, accentMat, piece3Group, new THREE.Vector3(-1.6 * params.wingSpan, 0.08, -0.5));
+          const wingGeoR = new THREE.BoxGeometry(2.4 * params.wingSpan, 0.06, 1.4).rotateY(0.3);
+          addMeshWithOutline(wingGeoR, accentMat, piece3Group, new THREE.Vector3(1.6 * params.wingSpan, 0.08, -0.5));
+
+          const engGeo = new THREE.CylinderGeometry(0.45, 0.32, 2.0, 8).rotateX(Math.PI / 2);
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0, 0.05, -1.8));
+
+        } else {
+          // OPTION C: Heavy Overdrive Striker
+          const noseGeo = new THREE.ConeGeometry(1.1, 5.0, 4).rotateX(Math.PI / 2).scale(1.1, 0.45, 1.0);
+          addMeshWithOutline(noseGeo, bodyMat, piece1Group, new THREE.Vector3(0, 0.05, 0.5));
+
+          const canopyGeo = new THREE.SphereGeometry(0.55, 10, 8).scale(0.7, 0.45, 1.4);
+          addMeshWithOutline(canopyGeo, cockpitMat, piece2Group, new THREE.Vector3(0, 0.35, 0.2));
+
+          const wingGeoL = new THREE.BoxGeometry(2.2 * params.wingSpan, 0.12, 1.8).rotateY(0.1);
+          addMeshWithOutline(wingGeoL, bodyMat, piece3Group, new THREE.Vector3(-1.6 * params.wingSpan, 0.1, -0.6));
+          const wingGeoR = new THREE.BoxGeometry(2.2 * params.wingSpan, 0.12, 1.8).rotateY(-0.1);
+          addMeshWithOutline(wingGeoR, bodyMat, piece3Group, new THREE.Vector3(1.6 * params.wingSpan, 0.1, -0.6));
+
+          const engGeo = new THREE.CylinderGeometry(0.42, 0.48, 1.8, 8).rotateX(Math.PI / 2);
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(-0.6, 0.05, -1.7));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0.6, 0.05, -1.7));
+        }
+
+      } else {
+        // ===============================================================
+        // 3. WILD GOOSE
+        // ===============================================================
+        if (currentStyleOption === 'A') {
+          // OPTION A: Heavy Battering Ram Classic
+          const noseGeo = new THREE.BoxGeometry(1.8, 0.6, 4.4);
+          addMeshWithOutline(noseGeo, bodyMat, piece1Group, new THREE.Vector3(0, 0, 0.3));
+          const barGeo = new THREE.BoxGeometry(2.2, 0.25, 0.5);
+          addMeshWithOutline(barGeo, accentMat, piece1Group, new THREE.Vector3(0, 0, 2.2));
+
+          const canopyGeo = new THREE.BoxGeometry(0.85, 0.4, 1.8);
+          addMeshWithOutline(canopyGeo, cockpitMat, piece2Group, new THREE.Vector3(0, 0.4, 0.2));
+
+          const skirtGeoL = new THREE.BoxGeometry(0.4, 0.8, 3.6);
+          addMeshWithOutline(skirtGeoL, bodyMat, piece3Group, new THREE.Vector3(-1.4 * params.wingSpan, 0.1, -0.3));
+          const finGeoL = new THREE.BoxGeometry(0.1, 1.4, 1.2);
+          addMeshWithOutline(finGeoL, accentMat, piece3Group, new THREE.Vector3(-0.9, 0.8, -1.3));
+
+          const skirtGeoR = new THREE.BoxGeometry(0.4, 0.8, 3.6);
+          addMeshWithOutline(skirtGeoR, bodyMat, piece3Group, new THREE.Vector3(1.4 * params.wingSpan, 0.1, -0.3));
+          const finGeoR = new THREE.BoxGeometry(0.1, 1.4, 1.2);
+          addMeshWithOutline(finGeoR, accentMat, piece3Group, new THREE.Vector3(0.9, 0.8, -1.3));
+
+          const engGeo = new THREE.BoxGeometry(0.6, 0.6, 1.8);
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(-0.7, 0.1, -1.9));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0.7, 0.1, -1.9));
+
+        } else if (currentStyleOption === 'B') {
+          // OPTION B: Cyber Juggernaut Vector
+          const noseGeo = new THREE.BoxGeometry(2.0, 0.5, 4.6);
+          addMeshWithOutline(noseGeo, bodyMat, piece1Group, new THREE.Vector3(0, 0, 0.4));
+          const neonSpike = new THREE.ConeGeometry(0.5, 2.4, 4).rotateX(Math.PI / 2);
+          addMeshWithOutline(neonSpike, glowMat, piece1Group, new THREE.Vector3(0, 0, 2.6));
+
+          const canopyGeo = new THREE.ConeGeometry(0.8, 2.5, 4).rotateX(Math.PI / 2).scale(0.9, 0.4, 1.0);
+          addMeshWithOutline(canopyGeo, cockpitMat, piece2Group, new THREE.Vector3(0, 0.38, 0.4));
+
+          const wingGeoL = new THREE.BoxGeometry(2.8 * params.wingSpan, 0.14, 2.2).rotateY(0.15);
+          addMeshWithOutline(wingGeoL, accentMat, piece3Group, new THREE.Vector3(-1.8 * params.wingSpan, 0.1, -0.5));
+          const wingGeoR = new THREE.BoxGeometry(2.8 * params.wingSpan, 0.14, 2.2).rotateY(-0.15);
+          addMeshWithOutline(wingGeoR, accentMat, piece3Group, new THREE.Vector3(1.8 * params.wingSpan, 0.1, -0.5));
+
+          const engGeo = new THREE.CylinderGeometry(0.55, 0.55, 1.9, 8).rotateX(Math.PI / 2);
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(-0.8, 0.1, -1.9));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0.8, 0.1, -1.9));
+
+        } else {
+          // OPTION C: Heavy Mecha Battering Siege
+          const noseGeo = new THREE.BoxGeometry(2.2, 0.7, 4.2);
+          addMeshWithOutline(noseGeo, bodyMat, piece1Group, new THREE.Vector3(0, 0.05, 0.2));
+          const teethL = new THREE.BoxGeometry(0.5, 0.3, 1.4);
+          addMeshWithOutline(teethL, accentMat, piece1Group, new THREE.Vector3(-1.0, 0, 2.2));
+          const teethR = new THREE.BoxGeometry(0.5, 0.3, 1.4);
+          addMeshWithOutline(teethR, accentMat, piece1Group, new THREE.Vector3(1.0, 0, 2.2));
+
+          const canopyGeo = new THREE.BoxGeometry(1.0, 0.5, 1.4);
+          addMeshWithOutline(canopyGeo, darkMetalMat, piece2Group, new THREE.Vector3(0, 0.45, 0.1));
+          const slitGeo = new THREE.BoxGeometry(0.9, 0.12, 1.0);
+          addMeshWithOutline(slitGeo, cockpitMat, piece2Group, new THREE.Vector3(0, 0.5, 0.2));
+
+          const wingGeoL = new THREE.BoxGeometry(2.6 * params.wingSpan, 0.22, 2.4);
+          addMeshWithOutline(wingGeoL, bodyMat, piece3Group, new THREE.Vector3(-1.8 * params.wingSpan, 0.15, -0.4));
+          const wingGeoR = new THREE.BoxGeometry(2.6 * params.wingSpan, 0.22, 2.4);
+          addMeshWithOutline(wingGeoR, bodyMat, piece3Group, new THREE.Vector3(1.8 * params.wingSpan, 0.15, -0.4));
+
+          const engGeo = new THREE.CylinderGeometry(0.65, 0.72, 2.2, 8).rotateX(Math.PI / 2);
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(-0.85, 0.15, -2.0));
+          addMeshWithOutline(engGeo, darkMetalMat, piece4Group, new THREE.Vector3(0.85, 0.15, -2.0));
+        }
+      }
+
+      // Add Dynamic Plasma Plumes to Piece 4
+      const plumeGeo = new THREE.ConeGeometry(0.38, 1.8 * params.plasmaLength, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.65, 0, -2.6);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.65, 0, -2.6);
+      piece4Group.add(pL, pR);
+      thrusterPlumes.push(pL, pR);
+
+      // Assemble 4 Pieces into Craft Root
+      currentCraftRoot.add(piece1Group);
+      currentCraftRoot.add(piece2Group);
+      currentCraftRoot.add(piece3Group);
+      currentCraftRoot.add(piece4Group);
+      currentCraftRoot.add(laserLinesGroup);
+
+      updateExplodedView();
+    }
+
+    function updateExplodedView() {
+      const offset = params.explodedOffset;
+
+      // P1 Nose moves Forward (+Z)
+      piece1Group.position.set(0, 0, offset * 1.5);
+      // P2 Cockpit moves Upward (+Y)
+      piece2Group.position.set(0, offset * 0.9, 0);
+      // P3 Wings stay centered or expand laterally (+/- X)
+      piece3Group.position.set(0, 0, 0);
+      // P4 Engines move Backward (-Z)
+      piece4Group.position.set(0, 0, -offset * 1.4);
+
+      // Build Laser Connection Guides when offset > 0
+      while(laserLinesGroup.children.length > 0) {
+        laserLinesGroup.remove(laserLinesGroup.children[0]);
+      }
+
+      if (offset > 0.2) {
+        const lineMat = new THREE.LineBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.6 });
+        // Nose guide
+        const geoNose = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0, 0, offset * 1.5)
+        ]);
+        laserLinesGroup.add(new THREE.Line(geoNose, lineMat));
+
+        // Cockpit guide
+        const geoCockpit = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0.2, 0),
+          new THREE.Vector3(0, 0.2 + offset * 0.9, 0)
+        ]);
+        laserLinesGroup.add(new THREE.Line(geoCockpit, lineMat));
+
+        // Engine guide
+        const geoEng = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0, 0, -offset * 1.4)
+        ]);
+        laserLinesGroup.add(new THREE.Line(geoEng, lineMat));
+      }
+    }
+
+    function disposeHierarchy(obj) {
+      obj.traverse(child => {
+        if (child.isMesh) {
+          if (child.geometry) child.geometry.dispose();
+          if (Array.isArray(child.material)) child.material.forEach(m => m.dispose());
+          else if (child.material) child.material.dispose();
+        }
+      });
+    }
+
+    // -------------------------------------------------------------------
+    // UI INTERACTION & LOGIC
+    // -------------------------------------------------------------------
+    function selectShip(shipKey) {
+      audioSys.playClick();
+      currentShip = shipKey;
+      const data = SHIPS_DATA[shipKey];
+      document.getElementById('hud-ship-name').textContent = data.name;
+      document.getElementById('hud-ship-pilot').textContent = data.pilot;
+
+      params.primaryColor = data.primary;
+      params.accentColor = data.accent;
+      params.cockpitColor = data.cockpit;
+      params.plasmaColor = data.plasma;
+
+      document.getElementById('color-primary').value = data.primary;
+      document.getElementById('color-accent').value = data.accent;
+      document.getElementById('color-cockpit').value = data.cockpit;
+      document.getElementById('color-plasma').value = data.plasma;
+
+      document.querySelectorAll('[id^="ship-"]').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`ship-${shipKey}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      buildCraftModular();
+      updateUI();
+      showToast(`Máquina: ${data.name}`);
+    }
+
+    function selectStyleOption(optKey) {
+      audioSys.playClick();
+      currentStyleOption = optKey;
+      document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
+      const activeCard = document.getElementById(`preset-opt-${optKey.toLowerCase()}`);
+      if (activeCard) activeCard.classList.add('active');
+
+      if (optKey === 'A') {
+        params.outlineThickness = 2.0;
+        params.celBands = 4;
+        params.metalness = 0.85;
+        params.roughness = 0.25;
+        params.plasmaLength = 1.8;
+      } else if (optKey === 'B') {
+        params.outlineThickness = 1.2;
+        params.celBands = 6;
+        params.metalness = 0.95;
+        params.roughness = 0.15;
+        params.plasmaLength = 2.4;
+      } else if (optKey === 'C') {
+        params.outlineThickness = 3.0;
+        params.celBands = 3;
+        params.metalness = 0.75;
+        params.roughness = 0.40;
+        params.plasmaLength = 2.2;
+      }
+
+      buildCraftModular();
+      updateUI();
+      showToast(`Opção de Design: ${optKey}`);
+    }
+
+    function updateParam(key, val) {
+      params[key] = parseFloat(val);
+      const valSpan = document.getElementById(`val-${key}`);
+      if (valSpan) {
+        if (key === 'explodedOffset') valSpan.textContent = `${parseFloat(val).toFixed(1)} m`;
+        else if (key === 'outlineThickness') valSpan.textContent = `${parseFloat(val).toFixed(1)} px`;
+        else if (key === 'wingDihedral') valSpan.textContent = `${parseFloat(val).toFixed(1)}°`;
+        else if (key === 'plasmaLength' || key === 'plasmaIntensity' || key === 'wingSpan') valSpan.textContent = `${parseFloat(val).toFixed(2)}x`;
+        else valSpan.textContent = parseFloat(val).toFixed(2);
+      }
+      if (key === 'explodedOffset') {
+        if (parseFloat(val) > 0.1 && audioSys.enabled) audioSys.playDetach();
+        updateExplodedView();
+      } else {
+        buildCraftModular();
+      }
+      updateJSONArea();
+    }
+
+    function updateColor(key, hex) {
+      if (key === 'primary') params.primaryColor = hex;
+      if (key === 'accent') params.accentColor = hex;
+      if (key === 'cockpit') params.cockpitColor = hex;
+      if (key === 'plasma') params.plasmaColor = hex;
+      buildCraftModular();
+      updateJSONArea();
+    }
+
+    function updateUI() {
+      for (const [k, v] of Object.entries(params)) {
+        const slider = document.getElementById(`slider-${k}`);
+        const valSpan = document.getElementById(`val-${k}`);
+        if (slider) slider.value = v;
+        if (valSpan) {
+          if (k === 'explodedOffset') valSpan.textContent = `${parseFloat(v).toFixed(1)} m`;
+          else if (k === 'outlineThickness') valSpan.textContent = `${parseFloat(v).toFixed(1)} px`;
+          else if (k === 'wingDihedral') valSpan.textContent = `${parseFloat(v).toFixed(1)}°`;
+          else if (k === 'plasmaLength' || k === 'plasmaIntensity' || k === 'wingSpan') valSpan.textContent = `${parseFloat(v).toFixed(2)}x`;
+          else valSpan.textContent = typeof v === 'number' ? v.toFixed(2) : v;
+        }
+      }
+      updateJSONArea();
+    }
+
+    function updateJSONArea() {
+      const jsonArea = document.getElementById('json-config');
+      const exportData = {
+        ship: currentShip,
+        styleOption: currentStyleOption,
+        params: params
+      };
+      jsonArea.value = JSON.stringify(exportData, null, 2);
+    }
+
+    function copyJSON() {
+      const jsonArea = document.getElementById('json-config');
+      navigator.clipboard.writeText(jsonArea.value).then(() => {
+        showToast("JSON copiado para a Área de Transferência!");
+      }).catch(() => showToast("Copie o texto do JSON manualmente."));
+    }
+
+    function applyJSON() {
+      try {
+        const jsonArea = document.getElementById('json-config');
+        const parsed = JSON.parse(jsonArea.value);
+        if (parsed.ship && SHIPS_DATA[parsed.ship]) selectShip(parsed.ship);
+        if (parsed.styleOption) selectStyleOption(parsed.styleOption);
+        if (parsed.params) {
+          params = { ...params, ...parsed.params };
+        }
+        buildCraftModular();
+        updateUI();
+        showToast("JSON aplicado com sucesso!");
+      } catch(e) {
+        showToast("JSON inválido.");
+      }
+    }
+
+    function setEnvironment(envKey) {
+      audioSys.playClick();
+      currentEnv = envKey;
+      document.querySelectorAll('[id^="env-"]').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`env-${envKey}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (envKey === 'cyber') {
+        scene.background = new THREE.Color(0x020409);
+        scene.fog.color.setHex(0x040814);
+        cyanRim.color.setHex(0x00f0ff);
+        magentaRim.color.setHex(0xff0055);
+        mainSpot.color.setHex(0xffffff);
+      } else if (envKey === 'void') {
+        scene.background = new THREE.Color(0x000103);
+        scene.fog.color.setHex(0x000103);
+        cyanRim.color.setHex(0x7090ff);
+        magentaRim.color.setHex(0x304080);
+        mainSpot.color.setHex(0xd0e8ff);
+      } else if (envKey === 'sunset') {
+        scene.background = new THREE.Color(0x180808);
+        scene.fog.color.setHex(0x180808);
+        cyanRim.color.setHex(0xffaa00);
+        magentaRim.color.setHex(0xff0044);
+        mainSpot.color.setHex(0xffddaa);
+      }
+      showToast(`Cenário: ${envKey.toUpperCase()}`);
+    }
+
+    // -------------------------------------------------------------------
+    // CAMERA CONTROLS & INSPECTION FOCUS
+    // -------------------------------------------------------------------
+    let isMouseDown = false;
+    let prevMouseX = 0;
+    let prevMouseY = 0;
+    let cameraSpherical = { radius: 12.0, phi: Math.PI / 3.2, theta: Math.PI / 4 };
+    let cameraTarget = new THREE.Vector3(0, 1.35, 0);
+    let isAutoRotating = true;
+    let isWireframe = false;
+
+    function updateCameraPos() {
+      camera.position.x = cameraTarget.x + cameraSpherical.radius * Math.sin(cameraSpherical.phi) * Math.sin(cameraSpherical.theta);
+      camera.position.y = cameraTarget.y + cameraSpherical.radius * Math.cos(cameraSpherical.phi);
+      camera.position.z = cameraTarget.z + cameraSpherical.radius * Math.sin(cameraSpherical.phi) * Math.cos(cameraSpherical.theta);
+      camera.lookAt(cameraTarget);
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      isMouseDown = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+      audioSys.init();
+    });
+
+    window.addEventListener('mouseup', () => { isMouseDown = false; });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      const dx = e.clientX - prevMouseX;
+      const dy = e.clientY - prevMouseY;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+
+      cameraSpherical.theta -= dx * 0.008;
+      cameraSpherical.phi = Math.max(0.1, Math.min(Math.PI / 2 - 0.05, cameraSpherical.phi - dy * 0.008));
+      updateCameraPos();
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      cameraSpherical.radius = Math.max(3.5, Math.min(25.0, cameraSpherical.radius + e.deltaY * 0.012));
+      updateCameraPos();
+    });
+
+    function toggleAutoRotate() {
+      isAutoRotating = !isAutoRotating;
+      const btn = document.getElementById('toggle-autorotate');
+      btn.classList.toggle('active', isAutoRotating);
+      showToast(isAutoRotating ? "Giro Automático: ON" : "Giro Automático: OFF");
+    }
+
+    function toggleWireframe() {
+      isWireframe = !isWireframe;
+      currentCraftRoot.traverse(c => {
+        if (c.isMesh && c.material) {
+          if (Array.isArray(c.material)) c.material.forEach(m => m.wireframe = isWireframe);
+          else c.material.wireframe = isWireframe;
+        }
+      });
+      const btn = document.getElementById('toggle-wireframe');
+      btn.classList.toggle('active', isWireframe);
+      showToast(isWireframe ? "Modo Aramado Ativado" : "Modo Sólido Ativado");
+    }
+
+    function setFocusTarget(target) {
+      audioSys.playClick();
+      document.querySelectorAll('[id^="focus-"]').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`focus-${target}`);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      if (target === 'all') {
+        cameraTarget.set(0, 1.35, 0);
+        cameraSpherical.radius = 12.0;
+        showToast("Foco: Nave Completa");
+      } else if (target === 'p1') {
+        cameraTarget.set(0, 1.35, piece1Group.position.z + 1.2);
+        cameraSpherical.radius = 5.5;
+        showToast("Foco: Peça 1 (Bico / Proa)");
+      } else if (target === 'p2') {
+        cameraTarget.set(0, 1.35 + piece2Group.position.y + 0.3, 0);
+        cameraSpherical.radius = 4.5;
+        showToast("Foco: Peça 2 (Cockpit / Cabine)");
+      } else if (target === 'p3') {
+        cameraTarget.set(0, 1.35, -0.4);
+        cameraSpherical.radius = 6.8;
+        showToast("Foco: Peça 3 (Asas & Chassi)");
+      } else if (target === 'p4') {
+        cameraTarget.set(0, 1.35, piece4Group.position.z - 1.5);
+        cameraSpherical.radius = 5.5;
+        showToast("Foco: Peça 4 (Motores / Propulsão)");
+      }
+      updateCameraPos();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+    }
+
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth - 480;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+
+    // -------------------------------------------------------------------
+    // ANIMATION & HOVER RENDER LOOP
+    // -------------------------------------------------------------------
+    let clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const elapsedTime = clock.getElapsedTime();
+
+      // Anti-Gravity Hover Bobbing
+      const bob = Math.sin(elapsedTime * params.hoverBobSpeed) * 0.08;
+      currentCraftRoot.position.y = params.hoverHeight + bob;
+
+      // Auto-Rotation
+      if (isAutoRotating && !isMouseDown) {
+        cameraSpherical.theta += 0.006;
+      }
+      updateCameraPos();
+
+      // Plasma Plume Pulse
+      const plumePulse = 1.0 + Math.sin(elapsedTime * 18) * 0.15;
+      for (const plume of thrusterPlumes) {
+        plume.scale.set(1, 1, params.plasmaLength * plumePulse);
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // Initialize
+    selectShip('falcon');
+    updateCameraPos();
+    animate();
+  </script>
+</body>
+</html>
