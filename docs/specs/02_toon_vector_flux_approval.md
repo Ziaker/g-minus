@@ -101,6 +101,8 @@ A decisão expressa foi **“opção D Toon Vector”**, sem envio de JSON de pa
 
 **Intervalos do HTML:** length/width/wingSpan/canopy = **0,78 a 1,22** em passo **0,01**; glow = **0 a 2**; saturation = **−0,38 a +0,38**. O estilo é indexado pelo campo style = “D”. Geometria/proporções são guardadas **por nave**, não redefinidas ao trocar a direção visual; os controles da D **não** são sliders independentes de toonBands, retícula, contorno ou cores vetoriais. Não apresentar esses valores visuais fixos de shader como controles aprovados.
 
+**Divergência documental explícita com o gate do GDD [101]:** a v6 oferece seis sliders de geometria/acabamento **compartilhados por nave** enquanto compara A–E; não possui conjuntos de sliders próprios e independentes para cada alternativa. A aprovação da **direção estética D** não equivale a aprovar essa exceção de interface nem dispensa o requisito de sliders independentes nos futuros protótipos de features. A geometria invariável entre estilos é um objetivo deliberado de comparação, mas a adequação do laboratório à política integral de prototipação continua sujeita a revisão específica.
+
 **Operação:** abrir o HTML isoladamente em navegador compatível com WebGL; selecionar **D** ou a tecla **4**; selecionar nave; usar modos **Vitrine**, **Comparador A–E** ou **Galeria de 10 naves**; vistas ¾, topo, frente e traseira; rotação, órbita/zoom, inspeção de silhueta e grupos. O JSON pode ser copiado e aplicado com validação de versão, nave, estilo, modo, foco, vista e limites dos parâmetros.
 
 ## 6. Contrato de continuidade para protótipos futuros
