@@ -11,7 +11,18 @@ export interface VehicleStats {
   grip: StatGrade;  // Turning traction vs drift slip
 }
 
-export type MachineModel = 'falcon' | 'fox' | 'goose' | 'stingray' | 'generic';
+export type MachineModel =
+  | 'falcon'
+  | 'fox'
+  | 'goose'
+  | 'stingray'
+  | 'white_cat'
+  | 'red_gazelle'
+  | 'iron_tiger'
+  | 'deep_claw'
+  | 'black_bull'
+  | 'blood_hawk'
+  | 'generic';
 
 export interface VehicleConfig {
   id: string;
@@ -132,151 +143,516 @@ export class Vehicle {
     return this.currentLap >= 2;
   }
 
+  /**
+   * Complete 4-Piece Modular Craft Overhaul (GDD [71-78]):
+   * 1. Piece 1: Nose & Prow (Bico / Proa Aerodinâmica)
+   * 2. Piece 2: Cockpit Canopy & Visor (Cabine / Domo Translúcido)
+   * 3. Piece 3: Wings & Side Pods (Asas / Pods Laterais / Estabilizadores / Blindagens)
+   * 4. Piece 4: Propulsion Engine Block (Bloco de Turbinas / Bocais / Plumas)
+   */
   private buildCraftModel(model: MachineModel, mainColor: number, accentColor: number): THREE.Group {
     const ship = new THREE.Group();
+    this.thrusterPlumes = [];
 
     const bodyMat = new THREE.MeshStandardMaterial({
       color: mainColor,
-      roughness: 0.28,
-      metalness: 0.85
+      roughness: 0.26,
+      metalness: 0.88
     });
 
     const accentMat = new THREE.MeshStandardMaterial({
       color: accentColor,
-      roughness: 0.22,
-      metalness: 0.9
+      roughness: 0.20,
+      metalness: 0.92
+    });
+
+    const darkMetalMat = new THREE.MeshStandardMaterial({
+      color: 0x121722,
+      roughness: 0.35,
+      metalness: 0.95
     });
 
     const cockpitMat = new THREE.MeshStandardMaterial({
-      color: 0x05101a,
-      roughness: 0.08,
-      metalness: 0.96
+      color: 0x050f1a,
+      roughness: 0.06,
+      metalness: 0.98
     });
 
     const glowMat = new THREE.MeshBasicMaterial({
       color: accentColor
     });
 
+    // 4 Modular Pieces Groups
+    const piece1_Nose = new THREE.Group();
+    piece1_Nose.name = 'Piece1_Nose';
+
+    const piece2_Cockpit = new THREE.Group();
+    piece2_Cockpit.name = 'Piece2_Cockpit';
+
+    const piece3_Wings = new THREE.Group();
+    piece3_Wings.name = 'Piece3_Wings';
+
+    const piece4_Engines = new THREE.Group();
+    piece4_Engines.name = 'Piece4_Engines';
+
     if (model === 'fox') {
-      // Golden Fox: Needle nose, compact lightweight body
-      const fuselage = new THREE.Mesh(new THREE.ConeGeometry(1.0, 5.6, 6).rotateX(Math.PI / 2).scale(1.0, 0.4, 1.0), bodyMat);
-      ship.add(fuselage);
+      // 1. GOLDEN FOX: Ultra-slender acceleration needle
+      // Piece 1: Slender Needle Nose + Aero Canards
+      const noseCone = new THREE.Mesh(
+        new THREE.ConeGeometry(0.85, 5.8, 6).rotateX(Math.PI / 2).scale(0.9, 0.36, 1.1),
+        bodyMat
+      );
+      noseCone.position.set(0, 0.05, 0.6);
+      piece1_Nose.add(noseCone);
 
-      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.55, 8, 8).scale(0.7, 0.45, 1.6), cockpitMat);
-      canopy.position.set(0, 0.32, 0.2);
-      ship.add(canopy);
+      const canardL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.06, 0.9).rotateY(0.3), accentMat);
+      canardL.position.set(-0.75, 0.05, 1.3);
+      const canardR = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.06, 0.9).rotateY(-0.3), accentMat);
+      canardR.position.set(0.75, 0.05, 1.3);
+      piece1_Nose.add(canardL, canardR);
 
-      // Angled delta fins
-      const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 1.5), accentMat);
-      wingL.position.set(-1.4, 0.1, -0.8);
-      wingL.rotation.z = 0.2;
-      ship.add(wingL);
+      // Piece 2: Teardrop Cockpit Canopy
+      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8).scale(0.65, 0.4, 1.5), cockpitMat);
+      canopy.position.set(0, 0.3, 0.2);
+      const spine = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 1.6), darkMetalMat);
+      spine.position.set(0, 0.44, -0.2);
+      piece2_Cockpit.add(canopy, spine);
 
-      const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 1.5), accentMat);
-      wingR.position.set(1.4, 0.1, -0.8);
-      wingR.rotation.z = -0.2;
-      ship.add(wingR);
+      // Piece 3: Razor Delta Wings + Winglets
+      const wingL = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.08, 1.5).rotateY(0.2), accentMat);
+      wingL.position.set(-1.4, 0.05, -0.7);
+      wingL.rotation.z = 0.15;
+      const wingletL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.9), accentMat);
+      wingletL.position.set(-2.25, 0.35, -0.8);
 
-      // Twin upright stabilizers
-      const finL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 1.2), accentMat);
-      finL.position.set(-0.9, 0.7, -1.5);
-      ship.add(finL);
+      const wingR = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.08, 1.5).rotateY(-0.2), accentMat);
+      wingR.position.set(1.4, 0.05, -0.7);
+      wingR.rotation.z = -0.15;
+      const wingletR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.9), accentMat);
+      wingletR.position.set(2.25, 0.35, -0.8);
 
-      const finR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 1.2), accentMat);
-      finR.position.set(0.9, 0.7, -1.5);
-      ship.add(finR);
+      const finL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.3, 1.1), bodyMat);
+      finL.position.set(-0.75, 0.7, -1.4);
+      const finR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.3, 1.1), bodyMat);
+      finR.position.set(0.75, 0.7, -1.4);
+      piece3_Wings.add(wingL, wingletL, wingR, wingletR, finL, finR);
+
+      // Piece 4: Twin High-Output Boost Thrusters
+      const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engL.position.set(-0.55, 0, -1.7);
+      const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engR.position.set(0.55, 0, -1.7);
+      piece4_Engines.add(engL, engR);
+
+      const plumeGeo = new THREE.ConeGeometry(0.32, 1.8, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.55, 0, -2.6);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.55, 0, -2.6);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
+
     } else if (model === 'goose') {
-      // Wild Goose: Heavy blocky faceted tank prow
-      const prow = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 4.6), bodyMat);
-      prow.position.set(0, 0.1, 0);
-      ship.add(prow);
+      // 2. WILD GOOSE: Heavy armored battering ram
+      // Piece 1: Faceted Heavy Ram Prow
+      const prow = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.95, 4.4), bodyMat);
+      prow.position.set(0, 0.1, 0.2);
+      const ramNose = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.7, 4).rotateX(Math.PI / 2), accentMat);
+      ramNose.position.set(0, 0.1, 2.8);
+      const ramBar = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.35, 0.5), darkMetalMat);
+      ramBar.position.set(0, 0, 3.2);
+      piece1_Nose.add(prow, ramNose, ramBar);
 
-      const noseCone = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.8, 4).rotateX(Math.PI / 2), accentMat);
-      noseCone.position.set(0, 0.1, 2.8);
-      ship.add(noseCone);
-
-      const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.6, 1.8), cockpitMat);
+      // Piece 2: Armored Slit Visor Cabin
+      const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.65, 1.9), cockpitMat);
       canopy.position.set(0, 0.65, 0.3);
-      ship.add(canopy);
+      const visorCap = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.15, 1.8), darkMetalMat);
+      visorCap.position.set(0, 0.98, 0.3);
+      piece2_Cockpit.add(canopy, visorCap);
 
-      // Heavy armor side skirts
-      const skirtL = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 3.4), accentMat);
-      skirtL.position.set(-1.5, 0, -0.3);
-      ship.add(skirtL);
+      // Piece 3: Heavy Reinforced Side Skirts & Bash Bumpers
+      const skirtL = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 3.8), accentMat);
+      skirtL.position.set(-1.55, 0, -0.2);
+      const bumperL = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.45, 1.6), darkMetalMat);
+      bumperL.position.set(-1.9, 0, 0.2);
 
-      const skirtR = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 3.4), accentMat);
-      skirtR.position.set(1.5, 0, -0.3);
-      ship.add(skirtR);
+      const skirtR = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 3.8), accentMat);
+      skirtR.position.set(1.55, 0, -0.2);
+      const bumperR = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.45, 1.6), darkMetalMat);
+      bumperR.position.set(1.9, 0, 0.2);
+      piece3_Wings.add(skirtL, bumperL, skirtR, bumperR);
+
+      // Piece 4: Dual Block Rocket Engine Array
+      const engBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.8, 1.4), darkMetalMat);
+      engBox.position.set(0, 0.1, -1.8);
+      const nozL = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 0.8, 8).rotateX(Math.PI / 2), accentMat);
+      nozL.position.set(-0.65, 0.1, -2.4);
+      const nozR = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 0.8, 8).rotateX(Math.PI / 2), accentMat);
+      nozR.position.set(0.65, 0.1, -2.4);
+      piece4_Engines.add(engBox, nozL, nozR);
+
+      const plumeGeo = new THREE.ConeGeometry(0.42, 2.0, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.65, 0.1, -3.0);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.65, 0.1, -3.0);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
+
     } else if (model === 'stingray') {
-      // Fire Stingray: Broad sweeping flat manta lifting body
-      const manta = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.9, 0.5, 7).scale(1.2, 0.7, 1.4), bodyMat);
-      manta.position.set(0, 0, 0);
-      ship.add(manta);
+      // 3. FIRE STINGRAY: Broad sweeping manta lifting body
+      // Piece 1: Wide Manta Aero Prow
+      const manta = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 3.0, 0.55, 8).scale(1.25, 0.65, 1.4), bodyMat);
+      manta.position.set(0, 0, 0.1);
+      const scoop = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.28, 1.2), darkMetalMat);
+      scoop.position.set(0, -0.12, 1.8);
+      piece1_Nose.add(manta, scoop);
 
-      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 8).scale(0.8, 0.5, 1.5), cockpitMat);
+      // Piece 2: Wide Panoramic Visor Dome
+      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.85, 12, 10).scale(0.85, 0.45, 1.5), cockpitMat);
       canopy.position.set(0, 0.45, 0.5);
-      ship.add(canopy);
+      piece2_Cockpit.add(canopy);
 
-      // Wide rear wing slats
-      const slatL = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 1.2), accentMat);
-      slatL.position.set(-2.2, 0.2, -1.0);
-      ship.add(slatL);
+      // Piece 3: Sweeping Manta Wings & Airbrake Slats
+      const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.16, 1.6), accentMat);
+      wingL.position.set(-2.4, 0.15, -0.8);
+      const flapL = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.8), darkMetalMat);
+      flapL.position.set(-2.5, 0.25, -1.6);
 
-      const slatR = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.15, 1.2), accentMat);
-      slatR.position.set(2.2, 0.2, -1.0);
-      ship.add(slatR);
+      const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.16, 1.6), accentMat);
+      wingR.position.set(2.4, 0.15, -0.8);
+      const flapR = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.8), darkMetalMat);
+      flapR.position.set(2.5, 0.25, -1.6);
+      piece3_Wings.add(wingL, flapL, wingR, flapR);
+
+      // Piece 4: Massive Dual Atomic Propulsion Cylinders
+      const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.6, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engL.position.set(-0.9, 0.05, -1.8);
+      const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.6, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engR.position.set(0.9, 0.05, -1.8);
+      piece4_Engines.add(engL, engR);
+
+      const plumeGeo = new THREE.ConeGeometry(0.5, 2.2, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.9, 0.05, -2.8);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.9, 0.05, -2.8);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
+
+    } else if (model === 'white_cat') {
+      // 4. WHITE CAT: Elegant twin-fork feline speeder
+      // Piece 1: Feline Twin-Fork Prow
+      const forkL = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.2, 5).rotateX(Math.PI / 2), bodyMat);
+      forkL.position.set(-0.55, 0.05, 1.8);
+      const forkR = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.2, 5).rotateX(Math.PI / 2), bodyMat);
+      forkR.position.set(0.55, 0.05, 1.8);
+      const centerKeel = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.25, 2.4), accentMat);
+      centerKeel.position.set(0, 0, 0.6);
+      piece1_Nose.add(forkL, forkR, centerKeel);
+
+      // Piece 2: Crystal Cyan Streamlined Canopy
+      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.6, 10, 8).scale(0.7, 0.45, 1.7), cockpitMat);
+      canopy.position.set(0, 0.35, 0.2);
+      piece2_Cockpit.add(canopy);
+
+      // Piece 3: Curved High-Grip Wings & Upright Ear Fins
+      const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 1.6).rotateY(0.15), accentMat);
+      wingL.position.set(-1.6, 0.05, -0.6);
+      const earFinL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.1, 0.9), accentMat);
+      earFinL.position.set(-0.8, 0.65, -1.1);
+
+      const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 1.6).rotateY(-0.15), accentMat);
+      wingR.position.set(1.6, 0.05, -0.6);
+      const earFinR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.1, 0.9), accentMat);
+      earFinR.position.set(0.8, 0.65, -1.1);
+      piece3_Wings.add(wingL, earFinL, wingR, earFinR);
+
+      // Piece 4: Chrome Cylindrical Turbo Jet Block
+      const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 1.6, 8).rotateX(Math.PI / 2), bodyMat);
+      engL.position.set(-0.6, 0, -1.8);
+      const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 1.6, 8).rotateX(Math.PI / 2), bodyMat);
+      engR.position.set(0.6, 0, -1.8);
+      piece4_Engines.add(engL, engR);
+
+      const plumeGeo = new THREE.ConeGeometry(0.35, 1.8, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.6, 0, -2.6);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.6, 0, -2.6);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
+
+    } else if (model === 'red_gazelle') {
+      // 5. RED GAZELLE: Lightweight aerodynamic rocket
+      // Piece 1: Crimson Razor Needle Prow
+      const needle = new THREE.Mesh(new THREE.ConeGeometry(0.75, 5.6, 5).rotateX(Math.PI / 2).scale(0.85, 0.38, 1.1), bodyMat);
+      needle.position.set(0, 0.05, 0.7);
+      piece1_Nose.add(needle);
+
+      // Piece 2: Cybernetic Pilot Capsule
+      const canopy = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.45, 1.4), cockpitMat);
+      canopy.position.set(0, 0.32, 0.2);
+      piece2_Cockpit.add(canopy);
+
+      // Piece 3: Lightweight Delta Wings & Strakes
+      const wingL = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.08, 1.4).rotateY(0.25), accentMat);
+      wingL.position.set(-1.45, 0.05, -0.6);
+      const finL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.2, 1.0), bodyMat);
+      finL.position.set(-0.85, 0.65, -1.3);
+
+      const wingR = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.08, 1.4).rotateY(-0.25), accentMat);
+      wingR.position.set(1.45, 0.05, -0.6);
+      const finR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.2, 1.0), bodyMat);
+      finR.position.set(0.85, 0.65, -1.3);
+      piece3_Wings.add(wingL, finL, wingR, finR);
+
+      // Piece 4: High-Boost Dual Rocket Block
+      const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.4, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engL.position.set(-0.55, 0, -1.8);
+      const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.4, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engR.position.set(0.55, 0, -1.8);
+      piece4_Engines.add(engL, engR);
+
+      const plumeGeo = new THREE.ConeGeometry(0.34, 1.9, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.55, 0, -2.6);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.55, 0, -2.6);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
+
+    } else if (model === 'iron_tiger') {
+      // 6. IRON TIGER: Industrial stepped tiger rammer
+      // Piece 1: Stepped Angular Ram Prow + Grille
+      const prow = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.85, 4.2), bodyMat);
+      prow.position.set(0, 0.05, 0.2);
+      const grille = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.35, 0.4), darkMetalMat);
+      grille.position.set(0, 0, 2.4);
+      piece1_Nose.add(prow, grille);
+
+      // Piece 2: Armored Roll-Cage Visor
+      const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.62, 1.8), cockpitMat);
+      canopy.position.set(0, 0.58, 0.2);
+      piece2_Cockpit.add(canopy);
+
+      // Piece 3: Stepped Side Sponsons & Tiger Fins
+      const sponsonL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.65, 3.4), accentMat);
+      sponsonL.position.set(-1.5, 0.05, -0.4);
+      const sponsonR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.65, 3.4), accentMat);
+      sponsonR.position.set(1.5, 0.05, -0.4);
+      const centerFin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.0, 1.2), bodyMat);
+      centerFin.position.set(0, 0.85, -1.4);
+      piece3_Wings.add(sponsonL, sponsonR, centerFin);
+
+      // Piece 4: Heavy Industrial Triple Turbine Array
+      const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.44, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engL.position.set(-0.75, 0, -1.8);
+      const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.44, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engR.position.set(0.75, 0, -1.8);
+      const engC = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.4, 1.4, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engC.position.set(0, 0.25, -1.7);
+      piece4_Engines.add(engL, engR, engC);
+
+      const plumeGeo = new THREE.ConeGeometry(0.38, 1.9, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.75, 0, -2.6);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.75, 0, -2.6);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
+
+    } else if (model === 'deep_claw') {
+      // 7. DEEP CLAW: Biomorphic alien claw
+      // Piece 1: Biomorphic Pincer Prow
+      const clawL = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.2, 5).rotateX(Math.PI / 2).rotateY(-0.15), bodyMat);
+      clawL.position.set(-0.75, 0.05, 2.0);
+      const clawR = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.2, 5).rotateX(Math.PI / 2).rotateY(0.15), bodyMat);
+      clawR.position.set(0.75, 0.05, 2.0);
+      const bioCore = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 8).scale(1.1, 0.45, 1.8), accentMat);
+      bioCore.position.set(0, 0.05, 0.4);
+      piece1_Nose.add(clawL, clawR, bioCore);
+
+      // Piece 2: Bulbous Magenta Ocular Canopy
+      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.72, 10, 8).scale(0.8, 0.55, 1.3), cockpitMat);
+      canopy.position.set(0, 0.45, 0.3);
+      piece2_Cockpit.add(canopy);
+
+      // Piece 3: Organic Side Flippers & Glowing Bio-Spines
+      const flipperL = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.12, 1.8).rotateY(0.2), bodyMat);
+      flipperL.position.set(-1.8, 0.08, -0.6);
+      const flipperR = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.12, 1.8).rotateY(-0.2), bodyMat);
+      flipperR.position.set(1.8, 0.08, -0.6);
+      piece3_Wings.add(flipperL, flipperR);
+
+      // Piece 4: Plasma Siphon Exhaust Manifolds
+      const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 1.6, 8).rotateX(Math.PI / 2), accentMat);
+      engL.position.set(-0.65, 0.05, -1.8);
+      const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 1.6, 8).rotateX(Math.PI / 2), accentMat);
+      engR.position.set(0.65, 0.05, -1.8);
+      piece4_Engines.add(engL, engR);
+
+      const plumeGeo = new THREE.ConeGeometry(0.38, 1.9, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.65, 0.05, -2.6);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.65, 0.05, -2.6);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
+
+    } else if (model === 'black_bull') {
+      // 8. BLACK BULL: Demonic armored dark rammer
+      // Piece 1: Horned Matte-Black Heavy Ram Prow
+      const prow = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.95, 4.4), bodyMat);
+      prow.position.set(0, 0.1, 0.2);
+      const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.35, 2.4, 5).rotateX(Math.PI / 2).rotateY(0.2), accentMat);
+      hornL.position.set(-1.1, 0.25, 2.6);
+      const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.35, 2.4, 5).rotateX(Math.PI / 2).rotateY(-0.2), accentMat);
+      hornR.position.set(1.1, 0.25, 2.6);
+      piece1_Nose.add(prow, hornL, hornR);
+
+      // Piece 2: Angular Stealth Cockpit
+      const canopy = new THREE.Mesh(new THREE.ConeGeometry(0.85, 2.2, 4).rotateX(Math.PI / 2), cockpitMat);
+      canopy.position.set(0, 0.65, 0.3);
+      piece2_Cockpit.add(canopy);
+
+      // Piece 3: Spiked Heavy Shields & Devil Fins
+      const shieldL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 3.8), bodyMat);
+      shieldL.position.set(-1.7, 0.1, -0.2);
+      const finL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 1.2), accentMat);
+      finL.position.set(-1.0, 0.85, -1.4);
+      finL.rotation.z = -0.2;
+
+      const shieldR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 3.8), bodyMat);
+      shieldR.position.set(1.7, 0.1, -0.2);
+      const finR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 1.2), accentMat);
+      finR.position.set(1.0, 0.85, -1.4);
+      finR.rotation.z = 0.2;
+      piece3_Wings.add(shieldL, finL, shieldR, finR);
+
+      // Piece 4: Dual Colossal Dark-Matter Nozzles
+      const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engL.position.set(-0.8, 0.1, -1.9);
+      const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engR.position.set(0.8, 0.1, -1.9);
+      piece4_Engines.add(engL, engR);
+
+      const plumeGeo = new THREE.ConeGeometry(0.48, 2.2, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.8, 0.1, -2.8);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.8, 0.1, -2.8);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
+
+    } else if (model === 'blood_hawk') {
+      // 9. BLOOD HAWK: Predatory crimson razor hawk
+      // Piece 1: Crimson Hawk Beak Prow
+      const beak = new THREE.Mesh(new THREE.ConeGeometry(1.2, 5.2, 4).rotateX(Math.PI / 2).scale(1.0, 0.45, 1.1), bodyMat);
+      beak.position.set(0, 0.05, 0.6);
+      const teethL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 1.2).rotateY(0.2), accentMat);
+      teethL.position.set(-0.65, -0.05, 1.6);
+      const teethR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 1.2).rotateY(-0.2), accentMat);
+      teethR.position.set(0.65, -0.05, 1.6);
+      piece1_Nose.add(beak, teethL, teethR);
+
+      // Piece 2: Obsidian Visor with Crimson Glow Frame
+      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.68, 10, 8).scale(0.75, 0.45, 1.7), cockpitMat);
+      canopy.position.set(0, 0.38, 0.3);
+      piece2_Cockpit.add(canopy);
+
+      // Piece 3: Inverted Forward-Swept Gull Wings & Tailfins
+      const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.12, 1.7).rotateY(-0.2), bodyMat);
+      wingL.position.set(-1.8, 0.08, -0.5);
+      wingL.rotation.z = -0.12;
+      const finL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.3, 1.3), accentMat);
+      finL.position.set(-1.15, 0.75, -1.3);
+
+      const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.12, 1.7).rotateY(0.2), bodyMat);
+      wingR.position.set(1.8, 0.08, -0.5);
+      wingR.rotation.z = 0.12;
+      const finR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.3, 1.3), accentMat);
+      finR.position.set(1.15, 0.75, -1.3);
+      piece3_Wings.add(wingL, finL, wingR, finR);
+
+      // Piece 4: Twin Crimson Plasma Boosters
+      const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 1.7, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engL.position.set(-0.65, 0, -1.8);
+      const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 1.7, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engR.position.set(0.65, 0, -1.8);
+      piece4_Engines.add(engL, engR);
+
+      const plumeGeo = new THREE.ConeGeometry(0.4, 2.0, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.65, 0, -2.6);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.65, 0, -2.6);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
+
     } else {
-      // Blue Falcon / Dart Interceptor Default
-      const bodyGeo = new THREE.ConeGeometry(1.3, 5.2, 5);
+      // 10. BLUE FALCON / DEFAULT INTERCEPTOR
+      // Piece 1: Iconic Dart Fuselage & Intakes
+      const bodyGeo = new THREE.ConeGeometry(1.25, 5.0, 5);
       bodyGeo.rotateX(Math.PI / 2);
-      bodyGeo.scale(1.2, 0.45, 1);
-      const body = new THREE.Mesh(bodyGeo, bodyMat);
-      ship.add(body);
+      bodyGeo.scale(1.15, 0.45, 1.0);
+      const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+      bodyMesh.position.set(0, 0, 0.4);
+      const intakeL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.25, 1.4), darkMetalMat);
+      intakeL.position.set(-0.8, -0.05, 0.8);
+      const intakeR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.25, 1.4), darkMetalMat);
+      intakeR.position.set(0.8, -0.05, 0.8);
+      piece1_Nose.add(bodyMesh, intakeL, intakeR);
 
-      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 8).scale(0.8, 0.45, 1.8), cockpitMat);
+      // Piece 2: Sleek Bubble Canopy & Spine
+      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.7, 10, 8).scale(0.8, 0.45, 1.8), cockpitMat);
       canopy.position.set(0, 0.35, 0.3);
-      ship.add(canopy);
+      const crest = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.18, 1.4), accentMat);
+      crest.position.set(0, 0.52, 0.2);
+      piece2_Cockpit.add(canopy, crest);
 
+      // Piece 3: Swept Delta Wings + Outrigger Pods + Vertical Fins
       const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 1.8).rotateY(0.2), accentMat);
       wingL.position.set(-1.8, 0, -0.6);
       wingL.rotation.z = 0.1;
-      ship.add(wingL);
+      const podL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.35, 1.6), darkMetalMat);
+      podL.position.set(-2.8, 0.05, -0.4);
+      const finL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.4), accentMat);
+      finL.position.set(-1.1, 0.7, -1.2);
+      finL.rotation.z = -0.25;
 
       const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 1.8).rotateY(-0.2), accentMat);
       wingR.position.set(1.8, 0, -0.6);
       wingR.rotation.z = -0.1;
-      ship.add(wingR);
-
-      const podL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.35, 1.6), cockpitMat);
-      podL.position.set(-2.8, 0.05, -0.4);
-      ship.add(podL);
-
-      const podR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.35, 1.6), cockpitMat);
+      const podR = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.35, 1.6), darkMetalMat);
       podR.position.set(2.8, 0.05, -0.4);
-      ship.add(podR);
-
-      const finL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.4), accentMat);
-      finL.position.set(-1.1, 0.7, -1.2);
-      finL.rotation.z = -0.25;
-      ship.add(finL);
-
       const finR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.4), accentMat);
       finR.position.set(1.1, 0.7, -1.2);
       finR.rotation.z = 0.25;
-      ship.add(finR);
+      piece3_Wings.add(wingL, podL, finL, wingR, podR, finR);
+
+      // Piece 4: Twin Titanium Jet Turbines
+      const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engL.position.set(-0.65, 0, -1.8);
+      const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+      engR.position.set(0.65, 0, -1.8);
+      piece4_Engines.add(engL, engR);
+
+      const plumeGeo = new THREE.ConeGeometry(0.38, 1.8, 8).rotateX(-Math.PI / 2);
+      const pL = new THREE.Mesh(plumeGeo, glowMat);
+      pL.position.set(-0.65, 0, -2.6);
+      const pR = new THREE.Mesh(plumeGeo, glowMat);
+      pR.position.set(0.65, 0, -2.6);
+      piece4_Engines.add(pL, pR);
+      this.thrusterPlumes.push(pL, pR);
     }
 
-    // Dual Thruster plumes
-    const plumeGeo = new THREE.ConeGeometry(0.38, 1.8, 8).rotateX(-Math.PI / 2);
-    const leftPlume = new THREE.Mesh(plumeGeo, glowMat);
-    leftPlume.position.set(-0.65, 0, -2.6);
-    ship.add(leftPlume);
+    // Assemble all 4 Pieces into the ship
+    ship.add(piece1_Nose);
+    ship.add(piece2_Cockpit);
+    ship.add(piece3_Wings);
+    ship.add(piece4_Engines);
 
-    const rightPlume = new THREE.Mesh(plumeGeo, glowMat);
-    rightPlume.position.set(0.65, 0, -2.6);
-    ship.add(rightPlume);
-
-    this.thrusterPlumes.push(leftPlume, rightPlume);
     return ship;
   }
 

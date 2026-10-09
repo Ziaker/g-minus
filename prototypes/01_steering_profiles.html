@@ -1210,106 +1210,482 @@
 
       let primaryColor = 0x0044ff;
       let accentColor = 0x00f0ff;
-      let baseShape = 'falcon';
 
       if (model === 'fox') {
         primaryColor = 0xf5b800;
         accentColor = 0xffde59;
-        baseShape = 'fox';
       } else if (model === 'goose') {
         primaryColor = 0x228b22;
         accentColor = 0x99ee22;
-        baseShape = 'goose';
       } else if (model === 'stingray') {
         primaryColor = 0xbb0022;
         accentColor = 0xffaa00;
-        baseShape = 'stingray';
       } else if (model === 'white_cat') {
         primaryColor = 0xe0e6ed;
         accentColor = 0x00f0ff;
-        baseShape = 'falcon';
       } else if (model === 'red_gazelle') {
         primaryColor = 0xb30000;
         accentColor = 0xff4444;
-        baseShape = 'fox';
       } else if (model === 'iron_tiger') {
         primaryColor = 0xff7700;
         accentColor = 0xffaa00;
-        baseShape = 'goose';
       } else if (model === 'deep_claw') {
         primaryColor = 0x7b2cbf;
         accentColor = 0xff006e;
-        baseShape = 'stingray';
       } else if (model === 'black_bull') {
         primaryColor = 0x161822;
         accentColor = 0xcc0033;
-        baseShape = 'goose';
       } else if (model === 'blood_hawk') {
         primaryColor = 0x880011;
         accentColor = 0xff0044;
-        baseShape = 'falcon';
       }
 
-      const bodyMat = new THREE.MeshStandardMaterial({ color: primaryColor, roughness: 0.22, metalness: 0.88 });
-      const accentMat = new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.2, metalness: 0.85 });
-      const cockpitMat = new THREE.MeshStandardMaterial({ color: 0x050d1a, roughness: 0.08, metalness: 0.95 });
+      const bodyMat = new THREE.MeshStandardMaterial({ color: primaryColor, roughness: 0.26, metalness: 0.88 });
+      const accentMat = new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.20, metalness: 0.92 });
+      const darkMetalMat = new THREE.MeshStandardMaterial({ color: 0x121722, roughness: 0.35, metalness: 0.95 });
+      const cockpitMat = new THREE.MeshStandardMaterial({ color: 0x050f1a, roughness: 0.06, metalness: 0.98 });
       const glowMat = new THREE.MeshBasicMaterial({ color: accentColor });
 
-      if (baseShape === 'fox') {
-        const body = new THREE.Mesh(new THREE.ConeGeometry(0.9, 5.2, 6).rotateX(Math.PI / 2).scale(1.0, 0.4, 1.0), bodyMat);
-        visualGroup.add(body);
-        const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8).scale(0.7, 0.4, 1.5), cockpitMat);
+      // 4 Modular Pieces
+      const piece1_Nose = new THREE.Group();
+      piece1_Nose.name = 'Piece1_Nose';
+
+      const piece2_Cockpit = new THREE.Group();
+      piece2_Cockpit.name = 'Piece2_Cockpit';
+
+      const piece3_Wings = new THREE.Group();
+      piece3_Wings.name = 'Piece3_Wings';
+
+      const piece4_Engines = new THREE.Group();
+      piece4_Engines.name = 'Piece4_Engines';
+
+      const plumes = [];
+
+      if (model === 'fox') {
+        // 1. GOLDEN FOX
+        // Piece 1: Slender Needle Nose + Canards
+        const noseCone = new THREE.Mesh(new THREE.ConeGeometry(0.85, 5.8, 6).rotateX(Math.PI / 2).scale(0.9, 0.36, 1.1), bodyMat);
+        noseCone.position.set(0, 0.05, 0.6);
+        const canardL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.06, 0.9).rotateY(0.3), accentMat);
+        canardL.position.set(-0.75, 0.05, 1.3);
+        const canardR = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.06, 0.9).rotateY(-0.3), accentMat);
+        canardR.position.set(0.75, 0.05, 1.3);
+        piece1_Nose.add(noseCone, canardL, canardR);
+
+        // Piece 2: Teardrop Cockpit Canopy
+        const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.5, 10, 8).scale(0.65, 0.4, 1.5), cockpitMat);
         canopy.position.set(0, 0.3, 0.2);
-        visualGroup.add(canopy);
-        const wL = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 1.4), accentMat);
-        wL.position.set(-1.3, 0, -0.6);
-        visualGroup.add(wL);
-        const wR = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 1.4), accentMat);
-        wR.position.set(1.3, 0, -0.6);
-        visualGroup.add(wR);
-      } else if (baseShape === 'goose') {
-        const prow = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 4.4), bodyMat);
-        visualGroup.add(prow);
-        const nose = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.6, 4).rotateX(Math.PI / 2), accentMat);
-        nose.position.set(0, 0, 2.6);
-        visualGroup.add(nose);
-        const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.55, 1.6), cockpitMat);
-        canopy.position.set(0, 0.6, 0.2);
-        visualGroup.add(canopy);
-      } else if (baseShape === 'stingray') {
-        const manta = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.8, 0.5, 7).scale(1.2, 0.7, 1.4), bodyMat);
-        visualGroup.add(manta);
-        const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.75, 8, 8).scale(0.8, 0.45, 1.4), cockpitMat);
-        canopy.position.set(0, 0.4, 0.4);
-        visualGroup.add(canopy);
-      } else {
-        // Default Falcon
-        const body = new THREE.Mesh(new THREE.ConeGeometry(1.2, 4.8, 6).rotateX(Math.PI / 2).scale(1.2, 0.45, 1.0), bodyMat);
-        visualGroup.add(body);
-        const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.65, 8, 8).scale(0.8, 0.45, 1.6), cockpitMat);
+        const spine = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.16, 1.6), darkMetalMat);
+        spine.position.set(0, 0.44, -0.2);
+        piece2_Cockpit.add(canopy, spine);
+
+        // Piece 3: Razor Delta Wings + Winglets
+        const wingL = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.08, 1.5).rotateY(0.2), accentMat);
+        wingL.position.set(-1.4, 0.05, -0.7);
+        wingL.rotation.z = 0.15;
+        const wingletL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.9), accentMat);
+        wingletL.position.set(-2.25, 0.35, -0.8);
+
+        const wingR = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.08, 1.5).rotateY(-0.2), accentMat);
+        wingR.position.set(1.4, 0.05, -0.7);
+        wingR.rotation.z = -0.15;
+        const wingletR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.9), accentMat);
+        wingletR.position.set(2.25, 0.35, -0.8);
+
+        const finL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.3, 1.1), bodyMat);
+        finL.position.set(-0.75, 0.7, -1.4);
+        const finR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.3, 1.1), bodyMat);
+        finR.position.set(0.75, 0.7, -1.4);
+        piece3_Wings.add(wingL, wingletL, wingR, wingletR, finL, finR);
+
+        // Piece 4: Twin Boost Thrusters
+        const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engL.position.set(-0.55, 0, -1.7);
+        const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engR.position.set(0.55, 0, -1.7);
+        piece4_Engines.add(engL, engR);
+
+        const plumeGeo = new THREE.ConeGeometry(0.32, 1.8, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.55, 0, -2.6);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.55, 0, -2.6);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
+
+      } else if (model === 'goose') {
+        // 2. WILD GOOSE
+        // Piece 1: Heavy Ram Prow
+        const prow = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.95, 4.4), bodyMat);
+        prow.position.set(0, 0.1, 0.2);
+        const ramNose = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.7, 4).rotateX(Math.PI / 2), accentMat);
+        ramNose.position.set(0, 0.1, 2.8);
+        const ramBar = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.35, 0.5), darkMetalMat);
+        ramBar.position.set(0, 0, 3.2);
+        piece1_Nose.add(prow, ramNose, ramBar);
+
+        // Piece 2: Armored Slit Visor Cabin
+        const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.65, 1.9), cockpitMat);
+        canopy.position.set(0, 0.65, 0.3);
+        const visorCap = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.15, 1.8), darkMetalMat);
+        visorCap.position.set(0, 0.98, 0.3);
+        piece2_Cockpit.add(canopy, visorCap);
+
+        // Piece 3: Side Armor Skirts
+        const skirtL = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 3.8), accentMat);
+        skirtL.position.set(-1.55, 0, -0.2);
+        const bumperL = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.45, 1.6), darkMetalMat);
+        bumperL.position.set(-1.9, 0, 0.2);
+        const skirtR = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 3.8), accentMat);
+        skirtR.position.set(1.55, 0, -0.2);
+        const bumperR = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.45, 1.6), darkMetalMat);
+        bumperR.position.set(1.9, 0, 0.2);
+        piece3_Wings.add(skirtL, bumperL, skirtR, bumperR);
+
+        // Piece 4: Rocket Engine Array
+        const engBox = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.8, 1.4), darkMetalMat);
+        engBox.position.set(0, 0.1, -1.8);
+        const nozL = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 0.8, 8).rotateX(Math.PI / 2), accentMat);
+        nozL.position.set(-0.65, 0.1, -2.4);
+        const nozR = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 0.8, 8).rotateX(Math.PI / 2), accentMat);
+        nozR.position.set(0.65, 0.1, -2.4);
+        piece4_Engines.add(engBox, nozL, nozR);
+
+        const plumeGeo = new THREE.ConeGeometry(0.42, 2.0, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.65, 0.1, -3.0);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.65, 0.1, -3.0);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
+
+      } else if (model === 'stingray') {
+        // 3. FIRE STINGRAY
+        // Piece 1: Manta Aero Prow
+        const manta = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 3.0, 0.55, 8).scale(1.25, 0.65, 1.4), bodyMat);
+        manta.position.set(0, 0, 0.1);
+        const scoop = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.28, 1.2), darkMetalMat);
+        scoop.position.set(0, -0.12, 1.8);
+        piece1_Nose.add(manta, scoop);
+
+        // Piece 2: Panoramic Visor Dome
+        const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.85, 12, 10).scale(0.85, 0.45, 1.5), cockpitMat);
+        canopy.position.set(0, 0.45, 0.5);
+        piece2_Cockpit.add(canopy);
+
+        // Piece 3: Manta Wings & Airbrake Flaps
+        const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.16, 1.6), accentMat);
+        wingL.position.set(-2.4, 0.15, -0.8);
+        const flapL = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.8), darkMetalMat);
+        flapL.position.set(-2.5, 0.25, -1.6);
+        const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.16, 1.6), accentMat);
+        wingR.position.set(2.4, 0.15, -0.8);
+        const flapR = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.8), darkMetalMat);
+        flapR.position.set(2.5, 0.25, -1.6);
+        piece3_Wings.add(wingL, flapL, wingR, flapR);
+
+        // Piece 4: Atomic Propulsion Cylinders
+        const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.6, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engL.position.set(-0.9, 0.05, -1.8);
+        const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.6, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engR.position.set(0.9, 0.05, -1.8);
+        piece4_Engines.add(engL, engR);
+
+        const plumeGeo = new THREE.ConeGeometry(0.5, 2.2, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.9, 0.05, -2.8);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.9, 0.05, -2.8);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
+
+      } else if (model === 'white_cat') {
+        // 4. WHITE CAT
+        // Piece 1: Twin-Fork Nose
+        const forkL = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.2, 5).rotateX(Math.PI / 2), bodyMat);
+        forkL.position.set(-0.55, 0.05, 1.8);
+        const forkR = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.2, 5).rotateX(Math.PI / 2), bodyMat);
+        forkR.position.set(0.55, 0.05, 1.8);
+        const centerKeel = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.25, 2.4), accentMat);
+        centerKeel.position.set(0, 0, 0.6);
+        piece1_Nose.add(forkL, forkR, centerKeel);
+
+        // Piece 2: Cyan Canopy
+        const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.6, 10, 8).scale(0.7, 0.45, 1.7), cockpitMat);
+        canopy.position.set(0, 0.35, 0.2);
+        piece2_Cockpit.add(canopy);
+
+        // Piece 3: Glide Wings & Ear Fins
+        const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 1.6).rotateY(0.15), accentMat);
+        wingL.position.set(-1.6, 0.05, -0.6);
+        const earFinL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.1, 0.9), accentMat);
+        earFinL.position.set(-0.8, 0.65, -1.1);
+        const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 1.6).rotateY(-0.15), accentMat);
+        wingR.position.set(1.6, 0.05, -0.6);
+        const earFinR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.1, 0.9), accentMat);
+        earFinR.position.set(0.8, 0.65, -1.1);
+        piece3_Wings.add(wingL, earFinL, wingR, earFinR);
+
+        // Piece 4: Chrome Turbo Jets
+        const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 1.6, 8).rotateX(Math.PI / 2), bodyMat);
+        engL.position.set(-0.6, 0, -1.8);
+        const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.42, 1.6, 8).rotateX(Math.PI / 2), bodyMat);
+        engR.position.set(0.6, 0, -1.8);
+        piece4_Engines.add(engL, engR);
+
+        const plumeGeo = new THREE.ConeGeometry(0.35, 1.8, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.6, 0, -2.6);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.6, 0, -2.6);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
+
+      } else if (model === 'red_gazelle') {
+        // 5. RED GAZELLE
+        const needle = new THREE.Mesh(new THREE.ConeGeometry(0.75, 5.6, 5).rotateX(Math.PI / 2).scale(0.85, 0.38, 1.1), bodyMat);
+        needle.position.set(0, 0.05, 0.7);
+        piece1_Nose.add(needle);
+
+        const canopy = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.45, 1.4), cockpitMat);
         canopy.position.set(0, 0.32, 0.2);
-        visualGroup.add(canopy);
-        const wL = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.1, 1.6).rotateY(0.2), accentMat);
-        wL.position.set(-1.6, 0, -0.5);
-        wL.rotation.z = 0.15;
-        visualGroup.add(wL);
-        const wR = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.1, 1.6).rotateY(-0.2), accentMat);
-        wR.position.set(1.6, 0, -0.5);
-        wR.rotation.z = -0.15;
-        visualGroup.add(wR);
+        piece2_Cockpit.add(canopy);
+
+        const wingL = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.08, 1.4).rotateY(0.25), accentMat);
+        wingL.position.set(-1.45, 0.05, -0.6);
+        const finL = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.2, 1.0), bodyMat);
+        finL.position.set(-0.85, 0.65, -1.3);
+        const wingR = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.08, 1.4).rotateY(-0.25), accentMat);
+        wingR.position.set(1.45, 0.05, -0.6);
+        const finR = new THREE.Mesh(new THREE.BoxGeometry(0.08, 1.2, 1.0), bodyMat);
+        finR.position.set(0.85, 0.65, -1.3);
+        piece3_Wings.add(wingL, finL, wingR, finR);
+
+        const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.4, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engL.position.set(-0.55, 0, -1.8);
+        const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.4, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engR.position.set(0.55, 0, -1.8);
+        piece4_Engines.add(engL, engR);
+
+        const plumeGeo = new THREE.ConeGeometry(0.34, 1.9, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.55, 0, -2.6);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.55, 0, -2.6);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
+
+      } else if (model === 'iron_tiger') {
+        // 6. IRON TIGER
+        const prow = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.85, 4.2), bodyMat);
+        prow.position.set(0, 0.05, 0.2);
+        const grille = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.35, 0.4), darkMetalMat);
+        grille.position.set(0, 0, 2.4);
+        piece1_Nose.add(prow, grille);
+
+        const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.62, 1.8), cockpitMat);
+        canopy.position.set(0, 0.58, 0.2);
+        piece2_Cockpit.add(canopy);
+
+        const sponsonL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.65, 3.4), accentMat);
+        sponsonL.position.set(-1.5, 0.05, -0.4);
+        const sponsonR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.65, 3.4), accentMat);
+        sponsonR.position.set(1.5, 0.05, -0.4);
+        const centerFin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.0, 1.2), bodyMat);
+        centerFin.position.set(0, 0.85, -1.4);
+        piece3_Wings.add(sponsonL, sponsonR, centerFin);
+
+        const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.44, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engL.position.set(-0.75, 0, -1.8);
+        const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.44, 1.6, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engR.position.set(0.75, 0, -1.8);
+        const engC = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.4, 1.4, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engC.position.set(0, 0.25, -1.7);
+        piece4_Engines.add(engL, engR, engC);
+
+        const plumeGeo = new THREE.ConeGeometry(0.38, 1.9, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.75, 0, -2.6);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.75, 0, -2.6);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
+
+      } else if (model === 'deep_claw') {
+        // 7. DEEP CLAW
+        const clawL = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.2, 5).rotateX(Math.PI / 2).rotateY(-0.15), bodyMat);
+        clawL.position.set(-0.75, 0.05, 2.0);
+        const clawR = new THREE.Mesh(new THREE.ConeGeometry(0.45, 3.2, 5).rotateX(Math.PI / 2).rotateY(0.15), bodyMat);
+        clawR.position.set(0.75, 0.05, 2.0);
+        const bioCore = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 8).scale(1.1, 0.45, 1.8), accentMat);
+        bioCore.position.set(0, 0.05, 0.4);
+        piece1_Nose.add(clawL, clawR, bioCore);
+
+        const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.72, 10, 8).scale(0.8, 0.55, 1.3), cockpitMat);
+        canopy.position.set(0, 0.45, 0.3);
+        piece2_Cockpit.add(canopy);
+
+        const flipperL = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.12, 1.8).rotateY(0.2), bodyMat);
+        flipperL.position.set(-1.8, 0.08, -0.6);
+        const flipperR = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.12, 1.8).rotateY(-0.2), bodyMat);
+        flipperR.position.set(1.8, 0.08, -0.6);
+        piece3_Wings.add(flipperL, flipperR);
+
+        const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 1.6, 8).rotateX(Math.PI / 2), accentMat);
+        engL.position.set(-0.65, 0.05, -1.8);
+        const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 1.6, 8).rotateX(Math.PI / 2), accentMat);
+        engR.position.set(0.65, 0.05, -1.8);
+        piece4_Engines.add(engL, engR);
+
+        const plumeGeo = new THREE.ConeGeometry(0.38, 1.9, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.65, 0.05, -2.6);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.65, 0.05, -2.6);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
+
+      } else if (model === 'black_bull') {
+        // 8. BLACK BULL
+        const prow = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.95, 4.4), bodyMat);
+        prow.position.set(0, 0.1, 0.2);
+        const hornL = new THREE.Mesh(new THREE.ConeGeometry(0.35, 2.4, 5).rotateX(Math.PI / 2).rotateY(0.2), accentMat);
+        hornL.position.set(-1.1, 0.25, 2.6);
+        const hornR = new THREE.Mesh(new THREE.ConeGeometry(0.35, 2.4, 5).rotateX(Math.PI / 2).rotateY(-0.2), accentMat);
+        hornR.position.set(1.1, 0.25, 2.6);
+        piece1_Nose.add(prow, hornL, hornR);
+
+        const canopy = new THREE.Mesh(new THREE.ConeGeometry(0.85, 2.2, 4).rotateX(Math.PI / 2), cockpitMat);
+        canopy.position.set(0, 0.65, 0.3);
+        piece2_Cockpit.add(canopy);
+
+        const shieldL = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 3.8), bodyMat);
+        shieldL.position.set(-1.7, 0.1, -0.2);
+        const finL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 1.2), accentMat);
+        finL.position.set(-1.0, 0.85, -1.4);
+        finL.rotation.z = -0.2;
+        const shieldR = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, 3.8), bodyMat);
+        shieldR.position.set(1.7, 0.1, -0.2);
+        const finR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 1.2), accentMat);
+        finR.position.set(1.0, 0.85, -1.4);
+        finR.rotation.z = 0.2;
+        piece3_Wings.add(shieldL, finL, shieldR, finR);
+
+        const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engL.position.set(-0.8, 0.1, -1.9);
+        const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.55, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engR.position.set(0.8, 0.1, -1.9);
+        piece4_Engines.add(engL, engR);
+
+        const plumeGeo = new THREE.ConeGeometry(0.48, 2.2, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.8, 0.1, -2.8);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.8, 0.1, -2.8);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
+
+      } else if (model === 'blood_hawk') {
+        // 9. BLOOD HAWK
+        const beak = new THREE.Mesh(new THREE.ConeGeometry(1.2, 5.2, 4).rotateX(Math.PI / 2).scale(1.0, 0.45, 1.1), bodyMat);
+        beak.position.set(0, 0.05, 0.6);
+        const teethL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 1.2).rotateY(0.2), accentMat);
+        teethL.position.set(-0.65, -0.05, 1.6);
+        const teethR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.1, 1.2).rotateY(-0.2), accentMat);
+        teethR.position.set(0.65, -0.05, 1.6);
+        piece1_Nose.add(beak, teethL, teethR);
+
+        const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.68, 10, 8).scale(0.75, 0.45, 1.7), cockpitMat);
+        canopy.position.set(0, 0.38, 0.3);
+        piece2_Cockpit.add(canopy);
+
+        const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.12, 1.7).rotateY(-0.2), bodyMat);
+        wingL.position.set(-1.8, 0.08, -0.5);
+        wingL.rotation.z = -0.12;
+        const finL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.3, 1.3), accentMat);
+        finL.position.set(-1.15, 0.75, -1.3);
+
+        const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.12, 1.7).rotateY(0.2), bodyMat);
+        wingR.position.set(1.8, 0.08, -0.5);
+        wingR.rotation.z = 0.12;
+        const finR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.3, 1.3), accentMat);
+        finR.position.set(1.15, 0.75, -1.3);
+        piece3_Wings.add(wingL, finL, wingR, finR);
+
+        const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 1.7, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engL.position.set(-0.65, 0, -1.8);
+        const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.46, 1.7, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engR.position.set(0.65, 0, -1.8);
+        piece4_Engines.add(engL, engR);
+
+        const plumeGeo = new THREE.ConeGeometry(0.4, 2.0, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.65, 0, -2.6);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.65, 0, -2.6);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
+
+      } else {
+        // 10. BLUE FALCON / DEFAULT
+        const bodyGeo = new THREE.ConeGeometry(1.25, 5.0, 5);
+        bodyGeo.rotateX(Math.PI / 2);
+        bodyGeo.scale(1.15, 0.45, 1.0);
+        const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
+        bodyMesh.position.set(0, 0, 0.4);
+        const intakeL = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.25, 1.4), darkMetalMat);
+        intakeL.position.set(-0.8, -0.05, 0.8);
+        const intakeR = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.25, 1.4), darkMetalMat);
+        intakeR.position.set(0.8, -0.05, 0.8);
+        piece1_Nose.add(bodyMesh, intakeL, intakeR);
+
+        const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.7, 10, 8).scale(0.8, 0.45, 1.8), cockpitMat);
+        canopy.position.set(0, 0.35, 0.3);
+        const crest = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.18, 1.4), accentMat);
+        crest.position.set(0, 0.52, 0.2);
+        piece2_Cockpit.add(canopy, crest);
+
+        const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 1.8).rotateY(0.2), accentMat);
+        wingL.position.set(-1.8, 0, -0.6);
+        wingL.rotation.z = 0.1;
+        const podL = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.35, 1.6), darkMetalMat);
+        podL.position.set(-2.8, 0.05, -0.4);
+        const finL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.4), accentMat);
+        finL.position.set(-1.1, 0.7, -1.2);
+        finL.rotation.z = -0.25;
+
+        const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.12, 1.8).rotateY(-0.2), accentMat);
+        wingR.position.set(1.8, 0, -0.6);
+        wingR.rotation.z = -0.1;
+        const podR = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.35, 1.6), darkMetalMat);
+        podR.position.set(2.8, 0.05, -0.4);
+        const finR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 1.4), accentMat);
+        finR.position.set(1.1, 0.7, -1.2);
+        finR.rotation.z = 0.25;
+        piece3_Wings.add(wingL, podL, finL, wingR, podR, finR);
+
+        const engL = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engL.position.set(-0.65, 0, -1.8);
+        const engR = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 1.8, 8).rotateX(Math.PI / 2), darkMetalMat);
+        engR.position.set(0.65, 0, -1.8);
+        piece4_Engines.add(engL, engR);
+
+        const plumeGeo = new THREE.ConeGeometry(0.38, 1.8, 8).rotateX(-Math.PI / 2);
+        const pL = new THREE.Mesh(plumeGeo, glowMat);
+        pL.position.set(-0.65, 0, -2.6);
+        const pR = new THREE.Mesh(plumeGeo, glowMat);
+        pR.position.set(0.65, 0, -2.6);
+        piece4_Engines.add(pL, pR);
+        plumes.push(pL, pR);
       }
 
-      // Thruster Plumes
-      const plumeGeo = new THREE.ConeGeometry(0.35, 1.6, 6).rotateX(-Math.PI / 2);
-      const plumeL = new THREE.Mesh(plumeGeo, glowMat);
-      plumeL.position.set(-0.6, 0, -2.4);
-      visualGroup.add(plumeL);
+      // Assemble all 4 Pieces into the ship
+      visualGroup.add(piece1_Nose);
+      visualGroup.add(piece2_Cockpit);
+      visualGroup.add(piece3_Wings);
+      visualGroup.add(piece4_Engines);
 
-      const plumeR = new THREE.Mesh(plumeGeo, glowMat);
-      plumeR.position.set(0.6, 0, -2.4);
-      visualGroup.add(plumeR);
-
-      return { group, visualGroup, plumes: [plumeL, plumeR] };
+      return { group, visualGroup, plumes };
     }
 
     // Player Craft
