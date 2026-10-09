@@ -140,6 +140,7 @@ As decisões atuais de gameplay, visual e processo de desenvolvimento estão reg
 
 - **Protótipo 01 — Física, Combate e Direção:** [abrir laboratório](prototypes/01_steering_profiles.html) · [especificação](docs/specs/01_steering_profiles_spec.md)
 - **Protótipo 02 — Modelos & Silhuetas de Naves:** [abrir laboratório](prototypes/02_craft_visuals.html) · [especificação](docs/specs/02_craft_visual_spec.md)
+- **Protótipo 02 — Laboratório de Visuais (v6 WebGL, referência em revisão):** [abrir laboratório](prototypes/02_ship_visuals.html) · [especificação](docs/specs/02_ship_visuals_spec.md). **C — Retro Vector: direção visual aprovada** em 09/10/2026; parâmetros finais e integração ao jogo pendentes. **D — Toon Vector Flux permanece alternativa distinta, não aprovada nesta decisão.**
 - **Protótipo 03 — Ambiente Neo Metropolis:** [abrir laboratório](prototypes/03_neo_metropolis_visual.html) · [especificação](docs/specs/03_neo_metropolis_visual_spec.md)
 - **Protótipo 04 — Efeitos Visuais das Naves (VFX Lab):** [abrir laboratório](prototypes/04_craft_vfx.html) · [especificação](docs/specs/04_craft_vfx_spec.md)
 
