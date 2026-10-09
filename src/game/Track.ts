@@ -87,7 +87,9 @@ export class Track {
       const pt = this.curve.getPointAt(t);
       const tangent = this.curve.getTangentAt(t).normalize();
       
-      // Calculate smooth up vector and binormal (right vector)
+      // IMMUTABLE INVARIANT: DO NOT MODIFY OR INVERT THIS BASIS.
+      // binormal = cross(tangent, up) -> Camera Right (+1.00)
+      // normal   = cross(binormal, tangent) -> Camera Up (+1.00)
       const up = new THREE.Vector3(0, 1, 0);
       const binormal = new THREE.Vector3().crossVectors(tangent, up).normalize();
       const normal = new THREE.Vector3().crossVectors(binormal, tangent).normalize();
@@ -321,6 +323,9 @@ export class Track {
 
     const position = this.curve.getPointAt(wrappedT);
     const tangent = this.curve.getTangentAt(wrappedT).normalize();
+    // IMMUTABLE INVARIANT: DO NOT MODIFY OR INVERT THIS BASIS.
+    // binormal = cross(tangent, up) -> Camera Right (+1.00)
+    // normal   = cross(binormal, tangent) -> Camera Up (+1.00)
     const up = new THREE.Vector3(0, 1, 0);
     const binormal = new THREE.Vector3().crossVectors(tangent, up).normalize();
     const normal = new THREE.Vector3().crossVectors(binormal, tangent).normalize();

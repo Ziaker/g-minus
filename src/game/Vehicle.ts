@@ -365,7 +365,7 @@ export class Vehicle {
       this.speed = Math.max(this.speed - 24 * dt, 0);
     }
 
-    // Lateral Steering & Grip Dynamics
+    // IMMUTABLE INVARIANT: Left is -1 (towards Screen Left), Right is +1 (towards Screen Right)
     let steerDir = 0;
     if (input.left) steerDir -= 1;
     if (input.right) steerDir += 1;
