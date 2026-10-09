@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>G-MINUS // Protótipo 01: Perfis de Direção e Dinâmica Lateral</title>
+  <style>
+    :root {
+      --bg-dark: #070a14;
+      --panel-bg: rgba(10, 16, 32, 0.88);
+      --panel-border: #1a2a4a;
+      --accent-cyan: #00f0ff;
+      --accent-magenta: #ff0055;
+      --accent-amber: #ffaa00;
+      --accent-green: #00ff88;
+      --text-main: #d0e4ff;
+      --text-muted: #708aa8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+    }
+
+    #viewport-container {
+      flex: 1;
+      position: relative;
+      height: 100%;
+      background: radial-gradient(circle at center, #0a1428 0%, #03060c 100%);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Telemetry HUD Overlay */
+    #hud-overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .hud-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-left: 4px solid var(--accent-cyan);
+      backdrop-filter: blur(10px);
+      padding: 12px 18px;
+      border-radius: 6px;
+      min-width: 220px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .hud-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .hud-value {
+      font-size: 26px;
+      font-weight: 900;
+      font-family: 'Courier New', Courier, monospace;
+      color: #fff;
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+    }
+
+    .hud-pill {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 3px;
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--accent-green);
+      border: 1px solid rgba(0, 255, 136, 0.4);
+    }
+
+    #controls-hint {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      backdrop-filter: blur(10px);
+      padding: 12px 18px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+      line-height: 1.6;
+    }
+
+    #controls-hint kbd {
+      background: #152238;
+      border: 1px solid #284065;
+      color: var(--accent-cyan);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-weight: bold;
+      font-family: monospace;
+    }
+
+    /* Toast notification */
+    #toast-msg {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 0, 85, 0.9);
+      color: #fff;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: bold;
+      box-shadow: 0 4px 16px rgba(255, 0, 85, 0.5);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    /* Sidebar Control Panel */
+    #sidebar {
+      width: 420px;
+      height: 100%;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--panel-border);
+      backdrop-filter: blur(16px);
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: -8px 0 32px rgba(0, 0, 0, 0.6);
+      z-index: 10;
+    }
+
+    #sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    #sidebar::-webkit-scrollbar-thumb {
+      background: #1c3050;
+      border-radius: 3px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-title span {
+      color: var(--accent-cyan);
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      border-bottom: 1px solid #1c3050;
+      padding-bottom: 4px;
+    }
+
+    /* Preset Buttons */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .preset-btn {
+      background: #0f1c30;
+      border: 1px solid #203554;
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+
+    .preset-btn:hover {
+      background: #162845;
+      border-color: var(--accent-cyan);
+    }
+
+    .preset-btn.active {
+      background: rgba(0, 240, 255, 0.12);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+    }
+
+    .preset-btn-name {
+      font-weight: 700;
+      font-size: 13px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .preset-btn.active .preset-btn-name {
+      color: var(--accent-cyan);
+    }
+
+    .preset-btn-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.3;
+    }
+
+    /* Track selector switch */
+    .track-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .track-btn {
+      background: #0f1c30;
+      border: 1px solid #203554;
+      color: var(--text-muted);
+      padding: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .track-btn.active {
+      background: rgba(255, 170, 0, 0.15);
+      border-color: var(--accent-amber);
+      color: #fff;
+    }
+
+    /* Sliders */
+    .param-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .param-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .param-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .param-val {
+      font-family: monospace;
+      color: var(--accent-cyan);
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 5px;
+      background: #142238;
+      border-radius: 3px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--accent-cyan);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+    }
+
+    /* Checkbox rows */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-main);
+      padding: 4px 0;
+    }
+
+    .toggle-row input[type="checkbox"] {
+      accent-color: var(--accent-cyan);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+
+    /* JSON IO Area */
+    .json-area {
+      width: 100%;
+      height: 100px;
+      background: #060a12;
+      border: 1px solid #1c3050;
+      color: #a0c0e0;
+      font-family: monospace;
+      font-size: 11px;
+      padding: 8px;
+      border-radius: 4px;
+      resize: none;
+      outline: none;
+      user-select: text;
+    }
+
+    .action-btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      background: #14243d;
+      border: 1px solid #28446c;
+      color: #fff;
+      transition: all 0.2s;
+    }
+
+    .btn-action:hover {
+      background: #1d3458;
+      border-color: var(--accent-cyan);
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+  <!-- 3D Canvas Viewport -->
+  <div id="viewport-container">
+    <canvas id="render-canvas"></canvas>
+
+    <!-- Telemetry HUD -->
+    <div id="hud-overlay">
+      <div class="hud-card">
+        <div class="hud-label">VELOCIDADE ESTIMADA</div>
+        <div class="hud-value" id="hud-speed">0 <span style="font-size:13px;color:var(--text-muted);">KM/H</span></div>
+        <div id="hud-drift-status" class="hud-pill">TRAÇÃO TOTAL</div>
+      </div>
+
+      <div class="hud-card" style="border-left-color: var(--accent-magenta);">
+        <div class="hud-label">ÂNGULO DE SLIP / DRIFT</div>
+        <div class="hud-value" id="hud-slip">0.0°</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+          Yaw: <span id="hud-yaw" style="color:#fff;font-weight:bold;">0.0°</span> | G-Force: <span id="hud-gforce" style="color:var(--accent-amber);font-weight:bold;">0.0 G</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast message -->
+    <div id="toast-msg">Mensagem</div>
+
+    <!-- Controls hint -->
+    <div id="controls-hint">
+      <div><kbd>W</kbd> / <kbd>S</kbd> Acelerar / Frear</div>
+      <div><kbd>A</kbd> / <kbd>D</kbd> Direção (Esquerda / Direita)</div>
+      <div><kbd>Q</kbd> / <kbd>E</kbd> Airbrakes Laterais (Arrasto + Deslizamento)</div>
+      <div><kbd>ESPAÇO</kbd> Turbo Boost | <kbd>R</kbd> Reposicionar</div>
+    </div>
+  </div>
+
+  <!-- Sidebar Configuration Panel -->
+  <div id="sidebar">
+    <div>
+      <div class="header-title">G-MINUS // <span>PROTÓTIPO 01</span></div>
+      <div class="header-subtitle">Laboratório de calibração para os 3 Perfis de Direção e Física Lateral do GDD [21–30].</div>
+    </div>
+
+    <!-- Track selection -->
+    <div>
+      <div class="section-label">Ambiente de Teste</div>
+      <div class="track-selector">
+        <button id="track-circuit" class="track-btn active" onclick="setTrack('circuit')">Circuito 3D Sinuoso</button>
+        <button id="track-straight" class="track-btn" onclick="setTrack('straight')">Reta de Ensaio</button>
+      </div>
+    </div>
+
+    <!-- 3 Steering Profiles -->
+    <div>
+      <div class="section-label">Perfis de Direção (GDD [21])</div>
+      <div class="preset-grid">
+        <button id="preset-a" class="preset-btn active" onclick="applyPreset('A')">
+          <div class="preset-btn-name">Perfil A: Direto / Preciso <span>F-ZERO GX</span></div>
+          <div class="preset-btn-desc">Resposta instantânea sem atraso. Tração firme nos trilhos, ideal para reflexos rápidos.</div>
+        </button>
+
+        <button id="preset-b" class="preset-btn" onclick="applyPreset('B')">
+          <div class="preset-btn-name">Perfil B: Progressivo / Suave <span>FILTRO DINÂMICO</span></div>
+          <div class="preset-btn-desc">Esterço suave com rampa exponencial. Permite micro-ajustes precisos em toques rápidos.</div>
+        </button>
+
+        <button id="preset-c" class="preset-btn" onclick="applyPreset('C')">
+          <div class="preset-btn-name">Perfil C: Inercial / Drift <span>F-ZERO X CLÁSSICO</span></div>
+          <div class="preset-btn-desc">Massa e inércia acentuadas. Quebra de tração proposital e contra-esterço em alta velocidade.</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Dynamic Sliders -->
+    <div>
+      <div class="section-label">Parâmetros de Ajuste Fino</div>
+      <div class="param-group">
+        <div class="param-row">
+          <div class="param-header">
+            <span>Taxa de Esterço (Steer Rate)</span>
+            <span id="val-steerRate" class="param-val">65</span>
+          </div>
+          <input type="range" id="slider-steerRate" min="20" max="120" value="65" oninput="updateParam('steerRate', this.value)">
+        </div>
+
+        <div class="param-row">
+          <div class="param-header">
+            <span>Progressividade de Entrada</span>
+            <span id="val-progressivity" class="param-val">1.0</span>
+          </div>
+          <input type="range" id="slider-progressivity" min="1.0" max="3.5" step="0.1" value="1.0" oninput="updateParam('progressivity', this.value)">
+        </div>
+
+        <div class="param-row">
+          <div class="param-header">
+            <span>Inércia Lateral / Massa</span>
+            <span id="val-inertia" class="param-val">18</span>
+          </div>
+          <input type="range" id="slider-inertia" min="5" max="80" value="18" oninput="updateParam('inertia', this.value)">
+        </div>
+
+        <div class="param-row">
+          <div class="param-header">
+            <span>Aderência Base (Grip %)</span>
+            <span id="val-grip" class="param-val">92%</span>
+          </div>
+          <input type="range" id="slider-grip" min="30" max="100" value="92" oninput="updateParam('grip', this.value)">
+        </div>
+
+        <div class="param-row">
+          <div class="param-header">
+            <span>Auto-Centralização ao Soltar [23]</span>
+            <span id="val-recenter" class="param-val">14.0</span>
+          </div>
+          <input type="range" id="slider-recenter" min="1.0" max="25.0" step="0.5" value="14.0" oninput="updateParam('recenter', this.value)">
+        </div>
+
+        <div class="param-row">
+          <div class="param-header">
+            <span>Instabilidade em Alta Vel. [22]</span>
+            <span id="val-speedInstability" class="param-val">0.15</span>
+          </div>
+          <input type="range" id="slider-speedInstability" min="0.0" max="1.0" step="0.05" value="0.15" oninput="updateParam('speedInstability', this.value)">
+        </div>
+
+        <div class="param-row">
+          <div class="param-header">
+            <span>Força dos Airbrakes Q/E [26]</span>
+            <span id="val-airbrakeForce" class="param-val">40</span>
+          </div>
+          <input type="range" id="slider-airbrakeForce" min="10" max="100" value="40" oninput="updateParam('airbrakeForce', this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- Options & Guardrails -->
+    <div>
+      <div class="section-label">Comportamento de Pista</div>
+      <div class="toggle-row">
+        <span>Barreiras de Proteção (Anti-Queda)</span>
+        <input type="checkbox" id="toggle-anticrash" checked onchange="options.antiCrash = this.checked">
+      </div>
+      <div class="toggle-row">
+        <span>Auto-Estabilização ao Soltar Direcionais</span>
+        <input type="checkbox" id="toggle-recenter" checked onchange="options.autoRecenter = this.checked">
+      </div>
+    </div>
+
+    <!-- JSON Config IO -->
+    <div>
+      <div class="section-label">Configuração em JSON</div>
+      <textarea id="json-config" class="json-area" spellcheck="false"></textarea>
+      <div class="action-btn-row" style="margin-top:8px;">
+        <button class="btn-action" onclick="copyJSON()">Copiar JSON</button>
+        <button class="btn-action" onclick="applyJSON()">Aplicar JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------------
+    // PRESETS DEFINITION (GDD [21])
+    // -------------------------------------------------------------------
+    const PRESETS = {
+      A: {
+        name: "Perfil A (Direto / Preciso)",
+        steerRate: 65,
+        progressivity: 1.0,
+        inertia: 18,
+        grip: 92,
+        recenter: 14.0,
+        speedInstability: 0.15,
+        airbrakeForce: 40
+      },
+      B: {
+        name: "Perfil B (Progressivo / Suave)",
+        steerRate: 52,
+        progressivity: 2.2,
+        inertia: 28,
+        grip: 85,
+        recenter: 9.0,
+        speedInstability: 0.30,
+        airbrakeForce: 55
+      },
+      C: {
+        name: "Perfil C (Inercial / Drift)",
+        steerRate: 75,
+        progressivity: 1.4,
+        inertia: 55,
+        grip: 68,
+        recenter: 4.5,
+        speedInstability: 0.60,
+        airbrakeForce: 80
+      }
+    };
+
+    let currentPresetKey = 'A';
+    let params = { ...PRESETS.A };
+    let options = {
+      antiCrash: true,
+      autoRecenter: true
+    };
+
+    // -------------------------------------------------------------------
+    // THREE.JS SETUP & SCENE
+    // -------------------------------------------------------------------
+    const canvas = document.getElementById('render-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x050a16, 0.0014);
+
+    const camera = new THREE.PerspectiveCamera(68, canvas.clientWidth / canvas.clientHeight, 0.5, 3000);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x2a3e5c, 1.4);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xd0e6ff, 2.2);
+    sunLight.position.set(200, 400, 200);
+    scene.add(sunLight);
+
+    const pointLight = new THREE.PointLight(0x00f0ff, 2.8, 400);
+    pointLight.position.set(0, 80, 0);
+    scene.add(pointLight);
+
+    // -------------------------------------------------------------------
+    // TRACK GENERATION (Frenet-Serret Orthonormal Right-Handed Basis)
+    // -------------------------------------------------------------------
+    const trackWidth = 32;
+    let trackGroup = new THREE.Group();
+    scene.add(trackGroup);
+
+    // Track 1: Full 3D Circuit
+    const circuitPoints = [
+      new THREE.Vector3(0, 10, 0),
+      new THREE.Vector3(0, 10, 300),
+      new THREE.Vector3(120, 28, 550),
+      new THREE.Vector3(320, 50, 600),
+      new THREE.Vector3(500, 30, 420),
+      new THREE.Vector3(520, 12, 160),
+      new THREE.Vector3(380, 35, -80),
+      new THREE.Vector3(300, 55, -280),
+      new THREE.Vector3(120, 25, -450),
+      new THREE.Vector3(-120, 15, -480),
+      new THREE.Vector3(-300, 38, -300),
+      new THREE.Vector3(-360, 22, -60),
+      new THREE.Vector3(-260, 10, 160),
+      new THREE.Vector3(-100, 10, 80)
+    ];
+    const circuitCurve = new THREE.CatmullRomCurve3(circuitPoints, true, 'centripetal', 0.5);
+
+    // Track 2: Straight Test Runway
+    const straightLength = 2400;
+    const straightPoints = [
+      new THREE.Vector3(0, 10, 0),
+      new THREE.Vector3(0, 10, straightLength * 0.5),
+      new THREE.Vector3(0, 10, straightLength)
+    ];
+    const straightCurve = new THREE.CatmullRomCurve3(straightPoints, false);
+
+    let currentTrackType = 'circuit';
+    let trackCurve = circuitCurve;
+    let trackLength = trackCurve.getLength();
+
+    function buildTrackMesh() {
+      // Clear existing track meshes
+      while (trackGroup.children.length > 0) {
+        trackGroup.remove(trackGroup.children[0]);
+      }
+
+      const segments = currentTrackType === 'circuit' ? 360 : 200;
+      const geom = new THREE.BufferGeometry();
+      const vertices = [];
+      const uvs = [];
+      const colors = [];
+      const indices = [];
+
+      const halfW = trackWidth / 2;
+      const leftRailPts = [];
+      const rightRailPts = [];
+
+      for (let i = 0; i <= segments; i++) {
+        const t = i / segments;
+        const frame = getTrackFrameAt(t);
+
+        const leftPt = frame.pt.clone().add(frame.sideRight.clone().multiplyScalar(-halfW));
+        const rightPt = frame.pt.clone().add(frame.sideRight.clone().multiplyScalar(halfW));
+
+        vertices.push(leftPt.x, leftPt.y, leftPt.z);
+        vertices.push(rightPt.x, rightPt.y, rightPt.z);
+
+        uvs.push(0, t * 50);
+        uvs.push(1, t * 50);
+
+        colors.push(0.06, 0.09, 0.16);
+        colors.push(0.06, 0.09, 0.16);
+
+        leftRailPts.push(leftPt.clone().add(frame.normal.clone().multiplyScalar(1.0)));
+        rightRailPts.push(rightPt.clone().add(frame.normal.clone().multiplyScalar(1.0)));
+
+        if (i < segments) {
+          const r1 = i * 2;
+          const r2 = (i + 1) * 2;
+          indices.push(r1, r1 + 1, r2);
+          indices.push(r1 + 1, r2 + 1, r2);
+        }
+      }
+
+      geom.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+      geom.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+      geom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+      geom.setIndex(indices);
+      geom.computeVertexNormals();
+
+      // Track surface material
+      const canvasTex = document.createElement('canvas');
+      canvasTex.width = 128;
+      canvasTex.height = 128;
+      const ctx = canvasTex.getContext('2d');
+      ctx.fillStyle = '#080d1a';
+      ctx.fillRect(0, 0, 128, 128);
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 4;
+      ctx.setLineDash([20, 20]);
+      ctx.beginPath();
+      ctx.moveTo(64, 0);
+      ctx.lineTo(64, 128);
+      ctx.stroke();
+
+      const texture = new THREE.CanvasTexture(canvasTex);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(1, 40);
+
+      const trackMat = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: 0.35,
+        metalness: 0.75,
+        vertexColors: true
+      });
+
+      const trackMesh = new THREE.Mesh(geom, trackMat);
+      trackGroup.add(trackMesh);
+
+      // Guardrails
+      const railMatL = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+      const railMatR = new THREE.MeshBasicMaterial({ color: 0xff0055 });
+
+      const railGeoL = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(leftRailPts), segments, 0.4, 6, false);
+      const railGeoR = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(rightRailPts), segments, 0.4, 6, false);
+
+      trackGroup.add(new THREE.Mesh(railGeoL, railMatL));
+      trackGroup.add(new THREE.Mesh(railGeoR, railMatR));
+    }
+
+    /**
+     * Compute orthonormal right-handed Frenet-Serret frame:
+     * - tangent (forward, +Z)
+     * - sideRight (cross(up, tangent) = right vector, +X)
+     * - normal (cross(tangent, sideRight) = up vector, +Y)
+     */
+    function getTrackFrameAt(t) {
+      const wrappedT = currentTrackType === 'circuit' ? ((t % 1.0) + 1.0) % 1.0 : Math.min(Math.max(t, 0), 0.9999);
+      const pt = trackCurve.getPointAt(wrappedT);
+      const tangent = trackCurve.getTangentAt(wrappedT).normalize();
+      const up = new THREE.Vector3(0, 1, 0);
+      const sideRight = new THREE.Vector3().crossVectors(up, tangent).normalize();
+      const normal = new THREE.Vector3().crossVectors(tangent, sideRight).normalize();
+      return { pt, tangent, sideRight, normal };
+    }
+
+    buildTrackMesh();
+
+    // -------------------------------------------------------------------
+    // CRAFT MESH GENERATION (Blue Falcon Silhouette)
+    // -------------------------------------------------------------------
+    const craftGroup = new THREE.Group();
+    const craftVisualGroup = new THREE.Group(); // Handles local roll & yaw
+    craftGroup.add(craftVisualGroup);
+
+    const craftBodyMat = new THREE.MeshStandardMaterial({ color: 0x0044ff, roughness: 0.2, metalness: 0.9 });
+    const craftAccentMat = new THREE.MeshStandardMaterial({ color: 0x00f0ff, roughness: 0.2, metalness: 0.8 });
+    const craftCockpitMat = new THREE.MeshStandardMaterial({ color: 0x050d1a, roughness: 0.1, metalness: 0.95 });
+    const thrusterGlowMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+
+    // Fuselage
+    const craftBody = new THREE.Mesh(
+      new THREE.ConeGeometry(1.2, 4.8, 6).rotateX(Math.PI / 2).scale(1.2, 0.45, 1.0),
+      craftBodyMat
+    );
+    craftVisualGroup.add(craftBody);
+
+    // Canopy
+    const canopy = new THREE.Mesh(
+      new THREE.SphereGeometry(0.65, 8, 8).scale(0.8, 0.45, 1.6),
+      craftCockpitMat
+    );
+    canopy.position.set(0, 0.32, 0.2);
+    craftVisualGroup.add(canopy);
+
+    // Wings (Left is -X, Right is +X)
+    const wingL = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.1, 1.6).rotateY(0.2), craftAccentMat);
+    wingL.position.set(-1.6, 0, -0.5);
+    wingL.rotation.z = 0.15;
+    craftVisualGroup.add(wingL);
+
+    const wingR = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.1, 1.6).rotateY(-0.2), craftAccentMat);
+    wingR.position.set(1.6, 0, -0.5);
+    wingR.rotation.z = -0.15;
+    craftVisualGroup.add(wingR);
+
+    // Thruster plumes
+    const plumeGeo = new THREE.ConeGeometry(0.35, 1.6, 6).rotateX(-Math.PI / 2);
+    const plumeL = new THREE.Mesh(plumeGeo, thrusterGlowMat);
+    plumeL.position.set(-0.6, 0, -2.5);
+    craftVisualGroup.add(plumeL);
+
+    const plumeR = new THREE.Mesh(plumeGeo, thrusterGlowMat);
+    plumeR.position.set(0.6, 0, -2.5);
+    craftVisualGroup.add(plumeR);
+
+    scene.add(craftGroup);
+
+    // -------------------------------------------------------------------
+    // PHYSICS, CONTROLS & DYNAMICS
+    // -------------------------------------------------------------------
+    let progressT = 0;
+    let lateralOffset = 0;
+    let lateralVelocity = 0;
+    let currentSpeed = 120;
+    let steerHoldTime = 0;
+    let craftRoll = 0;
+    let headingYaw = 0;
+
+    const keys = {
+      forward: false,
+      backward: false,
+      left: false,
+      right: false,
+      airbrakeL: false,
+      airbrakeR: false,
+      boost: false
+    };
+
+    const jsonArea = document.getElementById('json-config');
+
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement === jsonArea) return;
+      if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.forward = true;
+      if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.backward = true;
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = true;
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = true;
+      if (e.code === 'KeyQ') keys.airbrakeL = true;
+      if (e.code === 'KeyE') keys.airbrakeR = true;
+      if (e.code === 'Space') keys.boost = true;
+      if (e.code === 'KeyR') resetPosition();
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.forward = false;
+      if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.backward = false;
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = false;
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = false;
+      if (e.code === 'KeyQ') keys.airbrakeL = false;
+      if (e.code === 'KeyE') keys.airbrakeR = false;
+      if (e.code === 'Space') keys.boost = false;
+    });
+
+    window.addEventListener('resize', () => {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    });
+
+    function resetPosition() {
+      progressT = 0;
+      lateralOffset = 0;
+      lateralVelocity = 0;
+      currentSpeed = 100;
+      craftRoll = 0;
+      headingYaw = 0;
+      showToast("Posição resetada na pista!");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast-msg');
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => { toast.style.opacity = '0'; }, 2200);
+    }
+
+    // -------------------------------------------------------------------
+    // UI & PRESET MANAGEMENT
+    // -------------------------------------------------------------------
+    function updateUIFromParams() {
+      for (const [k, v] of Object.entries(params)) {
+        const slider = document.getElementById(`slider-${k}`);
+        const valSpan = document.getElementById(`val-${k}`);
+        if (slider) slider.value = v;
+        if (valSpan) valSpan.textContent = k === 'grip' ? `${v}%` : v;
+      }
+      jsonArea.value = JSON.stringify(params, null, 2);
+    }
+
+    function updateParam(k, val) {
+      params[k] = parseFloat(val);
+      const valSpan = document.getElementById(`val-${k}`);
+      if (valSpan) valSpan.textContent = k === 'grip' ? `${val}%` : val;
+      jsonArea.value = JSON.stringify(params, null, 2);
+      clearPresetHighlight();
+    }
+
+    function applyPreset(key) {
+      currentPresetKey = key;
+      params = { ...PRESETS[key] };
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById(`preset-${key.toLowerCase()}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      updateUIFromParams();
+      showToast(`Preset Carregado: ${PRESETS[key].name}`);
+    }
+
+    function clearPresetHighlight() {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function setTrack(type) {
+      currentTrackType = type;
+      trackCurve = type === 'circuit' ? circuitCurve : straightCurve;
+      trackLength = trackCurve.getLength();
+      document.getElementById('track-circuit').classList.toggle('active', type === 'circuit');
+      document.getElementById('track-straight').classList.toggle('active', type === 'straight');
+      buildTrackMesh();
+      resetPosition();
+    }
+
+    function copyJSON() {
+      navigator.clipboard.writeText(jsonArea.value).then(() => {
+        showToast("JSON copiado para a Área de Transferência!");
+      });
+    }
+
+    function applyJSON() {
+      try {
+        const parsed = JSON.parse(jsonArea.value);
+        params = { ...params, ...parsed };
+        updateUIFromParams();
+        clearPresetHighlight();
+        showToast("JSON aplicado com sucesso!");
+      } catch (err) {
+        showToast("Erro: JSON inválido!");
+      }
+    }
+
+    updateUIFromParams();
+
+    // -------------------------------------------------------------------
+    // MAIN SIMULATION LOOP
+    // -------------------------------------------------------------------
+    const hudSpeed = document.getElementById('hud-speed');
+    const hudSlip = document.getElementById('hud-slip');
+    const hudYaw = document.getElementById('hud-yaw');
+    const hudGForce = document.getElementById('hud-gforce');
+    const hudDriftStatus = document.getElementById('hud-drift-status');
+
+    let lastTime = performance.now();
+
+    function animate(currentTime) {
+      requestAnimationFrame(animate);
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.04);
+      lastTime = currentTime;
+
+      // 1. Throttle / Brake / Boost
+      const maxSpeed = keys.boost ? 230 : 170;
+      const accel = keys.boost ? 150 : 85;
+
+      if (keys.forward) {
+        currentSpeed = Math.min(currentSpeed + accel * dt, maxSpeed);
+      } else if (keys.backward) {
+        currentSpeed = Math.max(currentSpeed - 130 * dt, 20);
+      } else {
+        currentSpeed = Math.max(currentSpeed - 20 * dt, 25);
+      }
+
+      // 2. Lateral Steering Input
+      // Direction rule: -1 = Left (along -sideRight), +1 = Right (along +sideRight)
+      let rawSteer = 0;
+      if (keys.left) rawSteer -= 1;
+      if (keys.right) rawSteer += 1;
+
+      // Airbrakes contribution [26]: Q = -left, E = +right
+      let airbrakeInput = 0;
+      if (keys.airbrakeL) airbrakeInput -= (params.airbrakeForce / 100);
+      if (keys.airbrakeR) airbrakeInput += (params.airbrakeForce / 100);
+
+      if (rawSteer !== 0) {
+        steerHoldTime += dt;
+      } else {
+        steerHoldTime = Math.max(steerHoldTime - dt * 2.5, 0);
+      }
+
+      // Progressivity curve: power law on hold time
+      const progressMult = Math.pow(Math.min(steerHoldTime * 2.2, 1.0), params.progressivity - 1.0);
+      const effectiveSteerForce = (rawSteer * (1.0 + progressMult * 0.7) + airbrakeInput * 0.85) * params.steerRate;
+
+      // High-speed grip penalty [22]
+      const speedNorm = currentSpeed / 170;
+      const speedPenalty = speedNorm > 1.0 ? (speedNorm - 1.0) * params.speedInstability : 0;
+      const effectiveGrip = Math.max(0.12, (params.grip / 100) * (1.0 - speedPenalty));
+
+      // Lateral Velocity Integration
+      const inertiaMass = Math.max(params.inertia / 25, 0.3);
+      lateralVelocity += (effectiveSteerForce / inertiaMass) * dt;
+
+      // Grip Damping
+      const gripDamping = Math.exp(-effectiveGrip * 6.8 * dt);
+      lateralVelocity *= gripDamping;
+
+      // Auto-recenter tendency when input released [23]
+      if (rawSteer === 0 && airbrakeInput === 0 && options.autoRecenter) {
+        lateralVelocity = THREE.MathUtils.lerp(lateralVelocity, 0, Math.min(dt * (params.recenter / 8.0) * 4.0, 1.0));
+      }
+
+      // Lateral Position Integration
+      lateralOffset += lateralVelocity * dt;
+
+      // Guardrails collision / clamping
+      const maxOffset = trackWidth / 2 - 1.4;
+      if (Math.abs(lateralOffset) > maxOffset) {
+        if (options.antiCrash) {
+          lateralOffset = Math.sign(lateralOffset) * maxOffset;
+          lateralVelocity = -lateralVelocity * 0.4;
+          currentSpeed = Math.max(currentSpeed - 65 * dt, 20);
+        }
+      }
+
+      // 3. Advance along track curve
+      const deltaT = (currentSpeed * dt) / trackLength;
+      progressT = (progressT + deltaT);
+      if (currentTrackType === 'circuit') {
+        progressT = progressT % 1.0;
+      } else {
+        if (progressT >= 0.98) progressT = 0.01;
+      }
+
+      // 4. Update Craft 3D Transform
+      const frame = getTrackFrameAt(progressT);
+      const hoverHeight = 1.35;
+      const craftPos = frame.pt.clone()
+        .add(frame.sideRight.clone().multiplyScalar(lateralOffset))
+        .add(frame.normal.clone().multiplyScalar(hoverHeight));
+
+      craftGroup.position.copy(craftPos);
+
+      // Align group strictly with track orthonormal right-handed basis (det = +1)
+      const rotMat = new THREE.Matrix4().makeBasis(frame.sideRight, frame.normal, frame.tangent);
+      craftGroup.quaternion.setFromRotationMatrix(rotMat);
+
+      // Local Banking Roll & Heading Yaw in child group
+      // Roll: Steering left (rawSteer < 0) -> positive roll (left wing drops, right rises)
+      //       Steering right (rawSteer > 0) -> negative roll (right wing drops, left rises)
+      const targetRoll = -rawSteer * 0.44 - (lateralVelocity / 60.0) * 0.22;
+      craftRoll = THREE.MathUtils.lerp(craftRoll, targetRoll, Math.min(dt * 12, 1.0));
+      craftVisualGroup.rotation.z = craftRoll;
+
+      // Yaw rotation (nose points slightly into the turn)
+      const targetYaw = -rawSteer * 0.18;
+      headingYaw = THREE.MathUtils.lerp(headingYaw, targetYaw, Math.min(dt * 10, 1.0));
+      craftVisualGroup.rotation.y = headingYaw;
+
+      // Thruster scale
+      const plumeScale = (currentSpeed / 170) * (keys.boost ? 2.4 : 1.2);
+      plumeL.scale.set(1, 1, Math.max(plumeScale, 0.4));
+      plumeR.scale.set(1, 1, Math.max(plumeScale, 0.4));
+
+      // 5. Camera Follow
+      const chaseDist = 13.5;
+      const chaseHeight = 4.8;
+      const camBack = frame.tangent.clone().negate().multiplyScalar(chaseDist);
+      const camUp = frame.normal.clone().multiplyScalar(chaseHeight);
+      const idealCamPos = craftPos.clone().add(camBack).add(camUp);
+
+      camera.position.lerp(idealCamPos, Math.min(dt * 14, 1.0));
+      camera.up.copy(frame.normal); // Always set camera.up BEFORE lookAt
+      camera.lookAt(craftPos.clone().add(frame.tangent.clone().multiplyScalar(15)));
+
+      // 6. Telemetry Calculations
+      const speedKmH = Math.round(currentSpeed * 6.8);
+      const velAngle = Math.atan2(lateralVelocity, currentSpeed);
+      const slipAngleDeg = ((headingYaw - velAngle) * (180 / Math.PI)).toFixed(1);
+      const yawAngleDeg = (headingYaw * (180 / Math.PI)).toFixed(1);
+      const gForce = (Math.abs(effectiveSteerForce) / 45.0).toFixed(2);
+
+      hudSpeed.innerHTML = `${speedKmH} <span style="font-size:13px;color:var(--text-muted);">KM/H</span>`;
+      hudSlip.textContent = `${slipAngleDeg}°`;
+      hudYaw.textContent = `${yawAngleDeg}°`;
+      hudGForce.textContent = `${gForce} G`;
+
+      const absSlip = Math.abs(parseFloat(slipAngleDeg));
+      if (absSlip > 18) {
+        hudDriftStatus.textContent = "OVERSTEER / DERRAPAGEM";
+        hudDriftStatus.style.color = "var(--accent-magenta)";
+        hudDriftStatus.style.background = "rgba(255, 0, 85, 0.18)";
+        hudDriftStatus.style.borderColor = "rgba(255, 0, 85, 0.5)";
+      } else if (absSlip > 9) {
+        hudDriftStatus.textContent = "DRIFT CONTROLADO";
+        hudDriftStatus.style.color = "var(--accent-amber)";
+        hudDriftStatus.style.background = "rgba(255, 170, 0, 0.18)";
+        hudDriftStatus.style.borderColor = "rgba(255, 170, 0, 0.5)";
+      } else if (absSlip > 4) {
+        hudDriftStatus.textContent = "SLIP MODERADO";
+        hudDriftStatus.style.color = "#ffde59";
+        hudDriftStatus.style.background = "rgba(255, 222, 89, 0.18)";
+        hudDriftStatus.style.borderColor = "rgba(255, 222, 89, 0.5)";
+      } else {
+        hudDriftStatus.textContent = "TRAÇÃO TOTAL";
+        hudDriftStatus.style.color = "var(--accent-green)";
+        hudDriftStatus.style.background = "rgba(0, 255, 136, 0.15)";
+        hudDriftStatus.style.borderColor = "rgba(0, 255, 136, 0.4)";
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
