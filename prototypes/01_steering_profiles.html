@@ -1181,8 +1181,8 @@
       const pt = trackCurve.getPointAt(wrappedT);
       const tangent = trackCurve.getTangentAt(wrappedT).normalize();
       const up = new THREE.Vector3(0, 1, 0);
-      const sideRight = new THREE.Vector3().crossVectors(up, tangent).normalize();
-      const normal = new THREE.Vector3().crossVectors(tangent, sideRight).normalize();
+      const sideRight = new THREE.Vector3().crossVectors(tangent, up).normalize();
+      const normal = new THREE.Vector3().crossVectors(sideRight, tangent).normalize();
       return { pt, tangent, sideRight, normal };
     }
 
