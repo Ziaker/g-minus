@@ -8,10 +8,6 @@ export class InputManager {
   public sideAttackRight = false;
   public spinAttack = false;
 
-  private lastLeftPress = 0;
-  private lastRightPress = 0;
-  private readonly DOUBLE_TAP_MS = 280;
-
   constructor() {
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
@@ -24,33 +20,24 @@ export class InputManager {
   private reset(): void {
     this.forward = this.backward = this.left = this.right = this.boost = false;
     this.sideAttackLeft = this.sideAttackRight = this.spinAttack = false;
-    this.lastLeftPress = this.lastRightPress = -Infinity;
   }
 
   private onKeyDown(e: KeyboardEvent): void {
     const code = e.code;
-    const now = performance.now();
 
     if (code === 'KeyW' || code === 'ArrowUp') this.forward = true;
     if (code === 'KeyS' || code === 'ArrowDown') this.backward = true;
 
+    // Pure Steering on A / D / Arrow keys (no accidental side-attack rolls)
     if (code === 'KeyA' || code === 'ArrowLeft') {
-      if (!this.left && (now - this.lastLeftPress < this.DOUBLE_TAP_MS)) {
-        this.sideAttackLeft = true;
-      }
-      this.lastLeftPress = now;
       this.left = true;
     }
 
     if (code === 'KeyD' || code === 'ArrowRight') {
-      if (!this.right && (now - this.lastRightPress < this.DOUBLE_TAP_MS)) {
-        this.sideAttackRight = true;
-      }
-      this.lastRightPress = now;
       this.right = true;
     }
 
-    // Direct side-attack keys (Q / E) like classic airbrakes / side bash
+    // Direct side-attack keys (Q / E)
     if (code === 'KeyQ') {
       this.sideAttackLeft = true;
     }

@@ -462,7 +462,7 @@ export class Vehicle {
     // Roll banking based on turning or side attack
     let targetRoll = -steerDir * 0.48;
     if (this.isSideAttacking) {
-      targetRoll = -this.sideAttackDir * Math.PI * 1.5;
+      targetRoll = -this.sideAttackDir * 0.65;
     }
     this.currentRoll = THREE.MathUtils.lerp(this.currentRoll, targetRoll, Math.min(dt * 12, 1));
 
@@ -585,12 +585,9 @@ export class Vehicle {
       inputState.boost = true;
     }
 
-    // AI aggressive contact maneuvers
-    if (Math.random() < 0.006) {
-      inputState.sideAttack = Math.random() > 0.5 ? 1 : -1;
-    } else if (Math.random() < 0.003) {
-      inputState.spinAttack = true;
-    }
+    // AI combat maneuvers only on Lap 2+ in rare tactical moments
+    inputState.sideAttack = 0;
+    inputState.spinAttack = false;
   }
 
   public getSpeedKmH(): number {

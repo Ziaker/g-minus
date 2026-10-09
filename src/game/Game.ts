@@ -383,19 +383,25 @@ export class Game {
               this.addCameraShake(0.6);
             }
           } else {
-            // Glancing bump with body weight transfer
+            // Smooth glancing bump with elastic separation
             const lateralDiff = vA.lateralOffset - vB.lateralOffset;
-            const impulse = Math.sign(lateralDiff) * 36;
-            vA.lateralVelocity += impulse / vA.bodyArmorFactor;
-            vB.lateralVelocity -= impulse / vB.bodyArmorFactor;
+            const pushDir = Math.sign(lateralDiff) || 1;
+            const overlap = Math.max((radius * 2) - dist, 0.1);
 
-            vA.takeDamage(5, true);
-            vB.takeDamage(5, true);
+            vA.lateralVelocity += (pushDir * 18) / vA.bodyArmorFactor;
+            vB.lateralVelocity -= (pushDir * 18) / vB.bodyArmorFactor;
 
-            this.combat.spawnSparks(midPoint, 10, 0xffaa00);
+            // Separate vehicles to prevent interpenetration sticking
+            vA.lateralOffset += pushDir * overlap * 0.3;
+            vB.lateralOffset -= pushDir * overlap * 0.3;
+
+            vA.takeDamage(2, false);
+            vB.takeDamage(2, false);
+
+            this.combat.spawnSparks(midPoint, 6, 0xffaa00);
             if (vA === this.player || vB === this.player) {
               this.audio.playImpact();
-              this.addCameraShake(0.2);
+              this.addCameraShake(0.12);
             }
           }
         }

@@ -1787,7 +1787,7 @@
 
       // Local Roll & Yaw
       let targetRoll = -rawSteer * 0.44 - (lateralVelocity / 60.0) * 0.22;
-      if (isSideAttacking) targetRoll = -sideAttackDir * Math.PI * 1.5;
+      if (isSideAttacking) targetRoll = -sideAttackDir * 0.65;
       craftRoll = THREE.MathUtils.lerp(craftRoll, targetRoll, Math.min(dt * 12, 1.0));
       playerCraft.visualGroup.rotation.z = craftRoll;
 
