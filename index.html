@@ -473,6 +473,38 @@
         <div class="stat-row"><span>BOOST</span><span class="stat-grade grade-D">D</span></div>
         <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-B">B</span></div>
       </div>
+
+      <div class="machine-card" data-id="white_cat">
+        <div class="machine-name" style="color:#e0e6ed;">WHITE CAT</div>
+        <div class="machine-pilot">Jody Summer</div>
+        <div class="stat-row"><span>BODY</span><span class="stat-grade grade-C">C</span></div>
+        <div class="stat-row"><span>BOOST</span><span class="stat-grade grade-C">C</span></div>
+        <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-A">A</span></div>
+      </div>
+
+      <div class="machine-card" data-id="red_gazelle">
+        <div class="machine-name" style="color:#ff4444;">RED GAZELLE</div>
+        <div class="machine-pilot">Mighty Gazelle</div>
+        <div class="stat-row"><span>BODY</span><span class="stat-grade grade-E">E</span></div>
+        <div class="stat-row"><span>BOOST</span><span class="stat-grade grade-A">A</span></div>
+        <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-B">B</span></div>
+      </div>
+
+      <div class="machine-card" data-id="iron_tiger">
+        <div class="machine-name" style="color:#ff7700;">IRON TIGER</div>
+        <div class="machine-pilot">Baba</div>
+        <div class="stat-row"><span>BODY</span><span class="stat-grade grade-B">B</span></div>
+        <div class="stat-row"><span>BOOST</span><span class="stat-grade grade-D">D</span></div>
+        <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-A">A</span></div>
+      </div>
+
+      <div class="machine-card" data-id="black_bull">
+        <div class="machine-name" style="color:#b537f2;">BLACK BULL</div>
+        <div class="machine-pilot">Black Shadow</div>
+        <div class="stat-row"><span>BODY</span><span class="stat-grade grade-A">A</span></div>
+        <div class="stat-row"><span>BOOST</span><span class="stat-grade grade-A">A</span></div>
+        <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-E">E</span></div>
+      </div>
     </div>
 
     <!-- Engine Settings Balance -->
@@ -501,11 +533,11 @@
       </div>
       <div class="control-row">
         <span>Side-Attack (Ataque Lateral):</span>
-        <div><span class="key-badge">Q</span> / <span class="key-badge">E</span> (ou duplo clique A/D)</div>
+        <div><span class="key-badge">Q</span> / <span class="key-badge">E</span> (Golpes laterais de impacto)</div>
       </div>
       <div class="control-row">
         <span>Spin Attack (Giro 360° em Área):</span>
-        <div><span class="key-badge">Z</span> ou <span class="key-badge">SHIFT</span> (Varredura de rivais!)</div>
+        <div><span class="key-badge">Z</span> ou <span class="key-badge">SHIFT</span> (Varredura de múltiplos rivais)</div>
       </div>
       <div class="control-row">
         <span>Super Boost (Consome Shield):</span>
@@ -518,6 +550,14 @@
     </div>
 
     <button class="btn-start" id="btn-play">INICIAR CORRIDA</button>
+  </div>
+
+  <!-- Race Finish Results Screen [GDD 16, 101] -->
+  <div id="results-screen" style="display:none; position:fixed; inset:0; background:rgba(5,10,24,0.94); z-index:100; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(16px); text-align:center;">
+    <h1 style="font-family:'Orbitron', monospace; font-size:44px; color:#ffde59; margin-bottom:6px; letter-spacing:2px; text-shadow: 0 0 24px #ffde59;">GOAL! CORRIDA CONCLUÍDA</h1>
+    <div id="results-pos" style="font-size:36px; font-weight:900; color:#00f0ff; margin-bottom:12px; font-family:'Orbitron', monospace; text-shadow:0 0 16px #00f0ff;">1º LUGAR</div>
+    <div id="results-details" style="font-size:16px; color:#d0e4ff; margin-bottom:24px; font-family:'Orbitron', monospace; line-height:1.6;">Tempo Total: 02:15.30 | K.O.s: 0</div>
+    <button class="btn-start" onclick="location.reload()">CORRER NOVAMENTE</button>
   </div>
 
   <script type="module" src="/src/main.ts"></script>

@@ -127,6 +127,32 @@ export const MACHINE_ROSTER: Record<string, MachineDefinition> = {
     acceleration: 83,
     handling: 75,
     boostMultiplier: 1.56,
+  },
+  black_bull: {
+    id: 'black_bull',
+    name: 'BLACK BULL',
+    pilot: 'BLACK SHADOW',
+    model: 'goose',
+    color: 0x161822,
+    accentColor: 0xcc0033,
+    stats: { body: 'A', boost: 'A', grip: 'E' },
+    maxSpeed: 178,
+    acceleration: 88,
+    handling: 66,
+    boostMultiplier: 1.68,
+  },
+  blood_hawk: {
+    id: 'blood_hawk',
+    name: 'BLOOD HAWK',
+    pilot: 'BLOOD FALCON',
+    model: 'falcon',
+    color: 0x880011,
+    accentColor: 0xff0044,
+    stats: { body: 'B', boost: 'A', grip: 'E' },
+    maxSpeed: 175,
+    acceleration: 91,
+    handling: 74,
+    boostMultiplier: 1.64,
   }
 };
 
@@ -146,6 +172,8 @@ export class Game {
   public allVehicles: Vehicle[] = [];
 
   private isRunning = false;
+  private isRaceFinished = false;
+  private raceStartTime = 0;
   private lastTime = 0;
   private playerKills = 0;
   private shownBoostOkBanner = false;
@@ -162,6 +190,9 @@ export class Game {
   private hudKills: HTMLElement | null;
   private hudBoostStatus: HTMLElement | null;
   private boostOkBanner: HTMLElement | null;
+  private resultsScreen: HTMLElement | null;
+  private resultsPos: HTMLElement | null;
+  private resultsDetails: HTMLElement | null;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -203,6 +234,9 @@ export class Game {
     this.hudKills = document.getElementById('hud-kills');
     this.hudBoostStatus = document.getElementById('hud-boost-status');
     this.boostOkBanner = document.getElementById('boost-ok-banner');
+    this.resultsScreen = document.getElementById('results-screen');
+    this.resultsPos = document.getElementById('results-pos');
+    this.resultsDetails = document.getElementById('results-details');
 
     window.addEventListener('resize', this.onWindowResize.bind(this));
   }
@@ -265,6 +299,8 @@ export class Game {
     this.initRoster(selectedId, engineBalance);
     this.audio.init();
     this.isRunning = true;
+    this.isRaceFinished = false;
+    this.raceStartTime = performance.now();
     this.lastTime = performance.now();
     requestAnimationFrame(this.loop.bind(this));
   }
@@ -504,20 +540,36 @@ export class Game {
     }
 
     // Race Rank / Position
-    if (this.hudPos) {
-      const sorted = [...this.allVehicles].sort((a, b) => {
-        const scoreA = a.currentLap + a.progressT;
-        const scoreB = b.currentLap + b.progressT;
-        return scoreB - scoreA;
-      });
+    const sorted = [...this.allVehicles].sort((a, b) => {
+      const scoreA = a.currentLap + a.progressT;
+      const scoreB = b.currentLap + b.progressT;
+      return scoreB - scoreA;
+    });
 
-      const playerRank = sorted.findIndex(v => v.config.id === 'player') + 1;
+    const playerRank = sorted.findIndex(v => v.config.id === 'player') + 1;
+    if (this.hudPos) {
       this.hudPos.textContent = `POS: ${playerRank} / ${this.allVehicles.length}`;
     }
 
     // K.O.s (F-Zero Style)
     if (this.hudKills) {
       this.hudKills.textContent = `${this.playerKills} K.O.`;
+    }
+
+    // Race Finish Check (After 3 Laps)
+    if (this.player.currentLap > 3 && !this.isRaceFinished) {
+      this.isRaceFinished = true;
+      const totalSec = (performance.now() - this.raceStartTime) / 1000;
+      const mins = Math.floor(totalSec / 60).toString().padStart(2, '0');
+      const secs = (totalSec % 60).toFixed(2).padStart(5, '0');
+      const timeStr = `${mins}:${secs}`;
+
+      if (this.resultsScreen && this.resultsPos && this.resultsDetails) {
+        this.resultsPos.textContent = `${playerRank}º LUGAR`;
+        this.resultsPos.style.color = playerRank === 1 ? '#00ff88' : (playerRank <= 3 ? '#00f0ff' : '#ff0055');
+        this.resultsDetails.textContent = `Tempo Total: ${timeStr} | K.O.s: ${this.playerKills}`;
+        this.resultsScreen.style.display = 'flex';
+      }
     }
   }
 
