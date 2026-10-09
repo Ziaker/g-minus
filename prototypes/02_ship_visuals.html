@@ -1,1122 +1,571 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>G-MINUS // Laboratório de Visuais de Naves (Protótipo 02)</title>
-  <style>
-    :root {
-      --bg-dark: #050811;
-      --panel-bg: rgba(8, 14, 28, 0.92);
-      --panel-border: #182846;
-      --accent-cyan: #00f0ff;
-      --accent-magenta: #ff0055;
-      --accent-amber: #ffaa00;
-      --accent-green: #00ff88;
-      --accent-purple: #b537f2;
-      --text-main: #d0e4ff;
-      --text-muted: #6f89a8;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
-
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-      overflow: hidden;
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-    }
-
-    #viewport-container {
-      flex: 1;
-      position: relative;
-      height: 100%;
-      background: radial-gradient(circle at center, #0a152e 0%, #03050a 100%);
-      min-width: 0;
-    }
-
-    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
-
-    /* ---- Telemetry HUD ---- */
-    #hud-top-left {
-      position: absolute; top: 18px; left: 18px;
-      display: flex; flex-direction: column; gap: 10px;
-      pointer-events: none; max-width: 300px;
-    }
-    .hud-card {
-      background: var(--panel-bg);
-      border: 1px solid var(--panel-border);
-      border-left: 4px solid var(--accent-cyan);
-      backdrop-filter: blur(12px);
-      padding: 10px 16px;
-      border-radius: 6px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
-    }
-    .hud-label {
-      font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
-      color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px;
-    }
-    .hud-value {
-      font-size: 22px; font-weight: 900; font-family: 'Courier New', Courier, monospace;
-      color: #fff; text-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
-    }
-    .hud-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.5; }
-    .hud-pill {
-      display: inline-block; margin-top: 4px; padding: 2px 8px;
-      font-size: 10px; font-weight: 800; border-radius: 3px;
-      background: rgba(0, 255, 136, 0.15); color: var(--accent-green);
-      border: 1px solid rgba(0, 255, 136, 0.4);
-    }
-    .chip {
-      display: inline-block; width: 12px; height: 12px; border-radius: 3px;
-      margin-right: 6px; vertical-align: -1px; border: 1px solid rgba(255,255,255,0.35);
-    }
-
-    #hud-bottom-left {
-      position: absolute; bottom: 18px; left: 18px;
-      pointer-events: none;
-    }
-    .keys-card { font-size: 11px; color: var(--text-muted); line-height: 1.9; }
-    .keys-card b { color: var(--accent-cyan); font-family: 'Courier New', monospace; }
-
-    /* ---- Right panel ---- */
-    #side-panel {
-      width: 380px; min-width: 380px; height: 100%;
-      background: var(--panel-bg);
-      border-left: 1px solid var(--panel-border);
-      backdrop-filter: blur(16px);
-      overflow-y: auto;
-      padding: 18px 18px 40px;
-      display: flex; flex-direction: column; gap: 18px;
-    }
-    #side-panel::-webkit-scrollbar { width: 6px; }
-    #side-panel::-webkit-scrollbar-thumb { background: #1c3254; border-radius: 3px; }
-
-    .panel-title {
-      font-size: 13px; font-weight: 900; letter-spacing: 2px;
-      color: #fff; text-transform: uppercase;
-      text-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
-      padding-bottom: 4px; border-bottom: 1px solid var(--panel-border);
-    }
-    .section-label {
-      font-size: 10px; font-weight: 800; letter-spacing: 1.5px;
-      color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;
-    }
-
-    .btn-grid { display: grid; gap: 6px; }
-    .btn-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
-    .btn-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
-
-    .btn-option {
-      background: rgba(14, 24, 46, 0.85);
-      border: 1px solid var(--panel-border);
-      color: var(--text-main);
-      padding: 8px 6px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 11px; font-weight: 700;
-      text-align: center;
-      transition: all 0.15s ease;
-      line-height: 1.45;
-    }
-    .btn-option:hover { border-color: var(--accent-cyan); color: #fff; transform: translateY(-1px); }
-    .btn-option.active {
-      border-color: var(--accent-cyan);
-      background: rgba(0, 240, 255, 0.14);
-      box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
-      color: #fff;
-    }
-    .btn-option .grades { display: block; font-size: 9px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
-
-    .btn-style { padding: 10px 8px; }
-    .btn-style .style-name { display: block; font-size: 12px; font-weight: 900; letter-spacing: 0.5px; }
-    .btn-style .style-desc { display: block; font-size: 9px; color: var(--text-muted); font-weight: 500; margin-top: 3px; line-height: 1.4; }
-
-    .param-row { margin-bottom: 10px; }
-    .param-label {
-      display: flex; justify-content: space-between;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
-      margin-bottom: 4px; color: var(--text-main);
-    }
-    .param-label span:last-child {
-      font-family: 'Courier New', monospace; color: var(--accent-cyan); font-weight: 900;
-    }
-    input[type="range"] {
-      width: 100%; height: 4px;
-      -webkit-appearance: none; appearance: none;
-      background: #14223e; border-radius: 2px; outline: none; cursor: pointer;
-    }
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none;
-      width: 14px; height: 14px; border-radius: 50%;
-      background: var(--accent-cyan);
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
-      cursor: pointer; border: none;
-    }
-    input[type="range"]::-moz-range-thumb {
-      width: 14px; height: 14px; border-radius: 50%;
-      background: var(--accent-cyan);
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
-      cursor: pointer; border: none;
-    }
-
-    .btn-action {
-      background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(0, 136, 255, 0.18));
-      border: 1px solid rgba(0, 240, 255, 0.45);
-      color: #fff; padding: 9px 10px; border-radius: 5px;
-      font-size: 11px; font-weight: 800; letter-spacing: 0.5px;
-      cursor: pointer; transition: all 0.15s ease; width: 100%;
-    }
-    .btn-action:hover { box-shadow: 0 0 16px rgba(0, 240, 255, 0.4); transform: translateY(-1px); }
-    .btn-action.warn { border-color: rgba(255, 170, 0, 0.5); background: linear-gradient(135deg, rgba(255,170,0,0.14), rgba(255,0,85,0.12)); }
-    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-
-    /* JSON IO */
-    #json-area {
-      width: 100%; height: 130px; resize: vertical;
-      background: #04070f; color: var(--accent-green);
-      border: 1px solid var(--panel-border); border-radius: 5px;
-      font-family: 'Courier New', monospace; font-size: 10.5px;
-      padding: 8px; outline: none; line-height: 1.5;
-    }
-    #json-area:focus { border-color: var(--accent-cyan); box-shadow: 0 0 10px rgba(0, 240, 255, 0.25); }
-
-    #toast {
-      position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%) translateY(20px);
-      background: rgba(8, 18, 36, 0.96); border: 1px solid var(--accent-cyan);
-      color: #fff; padding: 10px 22px; border-radius: 6px;
-      font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
-      opacity: 0; pointer-events: none; transition: all 0.25s ease;
-      z-index: 100; box-shadow: 0 0 24px rgba(0, 240, 255, 0.35);
-      max-width: 80vw; text-align: center;
-    }
-    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    #webgl-error {
-      position: absolute; inset: 0; display: none;
-      align-items: center; justify-content: center; text-align: center;
-      color: var(--accent-magenta); font-size: 14px; font-weight: 700;
-      padding: 40px; line-height: 1.8;
-    }
-  </style>
-</head>
-<body>
-  <div id="viewport-container">
-    <div id="hud-top-left">
-      <div class="hud-card">
-        <div class="hud-label">Nave Selecionada</div>
-        <div class="hud-value" id="hud-name">BLUE FALCON</div>
-        <div class="hud-sub"><span class="chip" id="hud-chip"></span><span id="hud-pilot">CAPTAIN FALCON</span></div>
-        <div class="hud-sub" id="hud-stats">BODY B · BOOST C · GRIP B</div>
-        <div class="hud-sub" id="hud-archetype">Silhueta: Dart (Aerodinâmica)</div>
-      </div>
-      <div class="hud-card" style="border-left-color: var(--accent-magenta);">
-        <div class="hud-label">Direção Visual</div>
-        <div class="hud-value" id="hud-style" style="font-size: 16px;">A — Anime Cel Neon</div>
-        <div class="hud-sub" id="hud-style-desc"></div>
-        <span class="hud-pill" id="hud-mode">VITRINE</span>
-      </div>
-    </div>
-    <div id="hud-bottom-left">
-      <div class="hud-card keys-card">
-        <b>Arrastar</b> orbitar · <b>Roda</b> zoom<br>
-        <b>1 / 2 / 3</b> direção visual · <b>V</b> vitrine/galeria<br>
-        <b>R</b> girar automático · <b>Embaralhar</b> variação aleatória
-      </div>
-    </div>
-    <div id="webgl-error">WebGL indisponível neste navegador.<br>O laboratório de visuais precisa de uma GPU/contexto 3D para renderizar.</div>
-  </div>
-
-  <div id="side-panel">
-    <div class="panel-title">🎨 Laboratório de Visuais — Protótipo 02</div>
-
-    <section>
-      <div class="section-label">1. Direção Visual (GDD [81–90]) — 3 Alternativas</div>
-      <div class="btn-grid cols-3">
-        <button id="style-A" class="btn-option btn-style active" onclick="setStyle('A')">
-          <span class="style-name">A · Anime Cel</span>
-          <span class="style-desc">Toon shading + contorno preto invertido + luz de rim. Identidade anime/low-poly do GDD.</span>
-        </button>
-        <button id="style-B" class="btn-option btn-style" onclick="setStyle('B')">
-          <span class="style-name">B · Cyber Chrome</span>
-          <span class="style-desc">Metal PBR pesado, acabamentos emissivos e malha de fios técnica. Visual industrial cromado.</span>
-        </button>
-        <button id="style-C" class="btn-option btn-style" onclick="setStyle('C')">
-          <span class="style-name">C · Retro Vector</span>
-          <span class="style-desc">Preenchimento plano vetorial, arestas brancas e glow aditivo. Sintwave retrô.</span>
-        </button>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-label">2. Nave — 10 Silhuetas Distintas (GDD [71, 87, 89])</div>
-      <div class="btn-grid cols-2" id="machine-grid"></div>
-    </section>
-
-    <section>
-      <div class="section-label">3. Vista</div>
-      <div class="btn-grid cols-2">
-        <button id="view-vitrine" class="btn-option active" onclick="setView('vitrine')">🏅 Vitrine (turntable)</button>
-        <button id="view-galeria" class="btn-option" onclick="setView('galeria')">📐 Galeria (10 lado a lado)</button>
-      </div>
-      <div class="btn-row" style="margin-top: 6px;">
-        <button class="btn-action warn" onclick="randomizeParams()">🎲 Embaralhar Silhueta</button>
-        <button class="btn-action" id="btn-rotate" onclick="toggleRotate()">⏸ Parar Rotação</button>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-label">4. Proporções & Estilo (sliders independentes)</div>
-      <div class="param-row">
-        <div class="param-label">Comprimento (alongamento) <span id="val-length">1.00</span></div>
-        <input type="range" id="slider-length" min="0.70" max="1.40" step="0.01" value="1.00" oninput="updateParam('length', this.value)">
-      </div>
-      <div class="param-row">
-        <div class="param-label">Largura (fuselagem) <span id="val-width">1.00</span></div>
-        <input type="range" id="slider-width" min="0.70" max="1.40" step="0.01" value="1.00" oninput="updateParam('width', this.value)">
-      </div>
-      <div class="param-row">
-        <div class="param-label">Envergadura (asas) <span id="val-wingSpan">1.00</span></div>
-        <input type="range" id="slider-wingSpan" min="0.60" max="1.60" step="0.01" value="1.00" oninput="updateParam('wingSpan', this.value)">
-      </div>
-      <div class="param-row">
-        <div class="param-label">Tamanho da Cabine <span id="val-canopy">1.00</span></div>
-        <input type="range" id="slider-canopy" min="0.50" max="1.60" step="0.01" value="1.00" oninput="updateParam('canopy', this.value)">
-      </div>
-      <div class="param-row">
-        <div class="param-label">Brilho / Emissão <span id="val-glow">1.00</span></div>
-        <input type="range" id="slider-glow" min="0.00" max="2.00" step="0.05" value="1.00" oninput="updateParam('glow', this.value)">
-      </div>
-      <div class="param-row">
-        <div class="param-label">Saturação da Cor <span id="val-saturation">0.00</span></div>
-        <input type="range" id="slider-saturation" min="-0.50" max="0.50" step="0.01" value="0.00" oninput="updateParam('saturation', this.value)">
-      </div>
-    </section>
-
-    <section>
-      <div class="section-label">5. Configuração Serializada em JSON</div>
-      <textarea id="json-area" spellcheck="false"></textarea>
-      <div class="btn-row" style="margin-top: 6px;">
-        <button class="btn-action" onclick="copyJSON()">📋 Copiar JSON</button>
-        <button class="btn-action" onclick="applyJSON()">💾 Aplicar JSON</button>
-      </div>
-    </section>
-  </div>
-
-  <div id="toast"></div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script>
-    'use strict';
-
-    // ================= DATA =================
-    const MACHINES = [
-      { id: 'falcon',      name: 'BLUE FALCON',   pilot: 'CAPTAIN FALCON',  color: 0x0044ff, accent: 0x00f0ff, stats: ['B','C','B'], archetype: 'Dart',      family: 'Aerodinâmica' },
-      { id: 'fox',         name: 'GOLDEN FOX',    pilot: 'DR. STEWART',     color: 0xf5b800, accent: 0xffffff, stats: ['D','A','D'], archetype: 'Needle',    family: 'Aerodinâmica' },
-      { id: 'goose',       name: 'WILD GOOSE',    pilot: 'PICO',            color: 0x228b22, accent: 0x9400d3, stats: ['A','B','C'], archetype: 'Ram',       family: 'Robusta' },
-      { id: 'stingray',    name: 'FIRE STINGRAY', pilot: 'SAMURAI GOROH',   color: 0xd90429, accent: 0xffaa00, stats: ['A','D','B'], archetype: 'Manta',     family: 'Aerodinâmica' },
-      { id: 'white_cat',   name: 'WHITE CAT',     pilot: 'JODY SUMMER',     color: 0xe0e6ed, accent: 0x00f0ff, stats: ['C','C','A'], archetype: 'Twin-Fork', family: 'Aerodinâmica' },
-      { id: 'red_gazelle', name: 'RED GAZELLE',   pilot: 'MIGHTY GAZELLE',  color: 0xb30000, accent: 0xff4444, stats: ['E','A','B'], archetype: 'Rocket',    family: 'Aerodinâmica' },
-      { id: 'iron_tiger',  name: 'IRON TIGER',    pilot: 'BABA',            color: 0xff7700, accent: 0xffaa00, stats: ['B','D','A'], archetype: 'Block',     family: 'Robusta' },
-      { id: 'deep_claw',   name: 'DEEP CLAW',     pilot: 'OCTOMAN',         color: 0x7b2cbf, accent: 0xff006e, stats: ['B','B','C'], archetype: 'Pincer',    family: 'Agressiva' },
-      { id: 'black_bull',  name: 'BLACK BULL',    pilot: 'BLACK SHADOW',    color: 0x161822, accent: 0xcc0033, stats: ['A','A','E'], archetype: 'Brute',     family: 'Robusta' },
-      { id: 'blood_hawk',  name: 'BLOOD HAWK',    pilot: 'BLOOD FALCON',    color: 0x880011, accent: 0xff0044, stats: ['B','A','E'], archetype: 'Gull',      family: 'Aerodinâmica' }
-    ];
-
-    const STYLE_INFO = {
-      A: { name: 'A — Anime Cel Neon', desc: 'Toon shading com gradiente de 4 degraus, contorno preto por casca invertida (BackSide) e luz de rim ciano. Família visual anime/low-poly exigida pelo GDD [81–90].' },
-      B: { name: 'B — Cyber Chrome',   desc: 'Metal PBR (metalness 0.9), acabamentos emissivos proporcionais ao slider de brilho e overlay de malha de fios técnica. Visual industrial cromado de alta leitura.' },
-      C: { name: 'C — Retro Vector',   desc: 'Preenchimento plano vetorial, arestas brancas (EdgesGeometry) e sprites de glow aditivo sobre fundo violeta. Sintwave retrô com máxima separação do cenário.' }
-    };
-
-    // 3 alternativas distintas, com defaults próprios (GDD: processo de prototipação)
-    const PRESETS = {
-      A: { style: 'A', length: 1.00, width: 1.00, wingSpan: 1.00, canopy: 1.00, glow: 1.00, saturation: 0.00 },
-      B: { style: 'B', length: 1.02, width: 1.00, wingSpan: 1.05, canopy: 0.90, glow: 1.45, saturation: 0.05 },
-      C: { style: 'C', length: 0.98, width: 1.02, wingSpan: 1.08, canopy: 1.05, glow: 1.20, saturation: 0.18 }
-    };
-    const NUMERIC_KEYS = ['length', 'width', 'wingSpan', 'canopy', 'glow', 'saturation'];
-
-    let currentStyle = 'A';
-    let currentMachine = 'falcon';
-    let viewMode = 'vitrine';
-    let autoRotate = true;
-    let params = { ...PRESETS.A };
-    const editedPresets = { A: { ...PRESETS.A }, B: { ...PRESETS.B }, C: { ...PRESETS.C } };
-
-    // ================= THREE SETUP =================
-    let renderer, scene, camera;
-    const viewport = document.getElementById('viewport-container');
-    const orbit = { theta: 0.7, phi: 1.05, radius: 13 };
-    const cameraTarget = new THREE.Vector3(0, 1.4, 0);
-    const desiredTarget = new THREE.Vector3(0, 1.4, 0);
-    let vitrineShip = null;      // { group, wings, cockpit, ... }
-    let gridShips = [];
-    let gridPads = [];
-    let pedestal = null;
-    let styleLights = [];
-    let tGlobal = 0;
-
-    // Shared glow sprite texture (radial gradient)
-    const glowTexture = (() => {
-      const c = document.createElement('canvas');
-      c.width = c.height = 64;
-      const g = c.getContext('2d');
-      const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-      grad.addColorStop(0, 'rgba(255,255,255,1)');
-      grad.addColorStop(0.35, 'rgba(255,255,255,0.45)');
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
-      g.fillStyle = grad;
-      g.fillRect(0, 0, 64, 64);
-      return new THREE.CanvasTexture(c);
-    })();
-
-    // Toon gradient (4 steps)
-    const toonGradient = (() => {
-      const data = new Uint8Array([90, 150, 220, 255]);
-      const tex = new THREE.DataTexture(data, data.length, 1, THREE.LuminanceFormat);
-      tex.minFilter = THREE.NearestFilter;
-      tex.magFilter = THREE.NearestFilter;
-      tex.needsUpdate = true;
-      return tex;
-    })();
-
-    function initThree() {
-      try {
-        renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-      } catch (e) {
-        document.getElementById('webgl-error').style.display = 'flex';
-        return false;
-      }
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setSize(viewport.clientWidth, viewport.clientHeight);
-      renderer.outputEncoding = THREE.sRGBEncoding;
-      viewport.appendChild(renderer.domElement);
-
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(45, viewport.clientWidth / viewport.clientHeight, 0.1, 400);
-
-      // Floor: dark disc + polar grid
-      const disc = new THREE.Mesh(
-        new THREE.CircleGeometry(90, 48).rotateX(-Math.PI / 2),
-        new THREE.MeshBasicMaterial({ color: 0x04070f })
-      );
-      scene.add(disc);
-      const polar = new THREE.PolarGridHelper(60, 16, 8, 64, 0x1a2a4a, 0x0d1626);
-      polar.position.y = 0.02;
-      scene.add(polar);
-
-      buildPedestal();
-      applyStyleEnvironment();
-      rebuildScene();
-      bindOrbit();
-      window.addEventListener('resize', onResize);
-      requestAnimationFrame(animate);
-      return true;
-    }
-
-    function onResize() {
-      const w = viewport.clientWidth, h = viewport.clientHeight;
-      renderer.setSize(w, h);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    }
-
-    // ================= STYLE: MATERIALS =================
-    function makeMaterials(style, bodyColor, accentColor) {
-      if (style === 'A') {
-        return {
-          body: new THREE.MeshToonMaterial({ color: bodyColor, gradientMap: toonGradient }),
-          accent: new THREE.MeshToonMaterial({ color: accentColor, gradientMap: toonGradient }),
-          dark: new THREE.MeshToonMaterial({ color: 0x141a26, gradientMap: toonGradient }),
-          canopy: new THREE.MeshPhongMaterial({ color: 0x0a1420, specular: 0x88ccff, shininess: 90, transparent: true, opacity: 0.94 }),
-          glow: new THREE.MeshBasicMaterial({ color: accentColor }),
-          outline: new THREE.MeshBasicMaterial({ color: 0x05070d, side: THREE.BackSide }),
-          wire: null, edge: null
-        };
-      }
-      if (style === 'B') {
-        return {
-          body: new THREE.MeshStandardMaterial({ color: bodyColor, metalness: 0.9, roughness: 0.3 }),
-          accent: new THREE.MeshStandardMaterial({ color: accentColor, metalness: 0.6, roughness: 0.35, emissive: accentColor, emissiveIntensity: 0.9 }),
-          dark: new THREE.MeshStandardMaterial({ color: 0x1a2230, metalness: 0.85, roughness: 0.45 }),
-          canopy: new THREE.MeshStandardMaterial({ color: 0x0a1420, metalness: 0.2, roughness: 0.08, emissive: 0x00f0ff, emissiveIntensity: 0.25 }),
-          glow: new THREE.MeshBasicMaterial({ color: accentColor }),
-          outline: null,
-          wire: new THREE.MeshBasicMaterial({ color: accentColor, wireframe: true, transparent: true, opacity: 0.10 }),
-          edge: null
-        };
-      }
-      return {
-        body: new THREE.MeshBasicMaterial({ color: bodyColor }),
-        accent: new THREE.MeshBasicMaterial({ color: accentColor }),
-        dark: new THREE.MeshBasicMaterial({ color: 0x101826 }),
-        canopy: new THREE.MeshBasicMaterial({ color: 0x0a1420 }),
-        glow: new THREE.MeshBasicMaterial({ color: accentColor }),
-        outline: null, wire: null,
-        edge: new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.55 })
-      };
-    }
-
-    function applyStyleEnvironment() {
-      // Remove old style lights
-      for (const l of styleLights) scene.remove(l);
-      styleLights = [];
-
-      const rigs = {
-        A: { bg: 0x060a18, fog: [18, 95], lights: [
-          ['ambient', 0x334466, 1.25], ['dir', 0xaaccff, 1.7, [7, 11, 5]], ['point', 0x00f0ff, 1.3, [-9, 4.5, -9]]
-        ]},
-        B: { bg: 0x0a0c12, fog: [20, 100], lights: [
-          ['ambient', 0x20242e, 0.7], ['dir', 0xffffff, 2.3, [9, 13, 6]], ['point', 0x00f0ff, 0.9, [0, 6, -11]]
-        ]},
-        C: { bg: 0x12082a, fog: [22, 110], lights: [
-          ['ambient', 0x4433aa, 0.95], ['dir', 0xff88cc, 1.25, [5, 9, 7]], ['point', 0x00f0ff, 1.6, [0, 3, -7]]
-        ]}
-      };
-      const rig = rigs[currentStyle];
-      scene.background = new THREE.Color(rig.bg);
-      scene.fog = new THREE.Fog(rig.bg, rig.fog[0], rig.fog[1]);
-      for (const def of rig.lights) {
-        let light;
-        if (def[0] === 'ambient') light = new THREE.AmbientLight(def[1], def[2]);
-        else if (def[0] === 'dir') { light = new THREE.DirectionalLight(def[1], def[2]); light.position.set(...def[3]); }
-        else { light = new THREE.PointLight(def[1], def[2], 60); light.position.set(...def[3]); }
-        scene.add(light);
-        styleLights.push(light);
-      }
-      // Pedestal / pad ring color follows the accent of the selected machine
-      updatePedestalRing();
-    }
-
-    // ================= PEDESTAL =================
-    function buildPedestal() {
-      if (pedestal) { disposeObject(pedestal); scene.remove(pedestal); }
-      pedestal = new THREE.Group();
-      const base = new THREE.Mesh(
-        new THREE.CylinderGeometry(3.4, 3.9, 0.35, 32),
-        new THREE.MeshStandardMaterial({ color: 0x0c1220, metalness: 0.7, roughness: 0.4 })
-      );
-      base.position.y = 0.175;
-      pedestal.add(base);
-      const ring = new THREE.Mesh(
-        new THREE.TorusGeometry(3.15, 0.05, 8, 48).rotateX(Math.PI / 2),
-        new THREE.MeshBasicMaterial({ color: 0x00f0ff })
-      );
-      ring.position.y = 0.37;
-      ring.name = 'pedestalRing';
-      pedestal.add(ring);
-      scene.add(pedestal);
-    }
-
-    function updatePedestalRing() {
-      if (!pedestal) return;
-      const def = MACHINES.find(m => m.id === currentMachine);
-      const ring = pedestal.getObjectByName('pedestalRing');
-      if (ring) ring.material.color.set(def ? def.accent : 0x00f0ff);
-      for (const pad of gridPads) {
-        pad.material.color.set(def && pad.userData.machineId === def.id ? 0xffffff : (def ? def.accent : 0x00f0ff));
-        pad.material.opacity = (def && pad.userData.machineId === def.id) ? 0.95 : 0.4;
-      }
-    }
-
-    // ================= SHIP ARCHETYPES =================
-    // Each archetype: (nose, cockpit, wings, engines, M) — all face +Z forward.
-    const ARCHETYPES = {
-      // 1. Dart — agulha delta clássica (aerodinâmica)
-      falcon(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.ConeGeometry(0.95, 4.8, 6).rotateX(Math.PI / 2), M.body, 0, 0, 1.2));
-        finish(put(nose, new THREE.CylinderGeometry(0.55, 0.95, 2.2, 6).rotateX(Math.PI / 2), M.body, 0, 0, -1.6));
-        finish(put(nose, new THREE.BoxGeometry(0.35, 0.22, 1.2), M.dark, -0.75, -0.08, 0.6));
-        finish(put(nose, new THREE.BoxGeometry(0.35, 0.22, 1.2), M.dark, 0.75, -0.08, 0.6));
-        finish(put(cockpit, new THREE.SphereGeometry(0.55, 10, 8).scale(0.75, 0.5, 1.5), M.canopy, 0, 0.42, 0.1));
-        finish(put(cockpit, new THREE.BoxGeometry(0.1, 0.2, 1.5), M.accent, 0, 0.72, -0.1));
-        finish(put(wings, new THREE.BoxGeometry(3.6, 0.09, 1.7).rotateY(0.18), M.accent, -1.5, 0, -1.0));
-        finish(put(wings, new THREE.BoxGeometry(3.6, 0.09, 1.7).rotateY(-0.18), M.accent, 1.5, 0, -1.0));
-        finish(put(wings, new THREE.BoxGeometry(0.1, 0.7, 1.0), M.body, -2.6, 0.4, -1.2));
-        finish(put(wings, new THREE.BoxGeometry(0.1, 0.7, 1.0), M.body, 2.6, 0.4, -1.2));
-        finish(put(wings, new THREE.BoxGeometry(0.12, 1.3, 1.2), M.accent, -0.9, 0.75, -1.6));
-        finish(put(wings, new THREE.BoxGeometry(0.12, 1.3, 1.2), M.accent, 0.9, 0.75, -1.6));
-        finish(put(engines, new THREE.CylinderGeometry(0.42, 0.48, 1.7, 8).rotateX(Math.PI / 2), M.dark, -0.62, 0, -2.3));
-        finish(put(engines, new THREE.CylinderGeometry(0.42, 0.48, 1.7, 8).rotateX(Math.PI / 2), M.dark, 0.62, 0, -2.3));
-        finish(put(engines, new THREE.ConeGeometry(0.34, 1.4, 8).rotateX(-Math.PI / 2), M.glow, -0.62, 0, -3.3));
-        finish(put(engines, new THREE.ConeGeometry(0.34, 1.4, 8).rotateX(-Math.PI / 2), M.glow, 0.62, 0, -3.3));
-      },
-
-      // 2. Needle — agulha ultraleve com canards (aerodinâmica)
-      fox(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.ConeGeometry(0.55, 6.6, 5).rotateX(Math.PI / 2).scale(0.85, 0.4, 1), M.body, 0, 0.05, 1.4));
-        finish(put(nose, new THREE.BoxGeometry(0.75, 0.05, 0.9).rotateY(0.3), M.accent, -0.7, 0.05, 2.0));
-        finish(put(nose, new THREE.BoxGeometry(0.75, 0.05, 0.9).rotateY(-0.3), M.accent, 0.7, 0.05, 2.0));
-        finish(put(nose, new THREE.BoxGeometry(0.1, 0.18, 2.4), M.dark, 0, 0.5, -0.4));
-        finish(put(cockpit, new THREE.SphereGeometry(0.5, 10, 8).scale(0.62, 0.38, 1.5), M.canopy, 0, 0.32, 0.3));
-        finish(put(wings, new THREE.BoxGeometry(3.2, 0.07, 1.3).rotateY(0.22), M.accent, -1.3, 0.02, -1.1));
-        finish(put(wings, new THREE.BoxGeometry(3.2, 0.07, 1.3).rotateY(-0.22), M.accent, 1.3, 0.02, -1.1));
-        finish(put(wings, new THREE.BoxGeometry(0.08, 0.65, 0.8), M.body, -2.35, 0.35, -1.3));
-        finish(put(wings, new THREE.BoxGeometry(0.08, 0.65, 0.8), M.body, 2.35, 0.35, -1.3));
-        finish(put(wings, new THREE.BoxGeometry(0.08, 1.25, 1.0), M.body, -0.6, 0.65, -1.5));
-        finish(put(wings, new THREE.BoxGeometry(0.08, 1.25, 1.0), M.body, 0.6, 0.65, -1.5));
-        finish(put(engines, new THREE.CylinderGeometry(0.36, 0.4, 1.5, 8).rotateX(Math.PI / 2), M.dark, -0.5, 0, -2.4));
-        finish(put(engines, new THREE.CylinderGeometry(0.36, 0.4, 1.5, 8).rotateX(Math.PI / 2), M.dark, 0.5, 0, -2.4));
-        finish(put(engines, new THREE.ConeGeometry(0.3, 1.6, 8).rotateX(-Math.PI / 2), M.glow, -0.5, 0, -3.4));
-        finish(put(engines, new THREE.ConeGeometry(0.3, 1.6, 8).rotateX(-Math.PI / 2), M.glow, 0.5, 0, -3.4));
-      },
-
-      // 3. Ram — proa de abate blindada (robusta)
-      goose(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.BoxGeometry(2.5, 1.0, 3.4), M.body, 0, 0.05, 0.3));
-        finish(put(nose, new THREE.ConeGeometry(1.15, 1.8, 4).rotateX(Math.PI / 2).rotateY(Math.PI / 4), M.accent, 0, 0.05, 2.6));
-        finish(put(nose, new THREE.BoxGeometry(2.7, 0.35, 0.5), M.dark, 0, 0, 3.3));
-        finish(put(cockpit, new THREE.BoxGeometry(1.25, 0.6, 1.7), M.canopy, 0, 0.72, 0.2));
-        finish(put(cockpit, new THREE.BoxGeometry(1.35, 0.14, 1.6), M.dark, 0, 1.05, 0.2));
-        finish(put(wings, new THREE.BoxGeometry(0.55, 0.75, 3.6), M.accent, -1.55, 0, -0.2));
-        finish(put(wings, new THREE.BoxGeometry(0.55, 0.75, 3.6), M.accent, 1.55, 0, -0.2));
-        finish(put(wings, new THREE.BoxGeometry(0.25, 0.45, 1.5), M.dark, -1.9, 0, 0.4));
-        finish(put(wings, new THREE.BoxGeometry(0.25, 0.45, 1.5), M.dark, 1.9, 0, 0.4));
-        finish(put(wings, new THREE.BoxGeometry(2.2, 0.5, 0.4), M.dark, 0, 0.35, -1.9));
-        finish(put(engines, new THREE.CylinderGeometry(0.5, 0.55, 1.4, 8).rotateX(Math.PI / 2), M.dark, -0.7, 0.1, -2.4));
-        finish(put(engines, new THREE.CylinderGeometry(0.5, 0.55, 1.4, 8).rotateX(Math.PI / 2), M.dark, 0.7, 0.1, -2.4));
-        finish(put(engines, new THREE.TorusGeometry(0.42, 0.09, 6, 12), M.accent, -0.7, 0.1, -3.15));
-        finish(put(engines, new THREE.TorusGeometry(0.42, 0.09, 6, 12), M.accent, 0.7, 0.1, -3.15));
-        finish(put(engines, new THREE.ConeGeometry(0.38, 1.2, 8).rotateX(-Math.PI / 2), M.glow, -0.7, 0.1, -3.6));
-        finish(put(engines, new THREE.ConeGeometry(0.38, 1.2, 8).rotateX(-Math.PI / 2), M.glow, 0.7, 0.1, -3.6));
-      },
-
-      // 4. Manta — asa larga arredondada (aerodinâmica)
-      stingray(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.SphereGeometry(1.7, 10, 8).scale(1.5, 0.32, 1.35), M.body, 0, 0, 0.2));
-        finish(put(nose, new THREE.BoxGeometry(1.8, 0.25, 1.1), M.dark, 0, -0.15, 1.6));
-        finish(put(cockpit, new THREE.SphereGeometry(0.7, 10, 8).scale(0.8, 0.42, 1.4), M.canopy, 0, 0.5, 0.3));
-        finish(put(wings, new THREE.BoxGeometry(2.0, 0.12, 1.5).rotateY(0.35), M.accent, -2.2, 0.1, -0.6));
-        finish(put(wings, new THREE.BoxGeometry(2.0, 0.12, 1.5).rotateY(-0.35), M.accent, 2.2, 0.1, -0.6));
-        finish(put(wings, new THREE.BoxGeometry(1.3, 0.07, 0.7), M.dark, -2.6, 0.22, -1.3));
-        finish(put(wings, new THREE.BoxGeometry(1.3, 0.07, 0.7), M.dark, 2.6, 0.22, -1.3));
-        finish(put(wings, new THREE.CylinderGeometry(0.12, 0.2, 2.6, 6).rotateX(Math.PI / 2), M.body, 0, 0, -2.4));
-        finish(put(engines, new THREE.CylinderGeometry(0.5, 0.56, 1.6, 8).rotateX(Math.PI / 2), M.dark, -0.85, 0.05, -1.9));
-        finish(put(engines, new THREE.CylinderGeometry(0.5, 0.56, 1.6, 8).rotateX(Math.PI / 2), M.dark, 0.85, 0.05, -1.9));
-        finish(put(engines, new THREE.ConeGeometry(0.42, 1.8, 8).rotateX(-Math.PI / 2), M.glow, -0.85, 0.05, -3.0));
-        finish(put(engines, new THREE.ConeGeometry(0.42, 1.8, 8).rotateX(-Math.PI / 2), M.glow, 0.85, 0.05, -3.0));
-      },
-
-      // 5. Twin-Fork — nariz bifurcado felino (aerodinâmica)
-      white_cat(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.ConeGeometry(0.42, 3.4, 5).rotateX(Math.PI / 2), M.body, -0.55, 0.05, 1.5));
-        finish(put(nose, new THREE.ConeGeometry(0.42, 3.4, 5).rotateX(Math.PI / 2), M.body, 0.55, 0.05, 1.5));
-        finish(put(nose, new THREE.BoxGeometry(0.4, 0.25, 2.6), M.accent, 0, 0, 0.4));
-        finish(put(cockpit, new THREE.SphereGeometry(0.6, 10, 8).scale(0.68, 0.45, 1.7), M.canopy, 0, 0.38, 0.1));
-        finish(put(wings, new THREE.BoxGeometry(0.09, 1.1, 0.85), M.accent, -0.75, 0.7, -0.9));
-        finish(put(wings, new THREE.BoxGeometry(0.09, 1.1, 0.85), M.accent, 0.75, 0.7, -0.9));
-        finish(put(wings, new THREE.BoxGeometry(2.0, 0.09, 1.5).rotateY(0.15), M.accent, -1.5, 0.05, -0.5));
-        finish(put(wings, new THREE.BoxGeometry(2.0, 0.09, 1.5).rotateY(-0.15), M.accent, 1.5, 0.05, -0.5));
-        finish(put(engines, new THREE.CylinderGeometry(0.36, 0.4, 1.6, 8).rotateX(Math.PI / 2), M.body, -0.55, 0, -2.2));
-        finish(put(engines, new THREE.CylinderGeometry(0.36, 0.4, 1.6, 8).rotateX(Math.PI / 2), M.body, 0.55, 0, -2.2));
-        finish(put(engines, new THREE.ConeGeometry(0.32, 1.5, 8).rotateX(-Math.PI / 2), M.glow, -0.55, 0, -3.2));
-        finish(put(engines, new THREE.ConeGeometry(0.32, 1.5, 8).rotateX(-Math.PI / 2), M.glow, 0.55, 0, -3.2));
-      },
-
-      // 6. Rocket — corpo cilíndrico com aletas (aerodinâmica)
-      red_gazelle(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.CylinderGeometry(0.62, 0.72, 4.6, 8).rotateX(Math.PI / 2), M.body, 0, 0, -0.6));
-        finish(put(nose, new THREE.ConeGeometry(0.62, 1.6, 8).rotateX(Math.PI / 2).scale(0.9, 0.42, 1), M.body, 0, 0, 2.4));
-        finish(put(cockpit, new THREE.BoxGeometry(0.7, 0.42, 1.3), M.canopy, 0, 0.55, 0.4));
-        finish(put(wings, new THREE.BoxGeometry(0.08, 1.2, 1.1).rotateZ(0.15), M.accent, -0.62, 0.5, -2.6));
-        finish(put(wings, new THREE.BoxGeometry(0.08, 1.2, 1.1).rotateZ(-0.15), M.accent, 0.62, 0.5, -2.6));
-        finish(put(wings, new THREE.BoxGeometry(0.08, 1.1, 1.0), M.accent, 0, 0.55, -2.7));
-        finish(put(wings, new THREE.BoxGeometry(0.5, 0.06, 2.2), M.dark, -0.75, 0.1, -0.8));
-        finish(put(wings, new THREE.BoxGeometry(0.5, 0.06, 2.2), M.dark, 0.75, 0.1, -0.8));
-        finish(put(engines, new THREE.CylinderGeometry(0.44, 0.5, 1.6, 8).rotateX(Math.PI / 2), M.dark, 0, 0, -3.2));
-        finish(put(engines, new THREE.ConeGeometry(0.4, 2.0, 8).rotateX(-Math.PI / 2), M.glow, 0, 0, -4.4));
-      },
-
-      // 7. Block — lajes angulares escalonadas (robusta)
-      iron_tiger(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.BoxGeometry(2.2, 0.85, 3.2), M.body, 0, 0.05, 0.2));
-        finish(put(nose, new THREE.BoxGeometry(2.45, 0.35, 0.5), M.dark, 0, 0, 2.0));
-        finish(put(nose, new THREE.BoxGeometry(0.5, 0.6, 2.4), M.accent, -1.35, 0.35, -0.6));
-        finish(put(nose, new THREE.BoxGeometry(0.5, 0.6, 2.4), M.accent, 1.35, 0.35, -0.6));
-        finish(put(cockpit, new THREE.BoxGeometry(1.15, 0.6, 1.7), M.canopy, 0, 0.62, 0.1));
-        finish(put(cockpit, new THREE.BoxGeometry(1.3, 0.12, 1.9), M.dark, 0, 0.95, 0.1));
-        finish(put(wings, new THREE.BoxGeometry(0.6, 0.65, 3.2), M.accent, -1.5, 0.05, -0.4));
-        finish(put(wings, new THREE.BoxGeometry(0.6, 0.65, 3.2), M.accent, 1.5, 0.05, -0.4));
-        finish(put(wings, new THREE.BoxGeometry(0.12, 1.0, 1.2), M.body, 0, 0.85, -1.5));
-        finish(put(engines, new THREE.CylinderGeometry(0.38, 0.42, 1.5, 8).rotateX(Math.PI / 2), M.dark, -0.72, 0, -2.3));
-        finish(put(engines, new THREE.CylinderGeometry(0.38, 0.42, 1.5, 8).rotateX(Math.PI / 2), M.dark, 0.72, 0, -2.3));
-        finish(put(engines, new THREE.CylinderGeometry(0.32, 0.36, 1.3, 8).rotateX(Math.PI / 2), M.dark, 0, 0.3, -2.2));
-        finish(put(engines, new THREE.ConeGeometry(0.34, 1.3, 8).rotateX(-Math.PI / 2), M.glow, -0.72, 0, -3.25));
-        finish(put(engines, new THREE.ConeGeometry(0.34, 1.3, 8).rotateX(-Math.PI / 2), M.glow, 0.72, 0, -3.25));
-      },
-
-      // 8. Pincer — garras curvadas biônicas (agressiva)
-      deep_claw(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.SphereGeometry(0.85, 8, 8).scale(1.15, 0.45, 1.7), M.accent, 0, 0.05, 0.3));
-        for (const s of [-1, 1]) {
-          const claw = new THREE.Group();
-          claw.position.set(s * 0.75, 0.05, 1.4);
-          claw.rotation.y = -s * 0.4;
-          claw.rotation.z = s * 0.2;
-          nose.add(claw);
-          const seg1 = finish(put(claw, new THREE.ConeGeometry(0.3, 2.0, 5).rotateX(Math.PI / 2), M.body, 0, 0, 0.5));
-          const tip = finish(put(seg1, new THREE.ConeGeometry(0.2, 1.3, 5).rotateX(Math.PI / 2), M.body, 0, 0.3, 1.25));
-          tip.rotation.x = -0.75;
-        }
-        finish(put(cockpit, new THREE.SphereGeometry(0.65, 10, 8).scale(0.8, 0.5, 1.3), M.canopy, 0, 0.45, 0.2));
-        finish(put(wings, new THREE.BoxGeometry(2.0, 0.1, 1.6).rotateY(0.2), M.body, -1.7, 0.08, -0.5));
-        finish(put(wings, new THREE.BoxGeometry(2.0, 0.1, 1.6).rotateY(-0.2), M.body, 1.7, 0.08, -0.5));
-        finish(put(wings, new THREE.BoxGeometry(0.08, 0.6, 0.5), M.accent, -1.2, 0.35, -1.2));
-        finish(put(wings, new THREE.BoxGeometry(0.08, 0.6, 0.5), M.accent, 1.2, 0.35, -1.2));
-        finish(put(engines, new THREE.CylinderGeometry(0.4, 0.45, 1.5, 8).rotateX(Math.PI / 2), M.accent, -0.6, 0.05, -2.2));
-        finish(put(engines, new THREE.CylinderGeometry(0.4, 0.45, 1.5, 8).rotateX(Math.PI / 2), M.accent, 0.6, 0.05, -2.2));
-        finish(put(engines, new THREE.ConeGeometry(0.34, 1.5, 8).rotateX(-Math.PI / 2), M.glow, -0.6, 0.05, -3.2));
-        finish(put(engines, new THREE.ConeGeometry(0.34, 1.5, 8).rotateX(-Math.PI / 2), M.glow, 0.6, 0.05, -3.2));
-      },
-
-      // 9. Brute — casco largo com chifres (robusta)
-      black_bull(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.BoxGeometry(2.7, 1.0, 3.8), M.body, 0, 0.1, 0.2));
-        const hornL = finish(put(nose, new THREE.ConeGeometry(0.32, 2.2, 5).rotateX(Math.PI / 2), M.accent, -1.0, 0.35, 2.4));
-        hornL.rotation.set(0, 0.45, 0.3);
-        const hornR = finish(put(nose, new THREE.ConeGeometry(0.32, 2.2, 5).rotateX(Math.PI / 2), M.accent, 1.0, 0.35, 2.4));
-        hornR.rotation.set(0, -0.45, -0.3);
-        finish(put(cockpit, new THREE.ConeGeometry(0.85, 2.0, 4).rotateX(Math.PI / 2), M.canopy, 0, 0.7, 0.3));
-        finish(put(wings, new THREE.BoxGeometry(0.6, 0.8, 3.6), M.body, -1.7, 0.1, -0.2));
-        finish(put(wings, new THREE.BoxGeometry(0.6, 0.8, 3.6), M.body, 1.7, 0.1, -0.2));
-        finish(put(wings, new THREE.BoxGeometry(0.1, 1.4, 1.2), M.accent, -1.0, 0.9, -1.3));
-        finish(put(wings, new THREE.BoxGeometry(0.1, 1.4, 1.2), M.accent, 1.0, 0.9, -1.3));
-        finish(put(engines, new THREE.CylinderGeometry(0.5, 0.56, 1.8, 8).rotateX(Math.PI / 2), M.dark, -0.8, 0.1, -2.4));
-        finish(put(engines, new THREE.CylinderGeometry(0.5, 0.56, 1.8, 8).rotateX(Math.PI / 2), M.dark, 0.8, 0.1, -2.4));
-        finish(put(engines, new THREE.ConeGeometry(0.45, 2.0, 8).rotateX(-Math.PI / 2), M.glow, -0.8, 0.1, -3.6));
-        finish(put(engines, new THREE.ConeGeometry(0.45, 2.0, 8).rotateX(-Math.PI / 2), M.glow, 0.8, 0.1, -3.6));
-      },
-
-      // 10. Gull — asas de gaivota varridas (aerodinâmica)
-      blood_hawk(nose, cockpit, wings, engines, M) {
-        finish(put(nose, new THREE.ConeGeometry(1.1, 5.0, 4).rotateX(Math.PI / 2).scale(1, 0.45, 1.05), M.body, 0, 0.05, 0.5));
-        finish(put(nose, new THREE.BoxGeometry(0.38, 0.1, 1.1).rotateY(0.2), M.accent, -0.6, -0.05, 1.7));
-        finish(put(nose, new THREE.BoxGeometry(0.38, 0.1, 1.1).rotateY(-0.2), M.accent, 0.6, -0.05, 1.7));
-        finish(put(cockpit, new THREE.SphereGeometry(0.62, 10, 8).scale(0.72, 0.45, 1.6), M.canopy, 0, 0.4, 0.2));
-        const gl = finish(put(wings, new THREE.BoxGeometry(2.6, 0.11, 1.6).rotateY(-0.25), M.body, -2.0, 0.25, -0.4));
-        gl.rotation.z = 0.28;
-        const gr = finish(put(wings, new THREE.BoxGeometry(2.6, 0.11, 1.6).rotateY(0.25), M.body, 2.0, 0.25, -0.4));
-        gr.rotation.z = -0.28;
-        finish(put(wings, new THREE.BoxGeometry(0.1, 1.25, 1.2), M.accent, -1.05, 0.7, -1.2));
-        finish(put(wings, new THREE.BoxGeometry(0.1, 1.25, 1.2), M.accent, 1.05, 0.7, -1.2));
-        finish(put(engines, new THREE.CylinderGeometry(0.4, 0.45, 1.6, 8).rotateX(Math.PI / 2), M.dark, -0.6, 0, -2.3));
-        finish(put(engines, new THREE.CylinderGeometry(0.4, 0.45, 1.6, 8).rotateX(Math.PI / 2), M.dark, 0.6, 0, -2.3));
-        finish(put(engines, new THREE.ConeGeometry(0.36, 1.7, 8).rotateX(-Math.PI / 2), M.glow, -0.6, 0, -3.35));
-        finish(put(engines, new THREE.ConeGeometry(0.36, 1.7, 8).rotateX(-Math.PI / 2), M.glow, 0.6, 0, -3.35));
-      }
-    };
-
-    // ================= SHIP ASSEMBLY =================
-    function put(parent, geo, mat, x = 0, y = 0, z = 0) {
-      const m = new THREE.Mesh(geo, mat);
-      m.position.set(x, y, z);
-      parent.add(m);
-      return m;
-    }
-
-    // Style-dependent contour: inverted-hull outline (A) or vector edges (C)
-    function finish(mesh) {
-      if (currentStyle === 'A') {
-        const o = new THREE.Mesh(mesh.geometry, lastMaterials.outline);
-        o.scale.setScalar(1.05);
-        mesh.add(o);
-      } else if (currentStyle === 'C') {
-        const e = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry, 24), lastMaterials.edge);
-        mesh.add(e);
-      } else if (currentStyle === 'B') {
-        // Technical wireframe overlay on the larger surfaces
-        if (mesh.geometry.type === 'BoxGeometry' || mesh.geometry.type === 'CylinderGeometry') {
-          const w = new THREE.Mesh(mesh.geometry, lastMaterials.wire);
-          w.scale.setScalar(1.001);
-          mesh.add(w);
-        }
-      }
-      return mesh;
-    }
-
-    let lastMaterials = null;
-
-    function buildShip(def) {
-      const M = makeMaterials(currentStyle, def.color, def.accent);
-      lastMaterials = M;
-
-      const group = new THREE.Group();
-      const nose = new THREE.Group();
-      const cockpit = new THREE.Group();
-      const wings = new THREE.Group();
-      const engines = new THREE.Group();
-      group.add(nose, cockpit, wings, engines);
-
-      ARCHETYPES[def.id](nose, cockpit, wings, engines, M);
-
-      // Glow sprites at every plume (M.glow) position
-      const glowSprites = [];
-      const anchors = [];
-      engines.traverse(o => { if (o.isMesh && o.material === M.glow) anchors.push(o.position); });
-      for (const pos of anchors) {
-        const sm = new THREE.SpriteMaterial({
-          map: glowTexture, color: def.accent, transparent: true,
-          opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false
-        });
-        const sp = new THREE.Sprite(sm);
-        sp.position.copy(pos);
-        sp.scale.setScalar(2.4);
-        group.add(sp);
-        glowSprites.push(sp);
-      }
-
-      // Ship glow light
-      const glowLight = new THREE.PointLight(def.accent, 2.0, 10);
-      glowLight.position.set(0, 0.6, 0);
-      group.add(glowLight);
-
-      group.position.y = 1.5;
-
-      return {
-        def, group, wings, cockpit, glowSprites, glowLight,
-        glowMats: ('emissiveIntensity' in M.accent) ? [M.accent, M.canopy] : [],
-        tinted: [
-          { mat: M.body, base: new THREE.Color(def.color) },
-          { mat: M.dark, base: new THREE.Color(0x141a26) },
-          { mat: M.accent, base: new THREE.Color(def.accent) }
-        ],
-        phase: Math.random() * Math.PI * 2
-      };
-    }
-
-    // ================= PARAM APPLICATION (no rebuild) =================
-    function applyParams() {
-      const ships = viewMode === 'vitrine' ? (vitrineShip ? [vitrineShip] : []) : gridShips;
-      for (const s of ships) {
-        s.group.scale.set(params.width, 1, params.length);
-        s.wings.scale.x = params.wingSpan;
-        s.cockpit.scale.setScalar(params.canopy);
-        for (const m of s.glowMats) m.emissiveIntensity = 0.9 * params.glow;
-        for (const sp of s.glowSprites) {
-          sp.material.opacity = Math.min(0.85, 0.55 * params.glow);
-          sp.scale.setScalar(2.4 * (0.45 + 0.55 * params.glow));
-        }
-        s.glowLight.intensity = 2.0 * params.glow;
-        for (const t of s.tinted) t.mat.color.copy(t.base).offsetHSL(0, params.saturation, 0);
-      }
-    }
-
-    // ================= SCENE BUILD / REBUILD =================
-    function disposeObject(root) {
-      root.traverse(node => {
-        if (node.geometry) node.geometry.dispose();
-        if (node.material) {
-          const mats = Array.isArray(node.material) ? node.material : [node.material];
-          for (const m of mats) {
-            if (m.map && m.map !== glowTexture) m.map.dispose();
-            m.dispose();
-          }
-        }
-      });
-    }
-
-    function rebuildScene() {
-      // Dispose previous ships
-      if (vitrineShip) { disposeObject(vitrineShip.group); scene.remove(vitrineShip.group); vitrineShip = null; }
-      for (const s of gridShips) { disposeObject(s.group); scene.remove(s.group); }
-      gridShips = [];
-      for (const p of gridPads) { disposeObject(p); scene.remove(p); }
-      gridPads = [];
-      if (pedestal) pedestal.visible = (viewMode === 'vitrine');
-
-      if (viewMode === 'vitrine') {
-        const def = MACHINES.find(m => m.id === currentMachine) || MACHINES[0];
-        vitrineShip = buildShip(def);
-        scene.add(vitrineShip.group);
-        desiredTarget.set(0, 1.4, 0);
-        orbit.radius = 13;
-      } else {
-        // Galeria: 10 silhuetas lado a lado (2 fileiras × 5)
-        MACHINES.forEach((def, i) => {
-          const s = buildShip(def);
-          s.group.position.set((i % 5 - 2) * 9, 1.5, (Math.floor(i / 5) - 0.5) * 11);
-          scene.add(s.group);
-          gridShips.push(s);
-
-          // Floor pad + ring
-          const pad = new THREE.Mesh(
-            new THREE.CircleGeometry(2.6, 24).rotateX(-Math.PI / 2),
-            new THREE.MeshBasicMaterial({ color: 0x0a1220, transparent: true, opacity: 0.9 })
-          );
-          pad.position.set(s.group.position.x, 0.03, s.group.position.z);
-          scene.add(pad);
-          const ring = new THREE.Mesh(
-            new THREE.TorusGeometry(2.5, 0.04, 6, 32).rotateX(Math.PI / 2),
-            new THREE.MeshBasicMaterial({ color: def.accent, transparent: true, opacity: 0.4 })
-          );
-          ring.position.set(s.group.position.x, 0.06, s.group.position.z);
-          ring.userData.machineId = def.id;
-          scene.add(ring);
-          gridPads.push(ring);
-        });
-        desiredTarget.set(0, 1.2, 0);
-        orbit.radius = 34;
-      }
-      applyParams();
-      updatePedestalRing();
-    }
-
-    // ================= UI STATE =================
-    function setStyle(style, keepParams = false) {
-      if (!STYLE_INFO[style]) return;
-      currentStyle = style;
-      if (!keepParams) params = { ...editedPresets[style] };
-      applyStyleEnvironment();
-      rebuildScene();
-      syncUI();
-      showToast(`Direção visual ${style} — ${STYLE_INFO[style].name.split('— ')[1]}`);
-    }
-
-    function setView(mode) {
-      if (viewMode === mode) return;
-      viewMode = mode;
-      rebuildScene();
-      syncUI();
-      showToast(mode === 'vitrine' ? 'Vitrine: nave única em turntable' : 'Galeria: as 10 silhuetas lado a lado');
-    }
-
-    function selectMachine(id) {
-      const def = MACHINES.find(m => m.id === id);
-      if (!def) return;
-      currentMachine = id;
-      if (viewMode === 'vitrine') {
-        rebuildScene();
-      } else {
-        updatePedestalRing();
-        const idx = MACHINES.indexOf(def);
-        if (gridShips[idx]) desiredTarget.copy(gridShips[idx].group.position);
-        orbit.radius = 12;
-      }
-      syncUI();
-    }
-
-    function updateParam(key, value) {
-      const v = Number(value);
-      params[key] = v;
-      editedPresets[currentStyle][key] = v;
-      applyParams();
-      syncLabels();
-    }
-
-    function randomizeParams() {
-      for (const key of NUMERIC_KEYS) {
-        const slider = document.getElementById(`slider-${key}`);
-        const min = Number(slider.min), max = Number(slider.max);
-        const v = +(min + Math.random() * (max - min)).toFixed(2);
-        params[key] = v;
-        editedPresets[currentStyle][key] = v;
-      }
-      applyParams();
-      syncUI();
-      showToast('🎲 Silhueta aleatória gerada — ajuste os sliders para refinar');
-    }
-
-    function toggleRotate() {
-      autoRotate = !autoRotate;
-      document.getElementById('btn-rotate').textContent = autoRotate ? '⏸ Parar Rotação' : '▶ Girar Automático';
-    }
-
-    // ================= JSON IO =================
-    function copyJSON() {
-      const text = jsonArea.value;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(
-          () => showToast('📋 JSON copiado para a área de transferência!'),
-          () => showToast('Cópia indisponível: selecione e copie o JSON manualmente.')
-        );
-      } else {
-        jsonArea.select();
-        document.execCommand('copy');
-        showToast('📋 JSON copiado!');
-      }
-    }
-
-    function applyJSON() {
-      try {
-        const parsed = JSON.parse(jsonArea.value);
-        if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) throw new Error('not an object');
-        const next = { ...params };
-        let needRebuild = false;
-        if (parsed.style !== undefined) {
-          if (!STYLE_INFO[parsed.style]) throw new Error('style must be A, B or C');
-          if (parsed.style !== currentStyle) needRebuild = true;
-          next.style = parsed.style;
-        }
-        if (parsed.machine !== undefined) {
-          if (!MACHINES.some(m => m.id === parsed.machine)) throw new Error('unknown machine id');
-          if (parsed.machine !== currentMachine && viewMode === 'vitrine') needRebuild = true;
-          next.machine = parsed.machine;
-        }
-        for (const key of NUMERIC_KEYS) {
-          if (parsed[key] === undefined) continue;
-          const slider = document.getElementById(`slider-${key}`);
-          if (!slider || typeof parsed[key] !== 'number' || !Number.isFinite(parsed[key])
-            || parsed[key] < Number(slider.min) || parsed[key] > Number(slider.max)) {
-            throw new Error(`invalid ${key}`);
-          }
-          next[key] = parsed[key];
-        }
-        // Atomic apply: only after every validation passed
-        params = next;
-        const newStyle = params.style;
-        const newMachine = params.machine || currentMachine;
-        const styleChanged = newStyle !== currentStyle;
-        const machineChanged = newMachine !== currentMachine;
-        currentStyle = newStyle;
-        currentMachine = newMachine;
-        editedPresets[newStyle] = { ...params };
-        if (styleChanged) {
-          applyStyleEnvironment();
-          rebuildScene();
-        } else if (machineChanged && viewMode === 'vitrine') {
-          rebuildScene();
-        } else if (machineChanged) {
-          updatePedestalRing();
-          const idx = MACHINES.findIndex(m => m.id === newMachine);
-          if (gridShips[idx]) {
-            desiredTarget.copy(gridShips[idx].group.position);
-            orbit.radius = 12;
-          }
-        } else {
-          applyParams();
-        }
-        syncUI();
-        showToast('💾 JSON aplicado com sucesso!');
-      } catch (e) {
-        showToast('JSON inválido: verifique chaves, tipos e limites dos sliders. Nada foi alterado.');
-      }
-    }
-
-    // ================= UI SYNC =================
-    function syncLabels() {
-      for (const key of NUMERIC_KEYS) {
-        const el = document.getElementById(`val-${key}`);
-        if (el) el.textContent = params[key].toFixed(2);
-      }
-    }
-
-    function syncUI() {
-      // Style buttons
-      for (const s of ['A', 'B', 'C']) {
-        document.getElementById(`style-${s}`).classList.toggle('active', s === currentStyle);
-      }
-      // View buttons
-      document.getElementById('view-vitrine').classList.toggle('active', viewMode === 'vitrine');
-      document.getElementById('view-galeria').classList.toggle('active', viewMode === 'galeria');
-      // Sliders
-      for (const key of NUMERIC_KEYS) {
-        const slider = document.getElementById(`slider-${key}`);
-        if (slider) slider.value = params[key];
-      }
-      syncLabels();
-      // HUD
-      const def = MACHINES.find(m => m.id === currentMachine) || MACHINES[0];
-      document.getElementById('hud-name').textContent = def.name;
-      document.getElementById('hud-pilot').textContent = def.pilot;
-      document.getElementById('hud-stats').textContent = `BODY ${def.stats[0]} · BOOST ${def.stats[1]} · GRIP ${def.stats[2]}`;
-      document.getElementById('hud-archetype').textContent = `Silhueta: ${def.archetype} (${def.family})`;
-      const chip = document.getElementById('hud-chip');
-      chip.style.background = '#' + def.color.toString(16).padStart(6, '0');
-      document.getElementById('hud-style').textContent = STYLE_INFO[currentStyle].name;
-      document.getElementById('hud-style-desc').textContent = STYLE_INFO[currentStyle].desc;
-      const modePill = document.getElementById('hud-mode');
-      modePill.textContent = viewMode === 'vitrine' ? 'VITRINE' : 'GALERIA';
-      // Machine buttons
-      document.querySelectorAll('#machine-grid .btn-option').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.machine === currentMachine);
-      });
-      // JSON area
-      jsonArea.value = JSON.stringify({ machine: currentMachine, ...params }, null, 2);
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      clearTimeout(showToast._t);
-      showToast._t = setTimeout(() => toast.classList.remove('show'), 2600);
-    }
-
-    // ================= ORBIT CONTROLS =================
-    function bindOrbit() {
-      const canvas = renderer.domElement;
-      let dragging = false, lastX = 0, lastY = 0;
-      canvas.addEventListener('pointerdown', e => {
-        dragging = true; lastX = e.clientX; lastY = e.clientY;
-        canvas.setPointerCapture(e.pointerId);
-      });
-      canvas.addEventListener('pointermove', e => {
-        if (!dragging) return;
-        const dx = e.clientX - lastX, dy = e.clientY - lastY;
-        lastX = e.clientX; lastY = e.clientY;
-        orbit.theta -= dx * 0.006;
-        orbit.phi = Math.min(1.45, Math.max(0.15, orbit.phi - dy * 0.006));
-      });
-      canvas.addEventListener('pointerup', () => { dragging = false; });
-      canvas.addEventListener('pointercancel', () => { dragging = false; });
-      canvas.addEventListener('wheel', e => {
-        e.preventDefault();
-        orbit.radius = Math.min(60, Math.max(5, orbit.radius + e.deltaY * 0.02));
-      }, { passive: false });
-    }
-
-    // ================= KEYBOARD =================
-    window.addEventListener('keydown', e => {
-      if (e.target && (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT')) return;
-      if (e.code === 'Digit1') setStyle('A');
-      else if (e.code === 'Digit2') setStyle('B');
-      else if (e.code === 'Digit3') setStyle('C');
-      else if (e.code === 'KeyV') setView(viewMode === 'vitrine' ? 'galeria' : 'vitrine');
-      else if (e.code === 'KeyR') toggleRotate();
-    });
-
-    // ================= ANIMATION =================
-    let lastT = performance.now();
-    function animate(now) {
-      requestAnimationFrame(animate);
-      const dt = Math.min((now - lastT) / 1000, 0.05);
-      lastT = now;
-      tGlobal += dt;
-
-      const ships = viewMode === 'vitrine' ? (vitrineShip ? [vitrineShip] : []) : gridShips;
-      for (const s of ships) {
-        if (autoRotate) s.group.rotation.y += dt * (viewMode === 'vitrine' ? 0.45 : 0.25);
-        s.group.position.y = 1.5 + Math.sin(tGlobal * 1.2 + s.phase) * 0.12;
-      }
-
-      cameraTarget.lerp(desiredTarget, Math.min(dt * 5, 1));
-      camera.position.set(
-        cameraTarget.x + orbit.radius * Math.sin(orbit.phi) * Math.sin(orbit.theta),
-        cameraTarget.y + orbit.radius * Math.cos(orbit.phi),
-        cameraTarget.z + orbit.radius * Math.sin(orbit.phi) * Math.cos(orbit.theta)
-      );
-      camera.lookAt(cameraTarget);
-      renderer.render(scene, camera);
-    }
-
-    // ================= BOOT =================
-    // Build machine buttons
-    const machineGrid = document.getElementById('machine-grid');
-    for (const def of MACHINES) {
-      const btn = document.createElement('button');
-      btn.className = 'btn-option';
-      btn.dataset.machine = def.id;
-      btn.innerHTML = `<span class="chip" style="background:#${def.color.toString(16).padStart(6, '0')}"></span>${def.name}<span class="grades">${def.pilot} · ${def.stats.join('/')} · ${def.archetype}</span>`;
-      btn.addEventListener('click', () => selectMachine(def.id));
-      machineGrid.appendChild(btn);
-    }
-
-    const jsonArea = document.getElementById('json-area');
-    if (initThree()) syncUI();
-  </script>
-</body>
-</html>
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G-MINUS · Craft Design Lab / 02</title>
+<style>
+:root{color-scheme:dark;--bg:#090e17;--panel:#0e1522;--line:#263247;--muted:#8799b5;--ink:#f1f6ff;--cyan:#70deff;--mag:#ff6eac;--green:#86f1bc}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}button,input,textarea{font:inherit}
+.app{display:grid;grid-template-columns:344px minmax(0,1fr);height:100dvh}.sidebar{min-width:0;overflow:auto;background:#0b1320;border-right:1px solid #2a3447;padding:20px 18px 28px;scrollbar-color:#354765 transparent}.brand{font-weight:950;font-size:25px;letter-spacing:.08em;color:#fff}.brand span{color:var(--cyan)}.eyebrow{font-size:10px;letter-spacing:.21em;font-weight:900;color:var(--cyan);text-transform:uppercase}.caption{color:var(--muted);font-size:11px;line-height:1.5;margin-top:6px}.section{margin-top:22px}.section h2{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:#b6c7e2;margin:0 0 10px}.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.seg.mode{grid-template-columns:repeat(3,minmax(0,1fr))}.btn{cursor:pointer;background:#121e30;color:#dce9fc;border:1px solid #2c405d;padding:9px 8px;border-radius:7px;font-weight:750;font-size:11px;min-height:40px;transition:background .12s,border-color .12s}.btn:hover{background:#1c2b43;border-color:#5986b5}.btn.active{background:rgba(38,156,203,.18);border-color:#66cffa;box-shadow:inset 0 0 0 1px rgba(102,207,250,.36);color:#fff}.btn .small{display:block;color:#94abc7;font-weight:550;font-size:9px;margin-top:4px}.stylegrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.stylegrid .btn{padding:10px 3px;text-align:center;font-size:15px;min-height:48px}.stylegrid .btn span{display:block;font-size:9px;font-weight:650;letter-spacing:.02em;margin-top:4px}.shipgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.shipgrid .btn{text-align:left;display:flex;align-items:center;gap:8px;min-height:43px}.swatch{width:11px;height:11px;border-radius:3px;flex-shrink:0}.shipgrid .btn strong{font-size:10px}.styleDetail{padding:13px;margin-top:9px;border-left:3px solid var(--cyan);background:#121d2b;border-radius:0 6px 6px 0}.styleDetail strong{font-size:12px}.styleDetail p{margin:6px 0 0;color:#a4b9d6;font-size:11px;line-height:1.45}.detailGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.rangeRow{margin:12px 0}.rangeRow header{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#c5d2e6}.rangeRow output{font-variant-numeric:tabular-nums;color:var(--cyan);font-family:ui-monospace,monospace}.rangeRow input{width:100%;accent-color:#64cdff;margin:9px 0 0;height:12px}.rangeNote{margin:5px 0;color:#7e90aa;font-size:10px}.actions{display:flex;gap:6px}.actions>*{flex:1}textarea{width:100%;min-height:112px;background:#080f1a;border:1px solid #30405d;border-radius:7px;resize:vertical;padding:10px;font-family:ui-monospace,monospace;font-size:10px;color:#b3e7ff;line-height:1.5}.tiny{font-size:10px;color:#89a0bd;line-height:1.5}.stage{position:relative;min-width:0;overflow:hidden;background:radial-gradient(ellipse at 45% 38%,#153044 0%,#0b1524 40%,#070c15 85%)}#view{display:block;width:100%;height:100%;touch-action:none}.mast{position:absolute;pointer-events:none;top:26px;left:32px;max-width:calc(100% - 370px)}.mast .eyebrow{color:#76dfff}.mast h1{font-size:clamp(27px,3vw,43px);letter-spacing:.005em;line-height:1;margin:6px 0 7px;font-weight:900;text-transform:uppercase;text-shadow:0 2px 30px #071320}.mast p{font-size:12px;letter-spacing:.1em;color:#aec4dd;margin:0;text-transform:uppercase}.mast .sub{font-size:11px;color:#7d9abb;margin-top:8px;max-width:520px;line-height:1.5;letter-spacing:0;text-transform:none}.topright{position:absolute;right:27px;top:25px;text-align:right;pointer-events:none}.topright .value{font-size:12px;letter-spacing:.13em;color:#e3ecff;font-weight:900;text-transform:uppercase}.topright .sub{font-size:10px;color:#92a9c6;margin-top:5px}.bottom{position:absolute;left:30px;right:30px;bottom:22px;display:flex;align-items:end;justify-content:space-between;pointer-events:none;gap:12px}.status{background:rgba(9,18,29,.75);border:1px solid #304564;color:#aec6e2;font-size:10px;border-radius:6px;padding:8px 10px;max-width:650px}.status strong{color:#d6f6ff}.displaybadge{font-size:10px;color:#a4bbd3;letter-spacing:.11em;font-weight:700}.panelLabels{position:absolute;inset:0 14px 22px 14px;pointer-events:none;display:none;gap:7px;z-index:1}.labelTile{text-align:center;align-self:end;color:#ebf8ff;background:rgba(7,13,24,.80);border:1px solid #365171;border-radius:5px;padding:8px 3px;min-width:0}.labelTile strong{font-size:10px;display:block}.labelTile span{font-size:9px;color:#a8bfdd}.modal{display:none;position:absolute;inset:0;background:rgba(2,4,9,.8);z-index:5;align-items:center;justify-content:center;padding:20px}.modal .inner{max-width:500px;border:1px solid #724657;padding:30px;border-radius:10px;background:#101720}.error{color:#ffabb8}.alert{padding:10px 12px;background:#182b33;border-left:3px solid var(--green);font-size:11px;color:#c3dfdb}.notice{font-size:10px;margin-top:8px;min-height:1.4em;color:#91d9b6}.separator{border-top:1px solid #263448;margin-top:18px}.stage[data-mode="compare"] .bottom,.stage[data-mode="gallery"] .bottom,.stage[data-mode="compare"] .legend,.stage[data-mode="gallery"] .legend{display:none}.legend{position:absolute;bottom:74px;right:30px;font-size:10px;color:#95aec8;text-align:right;pointer-events:none}.legend b{color:#d0ecff}.rangeGrid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media(max-width:1020px){.app{grid-template-columns:310px 1fr}.sidebar{padding:15px 13px}.mast{left:17px;top:15px}.mast h1{font-size:26px}.topright{display:none}.bottom{left:14px;right:14px}.legend{display:none}}
+@media(max-width:720px){body{overflow:auto}.app{height:auto;min-height:100dvh;display:flex;flex-direction:column}.stage{height:55dvh;order:0;min-height:340px}.sidebar{height:auto;max-height:none;order:1}.mast{max-width:calc(100% - 30px)}.bottom{bottom:10px}.mast .sub{display:none}.panelLabels{bottom:65px;left:5px;right:5px;gap:2px}.labelTile{padding:4px 0}.labelTile strong{font-size:8px}.labelTile span{font-size:7px}}
+</style></head><body>
+<div class="app">
+<aside class="sidebar">
+<div class="eyebrow">Vehicle design · protótipo 02</div><div class="brand">G<span>–</span>MINUS <span style="font-size:12px;color:#8ebedc">/ LAB</span></div>
+<div class="caption">10 naves com geometria própria. 5 tratamentos artísticos. <b>A geometria de uma nave nunca muda ao trocar A–E.</b></div>
+<section class="section"><h2>Modo de inspeção</h2><div class="seg mode" id="modeList"></div></section>
+<section class="section"><h2>Direção visual</h2><div class="stylegrid" id="styleList"></div><div id="styleDetail" class="styleDetail"></div></section>
+<section class="section"><h2>Máquinas / 10 modelos</h2><div class="shipgrid" id="machineList"></div></section>
+<section class="section"><h2>Estrutura · 4 peças visuais provisórias</h2><div class="detailGrid" id="pieceList"></div></section>
+<section class="section"><h2>Geometria · parâmetros por nave</h2><div id="sliders" class="rangeGrid"></div><div class="rangeNote">Mudar o estilo preserva todos estes valores. Mudar a nave recupera os valores dela.</div><div class="actions" style="margin-top:8px"><button class="btn" id="reset">Restaurar nave</button><button class="btn" id="random">Gerar variação</button></div></section>
+<section class="section"><h2>Visualização</h2><div class="actions"><button class="btn" data-view="hero" id="camHero">¾</button><button class="btn" data-view="top" id="camTop">Topo</button><button class="btn" data-view="front" id="camFront">Frente</button><button class="btn" data-view="rear" id="camRear">Traseira</button></div><div class="actions" style="margin-top:6px"><button class="btn" id="toggleRotation">Pausar rotação</button><button class="btn" id="toggleInk">Silhueta / cor</button></div></section>
+<section class="section"><h2>Salvar / aplicar configuração</h2><textarea id="jsonInput" spellcheck="false"></textarea><div class="actions" style="margin-top:8px"><button class="btn" id="copy">Copiar JSON</button><button class="btn" id="apply">Aplicar JSON</button></div><div id="notice" class="notice"></div></section>
+<section class="section"><div class="alert">Sem alterações no GDD, na física ou no repositório. As quatro categorias são apenas os grupos já usados pelo laboratório; não são definição definitiva do GDD.</div></section>
+</aside>
+<main class="stage"><canvas id="view"></canvas>
+<div class="mast"><div class="eyebrow">CRAFT VISUAL RESEARCH / 02</div><h1 id="title">BLUE FALCON</h1><p id="subtitle">DART · AERODINÂMICA</p><div class="sub" id="shipdesc"></div></div>
+<div class="topright"><div class="value" id="styletitle">A / ANIME CEL</div><div class="sub" id="modesub">VITRINE / 01 DE 10</div></div>
+<div class="panelLabels" id="panelLabels"></div>
+<div class="legend">Arrastar: órbita · Roda: zoom · <b>1–5</b>: estilos · <b>V</b>: alternar visualização<br>Geometria verificada: <b id="geometryId">—</b></div>
+<div class="bottom"><div class="status" id="status">Preparando renderizador…</div><div class="displaybadge" id="badge">RENDER · 3D</div></div>
+<div class="modal" id="failure"><div class="inner"><h2 class="error">Erro ao iniciar renderização</h2><p id="failureText"></p></div></div>
+</main></div>
+<script>
+'use strict';
+const MACHINES=[
+{id:'falcon',name:'BLUE FALCON',pilot:'CAPTAIN FALCON',family:'AERODINÂMICA',archetype:'DART',paint:'#2468f6',accent:'#58e9ff',stats:'B · C · B',desc:'Interceptor delta: crista central, asas trapezoidais, dois estabilizadores e dupla propulsão.',spec:{length:1,width:1,wingSpan:1,canopy:1}},
+{id:'fox',name:'GOLDEN FOX',pilot:'DR. STEWART',family:'AERODINÂMICA',archetype:'NEEDLE',paint:'#f8c32c',accent:'#edfaff',stats:'D · A · D',desc:'Agulha ultraleve com canards dianteiros e silhueta estreita de aceleração.',spec:{length:1.14,width:.89,wingSpan:.86,canopy:.85}},
+{id:'goose',name:'WILD GOOSE',pilot:'PICO',family:'ROBUSTA',archetype:'RAM',paint:'#218e54',accent:'#b476ff',stats:'A · B · C',desc:'Aríete blindado de frontal largo, ombros segmentados e motores encaixados.',spec:{length:.94,width:1.16,wingSpan:.86,canopy:.87}},
+{id:'stingray',name:'FIRE STINGRAY',pilot:'SAMURAI GOROH',family:'AERODINÂMICA',archetype:'MANTA',paint:'#e03546',accent:'#ffa43c',stats:'A · D · B',desc:'Corpo-asa de arraia: grande envergadura, perfil baixíssimo e motor traseiro embutido.',spec:{length:1.06,width:1.13,wingSpan:1.2,canopy:.80}},
+{id:'white_cat',name:'WHITE CAT',pilot:'JODY SUMMER',family:'AERODINÂMICA',archetype:'TWIN-FORK',paint:'#e5edf3',accent:'#59dfff',stats:'C · C · A',desc:'Proa genuinamente bifurcada, vazio central aberto, cabine oval e pods simétricos.',spec:{length:1.02,width:.98,wingSpan:.91,canopy:1.02}},
+{id:'red_gazelle',name:'RED GAZELLE',pilot:'MIGHTY GAZELLE',family:'AERODINÂMICA',archetype:'ROCKET',paint:'#df2440',accent:'#ff9b86',stats:'E · A · B',desc:'Projétil antigravidade com motor axial dominante e aletas traseiras pequenas.',spec:{length:1.14,width:.8,wingSpan:.66,canopy:.75}},
+{id:'iron_tiger',name:'IRON TIGER',pilot:'BABA',family:'ROBUSTA',archetype:'BLOCK',paint:'#ed792a',accent:'#ffce63',stats:'B · D · A',desc:'Máquina robusta de casco escalonado, ombros quadrangulares e turbina tripla.',spec:{length:.94,width:1.13,wingSpan:.82,canopy:.83}},
+{id:'deep_claw',name:'DEEP CLAW',pilot:'OCTOMAN',family:'AGRESSIVA',archetype:'PINCER',paint:'#823bd2',accent:'#ff61b4',stats:'B · B · C',desc:'Predador mecânico com duas garras curvadas em torno de um núcleo baixo.',spec:{length:1.03,width:1.03,wingSpan:.98,canopy:.9}},
+{id:'black_bull',name:'BLACK BULL',pilot:'BLACK SHADOW',family:'ROBUSTA',archetype:'BRUTE',paint:'#272936',accent:'#fc4e78',stats:'A · A · E',desc:'Casco opressor de largura excepcional, chifres frontais e blindagem profunda.',spec:{length:1,width:1.22,wingSpan:.94,canopy:.83}},
+{id:'blood_hawk',name:'BLOOD HAWK',pilot:'BLOOD FALCON',family:'AERODINÂMICA',archetype:'GULL',paint:'#921b39',accent:'#ff4d72',stats:'B · A · E',desc:'Caçador de perfil baixo, bico longo e asas em gaivota de pontas serrilhadas.',spec:{length:1.11,width:.91,wingSpan:1.08,canopy:.82}}
+];
+const MACHINE_MAP=Object.fromEntries(MACHINES.map(m=>[m.id,m]));
+const CODES={paint:0,secondary:1,accent:2,structure:3,glass:4,energy:5,marking:6};
+const PARTS=['nose','cockpit','wings','engines'];
+const clamp=(a,l,h)=>Math.max(l,Math.min(h,a));
+const svec=(v,a)=>v.map((x,i)=>x*a[i]);
+function newDesign(machine,params){
+ const masses=[]; const tint={...params};const meta=MACHINE_MAP[machine].spec;
+ const o={id:machine,shapes:[],raw:[],bounds:null,parts:PARTS};
+ const p={length:params.length*meta.length,width:params.width*meta.width,wingSpan:params.wingSpan*meta.wingSpan,canopy:params.canopy*meta.canopy};
+ const X=x=>x*p.width,Z=z=>z*p.length,W=x=>x*p.width*p.wingSpan;
+ const push=(piece,role,tri,kind='hull')=>{
+  const pflat=[],norm=[];
+  for(const face of tri){
+   const [a,b,c]=face;const ax=b[0]-a[0],ay=b[1]-a[1],az=b[2]-a[2],bx=c[0]-a[0],by=c[1]-a[1],bz=c[2]-a[2];
+   const nx=ay*bz-az*by,ny=az*bx-ax*bz,nz=ax*by-ay*bx;
+   const len=Math.hypot(nx,ny,nz)||1;
+   for(const v of [a,b,c]){pflat.push(...v);norm.push(nx/len,ny/len,nz/len);}
+  }
+  o.shapes.push({part:piece,role:CODES[role],positions:new Float32Array(pflat),normals:new Float32Array(norm),kind});
+ };
+ const quad=(a,b,c,d)=>[[a,b,c],[a,c,d]];
+ const hull=(rings,role='paint',piece='nose',segments=12)=>{
+  const rows=rings.map(r=>{
+   const rr=[];for(let i=0;i<segments;i++){
+    let th=2*Math.PI*i/segments;rr.push([r.x+(r.rx*Math.cos(th)),r.y+(r.ry*Math.sin(th)),r.z]);}
+   return rr;
+  });const tri=[];
+  for(let k=0;k<rows.length-1;k++)for(let i=0;i<segments;i++){
+   const j=(i+1)%segments;tri.push(...quad(rows[k][i],rows[k][j],rows[k+1][j],rows[k+1][i]));
+  }
+  let front=rows[0],back=rows.at(-1),fmid=[rings[0].x,rings[0].y,rings[0].z],bmid=[rings.at(-1).x,rings.at(-1).y,rings.at(-1).z];
+  for(let i=0;i<segments;i++){let j=(i+1)%segments;tri.push([front[i],fmid,front[j]],[back[j],bmid,back[i]]);}
+  push(piece,role,tri,'loft');
+ };
+ // loft rings ordered from forward z to rear z
+ const body=(rings,role='paint',piece='nose',seg=10)=>hull(rings.map(r=>({z:Z(r[0]),x:X(r[1]||0),y:r[2]||0,rx:X(r[3]),ry:r[4]})),role,piece,seg);
+ const canopy=(cx,cz,rx,rz,height,role='glass')=>{
+  const y=.26;hull([
+    {x:X(cx),y,z:Z(cz+rz),rx:X(.07),ry:.06},
+    {x:X(cx),y:y+height*.42,z:Z(cz+rz*.60),rx:X(rx*.62),ry:height*.47},
+    {x:X(cx),y:y+height*.52,z:Z(cz),rx:X(rx),ry:height*.55},
+    {x:X(cx),y:y+height*.42,z:Z(cz-rz*.67),rx:X(rx*.64),ry:height*.43},
+    {x:X(cx),y:y,z:Z(cz-rz),rx:X(.06),ry:.05}
+   ],role,'cockpit',16);
+ };
+ const poly=(vertices,y,thick,role='paint',piece='wings',bevel=.10)=>{
+  // vertices in unscaled world coords [x,z], scale x by W; z by Z
+  const pp=vertices.map(([x,z])=>[W(x),Z(z)]);
+  const cx=pp.reduce((v,x)=>v+x[0],0)/pp.length,cz=pp.reduce((v,x)=>v+x[1],0)/pp.length;
+  const top=pp.map(p=>[cx+(p[0]-cx)*(1-bevel),y+thick*.5,p[1]*(1-bevel)+cz*bevel]);
+  const rim=pp.map(p=>[p[0],y+thick*.29,p[1]]);
+  const bottom=pp.map(p=>[p[0],y-thick*.5,p[1]]);
+  const tri=[];const topCenter=[cx,y+thick*.5,cz],botCenter=[cx,y-thick*.5,cz];
+  for(let i=0;i<pp.length;i++){
+   const j=(i+1)%pp.length;tri.push([topCenter,top[i],top[j]],...quad(top[i],rim[i],rim[j],top[j]),...quad(rim[i],bottom[i],bottom[j],rim[j]),[botCenter,bottom[j],bottom[i]]);
+  }push(piece,role,tri,'plate');
+ };
+ const vfin=(verts,x,thick,role='paint',piece='wings')=>{
+  const a=verts.map(([y,z])=>[X(x-thick/2),y,Z(z)]),b=verts.map(([y,z])=>[X(x+thick/2),y,Z(z)]),tri=[];
+  for(let i=1;i<a.length-1;i++){tri.push([a[0],a[i],a[i+1]],[b[0],b[i+1],b[i]]);}for(let i=0;i<a.length;i++){let j=(i+1)%a.length;tri.push(...quad(a[i],b[i],b[j],a[j]));}
+  push(piece,role,tri,'fin');
+ };
+ const pipe=(x,y,z,length,radius,role='structure',seg=12)=>{
+  let cx=X(x);hull([
+   {x:cx,y,z:Z(z),rx:X(radius),ry:radius},
+   {x:cx,y,z:Z(z-length*.15),rx:X(radius*1.1),ry:radius*1.1},
+   {x:cx,y,z:Z(z-length*.85),rx:X(radius*1.05),ry:radius*1.05},
+   {x:cx,y,z:Z(z-length),rx:X(radius*.85),ry:radius*.85}
+  ],role,'engines',seg);
+  const rr=X(radius*.76);
+  hull([{x:cx,y,z:Z(z-length-.03),rx:rr,ry:radius*.68},{x:cx,y,z:Z(z-length-.09),rx:rr*.94,ry:radius*.65}], 'energy','engines',seg);
+ };
+ const pipes=(xs,z,len,r,role='structure')=>xs.forEach(x=>pipe(x,0,z,len,r,role));
+ const ribbon=(coordinates,width,role='accent',piece='nose')=>{
+  const polyline=[];const half=width/2;
+  for(let i=0;i<coordinates.length-1;i++){
+   const [x,y,z]=coordinates[i], [xx,yy,zz]=coordinates[i+1];
+   const dx=xx-x,dz=zz-z,nn=Math.hypot(dx,dz)||1,nx=-dz/nn*half,nz=dx/nn*half;
+   polyline.push(...quad([X(x+nx),y+.013,Z(z+nz)],[X(x-nx),y+.013,Z(z-nz)],[X(xx-nx),yy+.013,Z(zz-nz)],[X(xx+nx),yy+.013,Z(zz+nz)]));
+  }push(piece,role,polyline,'stripe');
+ };
+ const pairPoly=(left,y,h,role='secondary')=>{
+  poly(left,y,h,role);
+  poly(left.map(([x,z])=>[-x,z]).reverse(),y,h,role);
+ };
+ const pairFin=(shape,offset,thick,role)=>{
+  vfin(shape,offset,thick,role);vfin(shape,-offset,thick,role);
+ };
+ // Every constructor owns bespoke major geometry. No branch depends on style.
+ switch(machine){
+ case 'falcon':{
+  body([[3.2,0,.05,.12,.12],[2.25,0,0,.57,.35],[.3,0,.02,.94,.40],[-2.55,0,0,.89,.35],[-3.15,0,-.02,.48,.22]],'paint','nose',10);
+  body([[1.2,0,.43,.18,.10],[.3,0,.52,.48,.21],[-1.45,0,.44,.40,.19]],'secondary','nose',10);
+  canopy(0,.30,.46,1.25,.5);
+  pairPoly([[-.72,1.0],[-1.3,.5],[-3.16,-1.27],[-3.35,-1.98],[-1.05,-1.60]],.02,.20,'paint');
+  pairPoly([[-.85,-1.58],[-2.1,-1.8],[-2.08,-2.8],[-.8,-2.82]],.17,.20,'secondary');
+  pairFin([[.15,-1.5],[.95,-2.3],[1.08,-2.83],[.15,-2.6]],.90,.1,'paint');
+  pipes([-.67,.67],-2.15,1.32,.36);
+  ribbon([[-2.55,.14,-1.3],[-1.13,.14,-.36]],.13,'accent','wings');
+  break;}
+ case 'fox':{
+  body([[4.10,0,0,.045,.06],[3.05,0,0,.24,.17],[.35,0,0,.46,.25],[-2.7,0,0,.47,.26],[-3.45,0,0,.22,.16]],'paint','nose',12);
+  ribbon([[0,.25,3.5],[0,.31,1.05]],.11,'accent');canopy(0,.28,.31,1.08,.34);
+  pairPoly([[-.38,2.68],[-1.17,2.22],[-1.16,1.88],[-.39,1.91]],.00,.12,'accent');
+  pairPoly([[-.45,-.65],[-1.65,-1.46],[-2.18,-2.12],[-.48,-2.34]],.05,.13,'paint');
+  pairFin([[.07,-2.07],[.58,-2.83],[.4,-3.0],[.08,-2.9]],.43,.07,'secondary');
+  pipes([-.38,.38],-2.73,.89,.24);break;}
+ case 'goose':{
+  body([[2.65,0,.04,.88,.41],[1.95,0,.04,1.28,.64],[.5,0,.02,1.38,.63],[-2.55,0,0,1.40,.60],[-2.90,0,0,1.12,.48]],'paint','nose',8);
+  poly([[-1.3,2.0],[1.3,2.0],[1.42,2.58],[-1.42,2.58]],.08,.45,'structure','nose');
+  canopy(0,.35,.70,.96,.30);
+  pairPoly([[-1.1,1.75],[-2.02,1.22],[-2.13,-1.95],[-1.38,-2.72]],.03,.49,'secondary');
+  pairPoly([[-1.48,1.8],[-1.98,1.32],[-2.12,-.1],[-1.55,-.12]],.34,.11,'structure');
+  pairFin([[.30,-.65],[.78,-1.45],[.77,-2.28],[.30,-2.39]],1.38,.16,'paint');
+  pipes([-.81,.81],-2.35,1.22,.49);ribbon([[-1.75,.35,1.05],[-1.68,.35,-1.05]],.12,'accent','wings');break;}
+ case 'stingray':{
+  body([[2.83,0,.05,.25,.09],[1.74,0,0,.95,.19],[.0,0,0,1.67,.30],[-1.91,0,-.02,1.53,.24],[-2.71,0,-.02,.81,.15]],'paint','nose',16);
+  pairPoly([[-.82,1.65],[-2.35,1.1],[-3.75,-.53],[-4.25,-1.30],[-2.26,-1.75],[-.71,-1.94]],-.02,.11,'paint');
+  pairPoly([[-1.22,.53],[-2.6,-.10],[-3.65,-1.13],[-1.95,-1.37]],.045,.07,'secondary');
+  canopy(0,.60,.6,1.08,.26);
+  poly([[-.88,-2.27],[-.28,-2.85],[.28,-2.85],[.88,-2.27]],0,.19,'secondary');
+  pipes([-.91,.91],-2.26,.61,.38);
+  ribbon([[-2.6,.14,-.26],[-3.63,.11,-1.12]],.12,'accent','wings');break;}
+ case 'white_cat':{
+  body([[1.15,0,.0,.42,.23],[.1,0,0,.70,.31],[-2.35,0,0,.79,.35],[-2.95,0,0,.50,.20]],'paint','nose',12);
+  // Physically disconnected tines leave negative space at the tip.
+  for(const sign of [-1,1])hull([
+    {x:X(sign*.67),y:0,z:Z(3.25),rx:X(.10),ry:.08},
+    {x:X(sign*.65),y:0,z:Z(2.50),rx:X(.28),ry:.17},
+    {x:X(sign*.68),y:0,z:Z(.25),rx:X(.33),ry:.23},
+    {x:X(sign*.58),y:0,z:Z(-1.12),rx:X(.26),ry:.17}
+   ],'paint','nose',10);
+  canopy(0,.05,.43,1.13,.38);
+  pairPoly([[-.65,0.65],[-1.4,-.15],[-2.30,-1.28],[-1.53,-1.68],[-.77,-1.55]],.01,.17,'secondary');
+  pairFin([[.12,-1.15],[.92,-1.34],[1.23,-1.84],[.28,-1.9]],.77,.11,'accent');
+  pipes([-.62,.62],-2.5,.87,.29);break;}
+ case 'red_gazelle':{
+  body([[4.05,0,0,.02,.03],[3.17,0,0,.30,.20],[1.3,0,0,.62,.31],[-2.5,0,0,.68,.34],[-3.7,0,0,.54,.26]],'paint','nose',16);
+  canopy(0,.52,.29,.73,.27);
+  pairPoly([[-.53,-1.42],[-1.52,-2.50],[-1.68,-3.32],[-.55,-3.43]],.02,.14,'secondary');
+  pairFin([[.10,-2.10],[1.35,-2.8],[1.55,-3.35],[.12,-3.45]],0,.09,'paint');
+  pipe(0,0,-3.42,1.47,.56);ribbon([[0,.37,1.82],[0,.36,-1.90]],.10,'accent','nose');break;}
+ case 'iron_tiger':{
+  body([[2.4,0,0,.69,.35],[1.85,0,0,1.16,.55],[-.7,0,0,1.23,.60],[-2.3,0,0,1.14,.57],[-2.77,0,0,.97,.40]],'paint','nose',8);
+  poly([[-1.12,1.69],[1.12,1.69],[1.25,2.14],[-1.25,2.14]],.26,.28,'structure','nose');
+  canopy(0,.39,.54,.86,.33);
+  pairPoly([[-1.14,1.24],[-1.93,.76],[-2.12,-.63],[-1.86,-2.35],[-1.14,-2.48]],-.03,.48,'secondary');
+  pairPoly([[-1.34,.61],[-1.91,.40],[-1.86,-1.25],[-1.28,-1.35]],.31,.17,'structure');
+  pairFin([[.26,-.7],[.83,-1.15],[1.09,-2.29],[.26,-2.23]],1.2,.14,'paint');
+  pipes([-.75,0,.75],-2.35,1.13,.31);ribbon([[0,.60,1.33],[0,.55,-1.03]],.16,'accent','nose');break;}
+ case 'deep_claw':{
+  body([[1.25,0,0,.38,.21],[.38,0,0,.89,.4],[-1.56,0,0,1.12,.46],[-2.88,0,0,.58,.29]],'paint','nose',10);
+  for(const sign of [-1,1]){
+   let xr=v=>v*sign;
+   hull([
+    {x:X(xr(1.6)),y:0,z:Z(3.74),rx:X(.04),ry:.06},
+    {x:X(xr(1.95)),y:0,z:Z(2.92),rx:X(.21),ry:.15},
+    {x:X(xr(2.17)),y:0,z:Z(1.70),rx:X(.32),ry:.24},
+    {x:X(xr(1.48)),y:0,z:Z(.24),rx:X(.45),ry:.33},
+    {x:X(xr(.94)),y:0,z:Z(-.62),rx:X(.35),ry:.27}
+   ],'paint','nose',10);
+  }
+  canopy(0,.24,.51,.87,.31);
+  pairPoly([[-.85,-.35],[-2.32,-1.00],[-2.69,-2.30],[-1.15,-2.36]],.01,.14,'secondary');
+  pairFin([[.18,-1.38],[.67,-1.65],[.42,-2.4],[.16,-2.40]],1.1,.13,'accent');
+  pipes([-.73,.73],-2.42,.85,.33);break;}
+ case 'black_bull':{
+  body([[2.5,0,0,.92,.42],[1.95,0,.04,1.52,.72],[-.1,0,0,1.80,.76],[-2.55,0,0,1.78,.70],[-3.13,0,0,1.32,.49]],'paint','nose',8);
+  poly([[-1.55,1.72],[1.55,1.72],[1.86,2.12],[-1.86,2.12]],.17,.55,'structure','nose');
+  for(const sign of [-1,1])hull([
+   {x:X(sign*1.65),y:.30,z:Z(3.42),rx:X(.08),ry:.07},
+   {x:X(sign*1.8),y:.26,z:Z(2.58),rx:X(.23),ry:.17},
+   {x:X(sign*1.63),y:.27,z:Z(1.35),rx:X(.40),ry:.31}
+  ],'secondary','nose',8);
+  canopy(0,.24,.62,1.12,.26);
+  pairPoly([[-1.50,1.10],[-2.43,.41],[-2.62,-2.72],[-1.64,-2.88]],.04,.65,'secondary');
+  pairFin([[.4,-1.1],[1.15,-1.49],[1.12,-2.71],[.48,-2.71]],1.43,.18,'structure');
+  pipes([-1.05,1.05],-2.73,1.10,.57);ribbon([[-2.02,.44,.31],[-2.14,.44,-1.90]],.15,'accent','wings');break;}
+ case 'blood_hawk':{
+  body([[3.65,0,.01,.10,.08],[2.45,0,0,.47,.29],[.05,0,0,.89,.39],[-2.3,0,0,.84,.32],[-3.3,0,0,.39,.19]],'paint','nose',8);
+  canopy(0,.20,.47,1.08,.30);
+  pairPoly([[-.64,1.31],[-1.45,.72],[-3.53,-1.62],[-3.88,-2.32],[-2.88,-2.05],[-.92,-1.33]],.16,.14,'paint');
+  pairPoly([[-2.15,-.55],[-3.23,-1.60],[-3.82,-2.35],[-3.2,-2.43]],.43,.18,'secondary');
+  pairFin([[.14,-.67],[1.07,-1.35],[1.52,-2.18],[.20,-1.96]],.95,.11,'structure');
+  pipes([-.70,.70],-2.45,1.08,.33);ribbon([[-1.5,.23,.61],[-3.30,.23,-1.61]],.10,'accent','wings');break;}
+ }
+ // Unique geometry fingerprint independent of styles.
+ let hash=2166136261;
+ for(const shape of o.shapes){for(const v of shape.positions){const iv=Math.round(v*1000);hash=Math.imul((hash^iv),16777619)>>>0;}}
+ o.fingerprint=hash.toString(16).padStart(8,'0');o.triangles=o.shapes.reduce((sum,x)=>sum+x.positions.length/9,0);
+ o.bounds=(()=>{let min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity];for(const sh of o.shapes)for(let i=0;i<sh.positions.length;i+=3)for(let k=0;k<3;k++){let v=sh.positions[i+k];min[k]=Math.min(min[k],v);max[k]=Math.max(max[k],v);}return {min,max};})();
+ return o;
+}
+
+const canvas=document.getElementById('view');
+const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true,depth:true,stencil:false,powerPreference:'high-performance'});
+if(!gl)throw new Error('Este navegador não disponibilizou WebGL. O laboratório requer um contexto WebGL ativo.');
+const VERT=`precision highp float;
+attribute vec3 a_pos;attribute vec3 a_normal;
+uniform mat4 u_vp;uniform float u_yaw;uniform float u_outline;uniform float u_scale;uniform vec3 u_offset;uniform float u_wire;
+varying vec3 v_normal;varying vec3 v_world;varying vec3 v_obj;
+void main(){
+ vec3 p=a_pos;vec3 n=normalize(a_normal+vec3(0.0001));p+=n*(u_outline+u_wire*.012);
+ float s=sin(u_yaw),c=cos(u_yaw);
+ vec3 r=vec3(p.x*c+p.z*s,p.y,-p.x*s+p.z*c);
+ vec3 rn=normalize(vec3(n.x*c+n.z*s,n.y,-n.x*s+n.z*c));
+ vec3 world=r*u_scale+u_offset;
+ v_normal=rn;v_world=world;v_obj=a_pos;
+ gl_Position=u_vp*vec4(world,1.0);
+}`;
+const FRAG=`precision highp float;
+uniform vec3 u_color;uniform float u_style;uniform float u_role;uniform float u_ink;uniform float u_outline;uniform float u_wire;uniform float u_opacity;uniform float u_monochrome;uniform float u_isFloor;
+varying vec3 v_normal;varying vec3 v_world;varying vec3 v_obj;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+void main(){
+ if(u_wire>0.5){
+  gl_FragColor=vec4(u_style==2.0?vec3(.19,.98,1.0):vec3(1.0,.22,.61),u_opacity);return;
+ }
+ if(u_outline>0.0){
+  vec3 ink=vec3(.012,.018,.026);
+  if(u_style==2.0)ink=vec3(.18,.86,1.0);
+  if(u_style==3.0)ink=vec3(.025,.036,.087);
+  if(u_style==4.0)ink=vec3(.18,.25,.32);
+  if(u_monochrome>0.5)ink=vec3(.02);
+  gl_FragColor=vec4(ink,u_opacity);return;
+ }
+ if(u_monochrome>0.5){gl_FragColor=vec4(vec3(.01),u_opacity);return;}
+ vec3 N=normalize(v_normal),L=normalize(vec3(.45,.93,.64)),V=normalize(vec3(.31,.65,.73));
+ float nd=max(dot(N,L),0.0),halfLam=clamp(.36+nd*.70,0.,1.);float rim=pow(1.0-max(dot(N,V),0.0),3.0);
+ vec3 c=u_color;
+ if(u_isFloor>0.5){gl_FragColor=vec4(c,u_opacity);return;}
+ if(u_style<.5){
+  float shade=nd<.27?.38:(nd<.66?.68:1.05);
+  c=c*shade*1.30+vec3(.045,.13,.21)*rim*.82;
+  if(u_role>4.5&&u_role<6.5)c=c*1.12+vec3(.18,.22,.27);
+  if(u_role>3.5&&u_role<4.5)c=mix(c,vec3(.13,.32,.46),.34);
+ }else if(u_style<1.5){
+  float spec=pow(max(dot(reflect(-L,N),V),0.0),18.0);
+  c=c*(.39+.77*halfLam)+vec3(.30,.40,.47)*spec*.48;
+  float panels=step(.90,fract(v_obj.z*3.1+v_obj.x*1.25));
+  c*=1.0-panels*.12;
+  c+=vec3(.026,.041,.048)*rim;
+  if(u_role>4.5&&u_role<6.5)c+=u_color*.78;
+ }else if(u_style<2.5){
+  c=mix(c,vec3(.06,.04,.15),.22);
+  float signal=(.55+.45*sin(v_obj.z*10.+v_obj.x*7.));
+  c=c*(.68+.36*nd)+c*.22*signal+vec3(.08,.24,.31)*rim;
+  if(u_role>4.5&&u_role<6.5)c+=vec3(.36,.67,.63);
+  float scan=step(.92,fract(gl_FragCoord.y*.12));c+=vec3(.02,.03,.055)*scan;
+ }else if(u_style<3.5){
+  float steps=floor((.25+.78*nd)*3.2)/3.0;
+  c=c*(.44+1.18*steps);
+  vec2 uv=mod(gl_FragCoord.xy,vec2(5.0));
+  float dotv=step(length(uv-2.5),1.35);
+  c*=1.0-.14*dotv*(1.0-steps);
+  c+=vec3(.19,.06,.15)*rim*.54;
+  if(u_role>4.5&&u_role<6.5)c+=vec3(.19,.34,.30);
+ }else{
+  float spec=pow(max(dot(reflect(-L,N),V),0.0),33.0);
+  c=c*(.54+.46*halfLam)+vec3(.23,.28,.30)*spec*.43;
+  c+=vec3(.08,.09,.12)*rim*.16;
+  if(u_role>4.5&&u_role<6.5)c+=vec3(.09,.13,.18);
+ }
+ gl_FragColor=vec4(pow(clamp(c,0.0,1.0),vec3(.82)),u_opacity);
+}`;
+function shader(type,src){let s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;}
+const program=gl.createProgram();gl.attachShader(program,shader(gl.VERTEX_SHADER,VERT));gl.attachShader(program,shader(gl.FRAGMENT_SHADER,FRAG));gl.linkProgram(program);if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(program));gl.useProgram(program);
+const att={p:gl.getAttribLocation(program,'a_pos'),n:gl.getAttribLocation(program,'a_normal')};
+const U=Object.fromEntries(['vp','yaw','outline','scale','offset','wire','color','style','role','ink','opacity','monochrome','isFloor'].map(k=>[k,gl.getUniformLocation(program,'u_'+k)]));
+gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.enable(gl.CULL_FACE);
+function rgb(hex){hex=hex.replace('#','');let n=parseInt(hex,16);return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255];}
+function mix(a,b,t){return a.map((v,i)=>v*(1-t)+b[i]*t);}
+function mul(a,b){let o=new Float32Array(16);for(let i=0;i<4;i++)for(let j=0;j<4;j++){o[j*4+i]=0;for(let k=0;k<4;k++)o[j*4+i]+=a[k*4+i]*b[j*4+k];}return o;}
+function perspective(fovy,aspect,near,far){let f=1/Math.tan(fovy/2),o=new Float32Array(16);o[0]=f/aspect;o[5]=f;o[10]=(far+near)/(near-far);o[11]=-1;o[14]=(2*far*near)/(near-far);return o;}
+function normalize(v){let n=Math.hypot(...v)||1;return v.map(x=>x/n);}
+function cross(a,b){return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];}
+function lookAt(eye,target,up=[0,1,0]){
+ let z=normalize(eye.map((x,i)=>x-target[i])),x=normalize(cross(up,z)),y=cross(z,x);let o=new Float32Array(16);
+ o[0]=x[0];o[1]=y[0];o[2]=z[0];o[4]=x[1];o[5]=y[1];o[6]=z[1];o[8]=x[2];o[9]=y[2];o[10]=z[2];o[12]=-x.reduce((s,v,i)=>s+v*eye[i],0);o[13]=-y.reduce((s,v,i)=>s+v*eye[i],0);o[14]=-z.reduce((s,v,i)=>s+v*eye[i],0);o[15]=1;return o;
+}
+function buffers(shape){let p=gl.createBuffer(),n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,p);gl.bufferData(gl.ARRAY_BUFFER,shape.positions,gl.STATIC_DRAW);gl.bindBuffer(gl.ARRAY_BUFFER,n);gl.bufferData(gl.ARRAY_BUFFER,shape.normals,gl.STATIC_DRAW);return {p,n,count:shape.positions.length/3};}
+function featureEdges(shape){
+ if(!['plate','loft','fin'].includes(shape.kind))return null;
+ const p=shape.positions,n=shape.normals,table=new Map();
+ const key=v=>v.map(x=>Math.round(x*500)).join(',');
+ for(let i=0;i<p.length;i+=9){
+  let verts=[];for(let j=0;j<3;j++)verts.push([p[i+j*3],p[i+j*3+1],p[i+j*3+2]]);
+  const normal=[n[i],n[i+1],n[i+2]];
+  for(let j=0;j<3;j++){
+   let a=verts[j],b=verts[(j+1)%3],aa=key(a),bb=key(b),id=aa<bb?aa+'|'+bb:bb+'|'+aa;
+   let ed=table.get(id);
+   if(ed)ed.normals.push(normal);
+   else table.set(id,{a,b,normals:[normal]});
+  }
+ }
+ const pos=[],norm=[];
+ for(const ed of table.values()){
+  const d=Math.hypot(ed.a[0]-ed.b[0],ed.a[1]-ed.b[1],ed.a[2]-ed.b[2]);if(d<.4)continue;
+  const angle=ed.normals.length<2?-1:ed.normals[0].reduce((s,x,i)=>s+x*ed.normals[1][i],0);
+  if(angle>.80)continue;
+  const ni=ed.normals[0];for(const v of [ed.a,ed.b]){pos.push(...v);norm.push(...ni);}
+ }
+ if(!pos.length)return null;
+ return buffers({positions:new Float32Array(pos),normals:new Float32Array(norm)});
+}
+function bind(geo){gl.bindBuffer(gl.ARRAY_BUFFER,geo.p);gl.vertexAttribPointer(att.p,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(att.p);gl.bindBuffer(gl.ARRAY_BUFFER,geo.n);gl.vertexAttribPointer(att.n,3,gl.FLOAT,false,0,0);gl.enableVertexAttribArray(att.n);}
+function destroy(obj){for(const g of obj.gpu){gl.deleteBuffer(g.p);gl.deleteBuffer(g.n);if(g.edges){gl.deleteBuffer(g.edges.p);gl.deleteBuffer(g.edges.n);}}}
+function upload(obj){obj.gpu=obj.shapes.map(sh=>{let g=buffers(sh);g.edges=featureEdges(sh);return g;});return obj;}
+function draw(shape,gpu,color,style,focus,scale,yaw,offset,outline,wire,mono,opacity=1,drawMode=gl.TRIANGLES){
+ bind(gpu);gl.uniform1f(U.yaw,yaw);gl.uniform1f(U.outline,outline);gl.uniform1f(U.scale,scale);gl.uniform3fv(U.offset,offset);gl.uniform1f(U.wire,wire);gl.uniform3fv(U.color,color);gl.uniform1f(U.style,style);gl.uniform1f(U.role,shape.role);gl.uniform1f(U.opacity,opacity);gl.uniform1f(U.monochrome,mono?1:0);gl.uniform1f(U.isFloor,0);
+ if(outline>0){gl.cullFace(gl.FRONT);gl.depthMask(false);}
+ else{gl.disable(gl.CULL_FACE);gl.depthMask(opacity>=.99);}
+ gl.drawArrays(drawMode,0,gpu.count);gl.enable(gl.CULL_FACE);gl.depthMask(true);
+}
+const STYLE_DATA=[
+{id:'A',name:'ANIME CEL',desc:'Cel shading em bandas, tinta preta marcante, cores de corrida saturadas e leitura de anime.',bg:[.035,.070,.12],art:'ANIME / 4 TONS',ink:.035},
+{id:'B',name:'AERO ARMOR',desc:'Compósitos acetinados, painéis de blindagem foscos e juntas industriais. Sem chrome nem wireframe.',bg:[.070,.078,.088],art:'INDUSTRIAL / MATTE',ink:.017},
+{id:'C',name:'RETRO VECTOR',desc:'Arte vetorial eletroluminescente, massa gráfica noturna, arestas ciano e detalhes holográficos.',bg:[.050,.019,.115],art:'VECTOR / HOLOGRAPH',ink:.016},
+{id:'D',name:'TOON VECTOR FLUX',desc:'Híbrido A+C: tinta gráfica, sombras posterizadas, halftone e traços vibrantes controlados.',bg:[.035,.034,.083],art:'MANGA / POSTER',ink:.032},
+{id:'E',name:'SOLAR PROTOTYPE',desc:'Cerâmica clara de competição, superfícies acetinadas, baixo ruído e apresentação aeroespacial.',bg:[.78,.82,.85],art:'AEROSPACE / CERAMIC',ink:.008}];
+function palette(machine,style,role,saturation){
+ const paint=rgb(machine.paint),accent=rgb(machine.accent),dark=[.075,.10,.15],white=[.87,.91,.97],sd=mix(paint,[.02,.05,.09],.38);
+ let p;
+ if(style===0)p=[paint,sd,accent,dark,[.035,.15,.23],mix(accent,white,.48),white];
+ if(style===1)p=[mix(paint,[.095,.12,.15],.73),[.24,.28,.32],mix(accent,white,.05),[.050,.06,.07],[.045,.10,.13],mix(accent,white,.50),[.96,.59,.24]];
+ if(style===2)p=[mix(paint,[.055,.019,.19],.79),[.027,.075,.14],[.30,.98,1.0],[.016,.016,.055],[.085,.09,.28],[1,.25,.70],[.91,.40,1]];
+ if(style===3)p=[mix(paint,[.96,.37,.68],.55),mix(paint,[.06,.032,.13],.68),[.44,.98,.96],[.052,.031,.11],[.13,.06,.17],[1,.78,.35],[1,.95,.78]];
+ if(style===4)p=[mix(white,[1,1,1],.22),mix(white,paint,.26),mix(paint,white,.11),[.25,.30,.36],[.10,.22,.31],[.83,.94,1.0],[.38,.47,.59]];
+ let c=p[role]||paint;
+ const lum=c[0]*.21+c[1]*.72+c[2]*.07;
+ return c.map(v=>clamp(lum+(v-lum)*(1+saturation),0,1));
+}
+function drawObject(obj,style,viewVp,{offset=[0,.37,0],scale=1,yaw=0,focus='all',mono=false,glow=1,saturation=0}={}){
+ gl.uniformMatrix4fv(U.vp,false,viewVp);
+ const selected=focus!=='all';
+ // Outer ink pass with front-face cull. Changes rendering, not model positions.
+ const passInk=!mono&&style!==4;
+ if(passInk){
+  for(let i=0;i<obj.shapes.length;i++){
+   const s=obj.shapes[i],g=obj.gpu[i],opacity=selected&&s.part!==focus?.08:1;
+   if(s.kind==='stripe')continue;
+   draw(s,g,[0,0,0],style,focus,scale,yaw,offset,STYLE_DATA[style].ink,0,false,opacity);
+  }
+ }
+ for(let i=0;i<obj.shapes.length;i++){
+  const s=obj.shapes[i],g=obj.gpu[i];let opacity=selected&&s.part!==focus?.16:1;
+  let color=palette(MACHINE_MAP[obj.id],style,s.role,saturation);
+  if(s.role===CODES.energy)color=color.map(x=>Math.min(1,x*(.70+.30*glow)));
+  draw(s,g,color,style,focus,scale,yaw,offset,0,0,mono,opacity);
+ }
+ if(!mono&&(style===2||style===3)){
+  for(let i=0;i<obj.shapes.length;i++){
+   const s=obj.shapes[i],g=obj.gpu[i];if(!g.edges)continue;
+   if(style===3&&s.role===CODES.glass)continue;
+   const opacity=selected&&s.part!==focus?.10:(style===2?.85:.46);
+   draw(s,g.edges,[1,1,1],style,focus,scale,yaw,offset,0,1,false,opacity,gl.LINES);
+  }
+ }
+}
+function drawBackdrop(style,index,total,rect){
+ const bg=STYLE_DATA[style].bg;gl.enable(gl.SCISSOR_TEST);gl.scissor(rect.x,rect.y,rect.w,rect.h);gl.viewport(rect.x,rect.y,rect.w,rect.h);gl.clearColor(...bg,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+}
+
+const PODIUM=[];
+function addFloorShape(r1,r2,y,role,seg=64){
+ let pos=[],norm=[];
+ for(let i=0;i<seg;i++){
+  const a=i/seg*Math.PI*2,b=(i+1)/seg*Math.PI*2;
+  const A=[Math.cos(a)*r1,y,Math.sin(a)*r1],B=[Math.cos(b)*r1,y,Math.sin(b)*r1];
+  const C=[Math.cos(b)*r2,y,Math.sin(b)*r2],D=[Math.cos(a)*r2,y,Math.sin(a)*r2];
+  for(const v of [A,B,C,A,C,D]){pos.push(...v);norm.push(0,1,0);}
+ }
+ const sh={part:'environment',role,kind:'environment',positions:new Float32Array(pos),normals:new Float32Array(norm)};
+ PODIUM.push({sh,gpu:buffers(sh)});
+}
+addFloorShape(0,4.6,-1.46,0);
+addFloorShape(4.66,4.71,-1.435,1);
+addFloorShape(3.52,3.57,-1.43,2);
+function drawPodium(style,vp,rot,mono){
+ gl.uniformMatrix4fv(U.vp,false,vp);
+ const cols=style===4?[[.74,.79,.84],[.30,.38,.46],[.40,.52,.60]]:
+ style===2?[[.045,.028,.11],[.31,.77,.97],[.53,.25,.89]]:
+ style===3?[[.055,.09,.16],[.32,.94,.87],[.95,.27,.61]]:
+ style===1?[[.11,.13,.16],[.39,.49,.59],[.21,.72,.71]]:
+ [[.07,.14,.22],[.22,.66,.85],[.26,.39,.67]];
+ for(let i=0;i<PODIUM.length;i++){
+  let {sh,gpu}=PODIUM[i];bind(gpu);
+  gl.uniform1f(U.yaw,0);gl.uniform1f(U.outline,0);gl.uniform1f(U.scale,1);
+  gl.uniform3fv(U.offset,[0,0,0]);gl.uniform1f(U.wire,0);gl.uniform3fv(U.color,cols[i]);
+  gl.uniform1f(U.style,style);gl.uniform1f(U.role,0);gl.uniform1f(U.opacity,mono?0.05:1);
+  gl.uniform1f(U.monochrome,0);gl.uniform1f(U.isFloor,1);
+  gl.disable(gl.CULL_FACE);gl.depthMask(true);gl.drawArrays(gl.TRIANGLES,0,gpu.count);
+ }
+ gl.uniform1f(U.isFloor,0);gl.enable(gl.CULL_FACE);
+}
+
+function renderObject(style,obj,rect,params,time,opts={}){
+ drawBackdrop(style,0,0,rect);
+ gl.uniform1f(U.style,style);gl.uniform1f(U.ink,STYLE_DATA[style].ink);
+ let target=[0,.15,0];let radius=opts.radius||12.8;
+ const yawCam=opts.cameraYaw??.60, elev=opts.elev??.48;
+ const eye=[Math.sin(yawCam)*radius*Math.cos(elev),radius*Math.sin(elev)+.15,Math.cos(yawCam)*radius*Math.cos(elev)];
+ const vp=mul(perspective(40*Math.PI/180,rect.w/Math.max(1,rect.h),.05,120),lookAt(eye,target));
+ const drawYaw=opts.rotate||0;
+ drawPodium(style,vp,drawYaw,!!opts.mono);
+ drawObject(obj,style,vp,{offset:[0,.30,0],scale:opts.scale||1,yaw:drawYaw,focus:opts.focus||'all',mono:!!opts.mono,glow:params.glow,saturation:params.saturation});
+}
+
+const $=id=>document.getElementById(id);
+const state={machine:'falcon',style:2,mode:'single',focus:'all',mono:false,rotate:false,view:'hero',yaw:.53,elev:.54,zoom:13.2,turn:.08,activeDrag:false,mouse:[0,0],draftDirty:false,params:{},meshes:{},last:0};
+const PARAMS=[
+{id:'length',label:'Comprimento',min:.78,max:1.22,value:1},
+{id:'width',label:'Largura',min:.78,max:1.22,value:1},
+{id:'wingSpan',label:'Envergadura',min:.78,max:1.22,value:1},
+{id:'canopy',label:'Cabine',min:.78,max:1.22,value:1},
+{id:'glow',label:'Brilho',min:0,max:2,value:1},
+{id:'saturation',label:'Saturação',min:-.38,max:.38,value:0}
+];
+const defaults=()=>Object.fromEntries(PARAMS.map(k=>[k.id,k.value]));
+const current=()=>state.params[state.machine]||(state.params[state.machine]=defaults());
+function getMesh(id){
+ const m=state.meshes[id];if(m)return m;
+ return state.meshes[id]=upload(newDesign(id,state.params[id]||defaults()));
+}
+function invalidate(id){if(state.meshes[id]){destroy(state.meshes[id]);delete state.meshes[id];}}
+function label(){return STYLE_DATA[state.style].id+' / '+STYLE_DATA[state.style].name;}
+function btn(text,active,onClick,sub=''){
+ let b=document.createElement('button');b.className='btn'+(active?' active':'');b.type='button';b.innerHTML=text+(sub?`<span class="small">${sub}</span>`:'');b.addEventListener('click',onClick);return b;
+}
+function updateUI(refreshJSON=true){
+ let machine=MACHINE_MAP[state.machine];
+ document.querySelector('.stage').dataset.mode=state.mode;$('title').textContent=machine.name;$('subtitle').textContent=`${machine.archetype} · ${machine.family}`;$('shipdesc').textContent=machine.desc;
+ $('styletitle').textContent=label();$('modesub').textContent=({single:'VITRINE',compare:'COMPARADOR / 5 ESTILOS',gallery:'GALERIA / 10 NAVES'})[state.mode]+' · 4 PEÇAS VISUAIS';
+ $('modeList').replaceChildren(...[
+  ['single','Vitrine'],['compare','A–E'],['gallery','10 naves']
+ ].map(([id,name])=>btn(name,state.mode===id,()=>{state.mode=id;updateUI();}))); 
+ $('styleList').replaceChildren(...STYLE_DATA.map((s,i)=>btn(s.id,state.style===i,()=>{state.style=i;updateUI();},['CEL','ARMOR','VECTOR','FLUX','SOLAR'][i])));
+ let sd=STYLE_DATA[state.style];$('styleDetail').innerHTML=`<strong>${sd.id} · ${sd.name}</strong><p>${sd.desc}</p>`;
+ $('machineList').replaceChildren(...MACHINES.map(m=>{
+  let b=btn('<span class="swatch" style="background:'+m.paint+'"></span><strong>'+m.name+'</strong>',state.machine===m.id,()=>{state.machine=m.id;state.zoom=13.2;state.draftDirty=false;updateUI();});return b;
+ }));
+ $('pieceList').replaceChildren(...[['all','Tudo'],['nose','Proa'],['cockpit','Cabine'],['wings','Asas'],['engines','Motores']].map(([id,n])=>btn(n,state.focus===id,()=>{state.focus=id;updateUI();})));
+ $('sliders').replaceChildren(...PARAMS.map(def=>{
+  const row=document.createElement('div');row.className='rangeRow';const val=current()[def.id];row.innerHTML=`<header><label for="param-${def.id}">${def.label}</label><output id="out-${def.id}">${val.toFixed(2)}</output></header>`;
+  let input=document.createElement('input');input.type='range';input.id='param-'+def.id;input.min=def.min;input.max=def.max;input.step='.01';input.value=val;
+  input.addEventListener('input',()=>{const value=Number(input.value);current()[def.id]=value;row.querySelector('output').textContent=value.toFixed(2);if(['length','width','wingSpan','canopy'].includes(def.id))invalidate(state.machine);updateJSON(false);});row.append(input);return row;
+ }));
+ $('toggleRotation').textContent=state.rotate?'Pausar rotação':'Retomar rotação';$('toggleInk').textContent=state.mono?'Exibir estilos':'Silhueta / cor';
+ ['hero','top','front','rear'].forEach(k=>{const id={hero:'camHero',top:'camTop',front:'camFront',rear:'camRear'}[k];$(id).classList.toggle('active',state.view===k);});
+ const show=state.mode!=='single';$('panelLabels').style.display=show?'grid':'none';$('panelLabels').style.gridTemplateColumns=state.mode==='compare'?'repeat(6,minmax(0,1fr))':'repeat(5,minmax(0,1fr))';$('panelLabels').style.gridTemplateRows='repeat(2,minmax(0,1fr))';
+ const labs=state.mode==='compare'?STYLE_DATA.map(s=>[s.id,s.name]):MACHINES.map(m=>[m.name,m.archetype]);
+ $('panelLabels').replaceChildren(...labs.map(([a,b],i)=>{let x=document.createElement('div');x.className='labelTile';x.innerHTML=`<strong>${a}</strong><span>${b}</span>`;if(state.mode==='compare')x.style.gridColumn=i<2?'span 3':'span 2';return x;}));
+ $('geometryId').textContent=getMesh(state.machine).fingerprint;
+ $('status').innerHTML=`<strong>GEOMETRIA ÚNICA / ${getMesh(state.machine).triangles.toLocaleString('pt-BR')} triângulos</strong> · SHA da malha ${getMesh(state.machine).fingerprint} · A troca de A–E altera somente materiais e renderização.`;
+ $('badge').textContent='WEBGL · REAL-TIME';
+ updateJSON(refreshJSON);
+}
+function snapshot(){return {schemaVersion:6,prototype:'gminus-craft-visual-lab',machine:state.machine,style:STYLE_DATA[state.style].id,mode:state.mode,focusPiece:state.focus,view:state.view,params:{...current()}};}
+function updateJSON(force){if(!state.draftDirty)$('jsonInput').value=JSON.stringify(snapshot(),null,2);}
+function feedback(msg,success=true){$('notice').style.color=success?'#91d9b6':'#fda1a6';$('notice').textContent=msg;}
+$('jsonInput').addEventListener('input',()=>{state.draftDirty=true;feedback('Rascunho editado: ainda não aplicado.',true);});
+$('copy').addEventListener('click',async()=>{
+ const value=$('jsonInput').value;
+ try{await navigator.clipboard.writeText(value);feedback('JSON copiado.');}
+ catch(e){$('jsonInput').select();const result=document.execCommand('copy');feedback(result?'JSON copiado.':'Cópia bloqueada; selecione o texto e copie manualmente.',result);}
+});
+$('apply').addEventListener('click',()=>{
+ try{let o=JSON.parse($('jsonInput').value);
+  if(o.schemaVersion!==6)throw Error('Versão de configuração incompatível.');
+  if(!MACHINE_MAP[o.machine])throw Error('Identificador da nave inválido.');
+  const newStyle=STYLE_DATA.findIndex(s=>s.id===o.style);if(newStyle<0)throw Error('Estilo inexistente.');
+  if(!['single','compare','gallery'].includes(o.mode))throw Error('Modo inválido.');
+  if(!['all',...PARTS].includes(o.focusPiece))throw Error('Peça inválida.');
+  if(!['hero','top','front','rear'].includes(o.view))throw Error('Vista inválida.');
+  if(!o.params||typeof o.params!=='object')throw Error('Parâmetros ausentes.');
+  let pp={};for(const v of PARAMS){const x=o.params[v.id];if(typeof x!=='number'||!Number.isFinite(x)||x<v.min||x>v.max)throw Error(v.label+' fora do intervalo.');pp[v.id]=x;}
+  state.machine=o.machine;state.style=newStyle;state.mode=o.mode;state.focus=o.focusPiece;state.view=o.view;state.params[o.machine]=pp;invalidate(o.machine);state.draftDirty=false;
+  updateUI(true);feedback('Configuração aplicada com sucesso.');
+ }catch(e){feedback('Configuração rejeitada: '+e.message,false);}
+});
+$('reset').addEventListener('click',()=>{state.params[state.machine]=defaults();invalidate(state.machine);state.draftDirty=false;updateUI();});
+$('random').addEventListener('click',()=>{let p=current();for(const v of PARAMS){const r=v.id==='glow'?.4:v.id==='saturation'?.12:.075;p[v.id]=clamp(v.value+(Math.random()-.5)*r*2,v.min,v.max);}invalidate(state.machine);state.draftDirty=false;updateUI();feedback('Variação gerada sem alterar os limites do arquétipo.');});
+$('toggleRotation').addEventListener('click',()=>{state.rotate=!state.rotate;updateUI();});
+$('toggleInk').addEventListener('click',()=>{state.mono=!state.mono;updateUI();});
+function setView(view){state.view=view;if(view==='hero'){state.yaw=.59;state.elev=.49;}if(view==='top'){state.yaw=0;state.elev=1.50;}if(view==='front'){state.yaw=0;state.elev=.14;}if(view==='rear'){state.yaw=Math.PI;state.elev=.15;}updateUI();}
+for(const [id,key] of [['camHero','hero'],['camTop','top'],['camFront','front'],['camRear','rear']])$(id).addEventListener('click',()=>setView(key));
+canvas.addEventListener('pointerdown',e=>{state.activeDrag=true;state.mouse=[e.clientX,e.clientY];canvas.setPointerCapture(e.pointerId);});
+canvas.addEventListener('pointermove',e=>{if(!state.activeDrag)return;let dx=e.clientX-state.mouse[0],dy=e.clientY-state.mouse[1];state.yaw-=dx*.007;state.elev=clamp(state.elev+dy*.006,-.18,1.5);state.mouse=[e.clientX,e.clientY];});
+canvas.addEventListener('pointerup',()=>{state.activeDrag=false;});canvas.addEventListener('pointercancel',()=>{state.activeDrag=false;});
+canvas.addEventListener('wheel',e=>{e.preventDefault();state.zoom=clamp(state.zoom+e.deltaY*.016,8,31);},{passive:false});
+window.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;
+ if(/^[1-5]$/.test(e.key)){state.style=Number(e.key)-1;updateUI();}
+ if(e.key.toLowerCase()==='v'){state.mode=state.mode==='single'?'compare':state.mode==='compare'?'gallery':'single';updateUI();}
+ if(e.key.toLowerCase()==='r'){state.rotate=!state.rotate;updateUI();}
+});
+function resize(){let dpr=Math.min(window.devicePixelRatio||1,2),w=Math.max(1,Math.floor(canvas.clientWidth*dpr)),h=Math.max(1,Math.floor(canvas.clientHeight*dpr));if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}gl.viewport(0,0,w,h);}
+window.addEventListener('resize',resize);
+function frame(now){
+ if(state.rotate&&state.mode==='single'&&state.view==='hero')state.turn+=(now-state.last||0)*.00024;
+ state.last=now;resize();const w=canvas.width,h=canvas.height;
+ gl.disable(gl.SCISSOR_TEST);gl.viewport(0,0,w,h);gl.clearColor(.036,.055,.083,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ let comps=[];
+ if(state.mode==='single')comps=[{obj:getMesh(state.machine),style:state.style,rect:{x:0,y:0,w,h},radius:state.zoom}];
+ else if(state.mode==='compare'){
+  for(let i=0;i<5;i++){
+   const r=i<2?0:1,cols=r===0?2:3,c=r===0?i:i-2,x=Math.floor(w*c/cols),next=Math.floor(w*(c+1)/cols);
+   const y=Math.floor(h*(1-r)/2),nextY=Math.floor(h*(2-r)/2);
+   comps.push({obj:getMesh(state.machine),style:i,rect:{x,y,w:next-x,h:nextY-y},radius:state.zoom*1.22});
+  }
+ }else{
+  for(let i=0;i<10;i++){let c=i%5,r=Math.floor(i/5),x=Math.floor(w*c/5),next=Math.floor(w*(c+1)/5),y=Math.floor(h*(1-r)/2),nextY=Math.floor(h*(2-r)/2);comps.push({obj:getMesh(MACHINES[i].id),style:state.style,rect:{x,y,w:next-x,h:nextY-y},radius:state.zoom*1.12});}
+ }
+ for(const c of comps){
+  const bounds=c.obj.bounds,spread=Math.max(bounds.max[0]-bounds.min[0],bounds.max[2]-bounds.min[2]);
+  const aspect=c.rect.w/Math.max(1,c.rect.h);
+  const distNeeded=spread*.70/(Math.tan(20*Math.PI/180)*Math.max(aspect,.3));
+  let distance=Math.max(c.radius,distNeeded);
+  renderObject(c.style,c.obj,c.rect,state.params[c.obj.id]||defaults(),now,{focus:state.focus,mono:state.mono,rotate:state.view==='hero'?state.turn:0,cameraYaw:state.yaw,elev:state.elev,radius:distance,scale:1});
+ }
+ requestAnimationFrame(frame);
+}
+updateUI();
+window.__GMINUS_TEST__={state,geometryFor:(id)=>getMesh(id).fingerprint,shipCount:()=>MACHINES.length,styleCount:()=>STYLE_DATA.length,modelTriangles:(id)=>getMesh(id).triangles,checkGeometryInvariance:()=>{let before=getMesh(state.machine).fingerprint;let s=state.style;for(let i=0;i<5;i++){state.style=i;if(before!==getMesh(state.machine).fingerprint)return false;}state.style=s;return true;}};
+requestAnimationFrame(frame);
+
+</script></body></html>
