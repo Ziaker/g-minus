@@ -193,6 +193,12 @@ export class Game {
   private resultsScreen: HTMLElement | null;
   private resultsPos: HTMLElement | null;
   private resultsDetails: HTMLElement | null;
+  private countdownOverlay: HTMLElement | null;
+  private wrongWayBanner: HTMLElement | null;
+  private isCountingDown = false;
+  private countdownTimer = 0;
+  private lastCountBeep = -1;
+  private attackCooldowns: Map<string, number> = new Map();
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -237,6 +243,8 @@ export class Game {
     this.resultsScreen = document.getElementById('results-screen');
     this.resultsPos = document.getElementById('results-pos');
     this.resultsDetails = document.getElementById('results-details');
+    this.countdownOverlay = document.getElementById('countdown-overlay');
+    this.wrongWayBanner = document.getElementById('wrong-way-banner');
 
     window.addEventListener('resize', this.onWindowResize.bind(this));
   }
@@ -267,14 +275,14 @@ export class Game {
     this.player = new Vehicle(playerConfig, this.track, this.combat, this.audio, this.scene);
     this.player.progressT = 0.002;
     this.player.lateralOffset = 0;
-    this.player.speed = 45;
+    this.player.speed = 0;
 
     // Spawn 7 Rivals staggered on starting grid
     const rivalKeys = Object.keys(MACHINE_ROSTER).filter(k => k !== selectedId).slice(0, 7);
     this.rivals = [];
 
     const gridOffsets = [-6, 6, -3, 3, -7, 7, 0];
-    const gridProgress = [0.012, 0.020, 0.028, 0.036, 0.044, 0.052, 0.060];
+    const gridProgress = [0.010, 0.016, 0.022, 0.028, 0.034, 0.040, 0.046];
 
     for (let i = 0; i < rivalKeys.length; i++) {
       const def = MACHINE_ROSTER[rivalKeys[i]];
@@ -288,7 +296,7 @@ export class Game {
       const v = new Vehicle(rivalConfig, this.track, this.combat, this.audio, this.scene);
       v.progressT = gridProgress[i];
       v.lateralOffset = gridOffsets[i];
-      v.speed = 90 + Math.random() * 20;
+      v.speed = 0;
       this.rivals.push(v);
     }
 
@@ -300,8 +308,16 @@ export class Game {
     this.audio.init();
     this.isRunning = true;
     this.isRaceFinished = false;
-    this.raceStartTime = performance.now();
+    this.isCountingDown = true;
+    this.countdownTimer = 3.6;
+    this.lastCountBeep = -1;
     this.lastTime = performance.now();
+
+    if (this.countdownOverlay) {
+      this.countdownOverlay.textContent = '3';
+      this.countdownOverlay.style.display = 'block';
+    }
+
     requestAnimationFrame(this.loop.bind(this));
   }
 
@@ -318,6 +334,48 @@ export class Game {
   }
 
   private update(dt: number): void {
+    // 0. Starting Countdown Sequence [GDD 13]
+    if (this.isCountingDown) {
+      this.countdownTimer -= dt;
+
+      if (this.countdownTimer > 2.5) {
+        if (this.lastCountBeep !== 3) {
+          this.lastCountBeep = 3;
+          if (this.countdownOverlay) this.countdownOverlay.textContent = '3';
+          this.audio.playCountdownBeep(false);
+        }
+      } else if (this.countdownTimer > 1.5) {
+        if (this.lastCountBeep !== 2) {
+          this.lastCountBeep = 2;
+          if (this.countdownOverlay) this.countdownOverlay.textContent = '2';
+          this.audio.playCountdownBeep(false);
+        }
+      } else if (this.countdownTimer > 0.5) {
+        if (this.lastCountBeep !== 1) {
+          this.lastCountBeep = 1;
+          if (this.countdownOverlay) this.countdownOverlay.textContent = '1';
+          this.audio.playCountdownBeep(false);
+        }
+      } else if (this.countdownTimer > 0) {
+        if (this.lastCountBeep !== 0) {
+          this.lastCountBeep = 0;
+          if (this.countdownOverlay) {
+            this.countdownOverlay.textContent = 'GO!';
+            this.countdownOverlay.style.color = '#00ff88';
+          }
+          this.audio.playCountdownBeep(true);
+        }
+      } else {
+        this.isCountingDown = false;
+        if (this.countdownOverlay) this.countdownOverlay.style.display = 'none';
+        this.raceStartTime = performance.now();
+      }
+
+      this.updateCamera(dt);
+      this.updateHUD();
+      return;
+    }
+
     // 1. Update Player
     const playerSideAttack = this.input.consumeSideAttack();
     const playerSpinAttack = this.input.consumeSpinAttack();
@@ -348,7 +406,7 @@ export class Game {
     this.combat.update(dt);
 
     // 4. Vehicle vs Vehicle Ramming Collisions & Spin Attacks
-    this.checkVehicleCollisions();
+    this.checkVehicleCollisions(dt);
 
     // 5. Update Camera
     this.updateCamera(dt);
@@ -357,8 +415,18 @@ export class Game {
     this.updateHUD();
   }
 
-  private checkVehicleCollisions(): void {
+  private checkVehicleCollisions(dt: number): void {
     const radius = 2.5;
+
+    // Decay attack cooldowns
+    for (const [key, time] of this.attackCooldowns.entries()) {
+      const remaining = time - dt;
+      if (remaining <= 0) {
+        this.attackCooldowns.delete(key);
+      } else {
+        this.attackCooldowns.set(key, remaining);
+      }
+    }
 
     for (let i = 0; i < this.allVehicles.length; i++) {
       const vA = this.allVehicles[i];
@@ -375,23 +443,35 @@ export class Game {
         if (vA.isSpinAttacking || vB.isSpinAttacking) {
           if (dist < 6.8) {
             if (vA.isSpinAttacking) {
-              const pushDir = Math.sign(vB.lateralOffset - vA.lateralOffset) || 1;
-              vB.lateralVelocity += pushDir * 150;
-              vB.takeDamage(45, true);
-              if (vA.config.id === 'player' && vB.isDestroyed) {
-                this.playerKills++;
+              const cdKey = `spin-${vA.config.id}-${vB.config.id}`;
+              if (!this.attackCooldowns.has(cdKey)) {
+                this.attackCooldowns.set(cdKey, 0.45);
+                const pushDir = Math.sign(vB.lateralOffset - vA.lateralOffset) || 1;
+                vB.lateralVelocity += pushDir * 150;
+                vB.takeDamage(45, true);
+                if (vA.config.id === 'player' && vB.isDestroyed) {
+                  this.playerKills++;
+                }
+                this.combat.spawnSparks(midPoint, 36, 0x00f0ff);
+                this.audio.playImpact();
+                if (vA === this.player || vB === this.player) {
+                  this.addCameraShake(0.7);
+                }
               }
             }
             if (vB.isSpinAttacking) {
-              const pushDir = Math.sign(vA.lateralOffset - vB.lateralOffset) || -1;
-              vA.lateralVelocity += pushDir * 150;
-              vA.takeDamage(45, true);
-            }
-
-            this.combat.spawnSparks(midPoint, 36, 0x00f0ff);
-            this.audio.playImpact();
-            if (vA === this.player || vB === this.player) {
-              this.addCameraShake(0.7);
+              const cdKey = `spin-${vB.config.id}-${vA.config.id}`;
+              if (!this.attackCooldowns.has(cdKey)) {
+                this.attackCooldowns.set(cdKey, 0.45);
+                const pushDir = Math.sign(vA.lateralOffset - vB.lateralOffset) || -1;
+                vA.lateralVelocity += pushDir * 150;
+                vA.takeDamage(45, true);
+                this.combat.spawnSparks(midPoint, 36, 0x00f0ff);
+                this.audio.playImpact();
+                if (vA === this.player || vB === this.player) {
+                  this.addCameraShake(0.7);
+                }
+              }
             }
             continue;
           }
@@ -405,18 +485,31 @@ export class Game {
           if (sideAttackA || sideAttackB) {
             // High-impact Side-Attack bash
             if (sideAttackA) {
-              vB.lateralVelocity += vA.sideAttackDir * 135;
-              vB.takeDamage(36, true);
-              if (vA.config.id === 'player' && vB.isDestroyed) this.playerKills++;
+              const cdKey = `side-${vA.config.id}-${vB.config.id}`;
+              if (!this.attackCooldowns.has(cdKey)) {
+                this.attackCooldowns.set(cdKey, 0.35);
+                vB.lateralVelocity += vA.sideAttackDir * 135;
+                vB.takeDamage(36, true);
+                if (vA.config.id === 'player' && vB.isDestroyed) this.playerKills++;
+                this.combat.spawnSparks(midPoint, 28, 0xff0055);
+                this.audio.playImpact();
+                if (vA === this.player || vB === this.player) {
+                  this.addCameraShake(0.6);
+                }
+              }
             }
             if (sideAttackB) {
-              vA.lateralVelocity += vB.sideAttackDir * 135;
-              vA.takeDamage(36, true);
-            }
-            this.combat.spawnSparks(midPoint, 28, 0xff0055);
-            this.audio.playImpact();
-            if (vA === this.player || vB === this.player) {
-              this.addCameraShake(0.6);
+              const cdKey = `side-${vB.config.id}-${vA.config.id}`;
+              if (!this.attackCooldowns.has(cdKey)) {
+                this.attackCooldowns.set(cdKey, 0.35);
+                vA.lateralVelocity += vB.sideAttackDir * 135;
+                vA.takeDamage(36, true);
+                this.combat.spawnSparks(midPoint, 28, 0xff0055);
+                this.audio.playImpact();
+                if (vA === this.player || vB === this.player) {
+                  this.addCameraShake(0.6);
+                }
+              }
             }
           } else {
             // Smooth glancing bump with elastic separation
@@ -431,13 +524,13 @@ export class Game {
             vA.lateralOffset += pushDir * overlap * 0.3;
             vB.lateralOffset -= pushDir * overlap * 0.3;
 
-            vA.takeDamage(2, false);
-            vB.takeDamage(2, false);
+            vA.takeDamage(6 * dt, false);
+            vB.takeDamage(6 * dt, false);
 
-            this.combat.spawnSparks(midPoint, 6, 0xffaa00);
+            this.combat.spawnSparks(midPoint, 4, 0xffaa00);
             if (vA === this.player || vB === this.player) {
               this.audio.playImpact();
-              this.addCameraShake(0.12);
+              this.addCameraShake(0.08);
             }
           }
         }
@@ -556,9 +649,19 @@ export class Game {
       this.hudKills.textContent = `${this.playerKills} K.O.`;
     }
 
+    // Wrong Way Check
+    if (this.wrongWayBanner) {
+      if (!this.isCountingDown && this.player.speed < -2) {
+        this.wrongWayBanner.style.display = 'block';
+      } else {
+        this.wrongWayBanner.style.display = 'none';
+      }
+    }
+
     // Race Finish Check (After 3 Laps)
     if (this.player.currentLap > 3 && !this.isRaceFinished) {
       this.isRaceFinished = true;
+      this.audio.playVictoryFanfare();
       const totalSec = (performance.now() - this.raceStartTime) / 1000;
       const mins = Math.floor(totalSec / 60).toString().padStart(2, '0');
       const secs = (totalSec % 60).toFixed(2).padStart(5, '0');

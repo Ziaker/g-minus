@@ -585,9 +585,21 @@
         <button id="mach-falcon" class="btn-option active" onclick="setPlayerMachine('falcon')">Blue Falcon (B/C/B)</button>
         <button id="mach-fox" class="btn-option" onclick="setPlayerMachine('fox')">Golden Fox (D/A/D)</button>
       </div>
-      <div class="btn-grid-2">
+      <div class="btn-grid-2" style="margin-bottom:6px;">
         <button id="mach-goose" class="btn-option" onclick="setPlayerMachine('goose')">Wild Goose (A/B/C)</button>
         <button id="mach-stingray" class="btn-option" onclick="setPlayerMachine('stingray')">Fire Stingray (A/D/B)</button>
+      </div>
+      <div class="btn-grid-2" style="margin-bottom:6px;">
+        <button id="mach-white_cat" class="btn-option" onclick="setPlayerMachine('white_cat')">White Cat (C/C/A)</button>
+        <button id="mach-red_gazelle" class="btn-option" onclick="setPlayerMachine('red_gazelle')">Red Gazelle (E/A/B)</button>
+      </div>
+      <div class="btn-grid-2" style="margin-bottom:6px;">
+        <button id="mach-iron_tiger" class="btn-option" onclick="setPlayerMachine('iron_tiger')">Iron Tiger (B/D/A)</button>
+        <button id="mach-deep_claw" class="btn-option" onclick="setPlayerMachine('deep_claw')">Deep Claw (B/B/C)</button>
+      </div>
+      <div class="btn-grid-2">
+        <button id="mach-black_bull" class="btn-option" onclick="setPlayerMachine('black_bull')">Black Bull (A/A/E)</button>
+        <button id="mach-blood_hawk" class="btn-option" onclick="setPlayerMachine('blood_hawk')">Blood Hawk (B/A/E)</button>
       </div>
     </div>
 
@@ -1198,16 +1210,44 @@
 
       let primaryColor = 0x0044ff;
       let accentColor = 0x00f0ff;
+      let baseShape = 'falcon';
 
       if (model === 'fox') {
-        primaryColor = 0xff8800;
+        primaryColor = 0xf5b800;
         accentColor = 0xffde59;
+        baseShape = 'fox';
       } else if (model === 'goose') {
-        primaryColor = 0x117733;
+        primaryColor = 0x228b22;
         accentColor = 0x99ee22;
+        baseShape = 'goose';
       } else if (model === 'stingray') {
         primaryColor = 0xbb0022;
-        accentColor = 0xff0055;
+        accentColor = 0xffaa00;
+        baseShape = 'stingray';
+      } else if (model === 'white_cat') {
+        primaryColor = 0xe0e6ed;
+        accentColor = 0x00f0ff;
+        baseShape = 'falcon';
+      } else if (model === 'red_gazelle') {
+        primaryColor = 0xb30000;
+        accentColor = 0xff4444;
+        baseShape = 'fox';
+      } else if (model === 'iron_tiger') {
+        primaryColor = 0xff7700;
+        accentColor = 0xffaa00;
+        baseShape = 'goose';
+      } else if (model === 'deep_claw') {
+        primaryColor = 0x7b2cbf;
+        accentColor = 0xff006e;
+        baseShape = 'stingray';
+      } else if (model === 'black_bull') {
+        primaryColor = 0x161822;
+        accentColor = 0xcc0033;
+        baseShape = 'goose';
+      } else if (model === 'blood_hawk') {
+        primaryColor = 0x880011;
+        accentColor = 0xff0044;
+        baseShape = 'falcon';
       }
 
       const bodyMat = new THREE.MeshStandardMaterial({ color: primaryColor, roughness: 0.22, metalness: 0.88 });
@@ -1215,7 +1255,7 @@
       const cockpitMat = new THREE.MeshStandardMaterial({ color: 0x050d1a, roughness: 0.08, metalness: 0.95 });
       const glowMat = new THREE.MeshBasicMaterial({ color: accentColor });
 
-      if (model === 'fox') {
+      if (baseShape === 'fox') {
         const body = new THREE.Mesh(new THREE.ConeGeometry(0.9, 5.2, 6).rotateX(Math.PI / 2).scale(1.0, 0.4, 1.0), bodyMat);
         visualGroup.add(body);
         const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8).scale(0.7, 0.4, 1.5), cockpitMat);
@@ -1227,7 +1267,7 @@
         const wR = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 1.4), accentMat);
         wR.position.set(1.3, 0, -0.6);
         visualGroup.add(wR);
-      } else if (model === 'goose') {
+      } else if (baseShape === 'goose') {
         const prow = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 4.4), bodyMat);
         visualGroup.add(prow);
         const nose = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.6, 4).rotateX(Math.PI / 2), accentMat);
@@ -1236,7 +1276,7 @@
         const canopy = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.55, 1.6), cockpitMat);
         canopy.position.set(0, 0.6, 0.2);
         visualGroup.add(canopy);
-      } else if (model === 'stingray') {
+      } else if (baseShape === 'stingray') {
         const manta = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.8, 0.5, 7).scale(1.2, 0.7, 1.4), bodyMat);
         visualGroup.add(manta);
         const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.75, 8, 8).scale(0.8, 0.45, 1.4), cockpitMat);
@@ -1279,7 +1319,7 @@
 
     // AI Vehicles Roster [GDD 51-60]
     let aiVehicles = [];
-    const AI_MODELS = ['fox', 'goose', 'stingray', 'falcon'];
+    const AI_MODELS = ['falcon', 'fox', 'goose', 'stingray', 'white_cat', 'red_gazelle', 'iron_tiger', 'deep_claw', 'black_bull', 'blood_hawk'];
 
     function rebuildAIGrid(count) {
       for (const ai of aiVehicles) scene.remove(ai.craft.group);
@@ -1301,6 +1341,7 @@
           shield: 100,
           isDestroyed: false,
           respawnTimer: 0,
+          hitCooldown: 0,
           targetOffset: (Math.random() - 0.5) * 16,
           nextDecision: performance.now() + 1000 + Math.random() * 1500,
           isSideAttacking: false,
@@ -1836,10 +1877,15 @@
         ai.craft.group.quaternion.setFromRotationMatrix(aiRotMat);
 
         // Vehicle vs Vehicle Collision with Player
+        if (ai.hitCooldown > 0) {
+          ai.hitCooldown = Math.max(ai.hitCooldown - dt, 0);
+        }
+
         const dist = craftPos.distanceTo(aiPos);
         if (dist < 5.2 && !inClash) {
           // Spin Attack AOE hit
-          if (isSpinAttacking) {
+          if (isSpinAttacking && ai.hitCooldown <= 0) {
+            ai.hitCooldown = 0.45;
             ai.lateralVelocity += Math.sign(ai.lateralOffset - lateralOffset) * 220;
             ai.shield = Math.max(ai.shield - 50, 0);
             fxSparks.spawnSparks(aiPos, 25, 0x00f0ff);
@@ -1853,8 +1899,9 @@
               document.getElementById('hud-kos').textContent = playerKills;
               showToast("💥 K.O. RIVAL DESTRUÍDO COM SPIN ATTACK!");
             }
-          } else if (isSideAttacking) {
+          } else if (isSideAttacking && ai.hitCooldown <= 0) {
             // Side Attack Bash
+            ai.hitCooldown = 0.35;
             ai.lateralVelocity += sideAttackDir * 180;
             ai.shield = Math.max(ai.shield - 35, 0);
             fxSparks.spawnSparks(aiPos, 20, 0xff0055);
@@ -1868,12 +1915,12 @@
               document.getElementById('hud-kos').textContent = playerKills;
               showToast("💥 K.O. RIVAL ESMAGADO COM SIDE-ATTACK!");
             }
-          } else {
+          } else if (!isSpinAttacking && !isSideAttacking) {
             // Physical Bump
             const pushDir = Math.sign(lateralOffset - ai.lateralOffset) || 1;
             lateralVelocity += pushDir * 25;
             ai.lateralVelocity -= pushDir * 25;
-            fxSparks.spawnSparks(craftPos.clone().add(aiPos).multiplyScalar(0.5), 10, 0xffaa00);
+            fxSparks.spawnSparks(craftPos.clone().add(aiPos).multiplyScalar(0.5), 6, 0xffaa00);
             audioSys.playImpact();
           }
         }

@@ -251,11 +251,11 @@
     /* Machine Roster Grid */
     .roster-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 12px;
       margin-bottom: 18px;
       width: 100%;
-      max-width: 860px;
+      max-width: 980px;
     }
     .machine-card {
       background: rgba(12, 18, 38, 0.85);
@@ -436,6 +436,12 @@
     </div>
   </div>
 
+  <!-- Countdown Overlay [GDD 13] -->
+  <div id="countdown-overlay" style="display:none; position:fixed; top:35%; left:50%; transform:translate(-50%,-50%); font-family:'Orbitron', monospace; font-size:100px; font-weight:900; color:#ffde59; text-shadow:0 0 36px #ffde59; z-index:90; pointer-events:none; letter-spacing:4px;">3</div>
+
+  <!-- Wrong Way Alert [GDD 19] -->
+  <div id="wrong-way-banner" style="display:none; position:fixed; top:22%; left:50%; transform:translateX(-50%); background:rgba(255,0,85,0.88); border:2px solid #fff; padding:10px 32px; border-radius:8px; font-family:'Orbitron', monospace; font-size:24px; font-weight:900; color:#fff; letter-spacing:3px; z-index:90; pointer-events:none; box-shadow:0 0 24px rgba(255,0,85,0.8);">⚠ REVERSE / WRONG WAY ⚠</div>
+
   <div id="overlay-screen">
     <h1 class="title-glitch">G - MINUS</h1>
     <div class="subtitle">Sci-Fi 3D Anti-Gravity Racing // F-Zero Style</div>
@@ -498,10 +504,26 @@
         <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-A">A</span></div>
       </div>
 
+      <div class="machine-card" data-id="deep_claw">
+        <div class="machine-name" style="color:#a855f7;">DEEP CLAW</div>
+        <div class="machine-pilot">Octoman</div>
+        <div class="stat-row"><span>BODY</span><span class="stat-grade grade-B">B</span></div>
+        <div class="stat-row"><span>BOOST</span><span class="stat-grade grade-B">B</span></div>
+        <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-C">C</span></div>
+      </div>
+
       <div class="machine-card" data-id="black_bull">
         <div class="machine-name" style="color:#b537f2;">BLACK BULL</div>
         <div class="machine-pilot">Black Shadow</div>
         <div class="stat-row"><span>BODY</span><span class="stat-grade grade-A">A</span></div>
+        <div class="stat-row"><span>BOOST</span><span class="stat-grade grade-A">A</span></div>
+        <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-E">E</span></div>
+      </div>
+
+      <div class="machine-card" data-id="blood_hawk">
+        <div class="machine-name" style="color:#ff0044;">BLOOD HAWK</div>
+        <div class="machine-pilot">Blood Falcon</div>
+        <div class="stat-row"><span>BODY</span><span class="stat-grade grade-B">B</span></div>
         <div class="stat-row"><span>BOOST</span><span class="stat-grade grade-A">A</span></div>
         <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-E">E</span></div>
       </div>
