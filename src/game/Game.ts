@@ -436,8 +436,8 @@ export class Game {
     this.camera.position.lerp(idealCamPos, Math.min(dt * 14, 1));
 
     const lookTarget = playerPos.clone().add(playerInfo.tangent.clone().multiplyScalar(15));
-    this.camera.lookAt(lookTarget);
     this.camera.up.copy(playerInfo.normal);
+    this.camera.lookAt(lookTarget);
   }
 
   private updateHUD(): void {

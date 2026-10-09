@@ -87,10 +87,10 @@ export class Track {
       const pt = this.curve.getPointAt(t);
       const tangent = this.curve.getTangentAt(t).normalize();
       
-      // Calculate smooth up vector and binormal (side vector)
+      // Calculate smooth up vector and binormal (right vector)
       const up = new THREE.Vector3(0, 1, 0);
-      const binormal = new THREE.Vector3().crossVectors(tangent, up).normalize();
-      const normal = new THREE.Vector3().crossVectors(binormal, tangent).normalize();
+      const binormal = new THREE.Vector3().crossVectors(up, tangent).normalize();
+      const normal = new THREE.Vector3().crossVectors(tangent, binormal).normalize();
 
       // Left edge & Right edge
       const leftPt = pt.clone().add(binormal.clone().multiplyScalar(-halfWidth));
@@ -322,8 +322,8 @@ export class Track {
     const position = this.curve.getPointAt(wrappedT);
     const tangent = this.curve.getTangentAt(wrappedT).normalize();
     const up = new THREE.Vector3(0, 1, 0);
-    const binormal = new THREE.Vector3().crossVectors(tangent, up).normalize();
-    const normal = new THREE.Vector3().crossVectors(binormal, tangent).normalize();
+    const binormal = new THREE.Vector3().crossVectors(up, tangent).normalize();
+    const normal = new THREE.Vector3().crossVectors(tangent, binormal).normalize();
 
     return { position, tangent, normal, binormal };
   }

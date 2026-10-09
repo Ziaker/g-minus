@@ -15,6 +15,16 @@ export class InputManager {
   constructor() {
     window.addEventListener('keydown', this.onKeyDown.bind(this));
     window.addEventListener('keyup', this.onKeyUp.bind(this));
+    window.addEventListener('blur', () => this.reset());
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.reset();
+    });
+  }
+
+  private reset(): void {
+    this.forward = this.backward = this.left = this.right = this.boost = false;
+    this.sideAttackLeft = this.sideAttackRight = this.spinAttack = false;
+    this.lastLeftPress = this.lastRightPress = -Infinity;
   }
 
   private onKeyDown(e: KeyboardEvent): void {

@@ -462,7 +462,7 @@ export class Vehicle {
     // Roll banking based on turning or side attack
     let targetRoll = -steerDir * 0.48;
     if (this.isSideAttacking) {
-      targetRoll = this.sideAttackDir * Math.PI * 1.5;
+      targetRoll = -this.sideAttackDir * Math.PI * 1.5;
     }
     this.currentRoll = THREE.MathUtils.lerp(this.currentRoll, targetRoll, Math.min(dt * 12, 1));
 
