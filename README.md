@@ -132,7 +132,7 @@ Distribuído sob a licença MIT. Consulte o arquivo `LICENSE` para mais detalhes
 
 **Revisão de 09/10/2026:** [novidades verificadas, bugs corrigidos e limites](docs/audits/2026-10-09-fixes.md). O menu tem dez modelos; a corrida principal usa oito participantes. Os quatro grupos visuais das naves ainda não constituem um editor de peças intercambiáveis. O laboratório HTML é independente do jogo.
 
-Validação: `npm test` executa regressões de input, geometria, combate, pads, chegada e laboratórios; `npm run build` verifica TypeScript antes do Vite. Os laboratórios de prototipação (`/prototypes/01_steering_profiles.html`, `/prototypes/02_craft_visuals.html`, `/prototypes/03_neo_metropolis_visual.html` e `/prototypes/04_craft_vfx.html`) rodam de forma independente e podem ser abertos diretamente no navegador.
+Validação: `npm test` executa regressões de input, geometria, combate, pads, chegada e laboratórios; `npm run build` verifica TypeScript antes do Vite. Os laboratórios de prototipação (`/prototypes/01_steering_profiles.html`, `/prototypes/02_craft_visuals.html`, `/prototypes/02_ship_visuals_v6_webgl.html`, `/prototypes/03_neo_metropolis_visual.html` e `/prototypes/04_craft_vfx.html`) rodam de forma independente e podem ser abertos diretamente no navegador.
 
 As decisões atuais de gameplay, visual e processo de desenvolvimento estão registradas no **[GDD inicial](docs/GDD.md)**. O documento diferencia requisitos definidos, detalhes pendentes e recursos já presentes no código; não significa que os novos recursos estejam implementados.
 
@@ -140,6 +140,7 @@ As decisões atuais de gameplay, visual e processo de desenvolvimento estão reg
 
 - **Protótipo 01 — Física, Combate e Direção:** [abrir laboratório](prototypes/01_steering_profiles.html) · [especificação](docs/specs/01_steering_profiles_spec.md)
 - **Protótipo 02 — Modelos & Silhuetas de Naves:** [abrir laboratório](prototypes/02_craft_visuals.html) · [especificação](docs/specs/02_craft_visual_spec.md)
+- **Protótipo 02 — WebGL v6 (direção estética aprovada D / Toon Vector Flux):** [abrir laboratório atualizado](prototypes/02_ship_visuals_v6_webgl.html) · [registro formal de aprovação e guia para futuros protótipos](docs/specs/02_toon_vector_flux_approval.md). **A aprovação é da estética, não das geometrias/peças definitivas ou implementação no jogo.**
 - **Protótipo 03 — Ambiente Neo Metropolis:** [abrir laboratório](prototypes/03_neo_metropolis_visual.html) · [especificação](docs/specs/03_neo_metropolis_visual_spec.md)
 - **Protótipo 04 — Efeitos Visuais das Naves (VFX Lab):** [abrir laboratório](prototypes/04_craft_vfx.html) · [especificação](docs/specs/04_craft_vfx_spec.md)
 

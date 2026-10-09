@@ -132,6 +132,14 @@
 - **Identidade individual [89]:** combinar silhueta, cor, iluminação e elementos mecânicos próprios.
 - **Segundo plano [90]:** cenários de fundo estáticos por ora.
 
+### Registro de aprovação estética posterior ao levantamento — 09/10/2026
+
+**Decisão expressa do responsável:** aprovada a **opção D — Toon Vector Flux**, do **Protótipo 02 WebGL v6**, como **direção estética de referência para o jogo G-MINUS e futuros protótipos visuais**. A linguagem aprovada combina superfícies toon/cel sombreadas em degraus, contornos escuros expressivos, grafismos e arestas vetoriais magenta/ciano selecionadas, retícula gráfica e neon controlado sobre volumes 3D estilizados. **A escolha aprova o estilo, não automaticamente as dez geometrias, as quatro peças finais, parâmetros individuais, VFX, pistas, HUD, câmeras ou integração no código.**
+
+- **Protótipo de referência:** [02_ship_visuals_v6_webgl.html](../prototypes/02_ship_visuals_v6_webgl.html).
+- **Documento normativo de aprovação e continuidade:** [02_toon_vector_flux_approval.md](specs/02_toon_vector_flux_approval.md).
+- **Regra de continuidade:** recursos futuros devem ser prototipados na linguagem D; variações e integrações ainda exigem gate de aprovação previsto em [101]. Versões históricas A/B/C/E permanecem apenas como comparação, salvo futura decisão expressa.
+
 ## 10. Câmera, HUD e efeitos [91–100]
 
 - **Câmera [91–92]:** perspectivas/enquadramentos variáveis selecionáveis por botão. Distâncias e quais perspectivas serão disponibilizadas dependem de protótipo; não presumir visão em primeira pessoa como confirmada.
