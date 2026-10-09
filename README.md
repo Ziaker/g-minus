@@ -130,5 +130,7 @@ As decisões atuais de gameplay, visual e processo de desenvolvimento estão reg
 
 **Regra de desenvolvimento:** toda feature passa por protótipo HTML com **3 alternativas distintas**, sliders independentes e configuração copiável/colável, acompanhada de especificação completa e aprovação **antes** de ser integrada ao jogo. A integração deve ser fiel à versão aprovada. Novas mudanças exigem consulta ao repositório atualizado, atualização documental, telemetria/debug e atualização do README.
 
+**Protótipo visual 03 — Neo Metropolis:** [abrir laboratório HTML](prototypes/03_neo_metropolis_visual.html) · [especificação](docs/specs/03_neo_metropolis_visual_spec.md). Estudo experimental A/B/C com sliders e importação/exportação JSON; nenhuma alternativa foi aprovada para integração.
+
 **Jogar via GitHub Pages (endereço previsto):** https://ziaker.github.io/g-minus/  
 **Aviso de disponibilidade (2026-10-08):** o endereço ainda não foi validado como jogável. A última publicação consultada falhou na etapa *Setup Pages*, apesar de o build ter passado. [Ver workflow](https://github.com/Ziaker/g-minus/actions/runs/37830599287). O jogo pode ser iniciado localmente pelas instruções acima; a falha de publicação não foi corrigida nesta alteração.
