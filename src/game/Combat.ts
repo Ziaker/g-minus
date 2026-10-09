@@ -41,6 +41,7 @@ export class CombatSystem {
     });
 
     this.particlePoints = new THREE.Points(this.particleGeo, this.particleMat);
+    this.particlePoints.frustumCulled = false; // Positions move globally; a cached bound becomes stale.
     this.scene.add(this.particlePoints);
   }
 

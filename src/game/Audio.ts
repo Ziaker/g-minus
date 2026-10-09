@@ -3,9 +3,16 @@ export class AudioManager {
   private engineOsc: OscillatorNode | null = null;
   private engineGain: GainNode | null = null;
   private isInitialized = false;
+  private nextImpact = 0;
+  private nextRecharge = 0;
 
   public init(): void {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {
+      if (!this.engineOsc) {
+        this.setupEngineSynth();
+      }
+      return;
+    }
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       this.ctx = new AudioCtx();
@@ -16,32 +23,40 @@ export class AudioManager {
     }
   }
 
-  private setupEngineSynth(): void {
-    if (!this.ctx) return;
-    const osc = this.ctx.createOscillator();
-    const gain = this.ctx.createGain();
-    const filter = this.ctx.createBiquadFilter();
+  public setupEngineSynth(): void {
+    if (!this.ctx || this.engineOsc) return;
+    try {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const filter = this.ctx.createBiquadFilter();
 
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(65, this.ctx.currentTime);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(65, this.ctx.currentTime);
 
-    filter.type = 'lowpass';
-    filter.frequency.setValueAtTime(350, this.ctx.currentTime);
-    filter.Q.setValueAtTime(4, this.ctx.currentTime);
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(350, this.ctx.currentTime);
+      filter.Q.setValueAtTime(4, this.ctx.currentTime);
 
-    gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
 
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(this.ctx.destination);
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
 
-    osc.start();
-    this.engineOsc = osc;
-    this.engineGain = gain;
+      osc.start();
+      this.engineOsc = osc;
+      this.engineGain = gain;
+    } catch (e) {
+      console.warn('Engine synth setup error:', e);
+    }
   }
 
   public updateEnginePitch(speedKmH: number, isBoosting: boolean): void {
-    if (!this.ctx || !this.engineOsc || !this.engineGain) return;
+    if (!this.ctx) return;
+    if (!this.engineOsc) {
+      this.setupEngineSynth();
+    }
+    if (!this.engineOsc || !this.engineGain) return;
     const now = this.ctx.currentTime;
     const normSpeed = Math.min(Math.max(speedKmH / 1200, 0), 1.6);
 
@@ -51,7 +66,6 @@ export class AudioManager {
     this.engineOsc.frequency.setTargetAtTime(targetFreq, now, 0.05);
     this.engineGain.gain.setTargetAtTime(targetGain, now, 0.05);
   }
-
 
   public playBoost(): void {
     if (!this.ctx) return;
@@ -76,6 +90,8 @@ export class AudioManager {
   public playImpact(): void {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
+    if (now < this.nextImpact) return;
+    this.nextImpact = now + 0.08;
 
     // Metal clash noise
     const bufferSize = this.ctx.sampleRate * 0.15;
@@ -139,6 +155,8 @@ export class AudioManager {
   public playRecharge(): void {
     if (!this.ctx) return;
     const now = this.ctx.currentTime;
+    if (now < this.nextRecharge) return;
+    this.nextRecharge = now + 0.15;
     const osc = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
 
@@ -283,5 +301,31 @@ export class AudioManager {
       osc.start(t);
       osc.stop(t + 0.5);
     });
+  }
+
+  public silenceEngine(): void {
+    if (this.ctx && this.engineGain) {
+      this.engineGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.05);
+    }
+  }
+
+  public stopEngine(): void {
+    if (this.engineOsc) {
+      try {
+        this.engineOsc.stop();
+        this.engineOsc.disconnect();
+      } catch {
+        // Safe catch
+      }
+      this.engineOsc = null;
+    }
+    if (this.engineGain) {
+      try {
+        this.engineGain.disconnect();
+      } catch {
+        // Safe catch
+      }
+      this.engineGain = null;
+    }
   }
 }

@@ -1,5 +1,13 @@
 # Especificação Técnica — Protótipo 01: Laboratório Completo de Física, Combate e IA
 
+> **Revisão 09/10/2026:** ver [correções e validação](../audits/2026-10-09-fixes.md). A descrição histórica abaixo não comprova integração/aprovação: o traçado chamado anteriormente “Tubo Zero-G” é uma fita elevada, sem condução cilíndrica/invertida; a reta não contém cones de slalom; os quatro grupos são visuais, sem troca de peças. Não há física livre de orientação/curvatura nem clash automático por colisão. O botão de clash inicia um ensaio manual.
+
+> **Contrato atualizado:** simulação em passos de 1/120 s; pausa/aba oculta não avançam a física. Cada A/B/C preserva seus ajustes durante a sessão. R reinicia nave, comandos, golpes, boost, clash, K.O.s e grid com seed de IA 12345; cenário/efeitos visuais não são determinísticos. JSON continua sendo um objeto plano de parâmetros, com nome opcional; importações parciais válidas preservam campos omitidos, e entradas inválidas rejeitam toda a operação. Limites são os sliders existentes. O JSON não exporta pista/câmera/opções/grid. Isso ainda deve ser ampliado antes de uma aprovação final reproduzível de todas as opções do laboratório.
+
+> **Eixos:** A = deslocamento lógico negativo e D = positivo. A matriz de orientação permanece SO(3), com +Z para frente e +X do modelo. Para a câmera atrás de uma nave voltada para +Z, direita da tela é −X do modelo; por isso a translação usa o negativo do primeiro vetor da base. Pads, recarga e IA seguem a mesma convenção, validada por projeção em câmera.
+
+> **Pads/combate:** área longitudinal usa os 12 u do visual; ativação única por entrada, +75 u/s no laboratório (teto 245), com desaceleração existente de 22 u/s² para remover o excedente gradualmente. Cada golpe atinge cada alvo uma vez. Clash vence no comando que alcança 100; o rival destruído reaparece após 3 s. Essas regras do laboratório não foram integradas como novo perfil de direção no principal. G lateral é uma estimativa da variação de velocidade lateral, usando escala derivada do velocímetro (6,8/3,6 m por unidade); não inclui aceleração centrípeta da spline.
+
 **Status:** Laboratório de Prototipação e Especificação Técnica Integrada (GDD Seções 1 a 11).  
 **Data:** 2026-10-08  
 **Arquivo do Protótipo:** `prototypes/01_steering_profiles.html`  

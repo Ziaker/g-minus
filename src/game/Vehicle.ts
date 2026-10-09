@@ -757,8 +757,10 @@ export class Vehicle {
 
     // 2. Leaning / Strafing from Z and C keys
     let tiltDir = 0;
-    if (input.tiltLeft) tiltDir -= 1;
-    if (input.tiltRight) tiltDir += 1;
+    if (!this.isSideAttacking && !this.isSpinAttacking) {
+      if (input.tiltLeft) tiltDir -= 1;
+      if (input.tiltRight) tiltDir += 1;
+    }
 
     // Drift Detection (Space held + steering)
     const isDrifting = isBrakingOrDrifting && steerDir !== 0;
@@ -788,6 +790,7 @@ export class Vehicle {
       this.lateralVelocity = -this.lateralVelocity * 0.45;
       this.speed = Math.max(this.speed - 120 * dt, 0);
       this.takeDamage(18 * dt, false);
+      if (this.isDestroyed) return;
       this.combat.spawnSparks(this.group.position, 12, 0x00f0ff);
       if (!this.config.isAI) {
         this.audio.playImpact();

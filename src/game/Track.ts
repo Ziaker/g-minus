@@ -121,8 +121,8 @@ export class Track {
         const row1 = i * 2;
         const row2 = (i + 1) * 2;
         // Two triangles for the quad
-        indices.push(row1, row1 + 1, row2);
-        indices.push(row1 + 1, row2 + 1, row2);
+        indices.push(row1, row2, row1 + 1);
+        indices.push(row1 + 1, row2, row2 + 1);
       }
     }
 
@@ -163,7 +163,7 @@ export class Track {
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(1, 40);
+    texture.repeat.set(1, 1); // Longitudinal repetition is already encoded in the UVs.
 
     const material = new THREE.MeshStandardMaterial({
       map: texture,
@@ -221,7 +221,7 @@ export class Track {
 
       const info = this.getTrackInfoAt(loc.t);
       const pos = info.position.clone()
-        .add(info.binormal.clone().multiplyScalar(loc.offset))
+        .add(info.binormal.clone().multiplyScalar(-loc.offset))
         .add(info.normal.clone().multiplyScalar(0.1));
 
       mesh.position.copy(pos);
@@ -257,13 +257,13 @@ export class Track {
       const t = 0.93 + (i / steps) * (0.99 - 0.93);
       const info = this.getTrackInfoAt(t);
       const p = info.position.clone()
-        .add(info.binormal.clone().multiplyScalar(7.5))
+        .add(info.binormal.clone().multiplyScalar(-7.5))
         .add(info.normal.clone().multiplyScalar(0.08));
       pitPts.push(p);
     }
 
     const pitCurve = new THREE.CatmullRomCurve3(pitPts);
-    const pitGeo = new THREE.TubeGeometry(pitCurve, 30, 2.8, 4, false);
+    const pitGeo = new THREE.TubeGeometry(pitCurve, 30, 3.5, 4, false);
     const pitMat = new THREE.MeshBasicMaterial({
       color: 0x00ff88,
       transparent: true,

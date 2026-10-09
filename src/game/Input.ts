@@ -29,6 +29,8 @@ export class InputManager {
     this.forward = this.backward = this.left = this.right = this.drift = this.boost = false;
     this.tiltLeft = this.tiltRight = false;
     this.sideAttackLeft = this.sideAttackRight = this.spinAttack = false;
+    this.lastZPressTime = 0;
+    this.lastCPressTime = 0;
   }
 
   private onKeyDown(e: KeyboardEvent): void {
@@ -62,18 +64,22 @@ export class InputManager {
 
     // 4. Z INCLINA PRA ESQUERDA (Double tap = Side Attack Esquerdo)
     if (code === 'KeyZ') {
-      this.tiltLeft = true;
       if (now - this.lastZPressTime < 280) {
         this.sideAttackLeft = true;
+        this.tiltLeft = false;
+      } else {
+        this.tiltLeft = true;
       }
       this.lastZPressTime = now;
     }
 
     // 5. C INCLINA PRA DIREITA (Double tap = Side Attack Direito)
     if (code === 'KeyC') {
-      this.tiltRight = true;
       if (now - this.lastCPressTime < 280) {
         this.sideAttackRight = true;
+        this.tiltRight = false;
+      } else {
+        this.tiltRight = true;
       }
       this.lastCPressTime = now;
     }
@@ -81,6 +87,8 @@ export class InputManager {
     // Z + C simultâneo ou Shift = Spin Attack 360°
     if ((this.pressed.has('KeyZ') && this.pressed.has('KeyC')) || code === 'ShiftLeft' || code === 'ShiftRight') {
       this.spinAttack = true;
+      this.tiltLeft = false;
+      this.tiltRight = false;
     }
 
     // 6. A É O BOOST

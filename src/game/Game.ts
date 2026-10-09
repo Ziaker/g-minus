@@ -173,13 +173,13 @@ export class Game {
 
   private isRunning = false;
   private isRaceFinished = false;
-  private raceStartTime = 0;
   private raceElapsed = 0;
   private accumulator = 0;
   private finishTimes = new Map<string, number>();
   private lastTime = 0;
   private playerKills = 0;
   private shownBoostOkBanner = false;
+  private animationFrameId: number | null = null;
 
   // Camera Shake
   private cameraShakeIntensity = 0;
@@ -197,7 +197,6 @@ export class Game {
   private resultsPos: HTMLElement | null;
   private resultsDetails: HTMLElement | null;
   private countdownOverlay: HTMLElement | null;
-  private wrongWayBanner: HTMLElement | null;
   private isCountingDown = false;
   private countdownTimer = 0;
   private lastCountBeep = -1;
@@ -247,7 +246,6 @@ export class Game {
     this.resultsPos = document.getElementById('results-pos');
     this.resultsDetails = document.getElementById('results-details');
     this.countdownOverlay = document.getElementById('countdown-overlay');
-    this.wrongWayBanner = document.getElementById('wrong-way-banner');
 
     window.addEventListener('resize', this.onWindowResize.bind(this));
   }
@@ -266,6 +264,11 @@ export class Game {
   }
 
   public initRoster(selectedId: string = 'falcon', engineBalance: number = 0): void {
+    if (this.scene && this.allVehicles) {
+      for (const vehicle of this.allVehicles) {
+        this.scene.remove(vehicle.group);
+      }
+    }
     const playerDef = MACHINE_ROSTER[selectedId] || MACHINE_ROSTER['falcon'];
 
     const playerConfig: VehicleConfig = {
@@ -307,8 +310,27 @@ export class Game {
     for (const vehicle of this.allVehicles) vehicle.updateTransform(0, 0);
   }
 
+  public stop(): void {
+    this.isRunning = false;
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    this.audio.silenceEngine();
+    this.audio.stopEngine();
+  }
+
   public start(selectedId: string = 'falcon', engineBalance: number = 0): void {
-    if (this.isRunning) return;
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    this.isRunning = false;
+    this.attackCooldowns.clear();
+    this.shownBoostOkBanner = false;
+    this.playerKills = 0;
+    this.cameraShakeIntensity = 0;
+
     this.initRoster(selectedId, engineBalance);
     this.audio.init();
     this.isRunning = true;
@@ -324,10 +346,18 @@ export class Game {
 
     if (this.countdownOverlay) {
       this.countdownOverlay.textContent = '3';
+      this.countdownOverlay.style.color = '#ffde59';
       this.countdownOverlay.style.display = 'block';
     }
+    if (this.boostOkBanner) {
+      this.boostOkBanner.style.display = 'none';
+      this.boostOkBanner.style.opacity = '0';
+    }
+    if (this.resultsScreen) {
+      this.resultsScreen.style.display = 'none';
+    }
 
-    requestAnimationFrame(this.loop.bind(this));
+    this.animationFrameId = requestAnimationFrame(this.loop.bind(this));
   }
 
   private loop(currentTime: number): void {
@@ -345,7 +375,7 @@ export class Game {
     }
     this.render();
 
-    requestAnimationFrame(this.loop.bind(this));
+    this.animationFrameId = requestAnimationFrame(this.loop.bind(this));
   }
 
   private update(dt: number): void {
@@ -372,7 +402,7 @@ export class Game {
           if (this.countdownOverlay) this.countdownOverlay.textContent = '1';
           this.audio.playCountdownBeep(false);
         }
-      } else if (this.countdownTimer > 0) {
+      } else {
         if (this.lastCountBeep !== 0) {
           this.lastCountBeep = 0;
           if (this.countdownOverlay) {
@@ -387,10 +417,6 @@ export class Game {
             if (this.countdownOverlay) this.countdownOverlay.style.display = 'none';
           }, 500);
         }
-      } else {
-        this.isCountingDown = false;
-        if (this.countdownOverlay) this.countdownOverlay.style.display = 'none';
-        this.raceStartTime = performance.now();
       }
 
       this.updateCamera(dt);
@@ -634,10 +660,13 @@ export class Game {
       this.hudEnergyFill.style.width = `${energyPct}%`;
       if (energyPct < 25) {
         this.hudEnergyFill.style.background = '#ff0055';
+        this.hudEnergyFill.style.boxShadow = '0 0 12px #ff0055';
       } else if (energyPct < 55) {
-        this.hudEnergyFill.style.background = 'linear-gradient(90deg, #ff0055, #ffcc00)';
+        this.hudEnergyFill.style.background = '#ffcc00';
+        this.hudEnergyFill.style.boxShadow = '0 0 12px #ffcc00';
       } else {
-        this.hudEnergyFill.style.background = 'linear-gradient(90deg, #ff0055, #ffcc00, #00f0ff)';
+        this.hudEnergyFill.style.background = '#00f0ff';
+        this.hudEnergyFill.style.boxShadow = '0 0 12px #00f0ff';
       }
     }
 
@@ -696,20 +725,12 @@ export class Game {
       this.hudKills.textContent = `${this.playerKills} K.O.`;
     }
 
-    // Wrong Way Check
-    if (this.wrongWayBanner) {
-      if (!this.isCountingDown && this.player.speed < -2) {
-        this.wrongWayBanner.style.display = 'block';
-      } else {
-        this.wrongWayBanner.style.display = 'none';
-      }
-    }
-
     // Race Finish Check (After 3 Laps)
     if (this.player.currentLap > 3 && !this.isRaceFinished) {
       this.isRaceFinished = true;
       this.input.reset();
       this.audio.silenceEngine();
+      this.audio.stopEngine();
       this.audio.playVictoryFanfare();
       const totalSec = this.finishTimes.get(this.player.config.id) ?? this.raceElapsed;
       const mins = Math.floor(totalSec / 60).toString().padStart(2, '0');

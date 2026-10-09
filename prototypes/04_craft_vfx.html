@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>G-MINUS // Laboratório de Efeitos Visuais das Naves (VFX Lab)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #02040c;
+      --panel-bg: rgba(10, 16, 32, 0.88);
+      --panel-border: rgba(0, 240, 255, 0.35);
+      --accent-cyan: #00f0ff;
+      --accent-magenta: #ff0055;
+      --accent-gold: #ffde59;
+      --accent-green: #00ff88;
+      --text-muted: #88a0c0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-main);
+      font-family: 'Rajdhani', sans-serif;
+      color: #fff;
+    }
+    #viewport {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      z-index: 1;
+    }
+
+    /* Top Navigation Header */
+    #top-bar {
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      right: 18px;
+      z-index: 20;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      pointer-events: none;
+    }
+    .brand {
+      pointer-events: auto;
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--panel-border);
+      padding: 8px 18px;
+      border-radius: 6px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+    .brand-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--accent-cyan);
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
+    }
+    .brand-sub {
+      font-size: 12px;
+      color: var(--accent-gold);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .top-actions {
+      pointer-events: auto;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-top {
+      background: rgba(14, 22, 44, 0.85);
+      border: 1px solid var(--panel-border);
+      color: #fff;
+      padding: 7px 14px;
+      border-radius: 5px;
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-top:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+      transform: translateY(-1px);
+    }
+    .btn-top.active {
+      background: var(--accent-cyan);
+      color: #02040c;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 16px var(--accent-cyan);
+    }
+
+    /* Left Floating Control Panel */
+    #left-panel {
+      position: absolute;
+      top: 70px;
+      left: 18px;
+      bottom: 24px;
+      width: 440px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .panel-header h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      color: var(--accent-cyan);
+    }
+    .global-presets {
+      display: flex;
+      gap: 6px;
+    }
+    .btn-preset {
+      background: #111a33;
+      border: 1px solid #00f0ff55;
+      color: #fff;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-preset:hover, .btn-preset.active {
+      background: var(--accent-gold);
+      color: #02040c;
+      border-color: var(--accent-gold);
+    }
+
+    /* Tabs */
+    .tabs-bar {
+      display: flex;
+      background: rgba(6, 10, 24, 0.95);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 6px;
+      text-align: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab-btn:hover {
+      color: #fff;
+      background: rgba(0, 240, 255, 0.05);
+    }
+    .tab-btn.active {
+      color: var(--accent-cyan);
+      border-bottom-color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.1);
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 18px;
+      font-size: 13px;
+    }
+    .panel-content::-webkit-scrollbar {
+      width: 5px;
+    }
+    .panel-content::-webkit-scrollbar-thumb {
+      background: var(--accent-cyan);
+      border-radius: 3px;
+    }
+
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Option Radios (A / B / C) */
+    .option-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .option-card {
+      background: rgba(14, 22, 45, 0.85);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 8px 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .option-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-2px);
+    }
+    .option-card.selected {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 240, 255, 0.18);
+      box-shadow: 0 0 14px rgba(0, 240, 255, 0.35);
+    }
+    .opt-letter {
+      font-family: 'Orbitron', monospace;
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--accent-cyan);
+      margin-bottom: 2px;
+    }
+    .opt-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    /* Sliders */
+    .control-group {
+      margin-bottom: 14px;
+    }
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .control-label {
+      font-size: 12px;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+    .control-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+    .slider-input {
+      width: 100%;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+      height: 5px;
+      background: #18223c;
+      border-radius: 3px;
+    }
+
+    /* Test Trigger Action Buttons */
+    .action-triggers {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .btn-action {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 140, 255, 0.25));
+      border: 1px solid var(--accent-cyan);
+      color: #fff;
+      padding: 9px;
+      border-radius: 5px;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .btn-action:hover {
+      background: linear-gradient(135deg, var(--accent-cyan), #0088ff);
+      color: #02040c;
+      box-shadow: 0 0 14px var(--accent-cyan);
+      transform: scale(1.02);
+    }
+    .btn-action.btn-mag {
+      border-color: var(--accent-magenta);
+      background: linear-gradient(135deg, rgba(255, 0, 85, 0.2), rgba(180, 0, 80, 0.3));
+    }
+    .btn-action.btn-mag:hover {
+      background: var(--accent-magenta);
+      color: #fff;
+      box-shadow: 0 0 14px var(--accent-magenta);
+    }
+
+    /* HUD Overlay bottom right */
+    #bottom-hud {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .speedometer-card {
+      pointer-events: auto;
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--panel-border);
+      border-bottom: 3px solid var(--accent-cyan);
+      padding: 12px 24px;
+      border-radius: 6px;
+      text-align: right;
+    }
+    .speed-val {
+      font-family: 'Orbitron', monospace;
+      font-size: 42px;
+      font-weight: 900;
+      color: var(--accent-cyan);
+      line-height: 1;
+      text-shadow: 0 0 16px rgba(0, 240, 255, 0.8);
+    }
+    .speed-unit {
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+    }
+
+    /* Telemetry and JSON Modal */
+    .json-panel {
+      margin-top: 14px;
+      background: rgba(4, 8, 18, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      padding: 10px;
+    }
+    .json-textarea {
+      width: 100%;
+      height: 90px;
+      background: transparent;
+      border: none;
+      color: #a7f3d0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      resize: vertical;
+      outline: none;
+    }
+    .json-buttons {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .btn-json {
+      flex: 1;
+      padding: 6px;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      background: #18223c;
+      border: 1px solid var(--accent-cyan);
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-json:hover {
+      background: var(--accent-cyan);
+      color: #02040c;
+    }
+
+    /* Roster Selector Strip at top center */
+    #roster-selector {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      display: flex;
+      gap: 6px;
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--panel-border);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .roster-chip {
+      padding: 4px 10px;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid transparent;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #94a3b8;
+      transition: all 0.15s;
+    }
+    .roster-chip:hover {
+      color: #fff;
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+    .roster-chip.active {
+      background: rgba(0, 240, 255, 0.2);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    }
+
+    /* Notification Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: rgba(0, 240, 255, 0.95);
+      color: #02040c;
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      font-weight: 900;
+      padding: 10px 24px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.8);
+      z-index: 100;
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: none;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="viewport"></canvas>
+
+  <div id="top-bar">
+    <div class="brand">
+      <span class="brand-title">G-MINUS</span>
+      <span class="brand-sub">VFX LAB // Naves & Propulsão</span>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn-top active" id="btn-env-track">Pista Infinita</button>
+      <button class="btn-top" id="btn-env-studio">Arena Studio 360°</button>
+      <button class="btn-top" id="btn-cam-chase">Câmera: Perseguição</button>
+      <button class="btn-top" id="btn-cam-orbit">Câmera: Órbita</button>
+    </div>
+  </div>
+
+  <div id="roster-selector">
+    <div class="roster-chip active" data-id="falcon">Falcon</div>
+    <div class="roster-chip" data-id="fox">Fox</div>
+    <div class="roster-chip" data-id="goose">Goose</div>
+    <div class="roster-chip" data-id="stingray">Stingray</div>
+    <div class="roster-chip" data-id="white_cat">White Cat</div>
+    <div class="roster-chip" data-id="red_gazelle">Gazelle</div>
+    <div class="roster-chip" data-id="iron_tiger">Tiger</div>
+    <div class="roster-chip" data-id="deep_claw">Claw</div>
+    <div class="roster-chip" data-id="black_bull">Bull</div>
+    <div class="roster-chip" data-id="blood_hawk">Hawk</div>
+  </div>
+
+  <div id="left-panel">
+    <div class="panel-header">
+      <h2>Laboratório de Efeitos (3 Opções)</h2>
+      <div class="global-presets">
+        <button class="btn-preset active" id="preset-A" title="F-Zero GX Arcade Style">Preset A</button>
+        <button class="btn-preset" id="preset-B" title="Cyber Particle Overdrive">Preset B</button>
+        <button class="btn-preset" id="preset-C" title="Retro Neon Synthwave">Preset C</button>
+      </div>
+    </div>
+
+    <div class="tabs-bar">
+      <button class="tab-btn active" data-tab="tab-thruster">1. Propulsor</button>
+      <button class="tab-btn" data-tab="tab-boost">2. Super Boost</button>
+      <button class="tab-btn" data-tab="tab-spin">3. Spin Attack</button>
+      <button class="tab-btn" data-tab="tab-motion">4. Movimento</button>
+      <button class="tab-btn" data-tab="tab-combat">5. Combate & Shield</button>
+      <button class="tab-btn" data-tab="tab-json">JSON</button>
+    </div>
+
+    <div class="panel-content">
+      <!-- 1. PROPULSOR TAB -->
+      <div class="tab-pane active" id="tab-thruster">
+        <div class="option-cards" id="opt-thruster">
+          <div class="option-card selected" data-val="A">
+            <div class="opt-letter">A</div>
+            <div class="opt-title">Plasma Plume F-Zero GX</div>
+          </div>
+          <div class="option-card" data-val="B">
+            <div class="opt-letter">B</div>
+            <div class="opt-title">Cyber Particle Jet</div>
+          </div>
+          <div class="option-card" data-val="C">
+            <div class="opt-letter">C</div>
+            <div class="opt-title">Neon Vector Grid</div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Comprimento da Chama / Jato</span>
+            <span class="control-val" id="val-thrusterLength">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-thrusterLength" min="0.4" max="2.4" step="0.05" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Espessura / Calibre do Bocal</span>
+            <span class="control-val" id="val-thrusterWidth">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-thrusterWidth" min="0.5" max="2.0" step="0.05" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Brilho Emissivo & Luz Dinâmica</span>
+            <span class="control-val" id="val-thrusterGlow">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-thrusterGlow" min="0.0" max="2.5" step="0.05" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Frequência de Pulso / Tremor</span>
+            <span class="control-val" id="val-thrusterFlicker">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-thrusterFlicker" min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Densidade de Partículas / Rastro</span>
+            <span class="control-val" id="val-thrusterParticles">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-thrusterParticles" min="0.0" max="2.0" step="0.1" value="1.0">
+        </div>
+      </div>
+
+      <!-- 2. SUPER BOOST TAB -->
+      <div class="tab-pane" id="tab-boost">
+        <div class="option-cards" id="opt-boost">
+          <div class="option-card selected" data-val="A">
+            <div class="opt-letter">A</div>
+            <div class="opt-title">Aura & Shockwave GX</div>
+          </div>
+          <div class="option-card" data-val="B">
+            <div class="opt-letter">B</div>
+            <div class="opt-title">Speed Lines & Warp</div>
+          </div>
+          <div class="option-card" data-val="C">
+            <div class="opt-letter">C</div>
+            <div class="opt-title">Lightning Arc Overdrive</div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Intensidade da Aura / Campo Turbo</span>
+            <span class="control-val" id="val-boostAuraIntensity">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-boostAuraIntensity" min="0.2" max="2.5" step="0.05" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Ondas de Choque Sônicas (Shockwaves)</span>
+            <span class="control-val" id="val-boostShockwaveScale">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-boostShockwaveScale" min="0.0" max="2.5" step="0.05" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Distorção de Câmera / FOV Turbo</span>
+            <span class="control-val" id="val-boostFovKick">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-boostFovKick" min="0.0" max="2.0" step="0.05" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Rastro Fantasma (After-Image Ghost)</span>
+            <span class="control-val" id="val-boostGhostTrail">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-boostGhostTrail" min="0.0" max="2.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="action-triggers">
+          <button class="btn-action" id="trigger-boost">Disparar Turbo [A]</button>
+          <button class="btn-action btn-mag" id="trigger-boost-loop">Boost Contínuo</button>
+        </div>
+      </div>
+
+      <!-- 3. SPIN ATTACK TAB -->
+      <div class="tab-pane" id="tab-spin">
+        <div class="option-cards" id="opt-spin">
+          <div class="option-card selected" data-val="A">
+            <div class="opt-letter">A</div>
+            <div class="opt-title">Ciclone Plasma & Disco</div>
+          </div>
+          <div class="option-card" data-val="B">
+            <div class="opt-letter">B</div>
+            <div class="opt-title">Vórtice Lâminas Elétricas</div>
+          </div>
+          <div class="option-card" data-val="C">
+            <div class="opt-letter">C</div>
+            <div class="opt-title">Digital Wave 3D Ring</div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Raio de Varredura / Alcance</span>
+            <span class="control-val" id="val-spinRadius">6.80m</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-spinRadius" min="3.0" max="12.0" step="0.2" value="6.8">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Velocidade Angular de Rotação</span>
+            <span class="control-val" id="val-spinSpeed">8.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-spinSpeed" min="3.0" max="18.0" step="0.5" value="8.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Brilho do Campo de Força Neon</span>
+            <span class="control-val" id="val-spinGlow">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-spinGlow" min="0.2" max="2.5" step="0.05" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Faíscas Radiais de Descarga</span>
+            <span class="control-val" id="val-spinSparks">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-spinSparks" min="0.0" max="2.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="action-triggers">
+          <button class="btn-action" id="trigger-spin">Giro 360° [Shift/Z+C]</button>
+          <button class="btn-action btn-mag" id="trigger-spin-loop">Spin Contínuo</button>
+        </div>
+      </div>
+
+      <!-- 4. MOVIMENTO & HOVER TAB -->
+      <div class="tab-pane" id="tab-motion">
+        <div class="option-cards" id="opt-motion">
+          <div class="option-card selected" data-val="A">
+            <div class="opt-letter">A</div>
+            <div class="opt-title">Arcade GX Banking</div>
+          </div>
+          <div class="option-card" data-val="B">
+            <div class="opt-letter">B</div>
+            <div class="opt-title">Inercial Heavy Float</div>
+          </div>
+          <div class="option-card" data-val="C">
+            <div class="opt-letter">C</div>
+            <div class="opt-title">Agile Hovercraft Jet</div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Ângulo Máximo de Banking Roll</span>
+            <span class="control-val" id="val-motionRollMax">42°</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-motionRollMax" min="10" max="75" step="1" value="42">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Pitch em Aceleração / Frenagem (Mergulho)</span>
+            <span class="control-val" id="val-motionPitch">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-motionPitch" min="0.0" max="2.5" step="0.1" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Flutuação / Bobbing Anti-Gravidade</span>
+            <span class="control-val" id="val-motionBobbing">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-motionBobbing" min="0.0" max="2.5" step="0.1" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Derrapagem / Slip Angle de Drift</span>
+            <span class="control-val" id="val-motionDriftYaw">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-motionDriftYaw" min="0.2" max="2.5" step="0.1" value="1.0">
+        </div>
+
+        <div class="action-triggers">
+          <button class="btn-action" id="trigger-steer-l">◄ Virar Esquerda</button>
+          <button class="btn-action" id="trigger-steer-r">Virar Direita ►</button>
+        </div>
+      </div>
+
+      <!-- 5. COMBATE & SHIELD TAB -->
+      <div class="tab-pane" id="tab-combat">
+        <div class="option-cards" id="opt-combat">
+          <div class="option-card selected" data-val="A">
+            <div class="opt-letter">A</div>
+            <div class="opt-title">Impacto Seco & Faíscas</div>
+          </div>
+          <div class="option-card" data-val="B">
+            <div class="opt-letter">B</div>
+            <div class="opt-title">Bolha Hex Shield Flash</div>
+          </div>
+          <div class="option-card" data-val="C">
+            <div class="opt-letter">C</div>
+            <div class="opt-title">Digital Cyber Glitch</div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Impulso Visual de Side Attack</span>
+            <span class="control-val" id="val-sideAttackImpulse">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-sideAttackImpulse" min="0.4" max="2.2" step="0.05" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Duração & Opacidade do Shield Hit</span>
+            <span class="control-val" id="val-shieldHitGlow">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-shieldHitGlow" min="0.2" max="2.5" step="0.1" value="1.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Quantidade de Faíscas em Guardrail</span>
+            <span class="control-val" id="val-sparksDensity">1.00x</span>
+          </div>
+          <input type="range" class="slider-input" id="slider-sparksDensity" min="0.2" max="2.5" step="0.1" value="1.0">
+        </div>
+
+        <div class="action-triggers">
+          <button class="btn-action" id="trigger-side-l">Side Attack [Z]</button>
+          <button class="btn-action" id="trigger-side-r">Side Attack [C]</button>
+          <button class="btn-action btn-mag" id="trigger-damage-hit">Simular Dano</button>
+          <button class="btn-action" id="trigger-dash-plate">Dash Plate (+Pad)</button>
+        </div>
+      </div>
+
+      <!-- JSON TAB -->
+      <div class="tab-pane" id="tab-json">
+        <p style="color:var(--text-muted); margin-bottom:8px;">Configuração completa de efeitos visuais em JSON:</p>
+        <div class="json-panel">
+          <textarea class="json-textarea" id="json-config" spellcheck="false"></textarea>
+          <div class="json-buttons">
+            <button class="btn-json" id="btn-copy-json">📋 Copiar JSON</button>
+            <button class="btn-json" id="btn-apply-json">✔ Aplicar JSON</button>
+            <button class="btn-json" id="btn-reset-json">↺ Padrão</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="bottom-hud">
+    <div class="speedometer-card">
+      <div class="speed-val" id="hud-speed">1024</div>
+      <div class="speed-unit">KM / H</div>
+    </div>
+  </div>
+
+  <div id="toast">CONFIGURAÇÃO COPIADA!</div>
+
+  <script>
+    // --- 1. CONFIGURAÇÃO BASE & ESTADO DO LABORATÓRIO ---
+    const ROSTER_CONFIGS = {
+      falcon: { name: 'Blue Falcon', color: 0x0044ff, accentColor: 0x00f0ff, thrusterCount: 2, scale: 1.0 },
+      fox: { name: 'Golden Fox', color: 0xf5b800, accentColor: 0xffffff, thrusterCount: 1, scale: 0.95 },
+      goose: { name: 'Wild Goose', color: 0x228b22, accentColor: 0x9400d3, thrusterCount: 2, scale: 1.15 },
+      stingray: { name: 'Fire Stingray', color: 0xd90429, accentColor: 0xffaa00, thrusterCount: 4, scale: 1.2 },
+      white_cat: { name: 'White Cat', color: 0xe0e6ed, accentColor: 0x00f0ff, thrusterCount: 2, scale: 0.92 },
+      red_gazelle: { name: 'Red Gazelle', color: 0xb30000, accentColor: 0xff4444, thrusterCount: 1, scale: 1.05 },
+      iron_tiger: { name: 'Iron Tiger', color: 0xff7700, accentColor: 0xffaa00, thrusterCount: 3, scale: 1.18 },
+      deep_claw: { name: 'Deep Claw', color: 0x7b2cbf, accentColor: 0xff006e, thrusterCount: 2, scale: 1.0 },
+      black_bull: { name: 'Black Bull', color: 0x161822, accentColor: 0xcc0033, thrusterCount: 4, scale: 1.25 },
+      blood_hawk: { name: 'Blood Hawk', color: 0x880011, accentColor: 0xff0044, thrusterCount: 2, scale: 1.08 }
+    };
+
+    let activeMachineId = 'falcon';
+
+    // Estado geral de parâmetros VFX
+    const vfxState = {
+      // Modos A / B / C por categoria
+      thrusterStyle: 'A',
+      boostStyle: 'A',
+      spinStyle: 'A',
+      motionStyle: 'A',
+      combatStyle: 'A',
+
+      // 1. Sliders Propulsor
+      thrusterLength: 1.0,
+      thrusterWidth: 1.0,
+      thrusterGlow: 1.0,
+      thrusterFlicker: 1.0,
+      thrusterParticles: 1.0,
+
+      // 2. Sliders Boost
+      boostAuraIntensity: 1.0,
+      boostShockwaveScale: 1.0,
+      boostFovKick: 1.0,
+      boostGhostTrail: 1.0,
+
+      // 3. Sliders Spin Attack
+      spinRadius: 6.8,
+      spinSpeed: 8.0,
+      spinGlow: 1.0,
+      spinSparks: 1.0,
+
+      // 4. Sliders Movimento
+      motionRollMax: 42,
+      motionPitch: 1.0,
+      motionBobbing: 1.0,
+      motionDriftYaw: 1.0,
+
+      // 5. Sliders Combate
+      sideAttackImpulse: 1.0,
+      shieldHitGlow: 1.0,
+      sparksDensity: 1.0
+    };
+
+    // Dinâmica de simulação da nave
+    let currentSpeed = 1024;
+    let targetSpeed = 1024;
+    let isBoosting = false;
+    let boostTimer = 0;
+    let isSpinAttacking = false;
+    let spinTimer = 0;
+    let spinRotation = 0;
+    let isSideAttacking = false;
+    let sideAttackDir = 0;
+    let sideAttackTimer = 0;
+    let shieldHitTimer = 0;
+    let dashPlateTimer = 0;
+
+    let steerInput = 0;
+    let currentRoll = 0;
+    let currentPitch = 0;
+    let hoverBobTimer = 0;
+
+    let environmentMode = 'track'; // 'track' ou 'studio'
+    let cameraMode = 'chase'; // 'chase' ou 'orbit'
+
+    // --- 2. THREE.JS CENÁRIO & RENDERIZADOR ---
+    const canvas = document.getElementById('viewport');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x02040c);
+    scene.fog = new THREE.FogExp2(0x02040c, 0.002);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.2, 2000);
+    camera.position.set(0, 4.5, -12);
+
+    // Luzes
+    const ambientLight = new THREE.AmbientLight(0x334466, 1.6);
+    scene.add(ambientLight);
+    const sunLight = new THREE.DirectionalLight(0xccddff, 2.2);
+    sunLight.position.set(100, 200, 100);
+    scene.add(sunLight);
+    const cyanLight = new THREE.PointLight(0x00f0ff, 3.5, 300);
+    cyanLight.position.set(0, 60, 0);
+    scene.add(cyanLight);
+
+    // --- 3. AMBIENTES (PISTA INFINITA & STUDIO) ---
+    const trackGroup = new THREE.Group();
+    const studioGroup = new THREE.Group();
+    scene.add(trackGroup);
+    scene.add(studioGroup);
+    studioGroup.visible = false;
+
+    // Criar Pista Sci-Fi Infinita
+    const trackWidth = 26;
+    const trackLength = 600;
+    const trackSegments = 60;
+    const trackGeo = new THREE.PlaneGeometry(trackWidth, trackLength, 12, trackSegments);
+    trackGeo.rotateX(-Math.PI / 2);
+
+    // Canvas Texture para o grid da pista
+    const trackCanvas = document.createElement('canvas');
+    trackCanvas.width = 512;
+    trackCanvas.height = 512;
+    const tctx = trackCanvas.getContext('2d');
+    tctx.fillStyle = '#080d1e';
+    tctx.fillRect(0, 0, 512, 512);
+    tctx.strokeStyle = '#00f0ff';
+    tctx.lineWidth = 8;
+    tctx.setLineDash([60, 60]);
+    tctx.beginPath();
+    tctx.moveTo(256, 0); tctx.lineTo(256, 512);
+    tctx.stroke();
+    tctx.strokeStyle = '#182440';
+    tctx.lineWidth = 3;
+    tctx.setLineDash([]);
+    for(let x = 64; x < 512; x += 64) {
+      if(x === 256) continue;
+      tctx.beginPath(); tctx.moveTo(x, 0); tctx.lineTo(x, 512); tctx.stroke();
+    }
+    const trackTex = new THREE.CanvasTexture(trackCanvas);
+    trackTex.wrapS = trackTex.wrapT = THREE.RepeatWrapping;
+    trackTex.repeat.set(1, 15);
+
+    const trackMat = new THREE.MeshStandardMaterial({ map: trackTex, roughness: 0.3, metalness: 0.8 });
+    const trackMesh = new THREE.Mesh(trackGeo, trackMat);
+    trackGroup.add(trackMesh);
+
+    // Guardrails luminosos
+    const railMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+    const railLeft = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, trackLength), railMat);
+    railLeft.position.set(-trackWidth/2, 0.6, 0);
+    const railRight = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, trackLength), railMat);
+    railRight.position.set(trackWidth/2, 0.6, 0);
+    trackGroup.add(railLeft, railRight);
+
+    // Pilares e arcos de cenário
+    const sceneryPillars = [];
+    for(let i = 0; i < 20; i++) {
+      const arch = new THREE.Mesh(new THREE.TorusGeometry(18, 0.4, 6, 24), new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true }));
+      arch.position.set(0, 5, (i - 10) * 30);
+      trackGroup.add(arch);
+      sceneryPillars.push(arch);
+    }
+
+    // Studio Arena Floor
+    const studioFloor = new THREE.Mesh(
+      new THREE.CircleGeometry(40, 48),
+      new THREE.MeshStandardMaterial({ color: 0x0a1020, roughness: 0.2, metalness: 0.9 })
+    );
+    studioFloor.rotateX(-Math.PI / 2);
+    const studioRing = new THREE.Mesh(
+      new THREE.RingGeometry(38, 39, 48),
+      new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide })
+    );
+    studioRing.rotateX(-Math.PI / 2);
+    studioRing.position.y = 0.05;
+    studioGroup.add(studioFloor, studioRing);
+
+    // --- 4. CONSTRUÇÃO DAS NAVES (ROSTER DE 10 MODELOS) ---
+    const shipRoot = new THREE.Group();
+    scene.add(shipRoot);
+
+    let currentShipMesh = new THREE.Group();
+    shipRoot.add(currentShipMesh);
+
+    function buildShipMesh(id) {
+      const def = ROSTER_CONFIGS[id] || ROSTER_CONFIGS['falcon'];
+      const group = new THREE.Group();
+
+      const mainMat = new THREE.MeshStandardMaterial({
+        color: def.color,
+        roughness: 0.35,
+        metalness: 0.75
+      });
+      const accentMat = new THREE.MeshBasicMaterial({ color: def.accentColor });
+      const cockpitMat = new THREE.MeshStandardMaterial({
+        color: 0x00e1ff,
+        roughness: 0.1,
+        metalness: 0.9,
+        transparent: true,
+        opacity: 0.8
+      });
+      const darkMat = new THREE.MeshStandardMaterial({ color: 0x111624, roughness: 0.6, metalness: 0.8 });
+
+      // Fuselagem Modular Base
+      const body = new THREE.Mesh(new THREE.ConeGeometry(1.4, 4.8, 6), mainMat);
+      body.rotateX(Math.PI / 2);
+      body.scale.set(1.1, 0.45, 1.0);
+      group.add(body);
+
+      // Cabine
+      const canopy = new THREE.Mesh(new THREE.SphereGeometry(0.65, 10, 8), cockpitMat);
+      canopy.scale.set(0.7, 0.45, 1.6);
+      canopy.position.set(0, 0.35, 0.4);
+      group.add(canopy);
+
+      // Asas
+      const leftWing = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 1.8), mainMat);
+      leftWing.position.set(-1.4, 0, -0.6);
+      leftWing.rotateY(0.2);
+      const rightWing = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.1, 1.8), mainMat);
+      rightWing.position.set(1.4, 0, -0.6);
+      rightWing.rotateY(-0.2);
+      group.add(leftWing, rightWing);
+
+      // Aletas dorsais
+      const finL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, 1.2), accentMat);
+      finL.position.set(-1.1, 0.45, -1.2);
+      finL.rotateZ(-0.25);
+      const finR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.9, 1.2), accentMat);
+      finR.position.set(1.1, 0.45, -1.2);
+      finR.rotateZ(0.25);
+      group.add(finL, finR);
+
+      // Bocais de escape dos motores
+      const nozzles = [];
+      const numNozzles = def.thrusterCount;
+      for(let n = 0; n < numNozzles; n++) {
+        const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.4, 0.6, 12), darkMat);
+        nozzle.rotateX(Math.PI / 2);
+        let xOff = 0;
+        if(numNozzles === 2) xOff = (n === 0 ? -0.7 : 0.7);
+        if(numNozzles === 3) xOff = (n - 1) * 0.75;
+        if(numNozzles === 4) xOff = [-1.1, -0.4, 0.4, 1.1][n];
+        nozzle.position.set(xOff, 0, -2.4);
+        group.add(nozzle);
+        nozzles.push(nozzle.position.clone());
+      }
+      group.userData.nozzlePositions = nozzles;
+      group.userData.accentColor = def.accentColor;
+      group.userData.mainColor = def.color;
+
+      group.scale.setScalar(def.scale);
+      return group;
+    }
+
+    function switchMachine(id) {
+      activeMachineId = id;
+      shipRoot.remove(currentShipMesh);
+      currentShipMesh = buildShipMesh(id);
+      shipRoot.add(currentShipMesh);
+      rebuildAllVFX();
+    }
+
+    // --- 5. SISTEMAS DE EFEITOS VISUAIS (VFX SYSTEMS) ---
+    const vfxGroup = new THREE.Group();
+    shipRoot.add(vfxGroup);
+
+    // 5.1 PROPULSORES (3 OPÇÕES)
+    let thrusterMeshes = [];
+    let thrusterParticles = null;
+    let thrusterLight = null;
+
+    function buildThrusterFX() {
+      // Limpar antigos
+      thrusterMeshes.forEach(m => vfxGroup.remove(m));
+      thrusterMeshes = [];
+      if(thrusterParticles) { vfxGroup.remove(thrusterParticles); thrusterParticles = null; }
+      if(thrusterLight) { vfxGroup.remove(thrusterLight); thrusterLight = null; }
+
+      const nozzles = currentShipMesh.userData.nozzlePositions || [new THREE.Vector3(0,0,-2.4)];
+      const accent = currentShipMesh.userData.accentColor || 0x00f0ff;
+
+      thrusterLight = new THREE.PointLight(accent, 3.0 * vfxState.thrusterGlow, 25);
+      thrusterLight.position.set(0, 0, -2.6);
+      vfxGroup.add(thrusterLight);
+
+      if (vfxState.thrusterStyle === 'A') {
+        // Opção A: Plasma Plume F-Zero GX (Cone Gradiente Duplo + Anéis de Choque)
+        nozzles.forEach(pos => {
+          const plumeGroup = new THREE.Group();
+          plumeGroup.position.copy(pos);
+
+          // Cone interno super brilhante
+          const coreGeo = new THREE.ConeGeometry(0.35 * vfxState.thrusterWidth, 3.2 * vfxState.thrusterLength, 12);
+          coreGeo.rotateX(-Math.PI / 2);
+          coreGeo.translate(0, 0, -1.6 * vfxState.thrusterLength);
+          const coreMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95 });
+          const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+
+          // Cone externo de plasma colorido
+          const shellGeo = new THREE.ConeGeometry(0.7 * vfxState.thrusterWidth, 4.8 * vfxState.thrusterLength, 14);
+          shellGeo.rotateX(-Math.PI / 2);
+          shellGeo.translate(0, 0, -2.4 * vfxState.thrusterLength);
+          const shellMat = new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.65, side: THREE.BackSide });
+          const shellMesh = new THREE.Mesh(shellGeo, shellMat);
+
+          // Anéis de compressão Mach Diamond
+          const ringGeo = new THREE.TorusGeometry(0.45 * vfxState.thrusterWidth, 0.08, 6, 16);
+          const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+          const ring1 = new THREE.Mesh(ringGeo, ringMat); ring1.position.z = -1.2;
+          const ring2 = new THREE.Mesh(ringGeo, ringMat); ring2.position.z = -2.4; ring2.scale.setScalar(0.7);
+
+          plumeGroup.add(coreMesh, shellMesh, ring1, ring2);
+          vfxGroup.add(plumeGroup);
+          thrusterMeshes.push(plumeGroup);
+        });
+
+      } else if (vfxState.thrusterStyle === 'B') {
+        // Opção B: Cyber Particle Jet (Nuvem de Faíscas & Fótons de Alta Velocidade)
+        const count = 120;
+        const pGeo = new THREE.BufferGeometry();
+        const pPos = new Float32Array(count * 3);
+        const pVel = [];
+        for(let i = 0; i < count; i++) {
+          pPos[i*3] = (Math.random() - 0.5) * 0.4;
+          pPos[i*3+1] = (Math.random() - 0.5) * 0.4;
+          pPos[i*3+2] = -2.4 - Math.random() * 4.0;
+          pVel.push({
+            speed: 15 + Math.random() * 25,
+            spreadX: (Math.random() - 0.5) * 2,
+            spreadY: (Math.random() - 0.5) * 2
+          });
+        }
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+        const pMat = new THREE.PointsMaterial({
+          color: accent,
+          size: 0.35 * vfxState.thrusterWidth,
+          transparent: true,
+          opacity: 0.85,
+          blending: THREE.AdditiveBlending
+        });
+        thrusterParticles = new THREE.Points(pGeo, pMat);
+        thrusterParticles.userData = { vel: pVel, nozzles };
+        vfxGroup.add(thrusterParticles);
+
+      } else if (vfxState.thrusterStyle === 'C') {
+        // Opção C: Neon Vector Grid (Feixe Retrô Wireframe com Ondas Cilíndricas)
+        nozzles.forEach(pos => {
+          const cylinderGeo = new THREE.CylinderGeometry(0.55 * vfxState.thrusterWidth, 0.1, 4.5 * vfxState.thrusterLength, 8, 4, true);
+          cylinderGeo.rotateX(Math.PI / 2);
+          cylinderGeo.translate(0, 0, -2.25 * vfxState.thrusterLength);
+          const wireMat = new THREE.MeshBasicMaterial({ color: accent, wireframe: true });
+          const cylMesh = new THREE.Mesh(cylinderGeo, wireMat);
+          cylMesh.position.copy(pos);
+          vfxGroup.add(cylMesh);
+          thrusterMeshes.push(cylMesh);
+        });
+      }
+    }
+
+    // 5.2 SUPER BOOST FX (3 OPÇÕES)
+    let boostAuraMesh = null;
+    let boostShockwaves = [];
+    let boostSpeedLines = null;
+    let boostArcsGroup = null;
+
+    function buildBoostFX() {
+      if(boostAuraMesh) { vfxGroup.remove(boostAuraMesh); boostAuraMesh = null; }
+      boostShockwaves.forEach(sw => vfxGroup.remove(sw));
+      boostShockwaves = [];
+      if(boostSpeedLines) { scene.remove(boostSpeedLines); boostSpeedLines = null; }
+      if(boostArcsGroup) { vfxGroup.remove(boostArcsGroup); boostArcsGroup = null; }
+
+      const accent = currentShipMesh.userData.accentColor || 0x00f0ff;
+
+      if (vfxState.boostStyle === 'A') {
+        // Opção A: Aura Esférica Fresnel GX + Anéis de Onda de Choque
+        const auraGeo = new THREE.SphereGeometry(2.8, 16, 12);
+        auraGeo.scale(1.1, 0.7, 1.8);
+        const auraMat = new THREE.MeshBasicMaterial({
+          color: 0x00ffff,
+          transparent: true,
+          opacity: 0.0,
+          wireframe: true,
+          blending: THREE.AdditiveBlending
+        });
+        boostAuraMesh = new THREE.Mesh(auraGeo, auraMat);
+        vfxGroup.add(boostAuraMesh);
+
+        for(let i = 0; i < 3; i++) {
+          const swGeo = new THREE.RingGeometry(0.8, 1.4, 24);
+          const swMat = new THREE.MeshBasicMaterial({
+            color: 0x00f0ff,
+            transparent: true,
+            opacity: 0,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending
+          });
+          const sw = new THREE.Mesh(swGeo, swMat);
+          sw.position.set(0, 0, -3.0);
+          vfxGroup.add(sw);
+          boostShockwaves.push(sw);
+        }
+
+      } else if (vfxState.boostStyle === 'B') {
+        // Opção B: Speed Lines Hiperespaço em direção à câmera
+        const lineCount = 180;
+        const lGeo = new THREE.BufferGeometry();
+        const lPos = new Float32Array(lineCount * 6);
+        for(let i = 0; i < lineCount; i++) {
+          const rad = 2 + Math.random() * 12;
+          const ang = Math.random() * Math.PI * 2;
+          const x = Math.cos(ang) * rad;
+          const y = Math.sin(ang) * rad;
+          const z1 = -20 - Math.random() * 60;
+          const z2 = z1 + 8 + Math.random() * 14;
+          lPos[i*6] = x; lPos[i*6+1] = y; lPos[i*6+2] = z1;
+          lPos[i*6+3] = x; lPos[i*6+4] = y; lPos[i*6+5] = z2;
+        }
+        lGeo.setAttribute('position', new THREE.BufferAttribute(lPos, 3));
+        const lMat = new THREE.LineBasicMaterial({
+          color: 0x00f0ff,
+          transparent: true,
+          opacity: 0.0,
+          blending: THREE.AdditiveBlending
+        });
+        boostSpeedLines = new THREE.LineSegments(lGeo, lMat);
+        scene.add(boostSpeedLines);
+
+      } else if (vfxState.boostStyle === 'C') {
+        // Opção C: Lightning Arc Overdrive (Arcos Elétricos nas Asas e Fuselagem)
+        boostArcsGroup = new THREE.Group();
+        for(let a = 0; a < 6; a++) {
+          const arcGeo = new THREE.BufferGeometry();
+          const arcPts = new Float32Array(15 * 3);
+          arcGeo.setAttribute('position', new THREE.BufferAttribute(arcPts, 3));
+          const arcMat = new THREE.LineBasicMaterial({ color: 0xff00aa, linewidth: 2, transparent: true, opacity: 0.0 });
+          const arcLine = new THREE.Line(arcGeo, arcMat);
+          boostArcsGroup.add(arcLine);
+        }
+        vfxGroup.add(boostArcsGroup);
+      }
+    }
+
+    // 5.3 SPIN ATTACK FX (3 OPÇÕES)
+    let spinVortexGroup = null;
+
+    function buildSpinFX() {
+      if(spinVortexGroup) { vfxGroup.remove(spinVortexGroup); spinVortexGroup = null; }
+      spinVortexGroup = new THREE.Group();
+
+      const radius = vfxState.spinRadius;
+
+      if (vfxState.spinStyle === 'A') {
+        // Opção A: Ciclone de Plasma & Disco de Corte Horizontal
+        const discGeo = new THREE.RingGeometry(0.8, radius, 32);
+        discGeo.rotateX(-Math.PI / 2);
+        const discMat = new THREE.MeshBasicMaterial({
+          color: 0x00f0ff,
+          transparent: true,
+          opacity: 0.0,
+          side: THREE.DoubleSide,
+          blending: THREE.AdditiveBlending
+        });
+        const discMesh = new THREE.Mesh(discGeo, discMat);
+        discMesh.name = 'spinDisc';
+
+        // Esfera de vórtice translúcida
+        const sphereGeo = new THREE.SphereGeometry(radius * 0.85, 20, 16);
+        const sphereMat = new THREE.MeshBasicMaterial({
+          color: 0x0088ff,
+          transparent: true,
+          opacity: 0.0,
+          wireframe: true,
+          blending: THREE.AdditiveBlending
+        });
+        const sphereMesh = new THREE.Mesh(sphereGeo, sphereMat);
+        sphereMesh.name = 'spinSphere';
+
+        spinVortexGroup.add(discMesh, sphereMesh);
+
+      } else if (vfxState.spinStyle === 'B') {
+        // Opção B: Lâminas Elétricas Circulares em Arco Giratório
+        const blades = 4;
+        for(let b = 0; b < blades; b++) {
+          const curve = new THREE.EllipseCurve(0, 0, radius, radius * 0.8, 0, Math.PI * 0.45, false, b * (Math.PI / 2));
+          const pts = curve.getPoints(24);
+          const bladeGeo = new THREE.BufferGeometry().setFromPoints(pts.map(p => new THREE.Vector3(p.x, 0, p.y)));
+          const bladeMat = new THREE.LineBasicMaterial({ color: 0x00ffaa, linewidth: 3, transparent: true, opacity: 0.0 });
+          const bladeLine = new THREE.Line(bladeGeo, bladeMat);
+          spinVortexGroup.add(bladeLine);
+        }
+
+      } else if (vfxState.spinStyle === 'C') {
+        // Opção C: Digital Wave 3D Rings Expansivos
+        for(let r = 0; r < 4; r++) {
+          const ringGeo = new THREE.RingGeometry(radius * (0.3 + r * 0.2), radius * (0.35 + r * 0.2), 6);
+          ringGeo.rotateX(-Math.PI / 2);
+          const ringMat = new THREE.MeshBasicMaterial({
+            color: 0xff0055,
+            transparent: true,
+            opacity: 0.0,
+            wireframe: true,
+            side: THREE.DoubleSide
+          });
+          const ring = new THREE.Mesh(ringGeo, ringMat);
+          spinVortexGroup.add(ring);
+        }
+      }
+
+      vfxGroup.add(spinVortexGroup);
+    }
+
+    // 5.4 COMBATE & SHIELD FX
+    let shieldBubble = null;
+    let sparkParticles = null;
+
+    function buildCombatFX() {
+      if(shieldBubble) { vfxGroup.remove(shieldBubble); shieldBubble = null; }
+      if(sparkParticles) { scene.remove(sparkParticles); sparkParticles = null; }
+
+      // Bolha de Escudo Hexagonal
+      const sGeo = new THREE.IcosahedronGeometry(3.0, 2);
+      const sMat = new THREE.MeshBasicMaterial({
+        color: 0x00ff88,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.0,
+        blending: THREE.AdditiveBlending
+      });
+      shieldBubble = new THREE.Mesh(sGeo, sMat);
+      vfxGroup.add(shieldBubble);
+
+      // Partículas de Faísca para Colisão / Guardrail
+      const sCount = 80;
+      const spGeo = new THREE.BufferGeometry();
+      const spPos = new Float32Array(sCount * 3);
+      const spVel = [];
+      for(let i = 0; i < sCount; i++) {
+        spPos[i*3] = 0; spPos[i*3+1] = 0; spPos[i*3+2] = 0;
+        spVel.push(new THREE.Vector3());
+      }
+      spGeo.setAttribute('position', new THREE.BufferAttribute(spPos, 3));
+      const spMat = new THREE.PointsMaterial({
+        color: 0xffcc00,
+        size: 0.25,
+        transparent: true,
+        opacity: 0.0,
+        blending: THREE.AdditiveBlending
+      });
+      sparkParticles = new THREE.Points(spGeo, spMat);
+      sparkParticles.userData = { vel: spVel, active: false };
+      scene.add(sparkParticles);
+    }
+
+    function rebuildAllVFX() {
+      buildThrusterFX();
+      buildBoostFX();
+      buildSpinFX();
+      buildCombatFX();
+    }
+
+    // --- 6. ATUALIZAÇÃO DA SIMULAÇÃO E ANIMAÇÃO ---
+    let lastTime = performance.now();
+
+    function updateSimulation(dt) {
+      // 1. Velocidade
+      targetSpeed = isBoosting ? 1420 : 1024;
+      currentSpeed = THREE.MathUtils.lerp(currentSpeed, targetSpeed, dt * 4);
+      document.getElementById('hud-speed').textContent = Math.round(currentSpeed);
+
+      // 2. Animação da Pista / Cenário (Ilusão de alta velocidade)
+      if(environmentMode === 'track') {
+        const moveDist = (currentSpeed / 3.6) * dt * 0.15;
+        trackTex.offset.y = (trackTex.offset.y - moveDist * 0.05) % 1;
+        sceneryPillars.forEach(p => {
+          p.position.z -= moveDist;
+          if(p.position.z < -150) p.position.z += 300;
+        });
+      }
+
+      // 3. Flutuação e Bobbing da Nave
+      hoverBobTimer += dt * 3.5 * vfxState.motionBobbing;
+      const bobY = Math.sin(hoverBobTimer) * 0.12 * vfxState.motionBobbing;
+
+      // 4. Banking Roll & Pitch
+      const maxRollRad = (vfxState.motionRollMax * Math.PI) / 180;
+      const targetRoll = steerInput * maxRollRad + (isSideAttacking ? sideAttackDir * 0.65 : 0);
+      currentRoll = THREE.MathUtils.lerp(currentRoll, targetRoll, dt * 10);
+
+      const targetPitch = (isBoosting ? -0.15 : 0) * vfxState.motionPitch;
+      currentPitch = THREE.MathUtils.lerp(currentPitch, targetPitch, dt * 8);
+
+      currentShipMesh.position.y = 1.2 + bobY;
+      currentShipMesh.rotation.z = currentRoll;
+      currentShipMesh.rotation.x = currentPitch;
+
+      // 5. Atualização de Propulsor
+      const flicker = 1.0 + (Math.random() - 0.5) * 0.25 * vfxState.thrusterFlicker;
+      const speedScale = (currentSpeed / 1000) * (isBoosting ? 2.2 : 1.0);
+
+      thrusterMeshes.forEach(mesh => {
+        mesh.scale.set(1, 1, speedScale * flicker);
+      });
+      if(thrusterLight) {
+        thrusterLight.intensity = (isBoosting ? 6.0 : 2.5) * vfxState.thrusterGlow * flicker;
+      }
+      if(thrusterParticles) {
+        const pos = thrusterParticles.geometry.attributes.position.array;
+        const vel = thrusterParticles.userData.vel;
+        for(let i = 0; i < vel.length; i++) {
+          pos[i*3+2] -= vel[i].speed * dt * speedScale;
+          pos[i*3] += vel[i].spreadX * dt;
+          pos[i*3+1] += vel[i].spreadY * dt;
+          if(pos[i*3+2] < -12.0) {
+            pos[i*3] = (Math.random() - 0.5) * 0.4;
+            pos[i*3+1] = (Math.random() - 0.5) * 0.4;
+            pos[i*3+2] = -2.4;
+          }
+        }
+        thrusterParticles.geometry.attributes.position.needsUpdate = true;
+      }
+
+      // 6. Atualização de Boost
+      if(boostTimer > 0) {
+        boostTimer -= dt;
+        if(boostTimer <= 0) isBoosting = false;
+      }
+      if(boostAuraMesh) {
+        boostAuraMesh.material.opacity = isBoosting ? 0.75 * vfxState.boostAuraIntensity : 0.0;
+        boostAuraMesh.rotation.z += dt * 4;
+      }
+      if(boostShockwaves.length > 0) {
+        boostShockwaves.forEach((sw, idx) => {
+          if(isBoosting) {
+            sw.position.z -= dt * (18 + idx * 8);
+            sw.scale.addScalar(dt * 3.5 * vfxState.boostShockwaveScale);
+            sw.material.opacity = Math.max(0, 1.0 - (-sw.position.z / 12));
+            if(sw.position.z < -10) {
+              sw.position.z = -2.5;
+              sw.scale.setScalar(0.8);
+            }
+          } else {
+            sw.material.opacity = 0;
+          }
+        });
+      }
+      if(boostSpeedLines) {
+        boostSpeedLines.material.opacity = isBoosting ? 0.85 : 0.0;
+        if(isBoosting) {
+          const pos = boostSpeedLines.geometry.attributes.position.array;
+          for(let i = 0; i < pos.length / 6; i++) {
+            pos[i*6+2] += dt * 140;
+            pos[i*6+5] += dt * 140;
+            if(pos[i*6+2] > 10) {
+              pos[i*6+2] -= 80;
+              pos[i*6+5] -= 80;
+            }
+          }
+          boostSpeedLines.geometry.attributes.position.needsUpdate = true;
+        }
+      }
+      if(boostArcsGroup) {
+        boostArcsGroup.children.forEach(arc => {
+          arc.material.opacity = isBoosting ? 0.9 : 0.0;
+          if(isBoosting) {
+            const pts = arc.geometry.attributes.position.array;
+            for(let p = 0; p < 15; p++) {
+              pts[p*3] = (p / 15 - 0.5) * 3.5 + (Math.random() - 0.5) * 0.4;
+              pts[p*3+1] = 0.2 + (Math.random() - 0.5) * 0.3;
+              pts[p*3+2] = (p / 15) * -3.0 + (Math.random() - 0.5) * 0.3;
+            }
+            arc.geometry.attributes.position.needsUpdate = true;
+          }
+        });
+      }
+
+      // 7. Atualização de Spin Attack
+      if(spinTimer > 0) {
+        spinTimer -= dt;
+        spinRotation += dt * Math.PI * vfxState.spinSpeed;
+        currentShipMesh.rotation.y = spinRotation;
+        if(spinTimer <= 0) {
+          isSpinAttacking = false;
+          spinRotation = 0;
+          currentShipMesh.rotation.y = 0;
+        }
+      }
+      if(spinVortexGroup) {
+        spinVortexGroup.rotation.y += dt * 12;
+        spinVortexGroup.children.forEach(child => {
+          if(child.material) {
+            child.material.opacity = isSpinAttacking ? 0.85 * vfxState.spinGlow : 0.0;
+          }
+        });
+      }
+
+      // 8. Atualização de Side Attack & Shield Hit
+      if(sideAttackTimer > 0) {
+        sideAttackTimer -= dt;
+        if(sideAttackTimer <= 0) isSideAttacking = false;
+      }
+      if(shieldHitTimer > 0) {
+        shieldHitTimer -= dt;
+        if(shieldBubble) {
+          shieldBubble.material.opacity = (shieldHitTimer / 0.5) * vfxState.shieldHitGlow;
+          shieldBubble.scale.setScalar(1.0 + (1.0 - shieldHitTimer / 0.5) * 0.25);
+        }
+      } else if(shieldBubble) {
+        shieldBubble.material.opacity = 0;
+      }
+
+      // 9. Câmera
+      if(cameraMode === 'chase') {
+        const targetFov = 65 + (isBoosting ? 16 * vfxState.boostFovKick : 0);
+        camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, dt * 8);
+        camera.updateProjectionMatrix();
+
+        const idealPos = new THREE.Vector3(
+          Math.sin(orbitAngleX * 0.25) * 4,
+          3.8 + orbitAngleY * 2,
+          -11.5 + (orbitDistance - 12) * 0.5
+        );
+        camera.position.lerp(idealPos, dt * 12);
+        camera.lookAt(0, 1.2, 8);
+      } else {
+        // Modo Órbita Interativo com arrasto do mouse
+        const time = isMouseDown ? 0 : performance.now() * 0.0004;
+        const currentAngle = orbitAngleX + time;
+        camera.position.x = Math.sin(currentAngle) * orbitDistance * Math.cos(orbitAngleY);
+        camera.position.z = Math.cos(currentAngle) * orbitDistance * Math.cos(orbitAngleY);
+        camera.position.y = 1.2 + Math.sin(orbitAngleY) * orbitDistance + 2.0;
+        camera.lookAt(0, 1.2, 0);
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const now = performance.now();
+      const dt = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      updateSimulation(dt);
+      renderer.render(scene, camera);
+    }
+
+    // --- 7. INTERFACE DE CONTROLE & BINDINGS ---
+    // Abas
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.tab;
+        document.getElementById(target).classList.add('active');
+        if(target === 'tab-json') updateJSONTextarea();
+      });
+    });
+
+    // Seletor de Opções A / B / C
+    function setupOptionCards(containerId, stateKey, rebuildFn) {
+      const container = document.getElementById(containerId);
+      if(!container || typeof container.querySelectorAll !== 'function') return;
+      container.querySelectorAll('.option-card').forEach(card => {
+        card.addEventListener('click', () => {
+          container.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          vfxState[stateKey] = card.dataset.val;
+          rebuildFn();
+          updateJSONTextarea();
+        });
+      });
+    }
+
+    setupOptionCards('opt-thruster', 'thrusterStyle', buildThrusterFX);
+    setupOptionCards('opt-boost', 'boostStyle', buildBoostFX);
+    setupOptionCards('opt-spin', 'spinStyle', buildSpinFX);
+    setupOptionCards('opt-motion', 'motionStyle', () => {});
+    setupOptionCards('opt-combat', 'combatStyle', buildCombatFX);
+
+    // Bindings de Sliders
+    function bindSlider(id, key, unit = 'x', multiplier = 1) {
+      const slider = document.getElementById(`slider-${id}`);
+      const valLabel = document.getElementById(`val-${id}`);
+      if(!slider || !valLabel) return;
+      slider.addEventListener('input', () => {
+        const val = parseFloat(slider.value);
+        vfxState[key] = val;
+        valLabel.textContent = (val * multiplier).toFixed(2) + unit;
+        rebuildAllVFX();
+        updateJSONTextarea();
+      });
+    }
+
+    bindSlider('thrusterLength', 'thrusterLength', 'x');
+    bindSlider('thrusterWidth', 'thrusterWidth', 'x');
+    bindSlider('thrusterGlow', 'thrusterGlow', 'x');
+    bindSlider('thrusterFlicker', 'thrusterFlicker', 'x');
+    bindSlider('thrusterParticles', 'thrusterParticles', 'x');
+
+    bindSlider('boostAuraIntensity', 'boostAuraIntensity', 'x');
+    bindSlider('boostShockwaveScale', 'boostShockwaveScale', 'x');
+    bindSlider('boostFovKick', 'boostFovKick', 'x');
+    bindSlider('boostGhostTrail', 'boostGhostTrail', 'x');
+
+    bindSlider('spinRadius', 'spinRadius', 'm');
+    bindSlider('spinSpeed', 'spinSpeed', 'x');
+    bindSlider('spinGlow', 'spinGlow', 'x');
+    bindSlider('spinSparks', 'spinSparks', 'x');
+
+    bindSlider('motionRollMax', 'motionRollMax', '°');
+    bindSlider('motionPitch', 'motionPitch', 'x');
+    bindSlider('motionBobbing', 'motionBobbing', 'x');
+    bindSlider('motionDriftYaw', 'motionDriftYaw', 'x');
+
+    bindSlider('sideAttackImpulse', 'sideAttackImpulse', 'x');
+    bindSlider('shieldHitGlow', 'shieldHitGlow', 'x');
+    bindSlider('sparksDensity', 'sparksDensity', 'x');
+
+    // Seletor de Roster
+    document.querySelectorAll('.roster-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.roster-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        switchMachine(chip.dataset.id);
+      });
+    });
+
+    // Top Bar Actions
+    document.getElementById('btn-env-track').addEventListener('click', function() {
+      environmentMode = 'track';
+      trackGroup.visible = true;
+      studioGroup.visible = false;
+      this.classList.add('active');
+      document.getElementById('btn-env-studio').classList.remove('active');
+    });
+    document.getElementById('btn-env-studio').addEventListener('click', function() {
+      environmentMode = 'studio';
+      trackGroup.visible = false;
+      studioGroup.visible = true;
+      this.classList.add('active');
+      document.getElementById('btn-env-track').classList.remove('active');
+    });
+
+    document.getElementById('btn-cam-chase').addEventListener('click', function() {
+      cameraMode = 'chase';
+      this.classList.add('active');
+      document.getElementById('btn-cam-orbit').classList.remove('active');
+    });
+    document.getElementById('btn-cam-orbit').addEventListener('click', function() {
+      cameraMode = 'orbit';
+      this.classList.add('active');
+      document.getElementById('btn-cam-chase').classList.remove('active');
+    });
+
+    // Gatilhos de Ação (Test Triggers)
+    document.getElementById('trigger-boost').addEventListener('click', () => {
+      isBoosting = true;
+      boostTimer = 2.4;
+      showToast('SUPER BOOST ATIVADO!');
+    });
+    document.getElementById('trigger-boost-loop').addEventListener('click', function() {
+      isBoosting = !isBoosting;
+      boostTimer = isBoosting ? 9999 : 0;
+      this.textContent = isBoosting ? 'Desativar Turbo' : 'Boost Contínuo';
+    });
+
+    document.getElementById('trigger-spin').addEventListener('click', () => {
+      isSpinAttacking = true;
+      spinTimer = 0.55;
+      showToast('SPIN ATTACK 360°!');
+    });
+    document.getElementById('trigger-spin-loop').addEventListener('click', function() {
+      isSpinAttacking = !isSpinAttacking;
+      spinTimer = isSpinAttacking ? 9999 : 0;
+      this.textContent = isSpinAttacking ? 'Parar Spin' : 'Spin Contínuo';
+    });
+
+    document.getElementById('trigger-side-l').addEventListener('click', () => {
+      isSideAttacking = true;
+      sideAttackDir = -1;
+      sideAttackTimer = 0.35;
+      showToast('SIDE ATTACK ESQUERDO!');
+    });
+    document.getElementById('trigger-side-r').addEventListener('click', () => {
+      isSideAttacking = true;
+      sideAttackDir = 1;
+      sideAttackTimer = 0.35;
+      showToast('SIDE ATTACK DIREITO!');
+    });
+
+    document.getElementById('trigger-damage-hit').addEventListener('click', () => {
+      shieldHitTimer = 0.5;
+      showToast('IMPACTO / DANO NO ESCUDO!');
+    });
+    document.getElementById('trigger-dash-plate').addEventListener('click', () => {
+      isBoosting = true;
+      boostTimer = 1.0;
+      showToast('DASH PLATE SPEED +95!');
+    });
+
+    document.getElementById('trigger-steer-l').addEventListener('mousedown', () => { steerInput = -1; });
+    document.getElementById('trigger-steer-l').addEventListener('mouseup', () => { steerInput = 0; });
+    document.getElementById('trigger-steer-r').addEventListener('mousedown', () => { steerInput = 1; });
+    document.getElementById('trigger-steer-r').addEventListener('mouseup', () => { steerInput = 0; });
+
+    // Teclado Interativo
+    window.addEventListener('keydown', e => {
+      if(e.code === 'KeyA') { isBoosting = true; boostTimer = 2.4; }
+      if(e.code === 'ShiftLeft' || e.code === 'ShiftRight') { isSpinAttacking = true; spinTimer = 0.55; }
+      if(e.code === 'KeyZ') { isSideAttacking = true; sideAttackDir = -1; sideAttackTimer = 0.35; }
+      if(e.code === 'KeyC') { isSideAttacking = true; sideAttackDir = 1; sideAttackTimer = 0.35; }
+      if(e.code === 'ArrowLeft') steerInput = -1;
+      if(e.code === 'ArrowRight') steerInput = 1;
+    });
+    window.addEventListener('keyup', e => {
+      if(e.code === 'ArrowLeft' && steerInput === -1) steerInput = 0;
+      if(e.code === 'ArrowRight' && steerInput === 1) steerInput = 0;
+    });
+
+    // Mouse Drag / Orbit & Wheel Zoom
+    let isMouseDown = false;
+    let prevMouseX = 0;
+    let prevMouseY = 0;
+    let orbitAngleX = 0;
+    let orbitAngleY = 0.25;
+    let orbitDistance = 12;
+
+    window.addEventListener('mousedown', e => {
+      if (e.target.closest && (e.target.closest('#left-panel') || e.target.closest('#top-bar') || e.target.closest('#roster-selector'))) return;
+      isMouseDown = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!isMouseDown) return;
+      const dx = e.clientX - prevMouseX;
+      const dy = e.clientY - prevMouseY;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+
+      orbitAngleX -= dx * 0.008;
+      orbitAngleY = Math.max(-1.1, Math.min(1.1, orbitAngleY + dy * 0.008));
+    });
+
+    window.addEventListener('mouseup', () => { isMouseDown = false; });
+
+    window.addEventListener('wheel', e => {
+      if (e.target.closest && e.target.closest('#left-panel')) return;
+      orbitDistance = Math.max(4, Math.min(30, orbitDistance + (e.deltaY || 0) * 0.015));
+    }, { passive: true });
+
+    // Presets Globais
+    function applyGlobalPreset(presetLetter) {
+      document.querySelectorAll('.btn-preset').forEach(b => b.classList.remove('active'));
+      document.getElementById(`preset-${presetLetter}`).classList.add('active');
+
+      vfxState.thrusterStyle = presetLetter;
+      vfxState.boostStyle = presetLetter;
+      vfxState.spinStyle = presetLetter;
+      vfxState.motionStyle = presetLetter;
+      vfxState.combatStyle = presetLetter;
+
+      // Sincronizar botões de opção nas abas
+      ['thruster', 'boost', 'spin', 'motion', 'combat'].forEach(cat => {
+        const c = document.getElementById(`opt-${cat}`);
+        if(c && typeof c.querySelectorAll === 'function') {
+          c.querySelectorAll('.option-card').forEach(card => {
+            card.classList.toggle('selected', card.dataset.val === presetLetter);
+          });
+        }
+      });
+
+      rebuildAllVFX();
+      updateJSONTextarea();
+      showToast(`PRESET ${presetLetter} ATIVADO!`);
+    }
+
+    document.getElementById('preset-A').addEventListener('click', () => applyGlobalPreset('A'));
+    document.getElementById('preset-B').addEventListener('click', () => applyGlobalPreset('B'));
+    document.getElementById('preset-C').addEventListener('click', () => applyGlobalPreset('C'));
+
+    // JSON Management
+    function updateJSONTextarea() {
+      const payload = { machine: activeMachineId, ...vfxState };
+      const ta = document.getElementById('json-config');
+      if(ta) ta.value = JSON.stringify(payload, null, 2);
+    }
+
+    document.getElementById('btn-copy-json').addEventListener('click', () => {
+      const ta = document.getElementById('json-config');
+      if(ta) {
+        ta.select();
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(ta.value).then(() => {
+              showToast('JSON COPIADO PARA O CLIPBOARD!');
+            }).catch(() => {
+              document.execCommand('copy');
+              showToast('JSON COPIADO!');
+            });
+          } else {
+            document.execCommand('copy');
+            showToast('JSON COPIADO!');
+          }
+        } catch {
+          document.execCommand('copy');
+          showToast('JSON COPIADO!');
+        }
+      }
+    });
+
+    document.getElementById('btn-apply-json').addEventListener('click', () => {
+      const ta = document.getElementById('json-config');
+      try {
+        const parsed = JSON.parse(ta.value);
+        if(parsed.machine && ROSTER_CONFIGS[parsed.machine]) switchMachine(parsed.machine);
+        for(const k of Object.keys(vfxState)) {
+          if(parsed[k] !== undefined) vfxState[k] = parsed[k];
+        }
+        rebuildAllVFX();
+        showToast('CONFIGURAÇÃO APLICADA COM SUCESSO!');
+      } catch(err) {
+        alert('Erro no formato JSON: ' + err.message);
+      }
+    });
+
+    document.getElementById('btn-reset-json').addEventListener('click', () => {
+      applyGlobalPreset('A');
+    });
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Inicialização
+    switchMachine('falcon');
+    updateJSONTextarea();
+    animate();
+  </script>
+</body>
+</html>

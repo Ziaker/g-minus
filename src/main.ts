@@ -26,10 +26,10 @@ window.addEventListener('DOMContentLoaded', () => {
   slider?.addEventListener('input', () => {
     const val = parseInt(slider.value, 10);
     if (val < -25) {
-      balanceLabel.textContent = `ACELERAÇÃO (+${Math.abs(val)}%)`;
+      balanceLabel.textContent = `ACELERAÇÃO (+${Math.round(Math.abs(val) * 0.28)}%)`;
       balanceLabel.style.color = '#38f9d7';
     } else if (val > 25) {
-      balanceLabel.textContent = `VELOCIDADE FINAL (+${val}%)`;
+      balanceLabel.textContent = `VELOCIDADE FINAL (+${Math.round(val * 0.18)}%)`;
       balanceLabel.style.color = '#ff0055';
     } else {
       balanceLabel.textContent = 'BALANCED (50/50)';

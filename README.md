@@ -19,9 +19,9 @@
 
 ### 🚫 Sem Armas. Velocidade Pura & Domínio da Pista.
 Aqui não existem lasers ou projéteis. As disputas são decididas na trajetória, no peso e no impacto entre as fuselagens:
-- **Side-Attack (<kbd>Q</kbd> / <kbd>E</kbd>)**: Golpes laterais de impacto seco para esmagar adversários contra as bordas de contenção.
-- **Spin Attack (<kbd>Z</kbd> / <kbd>SHIFT</kbd>)**: Rotação axial violenta em 360° com campo de força neon que varre múltiplos rivais ao redor.
-- **Regra Clássica de Boost**: Na Volta 1 o turbo é bloqueado (`BOOST LOCKED`). A partir da Volta 2, o sinal **BOOST OK!** se acende e o piloto pode queimar seu próprio escudo para atingir velocidades insanas.
+- **Side-Attack (<kbd>Z</kbd> / <kbd>C</kbd> [Toque duplo])**: Golpes laterais de impacto seco para esmagar adversários contra as bordas de contenção.
+- **Spin Attack (<kbd>Z</kbd> + <kbd>C</kbd> / <kbd>SHIFT</kbd>)**: Rotação axial violenta em 360° com campo de força neon que varre múltiplos rivais ao redor.
+- **Regra Clássica de Boost (<kbd>A</kbd>)**: Na Volta 1 o turbo é bloqueado (`BOOST LOCKED`). A partir da Volta 2, o sinal **BOOST OK!** se acende e o piloto pode queimar seu próprio escudo para atingir velocidades insanas.
 
 ---
 
@@ -48,8 +48,10 @@ Antes da largada, ajuste o balanço do motor no seletor:
 - 🏎️ **Física Anti-Gravidade 3D**: Naves flutuando sobre pista tubular com inclinação dinâmica de asa (*banking roll*), atrito de grip e sensação visceral de aceleração.
 - ⚡ **Sistema Escudo = Boost**: Ative o Super Boost a qualquer instante ao custo de drenar parte de sua blindagem energética. Se a energia chegar a zero, a máquina explode (K.O.).
 - 💥 **Combate Físico Autêntico**:
-  - **Side-Attack (`Q` / `E`)**: Manobra lateral ofensiva para arremessar naves adversárias para fora do traçado.
-  - **Spin Attack (`Z` / `SHIFT`)**: Giro 360° em área para repelir grupos de oponentes.
+  - **Side-Attack (Toque duplo em `Z` / `C`)**: Manobra lateral ofensiva para arremessar naves adversárias para fora do traçado.
+  - **Spin Attack (`Z` + `C` / `SHIFT`)**: Giro 360° em área para repelir grupos de oponentes.
+  - **Inclinar / Strafe (`Z` / `C`)**: Inclinação de asa e deslocamento lateral suave.
+  - **Freio / Drift (`ESPAÇO`)**: Freia e quebra tração para derrapagem controlada.
 - 🔋 **Pit Strip & Dash Plates**:
   - **Pit Strip (Faixa Verde)**: Recupera os escudos em tempo real.
   - **Dash Plates (Setas Amarelas)**: Impulso imediato de velocidade ao passar por cima.
@@ -62,11 +64,13 @@ Antes da largada, ajuste o balanço do motor no seletor:
 
 | Ação | Teclas / Atalho |
 | :--- | :--- |
-| **Acelerar / Frear** | <kbd>W</kbd> / <kbd>S</kbd> ou <kbd>↑</kbd> / <kbd>↓</kbd> |
-| **Curva / Direção** | <kbd>A</kbd> / <kbd>D</kbd> ou <kbd>←</kbd> / <kbd>→</kbd> |
-| **Side-Attack (Ataque Lateral)** | <kbd>Q</kbd> / <kbd>E</kbd> ou duplo-toque em <kbd>A</kbd>/<kbd>D</kbd> |
-| **Spin Attack (Giro 360° em Área)** | <kbd>Z</kbd> ou <kbd>SHIFT</kbd> |
-| **Super Boost** | <kbd>Espaço</kbd> *(Consome Escudo / Liberado na Volta 2)* |
+| **Acelerar (Manter Pressionado)** | <kbd>X</kbd> *(Segure para acelerar)* |
+| **Direção / Manobra** | <kbd>←</kbd> / <kbd>→</kbd> *(Apenas as setas movem a nave)* |
+| **Inclinar / Strafe** | <kbd>Z</kbd> (Esquerda) / <kbd>C</kbd> (Direita) |
+| **Side-Attack (Ataque Lateral)** | Toque duplo em <kbd>Z</kbd> (Esquerda) ou <kbd>C</kbd> (Direita) |
+| **Freio / Drift** | <kbd>ESPAÇO</kbd> *(Freia e quebra tração para derrapagem)* |
+| **Super Boost** | <kbd>A</kbd> *(Consome Escudo / Liberado na Volta 2)* |
+| **Spin Attack (Giro 360° em Área)** | <kbd>Z</kbd> + <kbd>C</kbd> ou <kbd>SHIFT</kbd> *(Varredura em área)* |
 
 ---
 
@@ -126,11 +130,18 @@ Distribuído sob a licença MIT. Consulte o arquivo `LICENSE` para mais detalhes
 
 ## 📘 Game Design Document e processo de prototipação
 
+**Revisão de 09/10/2026:** [novidades verificadas, bugs corrigidos e limites](docs/audits/2026-10-09-fixes.md). O menu tem dez modelos; a corrida principal usa oito participantes. Os quatro grupos visuais das naves ainda não constituem um editor de peças intercambiáveis. O laboratório HTML é independente do jogo.
+
+Validação: `npm test` executa regressões de input, geometria, combate, pads, chegada e laboratórios; `npm run build` verifica TypeScript antes do Vite. Os laboratórios de prototipação (`/prototypes/01_steering_profiles.html`, `/prototypes/02_craft_visuals.html`, `/prototypes/03_neo_metropolis_visual.html` e `/prototypes/04_craft_vfx.html`) rodam de forma independente e podem ser abertos diretamente no navegador.
+
 As decisões atuais de gameplay, visual e processo de desenvolvimento estão registradas no **[GDD inicial](docs/GDD.md)**. O documento diferencia requisitos definidos, detalhes pendentes e recursos já presentes no código; não significa que os novos recursos estejam implementados.
 
 **Regra de desenvolvimento:** toda feature passa por protótipo HTML com **3 alternativas distintas**, sliders independentes e configuração copiável/colável, acompanhada de especificação completa e aprovação **antes** de ser integrada ao jogo. A integração deve ser fiel à versão aprovada. Novas mudanças exigem consulta ao repositório atualizado, atualização documental, telemetria/debug e atualização do README.
 
-**Protótipo visual 03 — Neo Metropolis:** [abrir laboratório HTML](prototypes/03_neo_metropolis_visual.html) · [especificação](docs/specs/03_neo_metropolis_visual_spec.md). Estudo experimental A/B/C com sliders e importação/exportação JSON; nenhuma alternativa foi aprovada para integração.
+- **Protótipo 01 — Física, Combate e Direção:** [abrir laboratório](prototypes/01_steering_profiles.html) · [especificação](docs/specs/01_steering_profiles_spec.md)
+- **Protótipo 02 — Modelos & Silhuetas de Naves:** [abrir laboratório](prototypes/02_craft_visuals.html) · [especificação](docs/specs/02_craft_visual_spec.md)
+- **Protótipo 03 — Ambiente Neo Metropolis:** [abrir laboratório](prototypes/03_neo_metropolis_visual.html) · [especificação](docs/specs/03_neo_metropolis_visual_spec.md)
+- **Protótipo 04 — Efeitos Visuais das Naves (VFX Lab):** [abrir laboratório](prototypes/04_craft_vfx.html) · [especificação](docs/specs/04_craft_vfx_spec.md)
 
 **Jogar via GitHub Pages (endereço previsto):** https://ziaker.github.io/g-minus/  
 **Aviso de disponibilidade (2026-10-08):** o endereço ainda não foi validado como jogável. A última publicação consultada falhou na etapa *Setup Pages*, apesar de o build ter passado. [Ver workflow](https://github.com/Ziaker/g-minus/actions/runs/37830599287). O jogo pode ser iniciado localmente pelas instruções acima; a falha de publicação não foi corrigida nesta alteração.
