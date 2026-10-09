@@ -174,6 +174,9 @@ export class Game {
   private isRunning = false;
   private isRaceFinished = false;
   private raceStartTime = 0;
+  private raceElapsed = 0;
+  private accumulator = 0;
+  private finishTimes = new Map<string, number>();
   private lastTime = 0;
   private playerKills = 0;
   private shownBoostOkBanner = false;
@@ -278,7 +281,7 @@ export class Game {
     this.player.speed = 0;
 
     // Spawn 7 Rivals staggered on starting grid
-    const rivalKeys = Object.keys(MACHINE_ROSTER).filter(k => k !== selectedId).slice(0, 7);
+    const rivalKeys = Object.keys(MACHINE_ROSTER).filter(k => k !== playerDef.id).slice(0, 7);
     this.rivals = [];
 
     const gridOffsets = [-6, 6, -3, 3, -7, 7, 0];
@@ -301,9 +304,11 @@ export class Game {
     }
 
     this.allVehicles = [this.player, ...this.rivals];
+    for (const vehicle of this.allVehicles) vehicle.updateTransform(0, 0);
   }
 
   public start(selectedId: string = 'falcon', engineBalance: number = 0): void {
+    if (this.isRunning) return;
     this.initRoster(selectedId, engineBalance);
     this.audio.init();
     this.isRunning = true;
@@ -312,6 +317,10 @@ export class Game {
     this.countdownTimer = 3.6;
     this.lastCountBeep = -1;
     this.lastTime = performance.now();
+    this.raceElapsed = this.accumulator = 0;
+    this.finishTimes.clear();
+    this.input.reset();
+    this.updateCamera(1);
 
     if (this.countdownOverlay) {
       this.countdownOverlay.textContent = '3';
@@ -324,16 +333,23 @@ export class Game {
   private loop(currentTime: number): void {
     if (!this.isRunning) return;
 
-    const dt = Math.min((currentTime - this.lastTime) / 1000, 0.05);
+    const dt = Math.max(0, Math.min((currentTime - this.lastTime) / 1000, 0.25));
     this.lastTime = currentTime;
 
-    this.update(dt);
+    if (!document.hidden && !this.isRaceFinished) this.accumulator += dt;
+    else { this.accumulator = 0; this.audio.silenceEngine(); }
+    const step = 1 / 120;
+    while (this.accumulator + 1e-10 >= step && !this.isRaceFinished) {
+      this.update(step);
+      this.accumulator -= step;
+    }
     this.render();
 
     requestAnimationFrame(this.loop.bind(this));
   }
 
   private update(dt: number): void {
+    if (this.isRaceFinished) return;
     // 0. Starting Countdown Sequence [GDD 13]
     if (this.isCountingDown) {
       this.countdownTimer -= dt;
@@ -364,6 +380,12 @@ export class Game {
             this.countdownOverlay.style.color = '#00ff88';
           }
           this.audio.playCountdownBeep(true);
+          this.isCountingDown = false;
+          this.input.consumeSideAttack();
+          this.input.consumeSpinAttack();
+          setTimeout(() => {
+            if (this.countdownOverlay) this.countdownOverlay.style.display = 'none';
+          }, 500);
         }
       } else {
         this.isCountingDown = false;
@@ -376,6 +398,7 @@ export class Game {
       return;
     }
 
+    const previousScores = new Map(this.allVehicles.map(v => [v.config.id, v.currentLap + v.progressT]));
     // 1. Update Player
     const playerSideAttack = this.input.consumeSideAttack();
     const playerSpinAttack = this.input.consumeSpinAttack();
@@ -385,6 +408,9 @@ export class Game {
       backward: this.input.backward,
       left: this.input.left,
       right: this.input.right,
+      tiltLeft: this.input.tiltLeft,
+      tiltRight: this.input.tiltRight,
+      drift: this.input.drift,
       boost: this.input.boost,
       sideAttack: playerSideAttack,
       spinAttack: playerSpinAttack
@@ -392,6 +418,7 @@ export class Game {
 
     // 2. Update Rivals
     for (const rival of this.rivals) {
+      if (this.finishTimes.has(rival.config.id)) continue;
       rival.update(dt, {
         forward: true,
         backward: false,
@@ -401,6 +428,16 @@ export class Game {
         sideAttack: 0
       });
     }
+
+    // Keep the interpolated finish instant: post-line progress is not finish order.
+    for (const vehicle of this.allVehicles) {
+      const before = previousScores.get(vehicle.config.id)!;
+      const after = vehicle.currentLap + vehicle.progressT;
+      if (!this.finishTimes.has(vehicle.config.id) && before < 4 && after >= 4) {
+        this.finishTimes.set(vehicle.config.id, this.raceElapsed + dt * (4 - before) / (after - before));
+      }
+    }
+    this.raceElapsed += dt;
 
     // 3. Update Particle FX (Sparks, Collisions)
     this.combat.update(dt);
@@ -430,11 +467,12 @@ export class Game {
 
     for (let i = 0; i < this.allVehicles.length; i++) {
       const vA = this.allVehicles[i];
-      if (vA.isDestroyed) continue;
+      if (vA.isDestroyed || this.finishTimes.has(vA.config.id)) continue;
 
       for (let j = i + 1; j < this.allVehicles.length; j++) {
         const vB = this.allVehicles[j];
-        if (vB.isDestroyed) continue;
+        if (vA.isDestroyed) break;
+        if (vB.isDestroyed || this.finishTimes.has(vB.config.id)) continue;
 
         const dist = vA.group.position.distanceTo(vB.group.position);
         const midPoint = vA.group.position.clone().add(vB.group.position).multiplyScalar(0.5);
@@ -443,9 +481,9 @@ export class Game {
         if (vA.isSpinAttacking || vB.isSpinAttacking) {
           if (dist < 6.8) {
             if (vA.isSpinAttacking) {
-              const cdKey = `spin-${vA.config.id}-${vB.config.id}`;
+              const cdKey = `spin-${vA.config.id}-${vA.attackSerial}-${vB.config.id}`;
               if (!this.attackCooldowns.has(cdKey)) {
-                this.attackCooldowns.set(cdKey, 0.45);
+                this.attackCooldowns.set(cdKey, 0.6);
                 const pushDir = Math.sign(vB.lateralOffset - vA.lateralOffset) || 1;
                 vB.lateralVelocity += pushDir * 150;
                 vB.takeDamage(45, true);
@@ -459,10 +497,10 @@ export class Game {
                 }
               }
             }
-            if (vB.isSpinAttacking) {
-              const cdKey = `spin-${vB.config.id}-${vA.config.id}`;
+            if (!vB.isDestroyed && vB.isSpinAttacking) {
+              const cdKey = `spin-${vB.config.id}-${vB.attackSerial}-${vA.config.id}`;
               if (!this.attackCooldowns.has(cdKey)) {
-                this.attackCooldowns.set(cdKey, 0.45);
+                this.attackCooldowns.set(cdKey, 0.6);
                 const pushDir = Math.sign(vA.lateralOffset - vB.lateralOffset) || -1;
                 vA.lateralVelocity += pushDir * 150;
                 vA.takeDamage(45, true);
@@ -485,9 +523,9 @@ export class Game {
           if (sideAttackA || sideAttackB) {
             // High-impact Side-Attack bash
             if (sideAttackA) {
-              const cdKey = `side-${vA.config.id}-${vB.config.id}`;
+              const cdKey = `side-${vA.config.id}-${vA.attackSerial}-${vB.config.id}`;
               if (!this.attackCooldowns.has(cdKey)) {
-                this.attackCooldowns.set(cdKey, 0.35);
+                this.attackCooldowns.set(cdKey, 0.6);
                 vB.lateralVelocity += vA.sideAttackDir * 135;
                 vB.takeDamage(36, true);
                 if (vA.config.id === 'player' && vB.isDestroyed) this.playerKills++;
@@ -498,10 +536,10 @@ export class Game {
                 }
               }
             }
-            if (sideAttackB) {
-              const cdKey = `side-${vB.config.id}-${vA.config.id}`;
+            if (!vB.isDestroyed && sideAttackB) {
+              const cdKey = `side-${vB.config.id}-${vB.attackSerial}-${vA.config.id}`;
               if (!this.attackCooldowns.has(cdKey)) {
-                this.attackCooldowns.set(cdKey, 0.35);
+                this.attackCooldowns.set(cdKey, 0.6);
                 vA.lateralVelocity += vB.sideAttackDir * 135;
                 vA.takeDamage(36, true);
                 this.combat.spawnSparks(midPoint, 28, 0xff0055);
@@ -517,8 +555,14 @@ export class Game {
             const pushDir = Math.sign(lateralDiff) || 1;
             const overlap = Math.max((radius * 2) - dist, 0.1);
 
-            vA.lateralVelocity += (pushDir * 18) / vA.bodyArmorFactor;
-            vB.lateralVelocity -= (pushDir * 18) / vB.bodyArmorFactor;
+            // A single impulse per contact episode; heavy Body resists displacement.
+            const contactKey = `contact-${vA.config.id}-${vB.config.id}`;
+            const freshContact = !this.attackCooldowns.has(contactKey);
+            if (freshContact) {
+              vA.lateralVelocity += pushDir * 18 * vA.bodyArmorFactor;
+              vB.lateralVelocity -= pushDir * 18 * vB.bodyArmorFactor;
+            }
+            this.attackCooldowns.set(contactKey, 0.1);
 
             // Separate vehicles to prevent interpenetration sticking
             vA.lateralOffset += pushDir * overlap * 0.3;
@@ -527,8 +571,8 @@ export class Game {
             vA.takeDamage(6 * dt, false);
             vB.takeDamage(6 * dt, false);
 
-            this.combat.spawnSparks(midPoint, 4, 0xffaa00);
-            if (vA === this.player || vB === this.player) {
+            if (freshContact) this.combat.spawnSparks(midPoint, 4, 0xffaa00);
+            if (freshContact && (vA === this.player || vB === this.player)) {
               this.audio.playImpact();
               this.addCameraShake(0.08);
             }
@@ -634,6 +678,9 @@ export class Game {
 
     // Race Rank / Position
     const sorted = [...this.allVehicles].sort((a, b) => {
+      const finishA = this.finishTimes.get(a.config.id);
+      const finishB = this.finishTimes.get(b.config.id);
+      if (finishA !== undefined || finishB !== undefined) return (finishA ?? Infinity) - (finishB ?? Infinity);
       const scoreA = a.currentLap + a.progressT;
       const scoreB = b.currentLap + b.progressT;
       return scoreB - scoreA;
@@ -661,8 +708,10 @@ export class Game {
     // Race Finish Check (After 3 Laps)
     if (this.player.currentLap > 3 && !this.isRaceFinished) {
       this.isRaceFinished = true;
+      this.input.reset();
+      this.audio.silenceEngine();
       this.audio.playVictoryFanfare();
-      const totalSec = (performance.now() - this.raceStartTime) / 1000;
+      const totalSec = this.finishTimes.get(this.player.config.id) ?? this.raceElapsed;
       const mins = Math.floor(totalSec / 60).toString().padStart(2, '0');
       const secs = (totalSec % 60).toFixed(2).padStart(5, '0');
       const timeStr = `${mins}:${secs}`;

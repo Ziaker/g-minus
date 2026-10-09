@@ -54,6 +54,8 @@ export class Vehicle {
   public speed = 0; // World units / sec
   public currentLap = 1;
   public totalDistance = 0;
+  public attackSerial = 0;
+  private activePads = new Set<number>();
 
   // State
   public shield = 100;
@@ -659,11 +661,14 @@ export class Vehicle {
   public update(
     dt: number,
     input: {
-      forward: boolean;
-      backward: boolean;
-      left: boolean;
-      right: boolean;
-      boost: boolean;
+      forward: boolean;     // X segurado
+      backward: boolean;    // Space (Freio)
+      left: boolean;        // Seta Esquerda
+      right: boolean;       // Seta Direita
+      tiltLeft?: boolean;   // Z (Inclina pra esquerda)
+      tiltRight?: boolean;  // C (Inclina pra direita)
+      drift?: boolean;      // Space (Break / Drift)
+      boost: boolean;       // A (Boost)
       sideAttack: -1 | 0 | 1;
       spinAttack?: boolean;
     }
@@ -680,7 +685,7 @@ export class Vehicle {
       this.updateAI(dt, input);
     }
 
-    // Boost Handling (Requires Lap 2+)
+    // Boost Handling (A button - Requires Lap 2+)
     if (input.boost && !this.isBoosting) {
       if (this.canBoost()) {
         if (this.shield > 15) {
@@ -699,7 +704,7 @@ export class Vehicle {
       }
     }
 
-    // Side Attack Handling
+    // Side Attack Handling (Double-tap Z / C)
     if (input.sideAttack !== 0 && !this.isSideAttacking && !this.isSpinAttacking) {
       this.triggerSideAttack(input.sideAttack);
     }
@@ -712,7 +717,7 @@ export class Vehicle {
       }
     }
 
-    // Spin Attack Handling (F-Zero X Whirl)
+    // Spin Attack Handling (F-Zero X Whirl - Z + C together or Shift)
     if (input.spinAttack && !this.isSpinAttacking && !this.isSideAttacking) {
       this.triggerSpinAttack();
     }
@@ -726,31 +731,53 @@ export class Vehicle {
       }
     }
 
-    // Acceleration & Braking
+    // Acceleration & Braking (X held accelerates, Space brakes / drifts)
     const maxSpeedCurrent = this.isBoosting
       ? this.effectiveMaxSpeed * this.config.boostMultiplier
       : this.effectiveMaxSpeed;
 
-    if (input.forward) {
+    const isBrakingOrDrifting = !!(input.backward || input.drift);
+
+    if (isBrakingOrDrifting) {
+      this.speed = Math.max(this.speed - this.effectiveAcceleration * 2.2 * dt, 0);
+    } else if (input.forward) {
       const accel = this.isBoosting ? this.effectiveAcceleration * 1.85 : this.effectiveAcceleration;
-      this.speed = Math.min(this.speed + accel * dt, maxSpeedCurrent);
-    } else if (input.backward) {
-      this.speed = Math.max(this.speed - this.effectiveAcceleration * 1.5 * dt, 0);
+      this.speed = this.speed > maxSpeedCurrent
+        ? Math.max(maxSpeedCurrent, this.speed - 24 * dt)
+        : Math.min(this.speed + accel * dt, maxSpeedCurrent);
     } else {
-      // Atmospheric drag
+      // Atmospheric drag when X is not held
       this.speed = Math.max(this.speed - 24 * dt, 0);
     }
 
-    // IMMUTABLE INVARIANT: Left is -1 (towards Screen Left), Right is +1 (towards Screen Right)
+    // 1. Steering from Arrow Keys (Apenas as setas movem a nave)
     let steerDir = 0;
     if (input.left) steerDir -= 1;
     if (input.right) steerDir += 1;
 
-    const lateralForce = steerDir * this.config.handling * (0.35 + (this.speed / this.effectiveMaxSpeed) * 0.65);
-    this.lateralVelocity += lateralForce * dt;
+    // 2. Leaning / Strafing from Z and C keys
+    let tiltDir = 0;
+    if (input.tiltLeft) tiltDir -= 1;
+    if (input.tiltRight) tiltDir += 1;
 
-    // Lateral friction governed by Grip stat (A is sticky, E slides)
-    this.lateralVelocity *= Math.pow(this.gripFactor, dt);
+    // Drift Detection (Space held + steering)
+    const isDrifting = isBrakingOrDrifting && steerDir !== 0;
+
+    // Lateral Force calculation
+    const steerForce = steerDir * this.config.handling * (0.38 + (this.speed / this.effectiveMaxSpeed) * 0.62);
+    const tiltForce = tiltDir * this.config.handling * 0.85;
+    this.lateralVelocity += (steerForce + tiltForce) * dt;
+
+    // Lateral friction / Grip (Drift reduces grip to allow power-sliding)
+    if (isDrifting) {
+      const driftGrip = Math.max(this.gripFactor * 0.35, 0.008);
+      this.lateralVelocity *= Math.pow(driftGrip, dt);
+      if (this.speed > 50) {
+        this.combat.spawnSparks(this.group.position, 2, 0x00f0ff);
+      }
+    } else {
+      this.lateralVelocity *= Math.pow(this.gripFactor, dt);
+    }
 
     this.lateralOffset += this.lateralVelocity * dt;
 
@@ -759,13 +786,14 @@ export class Vehicle {
     if (Math.abs(this.lateralOffset) > halfWidth) {
       this.lateralOffset = Math.sign(this.lateralOffset) * halfWidth;
       this.lateralVelocity = -this.lateralVelocity * 0.45;
-      this.speed = Math.max(this.speed - 120 * dt, 20);
-      this.takeDamage(18 * dt * this.bodyArmorFactor, false);
+      this.speed = Math.max(this.speed - 120 * dt, 0);
+      this.takeDamage(18 * dt, false);
       this.combat.spawnSparks(this.group.position, 12, 0x00f0ff);
       if (!this.config.isAI) {
         this.audio.playImpact();
       }
     }
+    if (this.isDestroyed) return;
 
     // Advance along track curve
     const trackLen = this.track.getTrackLength();
@@ -783,9 +811,11 @@ export class Vehicle {
     }
 
     // Check Dash Plates (Boost Pads)
-    for (const pad of this.track.boostPads) {
+    for (const [index, pad] of this.track.boostPads.entries()) {
       const tDiff = Math.abs(this.progressT - pad.t);
-      if (tDiff < 0.015 || tDiff > 0.985) {
+      const overlapping = Math.min(tDiff, 1 - tDiff) * trackLen <= pad.length / 2;
+      const crossed = ((pad.t - prevT + 1) % 1) <= deltaT;
+      if (!this.activePads.has(index) && (overlapping || crossed)) {
         const offsetDiff = Math.abs(this.lateralOffset - pad.offset);
         if (offsetDiff < pad.width / 2 + 1.2) {
           this.speed = Math.min(this.speed + 95, this.effectiveMaxSpeed * this.config.boostMultiplier);
@@ -795,6 +825,8 @@ export class Vehicle {
           }
         }
       }
+      if (overlapping && Math.abs(this.lateralOffset - pad.offset) < pad.width / 2 + 1.2) this.activePads.add(index);
+      else this.activePads.delete(index);
     }
 
     // Check Pit Lane / Recharge Strips
@@ -813,7 +845,7 @@ export class Vehicle {
     }
 
     // Update 3D orientation & position
-    this.updateTransform(dt, steerDir);
+    this.updateTransform(dt, steerDir, tiltDir, isDrifting);
 
     // Audio Engine pitch for player
     if (!this.config.isAI) {
@@ -825,20 +857,21 @@ export class Vehicle {
     }
   }
 
-  private updateTransform(dt: number, steerDir: number): void {
+  public updateTransform(dt: number, steerDir: number, tiltDir = 0, isDrifting = false): void {
     const info = this.track.getTrackInfoAt(this.progressT);
 
     const hoverHeight = 1.35;
     const pos = info.position.clone()
-      .add(info.binormal.clone().multiplyScalar(this.lateralOffset))
+      // Local +X in a +Z-forward model is screen-left from the chase camera.
+      .add(info.binormal.clone().multiplyScalar(-this.lateralOffset))
       .add(info.normal.clone().multiplyScalar(hoverHeight));
 
     this.group.position.copy(pos);
 
-    // Roll banking based on turning or side attack
-    let targetRoll = -steerDir * 0.48;
+    // Roll banking based on turning (Arrows) and tilting (Z/C) or side attack
+    let targetRoll = steerDir * 0.42 + tiltDir * 0.52;
     if (this.isSideAttacking) {
-      targetRoll = -this.sideAttackDir * 0.65;
+      targetRoll = this.sideAttackDir * 0.65;
     }
     this.currentRoll = THREE.MathUtils.lerp(this.currentRoll, targetRoll, Math.min(dt * 12, 1));
 
@@ -846,12 +879,15 @@ export class Vehicle {
     const rotMatrix = new THREE.Matrix4().makeBasis(info.binormal, info.normal, info.tangent);
     this.group.quaternion.setFromRotationMatrix(rotMatrix);
 
-    // Apply banking roll to mesh + spin attack yaw
+    // Apply banking roll to mesh + spin attack / drift yaw
     this.craftMesh.rotation.z = this.currentRoll;
     if (this.isSpinAttacking) {
       this.craftMesh.rotation.y = this.spinAttackRotation;
+    } else if (isDrifting) {
+      // Deeper drift yaw slip angle
+      this.craftMesh.rotation.y = -steerDir * 0.38;
     } else {
-      this.craftMesh.rotation.y = 0;
+      this.craftMesh.rotation.y = -steerDir * 0.16 - tiltDir * 0.08;
     }
 
     // Thruster scale FX
@@ -866,7 +902,7 @@ export class Vehicle {
     this.isBoosting = true;
     this.boostDurationRemaining = 2.4;
     this.speed = Math.max(this.speed, this.effectiveMaxSpeed * 1.15);
-    this.takeDamage(10 * this.bodyArmorFactor, false); // initial burst cost
+    this.takeDamage(10, false); // Body reduction is applied once by takeDamage.
     this.combat.spawnSparks(this.group.position, 28, this.config.accentColor);
     if (!this.config.isAI) {
       this.audio.playBoost();
@@ -879,6 +915,8 @@ export class Vehicle {
   }
 
   public triggerSideAttack(dir: -1 | 1): void {
+    if (this.isDestroyed || this.isSideAttacking || this.isSpinAttacking) return;
+    this.attackSerial++;
     this.isSideAttacking = true;
     this.sideAttackDir = dir;
     this.sideAttackTimer = 0.35;
@@ -889,6 +927,8 @@ export class Vehicle {
   }
 
   public triggerSpinAttack(): void {
+    if (this.isDestroyed || this.isSideAttacking || this.isSpinAttacking) return;
+    this.attackSerial++;
     this.isSpinAttacking = true;
     this.spinAttackTimer = 0.48;
     this.spinAttackRotation = 0;
@@ -899,6 +939,7 @@ export class Vehicle {
   }
 
   public takeDamage(amount: number, flash = true): void {
+    if (this.isDestroyed) return;
     const reducedAmount = amount * this.bodyArmorFactor;
     this.shield = Math.max(this.shield - reducedAmount, 0);
 
@@ -916,7 +957,12 @@ export class Vehicle {
   }
 
   public destroy(): void {
+    if (this.isDestroyed) return;
     this.isDestroyed = true;
+    this.isBoosting = this.isSideAttacking = this.isSpinAttacking = false;
+    this.boostDurationRemaining = this.sideAttackTimer = this.spinAttackTimer = 0;
+    this.spinAttackRotation = this.currentRoll = 0;
+    this.activePads.clear();
     this.respawnTimer = 3.2;
     this.group.visible = false;
     this.combat.spawnExplosion(this.group.position);
@@ -930,6 +976,7 @@ export class Vehicle {
     this.lateralOffset = 0;
     this.lateralVelocity = 0;
     this.group.visible = true;
+    this.updateTransform(0, 0);
   }
 
   private updateAI(
@@ -957,7 +1004,7 @@ export class Vehicle {
     else if (offsetErr < -1.2) inputState.left = true;
 
     // AI Boost allowed only on Lap 2+
-    if (this.canBoost() && this.shield > 60 && Math.random() < 0.012) {
+    if (this.canBoost() && this.shield > 60 && Math.random() < 1 - Math.pow(1 - 0.012, _dt * 60)) {
       inputState.boost = true;
     }
 

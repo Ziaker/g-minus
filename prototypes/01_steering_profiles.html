@@ -523,9 +523,9 @@
 
     <!-- Controls hint -->
     <div id="controls-hint">
-      <div><kbd>W</kbd> / <kbd>S</kbd> Acelerar / Frear | <kbd>A</kbd> / <kbd>D</kbd> Direção</div>
-      <div><kbd>Q</kbd> / <kbd>E</kbd> Side-Attack / Airbrakes | <kbd>Z</kbd> / <kbd>SHIFT</kbd> Spin Attack 360°</div>
-      <div><kbd>ESPAÇO</kbd> Boost Turbo | <kbd>C</kbd> Mudar Câmera | <kbd>R</kbd> Reposicionar | <kbd>P</kbd> Pausar</div>
+      <div><kbd>X</kbd> Acelerar (Segurar) | <kbd>←</kbd> / <kbd>→</kbd> Direção (Apenas setas)</div>
+      <div><kbd>Z</kbd> / <kbd>C</kbd> Inclinar / Strafe (Toque duplo = Side-Attack) | <kbd>Z+C</kbd> Spin Attack 360°</div>
+      <div><kbd>A</kbd> Boost Turbo | <kbd>ESPAÇO</kbd> Freio / Drift | <kbd>V</kbd> Câmera | <kbd>R</kbd> Reposicionar | <kbd>P</kbd> Pausar</div>
     </div>
   </div>
 
@@ -544,8 +544,8 @@
       <div class="section-label">1. Geometria da Pista (GDD [61-70])</div>
       <div class="btn-grid-3">
         <button id="track-circuit" class="btn-option active" onclick="setTrack('circuit')">Circuito 3D</button>
-        <button id="track-straight" class="btn-option" onclick="setTrack('straight')">Reta Slalom</button>
-        <button id="track-tube" class="btn-option" onclick="setTrack('tube')">Tubo Zero-G</button>
+        <button id="track-straight" class="btn-option" onclick="setTrack('straight')">Reta de ensaio</button>
+        <button id="track-tube" class="btn-option" onclick="setTrack('tube')">Circuito elevado</button>
       </div>
     </div>
 
@@ -755,6 +755,8 @@
     };
 
     let params = { ...PRESETS.A };
+    let currentPreset = 'A';
+    const editedPresets = Object.fromEntries(Object.entries(PRESETS).map(([key, value]) => [key, { ...value }]));
     let timeScale = 1.0;
     let isPaused = false;
     let playerKills = 0;
@@ -778,7 +780,7 @@
       }
 
       init() {
-        if (this.isInitialized) return;
+        if (this.isInitialized || !this.enabled) return;
         try {
           const AudioCtx = window.AudioContext || window.webkitAudioContext;
           this.ctx = new AudioCtx();
@@ -808,12 +810,15 @@
       updateEngine(speedRatio, isBoosting) {
         if (!this.enabled || !this.isInitialized || !this.engineOsc) return;
         if (this.ctx.state === 'suspended') this.ctx.resume();
+        this.engineGain.gain.setTargetAtTime(0.04, this.ctx.currentTime, 0.05);
         const baseFreq = 65 + speedRatio * 180 + (isBoosting ? 90 : 0);
         this.engineOsc.frequency.setTargetAtTime(baseFreq, this.ctx.currentTime, 0.05);
       }
 
       playImpact() {
         if (!this.enabled || !this.ctx) return;
+        if (this.ctx.currentTime < (this.nextImpact ?? 0)) return;
+        this.nextImpact = this.ctx.currentTime + 0.08;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'square';
@@ -859,6 +864,8 @@
 
       playRecharge() {
         if (!this.enabled || !this.ctx) return;
+        if (this.ctx.currentTime < (this.nextRecharge ?? 0)) return;
+        this.nextRecharge = this.ctx.currentTime + 0.15;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
@@ -876,6 +883,7 @@
 
     function toggleAudio() {
       audioSys.enabled = !audioSys.enabled;
+      if (!audioSys.enabled && audioSys.engineGain) audioSys.engineGain.gain.setTargetAtTime(0, audioSys.ctx.currentTime, 0.02);
       if (audioSys.enabled) audioSys.init();
       const btn = document.getElementById('btn-audio-toggle');
       btn.textContent = audioSys.enabled ? '🔊 ÁUDIO: ON' : '🔇 ÁUDIO: OFF';
@@ -931,6 +939,7 @@
         });
 
         this.mesh = new THREE.Points(this.geometry, mat);
+        this.mesh.frustumCulled = false;
         scene.add(this.mesh);
       }
 
@@ -1054,7 +1063,24 @@
     let boostPads = [];
     let pitZones = [];
 
+    function disposeObject(root) {
+      const geometries = new Set(), materials = new Set(), textures = new Set();
+      root.traverse(node => {
+        if (node.geometry) geometries.add(node.geometry);
+        for (const material of (Array.isArray(node.material) ? node.material : [node.material])) {
+          if (!material) continue;
+          materials.add(material);
+          for (const value of Object.values(material)) if (value?.isTexture) textures.add(value);
+        }
+      });
+      textures.forEach(value => value.dispose());
+      materials.forEach(value => value.dispose());
+      geometries.forEach(value => value.dispose());
+    }
+
     function buildTrackMesh() {
+      disposeObject(trackGroup);
+      disposeObject(sceneryGroup);
       while (trackGroup.children.length > 0) trackGroup.remove(trackGroup.children[0]);
       while (sceneryGroup.children.length > 0) sceneryGroup.remove(sceneryGroup.children[0]);
       boostPads = [];
@@ -1093,8 +1119,8 @@
         if (i < segments) {
           const r1 = i * 2;
           const r2 = (i + 1) * 2;
-          indices.push(r1, r1 + 1, r2);
-          indices.push(r1 + 1, r2 + 1, r2);
+          indices.push(r1, r2, r1 + 1);
+          indices.push(r1 + 1, r2, r2 + 1);
         }
       }
 
@@ -1122,7 +1148,7 @@
       const texture = new THREE.CanvasTexture(canvasTex);
       texture.wrapS = THREE.RepeatWrapping;
       texture.wrapT = THREE.RepeatWrapping;
-      texture.repeat.set(1, 40);
+      texture.repeat.set(1, 1);
 
       const trackMat = new THREE.MeshStandardMaterial({
         map: texture,
@@ -1156,10 +1182,10 @@
         const pGeo = new THREE.PlaneGeometry(6, 12).rotateX(-Math.PI / 2);
         const pMesh = new THREE.Mesh(pGeo, padMat);
         const frame = getTrackFrameAt(loc.t);
-        pMesh.position.copy(frame.pt.clone().add(frame.sideRight.clone().multiplyScalar(loc.offset)).add(frame.normal.clone().multiplyScalar(0.12)));
+        pMesh.position.copy(frame.pt.clone().add(frame.sideRight.clone().multiplyScalar(-loc.offset)).add(frame.normal.clone().multiplyScalar(0.12)));
         pMesh.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(frame.sideRight, frame.normal, frame.tangent));
         trackGroup.add(pMesh);
-        boostPads.push({ t: loc.t, offset: loc.offset, width: 6, mesh: pMesh });
+        boostPads.push({ t: loc.t, offset: loc.offset, width: 6, length: 12, mesh: pMesh });
       }
 
       // Setup Pit Zone Strip [GDD 36]
@@ -1168,7 +1194,7 @@
       for (let s = 0; s <= 20; s++) {
         const t = 0.92 + (s / 20) * (0.99 - 0.92);
         const frame = getTrackFrameAt(t);
-        pitPts.push(frame.pt.clone().add(frame.sideRight.clone().multiplyScalar(8)).add(frame.normal.clone().multiplyScalar(0.15)));
+        pitPts.push(frame.pt.clone().add(frame.sideRight.clone().multiplyScalar(-8)).add(frame.normal.clone().multiplyScalar(0.15)));
       }
       const pitMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, wireframe: true });
       const pitGeo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pitPts), 20, 3.2, 4, false);
@@ -1191,7 +1217,7 @@
      * Pure right-handed orthonormal SO(3) frame:
      * - tangent = Forward (+Z)
      * - normal = Projected UP orthogonal to Tangent (+Y)
-     * - sideRight = Cross(Normal, Tangent) = Right (+X)
+     * - sideRight is the model's local +X, not screen-right. Chase screen-right is -sideRight.
      * Determinant is identically +1.000000 at all points!
      */
     function getTrackFrameAt(t) {
@@ -1704,10 +1730,16 @@
 
     // AI Vehicles Roster [GDD 51-60]
     let aiVehicles = [];
+    let aiSeed = 12345;
+    function aiRandom() {
+      aiSeed ^= aiSeed << 13; aiSeed ^= aiSeed >>> 17; aiSeed ^= aiSeed << 5;
+      return (aiSeed >>> 0) / 4294967296;
+    }
     const AI_MODELS = ['falcon', 'fox', 'goose', 'stingray', 'white_cat', 'red_gazelle', 'iron_tiger', 'deep_claw', 'black_bull', 'blood_hawk'];
 
     function rebuildAIGrid(count) {
-      for (const ai of aiVehicles) scene.remove(ai.craft.group);
+      aiSeed = 12345;
+      for (const ai of aiVehicles) { scene.remove(ai.craft.group); disposeObject(ai.craft.group); }
       aiVehicles = [];
 
       for (let i = 0; i < count; i++) {
@@ -1719,16 +1751,16 @@
           id: `ai-${i + 1}`,
           craft,
           progressT: (0.015 * (i + 1)) % 1.0,
-          lateralOffset: (Math.random() - 0.5) * 16,
+          lateralOffset: (aiRandom() - 0.5) * 16,
           lateralVelocity: 0,
-          speed: 130 + Math.random() * 35,
+          speed: 130 + aiRandom() * 35,
           maxSpeed: 175,
           shield: 100,
           isDestroyed: false,
           respawnTimer: 0,
           hitCooldown: 0,
-          targetOffset: (Math.random() - 0.5) * 16,
-          nextDecision: performance.now() + 1000 + Math.random() * 1500,
+          targetOffset: (aiRandom() - 0.5) * 16,
+          nextDecision: 0,
           isSideAttacking: false,
           sideAttackTimer: 0,
           sideAttackDir: 0,
@@ -1775,54 +1807,92 @@
     let inClash = false;
     let clashMeter = 50;
     let clashRival = null;
+    let simulationTime = 0;
+    const activePads = new Set();
+    const attackHits = new Set();
+    let lastSteer = 0;
 
     const keys = {
-      forward: false,
-      backward: false,
-      left: false,
-      right: false,
-      airbrakeL: false,
-      airbrakeR: false,
-      boost: false,
-      spinAttack: false
+      forward: false,    // X segurado
+      backward: false,   // Space (Freio)
+      left: false,       // Seta Esquerda
+      right: false,      // Seta Direita
+      tiltLeft: false,   // Z (Inclina esquerda)
+      tiltRight: false,  // C (Inclina direita)
+      drift: false,      // Space (Break / Drift)
+      boost: false       // A (Boost)
     };
 
     const jsonArea = document.getElementById('json-config');
+    const pressed = new Set();
+    let lastZPress = 0;
+    let lastCPress = 0;
+
+    function resetKeys() {
+      pressed.clear();
+      for (const key of Object.keys(keys)) keys[key] = false;
+      steerHoldTime = 0;
+      lastSteer = 0;
+    }
+    window.addEventListener('blur', resetKeys);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) resetKeys(); });
+    jsonArea.addEventListener('focus', resetKeys);
 
     window.addEventListener('keydown', (e) => {
-      audioSys.init();
       if (document.activeElement === jsonArea) return;
-      if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.forward = true;
-      if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.backward = true;
-      if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = true;
-      if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = true;
+      audioSys.init();
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'KeyX', 'KeyZ', 'KeyC', 'KeyA'].includes(e.code)) e.preventDefault();
+      if (e.repeat || pressed.has(e.code)) return;
+      pressed.add(e.code);
+      if (isPaused && !['KeyP', 'KeyR', 'KeyV'].includes(e.code)) return;
+      if (inClash && ['KeyZ', 'KeyC', 'Space', 'KeyA'].includes(e.code)) { registerClashMash(); return; }
 
-      // Side Attack (<kbd>Q</kbd>/<kbd>E</kbd>) [GDD 41]
-      if (e.code === 'KeyQ') {
-        keys.airbrakeL = true;
-        if (!isSideAttacking && !inClash) triggerSideAttack(-1);
-        if (inClash) registerClashMash();
-      }
-      if (e.code === 'KeyE') {
-        keys.airbrakeR = true;
-        if (!isSideAttacking && !inClash) triggerSideAttack(1);
-        if (inClash) registerClashMash();
+      // 1. APENAS AS SETAS MOVEM A NAVE
+      if (e.code === 'ArrowLeft') keys.left = true;
+      if (e.code === 'ArrowRight') keys.right = true;
+
+      // 2. X SEGURADO ACELERA
+      if (e.code === 'KeyX') keys.forward = true;
+
+      // 3. SPACE É O BREAK / DRIFT
+      if (e.code === 'Space') {
+        keys.backward = true;
+        keys.drift = true;
       }
 
-      // Spin Attack (<kbd>Z</kbd> / <kbd>SHIFT</kbd>) [GDD 45]
-      if (e.code === 'KeyZ' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+      // 4. Z INCLINA PRA ESQUERDA (Double tap = Side-Attack)
+      const now = performance.now();
+      if (e.code === 'KeyZ') {
+        keys.tiltLeft = true;
+        if (now - lastZPress < 280) {
+          if (!isSideAttacking && !inClash) triggerSideAttack(-1);
+        }
+        lastZPress = now;
+      }
+
+      // 5. C INCLINA PRA DIREITA (Double tap = Side-Attack)
+      if (e.code === 'KeyC') {
+        keys.tiltRight = true;
+        if (now - lastCPress < 280) {
+          if (!isSideAttacking && !inClash) triggerSideAttack(1);
+        }
+        lastCPress = now;
+      }
+
+      // Z + C simultâneo ou Shift = Spin Attack 360°
+      if ((pressed.has('KeyZ') && pressed.has('KeyC')) || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
         if (!isSpinAttacking && !isSideAttacking) triggerSpinAttack();
       }
 
-      // Boost (<kbd>SPACE</kbd>)
-      if (e.code === 'Space') {
+      // 6. A É O BOOST
+      if (e.code === 'KeyA') {
         keys.boost = true;
         if (!isBoosting && shield > 12) triggerBoost();
         if (inClash) registerClashMash();
       }
 
-      // Camera switch (<kbd>C</kbd>)
-      if (e.code === 'KeyC') {
+      // Camera switch (<kbd>V</kbd>)
+      if (e.code === 'KeyV') {
         const modes = ['chase', 'cockpit', 'orbit'];
         const nextIdx = (modes.indexOf(cameraMode) + 1) % modes.length;
         setCameraMode(modes[nextIdx]);
@@ -1834,13 +1904,15 @@
     });
 
     window.addEventListener('keyup', (e) => {
-      if (e.code === 'KeyW' || e.code === 'ArrowUp') keys.forward = false;
-      if (e.code === 'KeyS' || e.code === 'ArrowDown') keys.backward = false;
-      if (e.code === 'KeyA' || e.code === 'ArrowLeft') keys.left = false;
-      if (e.code === 'KeyD' || e.code === 'ArrowRight') keys.right = false;
-      if (e.code === 'KeyQ') keys.airbrakeL = false;
-      if (e.code === 'KeyE') keys.airbrakeR = false;
-      if (e.code === 'Space') keys.boost = false;
+      pressed.delete(e.code);
+      keys.left = pressed.has('ArrowLeft');
+      keys.right = pressed.has('ArrowRight');
+      keys.forward = pressed.has('KeyX');
+      keys.backward = pressed.has('Space');
+      keys.drift = pressed.has('Space');
+      keys.tiltLeft = pressed.has('KeyZ');
+      keys.tiltRight = pressed.has('KeyC');
+      keys.boost = pressed.has('KeyA');
     });
 
     window.addEventListener('resize', () => {
@@ -1859,6 +1931,8 @@
     // COMBAT & MANEUVER TRIGGERS
     // -------------------------------------------------------------------
     function triggerSideAttack(dir) {
+      if (isPaused || isSideAttacking || isSpinAttacking || inClash) return;
+      attackHits.clear();
       isSideAttacking = true;
       sideAttackDir = dir;
       sideAttackTimer = 0.32;
@@ -1869,6 +1943,8 @@
     }
 
     function triggerSpinAttack() {
+      if (isPaused || isSideAttacking || isSpinAttacking || inClash) return;
+      attackHits.clear();
       isSpinAttacking = true;
       spinAttackTimer = 0.45;
       spinAngle = 0;
@@ -1878,6 +1954,7 @@
     }
 
     function triggerBoost() {
+      if (isPaused || isBoosting || inClash || shield <= 14) return;
       isBoosting = true;
       boostTimer = 2.4;
       shield = Math.max(shield - 14, 0);
@@ -1889,13 +1966,15 @@
     }
 
     function triggerTestClash() {
+      if (isPaused || inClash) return;
       spawnRivalNearby();
       startClash(aiVehicles[0]);
     }
 
     function startClash(rival) {
-      if (inClash) return;
+      if (inClash || isPaused || !rival || rival.isDestroyed) return;
       inClash = true;
+      isSideAttacking = isSpinAttacking = false;
       clashRival = rival;
       clashMeter = 50;
       document.getElementById('clash-overlay').style.display = 'block';
@@ -1903,8 +1982,9 @@
     }
 
     function registerClashMash() {
-      if (!inClash) return;
+      if (!inClash || isPaused) return;
       clashMeter = Math.min(clashMeter + 10, 100);
+      if (clashMeter >= 100) endClash(true);
       fxSparks.spawnSparks(playerCraft.group.position, 10, 0xff0055);
       audioSys.playImpact();
     }
@@ -1914,9 +1994,12 @@
       document.getElementById('clash-overlay').style.display = 'none';
       if (playerWon) {
         showToast("🏆 VOCÊ VENCEU O CLASH! RIVAL LANÇADO!");
-        if (clashRival) {
+        if (clashRival && !clashRival.isDestroyed) {
           clashRival.lateralVelocity += (lateralOffset < clashRival.lateralOffset ? 1 : -1) * 320;
           clashRival.shield = 0;
+          clashRival.isDestroyed = true;
+          clashRival.respawnTimer = 3;
+          clashRival.craft.group.visible = false;
           playerKills++;
           document.getElementById('hud-kos').textContent = playerKills;
         }
@@ -1937,6 +2020,11 @@
       r.lateralOffset = lateralOffset + (Math.random() > 0.5 ? 4.5 : -4.5);
       r.speed = currentSpeed;
       r.shield = 100;
+      r.isDestroyed = false;
+      r.respawnTimer = r.hitCooldown = r.lateralVelocity = 0;
+      r.craft.group.visible = true;
+      document.getElementById('slider-aiCount').value = aiVehicles.length;
+      document.getElementById('val-aiCount').textContent = `${aiVehicles.length} Rivais`;
       showToast("Rival posicionado ao lado!");
     }
 
@@ -1962,7 +2050,9 @@
     }
 
     function applyPreset(key) {
-      params = { ...PRESETS[key] };
+      editedPresets[currentPreset] = { ...params };
+      currentPreset = key;
+      params = { ...editedPresets[key] };
       document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
       const card = document.getElementById(`preset-card-${key.toLowerCase()}`);
       if (card) card.classList.add('active');
@@ -1973,7 +2063,12 @@
     function setPlayerMachine(model) {
       currentMachine = model;
       scene.remove(playerCraft.group);
+      const oldPosition = playerCraft.group.position.clone();
+      const oldOrientation = playerCraft.group.quaternion.clone();
+      disposeObject(playerCraft.group);
       playerCraft = createCraftMesh(model);
+      playerCraft.group.position.copy(oldPosition);
+      playerCraft.group.quaternion.copy(oldOrientation);
       scene.add(playerCraft.group);
       document.querySelectorAll('[id^="mach-"]').forEach(b => b.classList.remove('active'));
       const activeBtn = document.getElementById(`mach-${model}`);
@@ -2001,6 +2096,9 @@
     }
 
     function updateAICount(val) {
+      inClash = false;
+      clashRival = null;
+      document.getElementById('clash-overlay').style.display = 'none';
       const count = parseInt(val);
       document.getElementById('val-aiCount').textContent = `${count} Rivais`;
       rebuildAIGrid(count);
@@ -2013,10 +2111,23 @@
 
     function togglePause() {
       isPaused = !isPaused;
+      resetKeys();
       showToast(isPaused ? "⏸ SIMULAÇÃO PAUSADA" : "▶ SIMULAÇÃO RETOMADA");
     }
 
     function resetPosition() {
+      resetKeys();
+      isBoosting = isSideAttacking = isSpinAttacking = false;
+      boostTimer = sideAttackTimer = spinAttackTimer = spinAngle = 0;
+      cameraShake = orbitAngle = 0;
+      activePads.clear();
+      attackHits.clear();
+      clashRival = null;
+      clashMeter = 50;
+      playerKills = 0;
+      simulationTime = 0;
+      document.getElementById('hud-kos').textContent = '0';
+      rebuildAIGrid(aiVehicles.length);
       progressT = 0;
       lateralOffset = 0;
       lateralVelocity = 0;
@@ -2024,25 +2135,49 @@
       shield = 100;
       craftRoll = 0;
       headingYaw = 0;
+      playerCraft.visualGroup.rotation.set(0, 0, 0);
+      const frame = getTrackFrameAt(0);
+      playerCraft.group.position.copy(frame.pt).addScaledVector(frame.normal, 1.35);
+      playerCraft.group.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(frame.sideRight, frame.normal, frame.tangent));
+      camera.position.copy(playerCraft.group.position).addScaledVector(frame.tangent, -13.5).addScaledVector(frame.normal, 4.8);
+      camera.up.copy(frame.normal);
+      camera.lookAt(playerCraft.group.position.clone().addScaledVector(frame.tangent, 15));
       inClash = false;
       document.getElementById('clash-overlay').style.display = 'none';
       showToast("Posição resetada na pista!");
+      document.getElementById('hud-speed').textContent = '680 KM/H';
+      document.getElementById('hud-energy-pct').textContent = '100%';
+      document.getElementById('shield-fill').style.width = '100%';
+      document.getElementById('hud-slip').textContent = '0.0°';
+      document.getElementById('hud-yaw').textContent = '0.0°';
+      document.getElementById('hud-gforce').textContent = '0.00 G';
+      speedlinesCanvas.style.opacity = 0;
     }
 
     function copyJSON() {
       navigator.clipboard.writeText(jsonArea.value).then(() => {
         showToast("JSON copiado para a Área de Transferência!");
-      });
+      }).catch(() => showToast('Cópia indisponível: selecione e copie o JSON manualmente.'));
     }
 
     function applyJSON() {
       try {
         const parsed = JSON.parse(jsonArea.value);
-        params = { ...params, ...parsed };
+        if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error();
+        const next = { ...params };
+        for (const [key, value] of Object.entries(parsed)) {
+          if (key === 'name') { if (typeof value !== 'string') throw new Error(); next.name = value; continue; }
+          const slider = document.getElementById(`slider-${key}`);
+          if (!Object.hasOwn(PRESETS.A, key) || !slider || typeof value !== 'number' || !Number.isFinite(value)
+            || value < Number(slider.min) || value > Number(slider.max)) throw new Error();
+          next[key] = value;
+        }
+        params = next;
+        document.querySelectorAll('.preset-card').forEach(c => c.classList.remove('active'));
         updateUIFromParams();
         showToast("JSON aplicado com sucesso!");
       } catch (err) {
-        showToast("Erro: JSON inválido!");
+        showToast("JSON inválido: parâmetros devem ser números dentro dos limites dos sliders. Nada foi alterado.");
       }
     }
 
@@ -2056,7 +2191,7 @@
     updateUIFromParams();
 
     // -------------------------------------------------------------------
-    // MAIN SIMULATION LOOP (60 FPS FIXED DELTA)
+    // Fixed 120 Hz simulation, independent of display refresh and time scale.
     // -------------------------------------------------------------------
     const hudSpeed = document.getElementById('hud-speed');
     const hudSlip = document.getElementById('hud-slip');
@@ -2069,28 +2204,22 @@
 
     let lastTime = performance.now();
 
-    function animate(currentTime) {
-      requestAnimationFrame(animate);
-      const rawDt = Math.min((currentTime - lastTime) / 1000, 0.04);
-      lastTime = currentTime;
+    function simulate(dt) {
+      simulationTime += dt;
+      const previousLateralVelocity = lateralVelocity;
 
-      if (isPaused) {
-        renderer.render(scene, camera);
-        return;
-      }
-
-      const dt = rawDt * timeScale;
-
-      // 1. Player Throttle, Brake & Boost
+      // 1. Player Throttle, Brake & Boost (X held accelerates, Space brakes / drifts)
       const maxSpeed = isBoosting ? 240 : 170;
       const accel = isBoosting ? 160 : 85;
 
-      if (keys.forward) {
-        currentSpeed = Math.min(currentSpeed + accel * dt, maxSpeed);
-      } else if (keys.backward) {
-        currentSpeed = Math.max(currentSpeed - 135 * dt, 15);
+      const isBrakingOrDrifting = keys.backward || keys.drift;
+
+      if (isBrakingOrDrifting) {
+        currentSpeed = Math.max(currentSpeed - 135 * dt, 0);
+      } else if (keys.forward) {
+        currentSpeed = currentSpeed > maxSpeed ? Math.max(maxSpeed, currentSpeed - 22 * dt) : Math.min(currentSpeed + accel * dt, maxSpeed);
       } else {
-        currentSpeed = Math.max(currentSpeed - 22 * dt, 20);
+        currentSpeed = Math.max(currentSpeed - 22 * dt, 0);
       }
 
       if (isBoosting) {
@@ -2104,16 +2233,19 @@
         shield = Math.min(shield + 8 * dt, maxShield);
       }
 
-      // 2. Lateral Steering Dynamics
-      // Direction rule: -1 = Left (along -sideRight), +1 = Right (along +sideRight)
+      // 2. Lateral Steering Dynamics (Apenas setas movem a nave; Z/C inclinam/strafe)
       let rawSteer = 0;
       if (keys.left) rawSteer -= 1;
       if (keys.right) rawSteer += 1;
 
-      let airbrakeInput = 0;
-      if (keys.airbrakeL) airbrakeInput -= 0.6;
-      if (keys.airbrakeR) airbrakeInput += 0.6;
+      let tiltInput = 0;
+      if (keys.tiltLeft) tiltInput -= 1;
+      if (keys.tiltRight) tiltInput += 1;
 
+      const isDrifting = isBrakingOrDrifting && rawSteer !== 0;
+
+      if (rawSteer !== lastSteer) steerHoldTime = 0;
+      lastSteer = rawSteer;
       if (rawSteer !== 0) {
         steerHoldTime += dt;
       } else {
@@ -2121,12 +2253,16 @@
       }
 
       const progressMult = Math.pow(Math.min(steerHoldTime * 2.2, 1.0), params.progressivity - 1.0);
-      const effectiveSteerForce = (rawSteer * (1.0 + progressMult * 0.7) + airbrakeInput) * params.steerRate;
+      const effectiveSteerForce = (rawSteer * (1.0 + progressMult * 0.7) * params.steerRate) + (tiltInput * params.steerRate * 0.75);
 
-      // High-speed grip penalty [GDD 22]
+      // High-speed grip penalty & Drift slip
       const speedNorm = currentSpeed / 170;
       const speedPenalty = speedNorm > 1.0 ? (speedNorm - 1.0) * params.speedInstability : 0;
-      const effectiveGrip = Math.max(0.12, (params.grip / 100) * (1.0 - speedPenalty));
+      let effectiveGrip = Math.max(0.12, (params.grip / 100) * (1.0 - speedPenalty));
+      if (isDrifting) {
+        effectiveGrip *= 0.38; // Drift traction break
+        if (currentSpeed > 40) fxSparks.spawnSparks(playerCraft.group.position, 2, 0x00f0ff);
+      }
 
       const inertiaMass = Math.max(params.inertia / 25, 0.3);
       lateralVelocity += (effectiveSteerForce / inertiaMass) * dt;
@@ -2134,8 +2270,8 @@
       const gripDamping = Math.exp(-effectiveGrip * 6.8 * dt);
       lateralVelocity *= gripDamping;
 
-      // Auto-recenter tendency [GDD 23]
-      if (rawSteer === 0 && airbrakeInput === 0 && options.autoRecenter) {
+      // Auto-recenter tendency
+      if (rawSteer === 0 && tiltInput === 0 && options.autoRecenter && !isDrifting) {
         lateralVelocity = THREE.MathUtils.lerp(lateralVelocity, 0, Math.min(dt * (params.recenter / 8.0) * 4.0, 1.0));
       }
 
@@ -2163,7 +2299,7 @@
         if (options.antiCrash) {
           lateralOffset = Math.sign(lateralOffset) * maxOffset;
           lateralVelocity = -lateralVelocity * 0.45;
-          currentSpeed = Math.max(currentSpeed - 70 * dt, 20);
+          currentSpeed = Math.max(currentSpeed - 70 * dt, 0);
           shield = Math.max(shield - 15 * dt, 0);
           fxSparks.spawnSparks(playerCraft.group.position, 8, 0x00f0ff);
           audioSys.playImpact();
@@ -2173,6 +2309,7 @@
 
       // Advance player along track
       const deltaT = (currentSpeed * dt) / trackLength;
+      const previousT = progressT;
       progressT += deltaT;
       if (currentTrackType === 'circuit' || currentTrackType === 'tube') {
         progressT = progressT % 1.0;
@@ -2181,12 +2318,16 @@
       }
 
       // Check Dash Pads [GDD 37]
-      for (const pad of boostPads) {
-        if (Math.abs(progressT - pad.t) < 0.012 && Math.abs(lateralOffset - pad.offset) < pad.width / 2 + 1.2) {
-          currentSpeed = Math.min(currentSpeed + 75 * dt * 10, 245);
+      for (const [index, pad] of boostPads.entries()) {
+        const diff = Math.abs(progressT - pad.t);
+        const overlapping = Math.min(diff, 1 - diff) * trackLength <= pad.length / 2 && Math.abs(lateralOffset - pad.offset) < pad.width / 2 + 1.2;
+        const crossed = ((pad.t - previousT + 1) % 1) <= deltaT && Math.abs(lateralOffset - pad.offset) < pad.width / 2 + 1.2;
+        if (!activePads.has(index) && (overlapping || crossed)) {
+          currentSpeed = Math.min(currentSpeed + 75, 245);
           fxSparks.spawnSparks(playerCraft.group.position, 14, 0xffaa00);
           audioSys.playBoost();
         }
+        if (overlapping) activePads.add(index); else activePads.delete(index);
       }
 
       // Check Pit Zone [GDD 36]
@@ -2194,7 +2335,7 @@
         if (progressT >= pit.tStart && progressT <= pit.tEnd && lateralOffset >= pit.offsetMin && lateralOffset <= pit.offsetMax) {
           shield = Math.min(shield + 45 * dt, maxShield);
           fxSparks.spawnSparks(playerCraft.group.position, 3, 0x00ff88);
-          audioSys.playRecharge();
+          if (shield < maxShield) audioSys.playRecharge();
         }
       }
 
@@ -2202,7 +2343,7 @@
       const frame = getTrackFrameAt(progressT);
       const hoverHeight = 1.35;
       const craftPos = frame.pt.clone()
-        .add(frame.sideRight.clone().multiplyScalar(lateralOffset))
+        .add(frame.sideRight.clone().multiplyScalar(-lateralOffset))
         .add(frame.normal.clone().multiplyScalar(hoverHeight));
 
       playerCraft.group.position.copy(craftPos);
@@ -2211,13 +2352,13 @@
       const rotMat = new THREE.Matrix4().makeBasis(frame.sideRight, frame.normal, frame.tangent);
       playerCraft.group.quaternion.setFromRotationMatrix(rotMat);
 
-      // Local Roll & Yaw
-      let targetRoll = -rawSteer * 0.44 - (lateralVelocity / 60.0) * 0.22;
-      if (isSideAttacking) targetRoll = -sideAttackDir * 0.65;
+      // Local Roll & Yaw (Arrows steer, Z/C tilt roll, Space drifts yaw)
+      let targetRoll = rawSteer * 0.44 + tiltInput * 0.52 + (lateralVelocity / 60.0) * 0.22;
+      if (isSideAttacking) targetRoll = sideAttackDir * 0.65;
       craftRoll = THREE.MathUtils.lerp(craftRoll, targetRoll, Math.min(dt * 12, 1.0));
       playerCraft.visualGroup.rotation.z = craftRoll;
 
-      const targetYaw = isSpinAttacking ? spinAngle : (-rawSteer * 0.18);
+      const targetYaw = isSpinAttacking ? spinAngle : (isDrifting ? -rawSteer * 0.38 : (-rawSteer * 0.18 - tiltInput * 0.08));
       headingYaw = THREE.MathUtils.lerp(headingYaw, targetYaw, Math.min(dt * 12, 1.0));
       playerCraft.visualGroup.rotation.y = isSpinAttacking ? spinAngle : headingYaw;
 
@@ -2239,22 +2380,26 @@
         }
 
         // AI Decisions
-        if (performance.now() > ai.nextDecision) {
-          ai.nextDecision = performance.now() + 1000 + Math.random() * 1500;
-          ai.targetOffset = (Math.random() - 0.5) * (trackWidth - 10);
+        if (simulationTime > ai.nextDecision) {
+          ai.nextDecision = simulationTime + 1 + aiRandom() * 1.5;
+          ai.targetOffset = (aiRandom() - 0.5) * (trackWidth - 10);
         }
 
         const offsetErr = ai.targetOffset - ai.lateralOffset;
         let aiSteer = Math.sign(offsetErr);
         ai.lateralVelocity += aiSteer * 45 * dt;
-        ai.lateralVelocity *= 0.94;
+        ai.lateralVelocity *= Math.pow(0.94, dt * 60);
         ai.lateralOffset += ai.lateralVelocity * dt;
+        if (Math.abs(ai.lateralOffset) > trackWidth / 2 - 1.4) {
+          ai.lateralOffset = Math.sign(ai.lateralOffset) * (trackWidth / 2 - 1.4);
+          ai.lateralVelocity *= -0.45;
+        }
 
         ai.progressT = (ai.progressT + (ai.speed * dt) / trackLength) % 1.0;
 
         const aiFrame = getTrackFrameAt(ai.progressT);
         const aiPos = aiFrame.pt.clone()
-          .add(aiFrame.sideRight.clone().multiplyScalar(ai.lateralOffset))
+          .add(aiFrame.sideRight.clone().multiplyScalar(-ai.lateralOffset))
           .add(aiFrame.normal.clone().multiplyScalar(hoverHeight));
 
         ai.craft.group.position.copy(aiPos);
@@ -2269,9 +2414,10 @@
         const dist = craftPos.distanceTo(aiPos);
         if (dist < 5.2 && !inClash) {
           // Spin Attack AOE hit
-          if (isSpinAttacking && ai.hitCooldown <= 0) {
+          if (isSpinAttacking && !attackHits.has(ai.id)) {
+            attackHits.add(ai.id);
             ai.hitCooldown = 0.45;
-            ai.lateralVelocity += Math.sign(ai.lateralOffset - lateralOffset) * 220;
+            ai.lateralVelocity += (Math.sign(ai.lateralOffset - lateralOffset) || 1) * 220;
             ai.shield = Math.max(ai.shield - 50, 0);
             fxSparks.spawnSparks(aiPos, 25, 0x00f0ff);
             audioSys.playImpact();
@@ -2284,7 +2430,8 @@
               document.getElementById('hud-kos').textContent = playerKills;
               showToast("💥 K.O. RIVAL DESTRUÍDO COM SPIN ATTACK!");
             }
-          } else if (isSideAttacking && ai.hitCooldown <= 0) {
+          } else if (isSideAttacking && !attackHits.has(ai.id)) {
+            attackHits.add(ai.id);
             // Side Attack Bash
             ai.hitCooldown = 0.35;
             ai.lateralVelocity += sideAttackDir * 180;
@@ -2300,7 +2447,8 @@
               document.getElementById('hud-kos').textContent = playerKills;
               showToast("💥 K.O. RIVAL ESMAGADO COM SIDE-ATTACK!");
             }
-          } else if (!isSpinAttacking && !isSideAttacking) {
+          } else if (!isSpinAttacking && !isSideAttacking && ai.hitCooldown <= 0) {
+            ai.hitCooldown = 0.15;
             // Physical Bump
             const pushDir = Math.sign(lateralOffset - ai.lateralOffset) || 1;
             lateralVelocity += pushDir * 25;
@@ -2375,10 +2523,10 @@
 
       // 7. Telemetry HUD Updates
       const speedKmH = Math.round(currentSpeed * 6.8);
-      const velAngle = Math.atan2(lateralVelocity, currentSpeed);
-      const slipAngleDeg = ((headingYaw - velAngle) * (180 / Math.PI)).toFixed(1);
-      const yawAngleDeg = (headingYaw * (180 / Math.PI)).toFixed(1);
-      const gForce = (Math.abs(effectiveSteerForce) / 45.0).toFixed(2);
+      const velAngle = Math.hypot(lateralVelocity, currentSpeed) < 0.01 ? 0 : Math.atan2(lateralVelocity, currentSpeed);
+      const slipAngleDeg = ((-headingYaw - velAngle) * (180 / Math.PI)).toFixed(1);
+      const yawAngleDeg = (-headingYaw * (180 / Math.PI)).toFixed(1);
+      const gForce = (Math.abs(lateralVelocity - previousLateralVelocity) / dt * (6.8 / 3.6) / 9.80665).toFixed(2);
 
       hudSpeed.innerHTML = `${speedKmH} <span style="font-size:12px;color:var(--text-muted);">KM/H</span>`;
       hudSlip.textContent = `${slipAngleDeg}°`;
@@ -2412,6 +2560,20 @@
         hudDriftStatus.style.borderColor = "rgba(0, 255, 136, 0.4)";
       }
 
+    }
+
+    let accumulator = 0;
+    function animate(currentTime) {
+      requestAnimationFrame(animate);
+      const elapsed = Math.max(0, Math.min((currentTime - lastTime) / 1000, 0.25));
+      lastTime = currentTime;
+      if (!isPaused && !document.hidden) accumulator += elapsed * timeScale;
+      else {
+        accumulator = 0;
+        if (audioSys.engineGain) audioSys.engineGain.gain.setTargetAtTime(0, audioSys.ctx.currentTime, 0.02);
+      }
+      const step = 1 / 120;
+      while (accumulator + 1e-10 >= step) { simulate(step); accumulator -= step; }
       renderer.render(scene, camera);
     }
 
