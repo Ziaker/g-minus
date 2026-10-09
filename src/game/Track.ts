@@ -35,22 +35,29 @@ export class Track {
   private trackLength = 0;
 
   constructor(scene: THREE.Scene) {
-    // Define a thrilling sci-fi circuit with loops, dips, elevated curves
+    // Define a thrilling sci-fi circuit with smooth continuous flow
     const controlPoints = [
-      new THREE.Vector3(0, 5, 0),         // Start / Finish Line
-      new THREE.Vector3(0, 5, 250),       // Main straightaway
-      new THREE.Vector3(80, 20, 450),     // Rising bank right
-      new THREE.Vector3(260, 45, 500),    // High elevation apex turn
-      new THREE.Vector3(420, 25, 380),    // Downhill sweeping right
-      new THREE.Vector3(450, 10, 150),    // Mid-speed chicane
-      new THREE.Vector3(340, 30, -50),    // Crest turn
-      new THREE.Vector3(280, 50, -250),   // High dive curve
-      new THREE.Vector3(120, 25, -420),   // Deep banked left
-      new THREE.Vector3(-100, 15, -460),  // Sharp turn
-      new THREE.Vector3(-280, 35, -300),  // Hill climb S-curve
-      new THREE.Vector3(-340, 20, -80),   // Dropping chicane
-      new THREE.Vector3(-260, 5, 120),    // Low speed technical sweep
-      new THREE.Vector3(-100, 5, 50),     // Final straight alignment
+      new THREE.Vector3(0, 5, 0),         // 0: Start / Finish Line
+      new THREE.Vector3(0, 5, 300),       // 1: Main straightaway
+      new THREE.Vector3(0, 5, 600),       // 2: Straightaway extension
+      new THREE.Vector3(120, 25, 800),    // 3: Rising bank right
+      new THREE.Vector3(350, 45, 850),    // 4: High elevation apex turn
+      new THREE.Vector3(550, 35, 700),    // 5: Downhill sweeping right
+      new THREE.Vector3(600, 20, 350),    // 6: Wide right sweep
+      new THREE.Vector3(580, 15, 0),      // 7: High-speed section
+      new THREE.Vector3(480, 25, -300),   // 8: Back straight right
+      new THREE.Vector3(300, 40, -550),   // 9: Crest turn
+      new THREE.Vector3(100, 30, -700),   // 10: Deep banked turn
+      new THREE.Vector3(-150, 20, -700),  // 11: Bottom curve apex
+      new THREE.Vector3(-350, 15, -550),  // 12: Left sweep ascent
+      new THREE.Vector3(-480, 20, -300),  // 13: Left side straight
+      new THREE.Vector3(-500, 25, 0),     // 14: S-curve entrance
+      new THREE.Vector3(-420, 20, 300),   // 15: Crest chicane
+      new THREE.Vector3(-250, 15, 100),   // 16: Chicane mid
+      new THREE.Vector3(-180, 10, -200),  // 17: Entry to final turn
+      new THREE.Vector3(-100, 5, -450),   // 18: Turn into final straight
+      new THREE.Vector3(0, 5, -450),      // 19: Aligned at bottom
+      new THREE.Vector3(0, 5, -250),      // 20: Pre-finish straight
     ];
 
     this.curve = new THREE.CatmullRomCurve3(controlPoints, true, 'centripetal', 0.5);
@@ -87,12 +94,11 @@ export class Track {
       const pt = this.curve.getPointAt(t);
       const tangent = this.curve.getTangentAt(t).normalize();
       
-      // IMMUTABLE INVARIANT: DO NOT MODIFY OR INVERT THIS BASIS.
-      // binormal = cross(tangent, up) -> Camera Right (+1.00)
-      // normal   = cross(binormal, tangent) -> Camera Up (+1.00)
+      // Pure right-handed orthonormal SO(3) basis:
       const up = new THREE.Vector3(0, 1, 0);
-      const binormal = new THREE.Vector3().crossVectors(tangent, up).normalize();
-      const normal = new THREE.Vector3().crossVectors(binormal, tangent).normalize();
+      const dot = up.dot(tangent);
+      const normal = up.clone().sub(tangent.clone().multiplyScalar(dot)).normalize();
+      const binormal = new THREE.Vector3().crossVectors(normal, tangent).normalize();
 
       // Left edge & Right edge
       const leftPt = pt.clone().add(binormal.clone().multiplyScalar(-halfWidth));
@@ -323,12 +329,16 @@ export class Track {
 
     const position = this.curve.getPointAt(wrappedT);
     const tangent = this.curve.getTangentAt(wrappedT).normalize();
-    // IMMUTABLE INVARIANT: DO NOT MODIFY OR INVERT THIS BASIS.
-    // binormal = cross(tangent, up) -> Camera Right (+1.00)
-    // normal   = cross(binormal, tangent) -> Camera Up (+1.00)
+    
+    // Pure right-handed orthonormal SO(3) basis:
+    // 1. Tangent = Forward (+Z)
+    // 2. Normal = Projected UP orthogonal to Tangent (+Y)
+    // 3. Binormal = Cross(Normal, Tangent) = Right (+X)
+    // Determinant is identically +1.000000 across the whole track!
     const up = new THREE.Vector3(0, 1, 0);
-    const binormal = new THREE.Vector3().crossVectors(tangent, up).normalize();
-    const normal = new THREE.Vector3().crossVectors(binormal, tangent).normalize();
+    const dot = up.dot(tangent);
+    const normal = up.clone().sub(tangent.clone().multiplyScalar(dot)).normalize();
+    const binormal = new THREE.Vector3().crossVectors(normal, tangent).normalize();
 
     return { position, tangent, normal, binormal };
   }

@@ -999,31 +999,38 @@
     scene.add(trackGroup);
     scene.add(sceneryGroup);
 
-    // 1. Circuit 3D Neo-Tokyo
+    // 1. Circuit 3D Neo-Tokyo (Smooth continuous 3D loop)
     const circuitPoints = [
-      new THREE.Vector3(0, 10, 0),
-      new THREE.Vector3(0, 10, 300),
-      new THREE.Vector3(120, 28, 550),
-      new THREE.Vector3(320, 50, 600),
-      new THREE.Vector3(500, 30, 420),
-      new THREE.Vector3(520, 12, 160),
-      new THREE.Vector3(380, 35, -80),
-      new THREE.Vector3(300, 55, -280),
-      new THREE.Vector3(120, 25, -450),
-      new THREE.Vector3(-120, 15, -480),
-      new THREE.Vector3(-300, 38, -300),
-      new THREE.Vector3(-360, 22, -60),
-      new THREE.Vector3(-260, 10, 160),
-      new THREE.Vector3(-100, 10, 80)
+      new THREE.Vector3(0, 5, 0),         // 0: Start / Finish Line
+      new THREE.Vector3(0, 5, 300),       // 1: Main straightaway
+      new THREE.Vector3(0, 5, 600),       // 2: Straightaway extension
+      new THREE.Vector3(120, 25, 800),    // 3: Rising bank right
+      new THREE.Vector3(350, 45, 850),    // 4: High elevation apex turn
+      new THREE.Vector3(550, 35, 700),    // 5: Downhill sweeping right
+      new THREE.Vector3(600, 20, 350),    // 6: Wide right sweep
+      new THREE.Vector3(580, 15, 0),      // 7: High-speed section
+      new THREE.Vector3(480, 25, -300),   // 8: Back straight right
+      new THREE.Vector3(300, 40, -550),   // 9: Crest turn
+      new THREE.Vector3(100, 30, -700),   // 10: Deep banked turn
+      new THREE.Vector3(-150, 20, -700),  // 11: Bottom curve apex
+      new THREE.Vector3(-350, 15, -550),  // 12: Left sweep ascent
+      new THREE.Vector3(-480, 20, -300),  // 13: Left side straight
+      new THREE.Vector3(-500, 25, 0),     // 14: S-curve entrance
+      new THREE.Vector3(-420, 20, 300),   // 15: Crest chicane
+      new THREE.Vector3(-250, 15, 100),   // 16: Chicane mid
+      new THREE.Vector3(-180, 10, -200),  // 17: Entry to final turn
+      new THREE.Vector3(-100, 5, -450),   // 18: Turn into final straight
+      new THREE.Vector3(0, 5, -450),      // 19: Aligned at bottom
+      new THREE.Vector3(0, 5, -250),      // 20: Pre-finish straight
     ];
     const circuitCurve = new THREE.CatmullRomCurve3(circuitPoints, true, 'centripetal', 0.5);
 
     // 2. Straight Slalom Runway
     const straightLength = 2600;
     const straightPoints = [
-      new THREE.Vector3(0, 10, 0),
-      new THREE.Vector3(0, 10, straightLength * 0.5),
-      new THREE.Vector3(0, 10, straightLength)
+      new THREE.Vector3(0, 5, 0),
+      new THREE.Vector3(0, 5, straightLength * 0.5),
+      new THREE.Vector3(0, 5, straightLength)
     ];
     const straightCurve = new THREE.CatmullRomCurve3(straightPoints, false);
 
@@ -1181,10 +1188,11 @@
     }
 
     /**
-     * Orthonormal right-handed Frenet-Serret frame:
-     * - tangent (forward, +Z)
-     * - sideRight (cross(up, tangent) = right vector, +X)
-     * - normal (cross(tangent, sideRight) = up vector, +Y)
+     * Pure right-handed orthonormal SO(3) frame:
+     * - tangent = Forward (+Z)
+     * - normal = Projected UP orthogonal to Tangent (+Y)
+     * - sideRight = Cross(Normal, Tangent) = Right (+X)
+     * Determinant is identically +1.000000 at all points!
      */
     function getTrackFrameAt(t) {
       const wrappedT = (currentTrackType === 'circuit' || currentTrackType === 'tube')
@@ -1193,8 +1201,9 @@
       const pt = trackCurve.getPointAt(wrappedT);
       const tangent = trackCurve.getTangentAt(wrappedT).normalize();
       const up = new THREE.Vector3(0, 1, 0);
-      const sideRight = new THREE.Vector3().crossVectors(tangent, up).normalize();
-      const normal = new THREE.Vector3().crossVectors(sideRight, tangent).normalize();
+      const dot = up.dot(tangent);
+      const normal = up.clone().sub(tangent.clone().multiplyScalar(dot)).normalize();
+      const sideRight = new THREE.Vector3().crossVectors(normal, tangent).normalize();
       return { pt, tangent, sideRight, normal };
     }
 
