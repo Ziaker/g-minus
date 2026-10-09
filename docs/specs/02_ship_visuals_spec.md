@@ -1,11 +1,14 @@
 # Especificação Técnica — Protótipo 02: Laboratório de Visuais de Naves
 
-**Status:** Laboratório de Prototipação Visual — **AGUARDANDO APROVAÇÃO** (não integrado ao jogo).  
+**Status:** **DIREÇÃO VISUAL C — RETRO VECTOR APROVADA**, em 09/10/2026, por declaração do responsável. Configuração final de sliders, geometria, demais estilos e integração ao jogo **NÃO APROVADAS**.  
 **Data:** 2026-10-09  
 **Arquivo do Protótipo:** `prototypes/02_ship_visuals.html` (laboratório independente, não entra no bundle de produção)  
 **Referência GDD:** Itens [71] (dez veículos com paletas distintas), [72, 78] (estrutura modular de peças), [81–90] (Direção Visual — especialmente [83] leitura contra o cenário, [87] famílias de silhueta e [89] identidade individual), [95] (sensação de velocidade) e [101–102] (telemetria e exportação JSON).
 
 ---
+
+
+> **Atualização de 09/10/2026 — v6 WebGL:** O arquivo `prototypes/02_ship_visuals.html` foi atualizado nesta branch para o laboratório v6, com dez modelos, cinco estilos, renderização WebGL própria e geometria única por nave. **As seções antigas sobre Three.js r128, apenas três alternativas, ranges e JSON anteriores descrevem a versão histórica e não devem ser usadas como contrato da v6.** O aditivo ao final documenta a nova referência. 
 
 ## 1. Motivação
 
@@ -95,3 +98,37 @@ Objeto plano, compatível com o padrão do Protótipo 01:
 ## 10. Configuração aprovada
 
 *(preencher após aprovação — exemplo: `{"machine":"falcon","style":"A","length":1.00,...}`)*
+
+
+---
+
+## 11. Aditivo de aprovação e referência v6 — 09/10/2026
+
+**Decisão explícita do responsável:** “seguiremos com o C estando aprovado, envie isso ao repositorio”.
+
+### 11.1 Escopo preciso da aprovação
+
+- **Aprovado:** estilo **C — RETRO VECTOR** do laboratório v6, identificado no código-fonte por `{id:'C', name:'RETRO VECTOR'}`.
+- **Não confundir:** **D — TOON VECTOR FLUX** é uma direção distinta no mesmo arquivo; o comentário positivo anterior sobre D não substitui a aprovação literal de C.
+- **Não aprovados por esta decisão:** estilos A, B, D, E, design final de todos os componentes, física, critérios de desempenho e integração de assets no jogo.
+- **Em aberto:** o JSON final com parâmetros numéricos escolhidos, alterações de cores de cada peça e avaliação de compatibilidade de C com os contornos pretos previstos no GDD [81, 88]. Não inventar aprovação para esses itens.
+
+### 11.2 Arquivo de implementação da referência aprovada
+
+- **HTML:** `prototypes/02_ship_visuals.html` (v6 WebGL independente).
+- **Direção inicial da interface:** C — RETRO VECTOR (`style:2` no estado inicial da v6).
+- **Quantidade de opções ainda apresentadas:** A Anime Cel, B Aero Armor, C Retro Vector, D Toon Vector Flux, E Solar Prototype.
+- **Dez geometrias-base:** uma por máquina; alternar o estilo deve conservar a geometria e as proporções. Os seis sliders permanecem associados à nave, não ao estilo.
+- **UI:** modos vitrine, comparação A–E e galeria de dez naves; destaque das quatro peças visuais provisórias; vistas; importação/exportação.
+- **JSON v6:** `schemaVersion: 6`, `prototype: 'gminus-craft-visual-lab'`, `machine`, `style`, `mode`, `focusPiece`, `view`, `params` com `length`, `width`, `wingSpan`, `canopy`, `glow` e `saturation`.
+- **Limites de sliders v6:** `length`, `width`, `wingSpan` e `canopy`: 0,78–1,22; `glow`: 0–2; `saturation`: −0,38–0,38. Os valores iniciais exibidos **não são considerados configuração aprovada**.
+
+### 11.3 Pendências e política de integração
+
+1. Registrar posteriormente o snapshot JSON de parâmetros **explicitamente aprovado**.
+2. Validar visualmente o estilo C no contexto de pista conforme GDD [83] e testar a aderência aos contornos pretos de [81,88], sem alteração automática do GDD.
+3. Manter `prototypes/02_craft_visuals.html` e sua especificação sem exclusão ou fusão.
+4. **Não portar** modelos ou materiais para `src/game/Vehicle.ts` até aprovação de integração conforme GDD [101].
+5. Não tratar aprovação da **direção C** como aprovação final de outras alternativas, da geometria ou do jogo.
+
+**Status de implementação:** enviado à branch de revisão do repositório; integração ao jogo principal não realizada.
