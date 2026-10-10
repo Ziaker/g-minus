@@ -1,0 +1,1029 @@
+{
+ "generatedBy": "prototypes/pregame-options/classify-params.mjs",
+ "method": "conectado = referência estática fora da calibração; funcional = a assinatura da simulação (pilotagem, combate, IA, câmera e sondas de limite/temporização) muda ao alterar o valor em +37 % ou −37 %. Não funcional = efeito não demonstrado por estes cenários.",
+ "params": {
+  "steering.steerRate": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 56,
+   "testedValues": [
+    76.72,
+    35.28
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "steering.progressivity": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 1.4,
+   "testedValues": [
+    1.918,
+    0.882
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "steering.inertia": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 65,
+   "testedValues": [
+    89.05,
+    40.95
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "steering.grip": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.68,
+   "testedValues": [
+    0.9316,
+    0.4284
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "steering.recenter": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 4.5,
+   "testedValues": [
+    6.165,
+    2.835
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "steering.speedInstability": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.6,
+   "testedValues": [
+    0.822,
+    0.378
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "steering.speedInstabilityThreshold": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.58,
+   "testedValues": [
+    0.7946,
+    0.3654
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "steering.highSpeedSteerDropoff": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.12,
+   "testedValues": [
+    0.1644,
+    0.0756
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "steering.lowSpeedSteerMultiplier": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 1.3,
+   "testedValues": [
+    1.781,
+    0.819
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "steering.counterSteerBoost": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 1.8,
+   "testedValues": [
+    2.466,
+    1.134
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "banking.rollResponse": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 23,
+   "testedValues": [
+    31.51,
+    14.49
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "banking.maxRollDegrees": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 75,
+   "testedValues": [
+    102.75,
+    47.25
+   ],
+   "changedUp": false,
+   "changedDown": true
+  },
+  "banking.tiltSteerBoost": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 2.5,
+   "testedValues": [
+    3.425,
+    1.575
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "banking.bankTurnForce": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 62,
+   "testedValues": [
+    84.94,
+    39.06
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "banking.bankDrag": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 5.5,
+   "testedValues": [
+    7.535,
+    3.465
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "banking.strafeThrust": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 195,
+   "testedValues": [
+    267.15,
+    122.85
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "banking.quickStrafeImpulse": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 55,
+   "testedValues": [
+    75.35,
+    34.65
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "banking.rollReturnSpeed": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 18,
+   "testedValues": [
+    24.66,
+    11.34
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "drift.yawBoost": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 1.9,
+   "testedValues": [
+    2.603,
+    1.197
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "drift.gripMultiplier": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.18,
+   "testedValues": [
+    0.2466,
+    0.1134
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "drift.brakeDeceleration": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 3.5,
+   "testedValues": [
+    4.795,
+    2.205
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "drift.slideTurnBoost": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 1.6,
+   "testedValues": [
+    2.192,
+    1.008
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "drift.threshold": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 15,
+   "testedValues": [
+    20.55,
+    9.45
+   ],
+   "changedUp": true,
+   "changedDown": false
+  },
+  "drift.counterSteerAuthority": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 1.6,
+   "testedValues": [
+    2.192,
+    1.008
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "drift.entrySlipKick": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 28,
+   "testedValues": [
+    38.36,
+    17.64
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "drift.maxAngleDegrees": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 65,
+   "testedValues": [
+    89.05,
+    40.95
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "drift.angularDamping": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 2.5,
+   "testedValues": [
+    3.425,
+    1.575
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "propulsion.topSpeed": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 500,
+   "testedValues": [
+    685,
+    315
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "propulsion.boostTopSpeed": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 600,
+   "testedValues": [
+    822,
+    378
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "propulsion.acceleration": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 80,
+   "testedValues": [
+    109.6,
+    50.4
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "propulsion.boostAcceleration": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 125,
+   "testedValues": [
+    171.25,
+    78.75
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "propulsion.boostDuration": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 2.4,
+   "testedValues": [
+    3.288,
+    1.512
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "propulsion.coastDeceleration": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 4,
+   "testedValues": [
+    5.48,
+    2.52
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "propulsion.brakeForce": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 145,
+   "testedValues": [
+    198.65,
+    91.35
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "propulsion.boostEnergyDrainRate": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 4.5,
+   "testedValues": [
+    6.165,
+    2.835
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "propulsion.passiveRegenRate": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 6,
+   "testedValues": [
+    8.22,
+    3.78
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "propulsion.boostCooldown": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.3,
+   "testedValues": [
+    0.411,
+    0.189
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.sideAttackForce": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 500,
+   "testedValues": [
+    685,
+    315
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.sideAttackDuration": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.31,
+   "testedValues": [
+    0.4247,
+    0.1953
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.sideAttackDamage": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 32,
+   "testedValues": [
+    43.84,
+    20.16
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.spinAttackDuration": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.5,
+   "testedValues": [
+    0.685,
+    0.315
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.spinAttackDamage": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 52,
+   "testedValues": [
+    71.24,
+    32.76
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.spinAttackForce": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 200,
+   "testedValues": [
+    274,
+    126
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.boostCost": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 14,
+   "testedValues": [
+    19.18,
+    8.82
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.sideAttackCost": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 3,
+   "testedValues": [
+    4.11,
+    1.89
+   ],
+   "changedUp": true,
+   "changedDown": false
+  },
+  "combat.spinAttackCost": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 6,
+   "testedValues": [
+    8.22,
+    3.78
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.sideAttackReach": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 4.2,
+   "testedValues": [
+    5.754,
+    2.646
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.spinAttackRadius": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 4,
+   "testedValues": [
+    5.48,
+    2.52
+   ],
+   "changedUp": true,
+   "changedDown": false
+  },
+  "combat.sideAttackCooldown": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.3,
+   "testedValues": [
+    0.411,
+    0.189
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "combat.spinAttackCooldown": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.6,
+   "testedValues": [
+    0.822,
+    0.378
+   ],
+   "changedUp": false,
+   "changedDown": true
+  },
+  "combat.bodySlamImpactMultiplier": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 1.3,
+   "testedValues": [
+    1.781,
+    0.819
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "hover.height": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 2.8,
+   "testedValues": [
+    3.836,
+    1.764
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "hover.springStiffness": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 250,
+   "testedValues": [
+    342.5,
+    157.5
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "hover.springDamping": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 50,
+   "testedValues": [
+    68.5,
+    31.5
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "hover.wakeAmplitude": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.12,
+   "testedValues": [
+    0.1644,
+    0.0756
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "hover.wakeFrequency": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 4.8,
+   "testedValues": [
+    6.576,
+    3.024
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "hover.magneticGripStrength": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 1.4,
+   "testedValues": [
+    1.918,
+    0.882
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.pitchControlRate": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 35,
+   "testedValues": [
+    47.95,
+    22.05
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.rollControlRate": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 42,
+   "testedValues": [
+    57.54,
+    26.46
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.steerAuthority": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 1.1,
+   "testedValues": [
+    1.507,
+    0.693
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.glideLift": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 40,
+   "testedValues": [
+    54.8,
+    25.2
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.glideDrag": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 5,
+   "testedValues": [
+    6.85,
+    3.15
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.diveAcceleration": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 55,
+   "testedValues": [
+    75.35,
+    34.65
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.diveMaxSpeed": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 85,
+   "testedValues": [
+    116.45,
+    53.55
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.airborneGravity": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 90,
+   "testedValues": [
+    123.3,
+    56.7
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.airborneThreshold": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 0.5,
+   "testedValues": [
+    0.685,
+    0.315
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.landingBoostEfficiency": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 0.9,
+   "testedValues": [
+    1.233,
+    0.567
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.landingBoostMax": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 140,
+   "testedValues": [
+    191.8,
+    88.2
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.landingImpactThreshold": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 0.5,
+   "testedValues": [
+    0.685,
+    0.315
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.landingPenaltyDamage": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 5,
+   "testedValues": [
+    6.85,
+    3.15
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.landingPenaltyDeceleration": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 15,
+   "testedValues": [
+    20.55,
+    9.45
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "flight.airStrafeThrust": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 110,
+   "testedValues": [
+    150.7,
+    69.3
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.baseSpeed": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 350,
+   "testedValues": [
+    479.5,
+    220.5
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.aggressiveness": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 1.8,
+   "testedValues": [
+    2.466,
+    1.134
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.rubberbanding": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 1.8,
+   "testedValues": [
+    2.466,
+    1.134
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.laneChangeSpeed": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 1.7,
+   "testedValues": [
+    2.329,
+    1.071
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.topSpeedCap": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 550,
+   "testedValues": [
+    753.5,
+    346.5
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.boostFrequency": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 0.6,
+   "testedValues": [
+    0.822,
+    0.378
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.boostTopSpeed": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 550,
+   "testedValues": [
+    753.5,
+    346.5
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.boostAcceleration": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 140,
+   "testedValues": [
+    191.8,
+    88.2
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.corneringGrip": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 1.3,
+   "testedValues": [
+    1.781,
+    0.819
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.brakingTendency": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 0.3,
+   "testedValues": [
+    0.411,
+    0.189
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "ai.catchupAcceleration": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 65,
+   "testedValues": [
+    89.05,
+    40.95
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "camera.distance": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 15,
+   "testedValues": [
+    20.55,
+    9.45
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "camera.height": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 7.8,
+   "testedValues": [
+    10.686,
+    4.914
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "camera.fovFactor": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 0.78,
+   "testedValues": [
+    1.0686,
+    0.4914
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "camera.speedFov": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.1,
+   "testedValues": [
+    0.137,
+    0.063
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "camera.lag": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 14,
+   "testedValues": [
+    19.18,
+    8.82
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "camera.lookahead": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 38,
+   "testedValues": [
+    52.06,
+    23.94
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "camera.shakeDecay": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 1.7,
+   "testedValues": [
+    2.329,
+    1.071
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "camera.rollFollow": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 0.5,
+   "testedValues": [
+    0.685,
+    0.315
+   ],
+   "changedUp": false,
+   "changedDown": false
+  },
+  "camera.boostFovPulse": {
+   "connected": true,
+   "functional": true,
+   "baseValue": 0.12,
+   "testedValues": [
+    0.1644,
+    0.0756
+   ],
+   "changedUp": true,
+   "changedDown": true
+  },
+  "camera.driftSwing": {
+   "connected": false,
+   "functional": false,
+   "baseValue": 0.6,
+   "testedValues": [
+    0.822,
+    0.378
+   ],
+   "changedUp": false,
+   "changedDown": false
+  }
+ }
+}
