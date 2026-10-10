@@ -27,7 +27,23 @@ As demais alternativas **não foram escolhidas** e ficam no laboratório apenas 
 
 ## 2. Regras e modificações aprovadas
 
-### 2.1 Spin E — tamanho igual ao da nave + 0,35
+### 2.1 Spin E — dimensão do campo
+
+> **Atualização de 10/10/2026 — dimensão desejada (provisória):** o responsável definiu que o campo do Spin E deve ter **130 % do raio de varredura da nave (+30 %)**:
+>
+> **raio externo desejado = 1,30 × raio de varredura do giro da nave**
+>
+> Essa regra é **provisória** e **ainda não está implementada**. O laboratório (`prototypes/04_craft_vfx_v2.html`, `SPIN_E_MARGIN` em `prototypes/vfx-atelier/vfx-state.js`), o JSON de baseline e os testes continuam usando **+0,35 u**, descrito abaixo. A regra de +30 % deve ser aplicada numa revisão futura do laboratório ou na integração no jogo, com teste correspondente. Até lá, a implementação atual (+0,35 u) **não** representa a configuração desejada.
+>
+> Raios desejados nos nove modelos (1,30 × varredura, em u):
+>
+> | Nave | A | B | C |
+> | :--- | :--- | :--- | :--- |
+> | Falcon | 4,958 | 4,494 | 5,021 |
+> | Fox | 4,766 | 4,971 | 4,056 |
+> | Goose | 3,674 | 4,525 | 4,313 |
+
+**Implementação atual no laboratório (+0,35 u), mantida sem alteração nesta atualização:**
 
 O efeito tem que **bater com o tamanho da nave mais 0,35**:
 
@@ -45,7 +61,7 @@ O efeito tem que **bater com o tamanho da nave mais 0,35**:
 | Fox | 3,666 → 4,016 | 3,824 → 4,174 | 3,120 → 3,470 |
 | Goose | 2,826 → 3,176 | 3,481 → 3,831 | 3,318 → 3,668 |
 
-**Interpretação registrada:** "+.35" foi entendido como **+0,35 unidade**, não +35 %. Se a intenção era +35 %, a mudança é de uma linha (`SPIN_E_MARGIN`) e precisa de confirmação do responsável.
+**Histórico da interpretação:** na implementação, "+.35" foi entendido como **+0,35 unidade**. O responsável depois definiu a dimensão desejada como **+30 % (130 % do raio de varredura)**, provisoriamente (ver o quadro acima). A tabela acima mostra os valores da implementação atual (+0,35 u), não os desejados.
 
 ### 2.2 Side E — afterimage mantido, descarga azul removida, speedlines laterais
 
@@ -94,7 +110,7 @@ O JSON enviado pelo responsável está arquivado literalmente em [`2026-10-10-pr
 - **Integração no jogo:** o responsável pediu que o Boost B "esteja no JOGO". Isso fica registrado como requisito da integração, mas a integração em `src/game` **ainda não foi feita**.
 - **Estado padrão dos toggles do Boost** (A, D, E) no jogo, onde o jogador os liga e desliga (menu, garagem, opções) e se o estado é por nave ou global. No laboratório todos começam ligados só para pré-visualização.
 - **Como o jogador escolhe** entre as opções selecionáveis (Drift A/B/C/E, Colisão B/D, Voo C/D), qual é o padrão de cada uma e se a escolha é por nave.
-- **Confirmação da interpretação "+0,35 u"** do Spin E (seção 2.1).
+- **Aplicar a regra provisória do Spin E de 130 % do raio de varredura (+30 %)** no laboratório ou na integração, substituindo os +0,35 u atuais, com teste. Ainda não implementado (seção 2.1).
 - Desempenho em hardware-alvo; os eventos do laboratório são simulados (sem física, colisão real, som ou IA).
 
 ## 4. Implementação neste registro
