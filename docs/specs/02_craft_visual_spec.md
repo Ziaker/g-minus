@@ -1,5 +1,8 @@
 # Especificação Técnica — Protótipo 02: Visual Modular e Opções de Design das 3 Primeiras Naves
 
+> **Atualização de decisão (09/10/2026):** este documento descreve o laboratório histórico com alternativas A/B/C e não registra aprovação dessas alternativas. A direção estética global **D — Toon Vector Flux** foi posteriormente aprovada no [registro de aprovação](02_toon_vector_flux_approval.md), referenciado pelo novo [protótipo WebGL v6](../../prototypes/02_ship_visuals_v6_webgl.html). Esta especificação histórica permanece preservada para rastreabilidade.
+
+
 **Status:** Especificação Técnica de Direção Visual e Prototipação Modular (GDD Seções 8, 9, 11 [71–78, 81–90, 101]).  
 **Data:** 2026-10-09  
 **Arquivo do Protótipo:** `prototypes/02_craft_visuals.html`  
