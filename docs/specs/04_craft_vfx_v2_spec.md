@@ -1,78 +1,64 @@
-# Especificação Técnica — Protótipo 04 V2: Craft VFX Lab
+# Protótipo 04 V2 — VFX Atelier
 
-**Estado:** implementado para avaliação visual em 10/10/2026. **Nenhum VFX aprovado.**
+**EM AVALIAÇÃO — VFX NÃO APROVADOS.** Reconstrução de 10/10/2026; substitui a implementação V2 anterior, não o Protótipo 04 histórico.
 
-## 1. Objetivo e autoridade
+## Contrato acumulativo
 
-O laboratório `prototypes/04_craft_vfx_v2.html` reconstrói o Protótipo 04 como ferramenta isolada de exploração e comparação. Ele não integra efeitos ao jogo e não altera física, combate, IA, pista ou balanceamento.
+Laboratório isolado do jogo. A aprovação do Perfil C (01) não aprova VFX, pistas ou arte, nem resolve as lacunas da física principal. PhysicsCalibration.ts, Vehicle.ts, Game.ts e Combat.ts não são alterados.
 
-A hierarquia aplicada é cumulativa:
+- **02 / D:** shaders, iluminação, cel shading, retícula, contorno e seleção de arestas extraídos literalmente do renderizador D utilizado pelo 06.
+- **03:** decisões de pistas preservadas; chão do atelier é referência de inspeção, não pista aprovada.
+- **05:** bloco canônico integral, nove geometrias e fingerprints preservados. Nenhum modelo inventado das outras sete naves.
+- **06 / B:** resolver original; baseline pinkMix 0.55, shadeMix 0.68, hierarchy 0, saturation 0, glow 1. Cores experimentais editáveis por material e por nave, sem nova aprovação.
+- **04 original:** preservado sem alteração. Nenhuma alternativa é aprovada automaticamente.
 
-1. [GDD](../GDD.md) e decisões expressas;
-2. [Toon Vector Flux D](02_toon_vector_flux_approval.md), como linguagem visual;
-3. [Protótipo 05](../decisions/2026-10-10-prototype-05-craft-geometry-approval.md), com as nove geometrias canônicas;
-4. [Protótipo 06](../decisions/2026-10-10-prototype-06-paint-system-approval.md), com Sistema B e sua baseline;
-5. alternativas VFX deste laboratório, todas **EM AVALIAÇÃO**.
+## Uso e fontes
 
-O arquivo histórico `prototypes/04_craft_vfx.html` permanece intacto.
+Abra `prototypes/04_craft_vfx_v2.html` diretamente ou pelo servidor local. HTML autossuficiente, sem CDN ou dependência em runtime.
 
-## 2. Baselines bloqueadas
+Fontes em `prototypes/vfx-atelier/`: template, estado/contrato, efeitos e runtime. Regeneração: `node prototypes/vfx-atelier/rebuild-vfx.mjs`. O gerador incorpora os blocos aprovados de 05/06 e valida marcadores e sintaxe antes de escrever. Testes detectam divergências dessas dependências.
 
-- O bloco entre `@gminus-approved-craft-geometry:begin v1` e `:end v1` é copiado byte a byte do Protótipo 05 e coberto por teste de igualdade.
-- São exibidas somente Blue Falcon, Golden Fox e Wild Goose, cada uma nas variantes A/B/C aprovadas. As outras sete naves não são inventadas.
-- A direção é D — Toon Vector Flux: volumes facetados, leitura toon, contorno escuro e energia vetorial controlada.
-- O Sistema B usa os papéis `paint`, `secondary`, `accent`, `structure`, `glass`, `energy` e `marking`, com baseline `pinkMix=0.55`, `shadeMix=0.68`, `hierarchy=0`, `saturation=0`, `glow=1`.
-
-## 3. Matriz de alternativas
+## Cinquenta alternativas
 
 | Categoria | A | B | C | D | E |
 |---|---|---|---|---|---|
-| Propulsão | núcleo plasma | jatos segmentados | ondas pulsantes | fitas/fragmentos | células/feixes/anéis |
-| Boost | shockwaves | corredores | arcos elétricos | afterimages | ruptura espacial |
-| Spin | disco | lâminas | espiral 3D | anéis concêntricos | campo poligonal |
-| Ataque lateral | corte | arco de pressão | faixa vetorial | onda de impulso | fantasma/descarga |
-| Escudo/dano | flash toon | placas | trincas | ondas de superfície | arco/fragmentos |
-| Drift/strafe/hover | tiras da pista | fricção magnética | linhas de fluxo | pulso de estabilização | rastros de slip |
-| Colisão | faíscas | estilhaços | pulso de contato | riscos de tinta | onda angular |
-| Dash/recarga | flash ascendente | anéis aceleradores | faixas superiores | pista → motores | onda direcional |
-| Voo/pouso | desprendimento | rastros aero | pulso de saída | compressão | impacto direcional |
-| Velocidade | action lines | perspectiva | silhuetas | fragmentos | deslocamento espacial |
+| Propulsão | Plasma facetado | Lâminas escalonadas | Ondas de pressão | Fitas helicoidais | Células hexagonais |
+| Super Boost | Frente de choque | Corredor vetorial | Sobrecarga elétrica | Ecos da malha real | Portais quebrados |
+| Spin Attack | Disco radial | Lâminas orbitais | Espiral 3D | Choques concêntricos | Campo poligonal |
+| Side Attack | Corte de impacto | Arco de pressão | Faixa de deslocamento | Impulso radial | Eco e descarga |
+| Escudo/dano | Flash de tinta | Placas hexagonais | Fratura energética | Onda superficial | Arco defensivo |
+| Drift/hover | Faixas de contato | Atrito magnético | Linhas de fluxo | Estabilização | Trilha segmentada |
+| Colisão | Faíscas balísticas | Estilhaços vetoriais | Pulso concentrado | Riscos de tinta | Onda angular |
+| Dash/recarga | Ascensão energética | Anéis aceleradores | Varredura de faixas | Feixes aos motores | Onda direcional |
+| Voo/pouso | Desacoplamento | Rastro aerodinâmico | Pulso de decolagem | Compressão de pouso | Impacto de aterrissagem |
+| Velocidade | Action lines | Portais em profundidade | Silhueta residual | Fragmentos periféricos | Faixas de parallax |
 
-Cada alternativa tem cópia independente dos controles de intensidade, escala, duração, densidade e velocidade. Alterar ou restaurar uma alternativa não toca as demais.
+Construções distintas, não cinco recolorações. Geometria sólida/translúcida com profundidade; ecos usam a malha canônica. Sem bloom fotográfico ou filtro global substituindo a pintura.
 
-## 4. Modos de avaliação
+## Calibração e inspeção
 
-- **Única ampliada:** uma alternativa e gatilho manual.
-- **Comparar A–E:** cinco viewports sob nave, câmera, seed e tempo idênticos.
-- **Galeria 3×3:** as nove geometrias aprovadas usando a alternativa ativa.
-- Câmeras de perseguição, traseira, lateral e orbital; estúdio ou pista de teste.
-- Pausa, avanço de um quadro, replay, seed inteira determinística e stress com 18 instâncias.
-- Eventos simulados incluem throttle, boost, spin, ataque lateral espelhado, impacto, drift, colisão, dash, voo e velocidade. São estados exclusivamente visuais e rotulados.
+Cada alternativa mantém seus valores: dez controles em propulsão e seis nas demais categorias. `paramDefsVFX` documenta limites e unidades; cada controle tem teste de resposta observável ao longo do evento.
 
-## 5. JSON e reprodutibilidade
+Propulsão: comprimento, largura, pulsação, cadência, quantidade/facetas, dispersão, persistência, resposta à aceleração, opacidade e duração. Demais categorias: extensão/raio/comprimento, espessura, quantidade, cadência/propagação, opacidade e duração.
 
-O schema é `g-minus.craft-vfx-v2`, versão `2`. A exportação contém dependências, seleção, seed, baseline de pintura e todos os 250 valores de parâmetros (10 × 5 × 5).
+Simulação: velocidade 0–1600 km/h, aceleração 0–1, slip −1 a 1, impacto 0.1–1, **gravidade 4–30 u/s² e altura de salto 0.3–3 u**. Interface mostra controles pertinentes. Velocidade move a pista de teste; categorias sem acoplamento direto não mudam o efeito em estúdio. Esses controles não calibram a física do jogo.
 
-A importação é estrita e atômica: rejeita campos ausentes ou desconhecidos, números não finitos/fora da faixa, IDs inválidos, versão incompatível e qualquer tentativa de declarar aprovação ou trocar geometria, estilo ou sistema de pintura. Em erro, nada é aplicado.
+Replay, pausa, passo de 1/60 s, repetição e inspeção de instante representativo. “Inspecionar pico” é um marcador, não busca matemática do máximo; voo usa instante posterior para pouso. Hover de repouso sem oscilação vertical artificial.
 
-## 6. WebGL e recursos
+No voo, o ciclo se estende automaticamente quando a gravidade/altura exigem mais tempo para aterrissar; a duração escolhida funciona como mínimo. O efeito não reinicia no ar. Rastros de chão permanecem nivelados mesmo com roll/pitch da nave.
 
-O renderizador mantém buffers estáticos por geometria e um pool de três buffers dinâmicos para triângulos, linhas e partículas. Recursos são descartados no encerramento; perda e restauração do contexto WebGL são tratadas explicitamente. A telemetria mostra FPS, draw calls, partículas, buffers, triângulos, vértices dinâmicos, instâncias de stress e restaurações de contexto.
+Reset por alternativa, categoria e configuração inteira. Câmeras orbital, perseguição, traseira, lateral e superior; arrasto, zoom e restauração. Comparação A–E e galeria das nove geometrias. Até 1100 px os painéis viram seções expansíveis sem cobrir o canvas.
 
-## 7. Testes e critérios
+## Sincronização e recursos
 
-Os testes automatizados verificam:
+Bocais obtidos das peças energy dos motores; impactos usam vértices da extremidade real com altura/profundidade, não apenas largura. Nave e efeitos locais recebem a mesma transformação.
 
-- igualdade byte a byte do bloco geométrico com o Protótipo 05;
-- 10 categorias × 5 alternativas com geradores distintos;
-- baseline D/B e selo obrigatório `EM AVALIAÇÃO`;
-- importação estrita e atômica;
-- independência de parâmetros e resets;
-- geometria VFX finita, não vazia e determinística nas 50 combinações;
-- reprodução das nove geometrias e presença do ciclo de recursos WebGL.
+Arena reutilizável de 24 mil vértices por passagem de efeito; níveis médio/baixo de 12/6 mil. Cache limitado às nove malhas; nenhum buffer WebGL novo por quadro. Descarte e restauração explícitos; shaders liberados após linkagem.
 
-A validação final inclui `npm test`, `npm run build` e inspeção em navegador com WebGL real. Resultados e limitações ficam na [auditoria](../audits/2026-10-10-prototype-04-v2-audit.md).
+Telemetria: FPS amostrado, draws, vértices da passagem dinâmica (inclui chão), buffers, memória estimada, descartes por orçamento e erro GL. Memória não é medição da VRAM do driver. Stress: 12 naves num viewport, não custo do jogo completo.
 
-## 8. Fora do escopo
+## JSON e validação
 
-Nenhuma alternativa é aprovada por existir no laboratório. Não há alteração em `PhysicsCalibration.ts`, `Vehicle.ts`, `Game.ts` ou `Combat.ts`; não há integração ao runtime principal; não há decisão sobre VFX finais, modelos das outras sete naves ou física definitiva de voo/pouso.
+Schema `gminus.craft-vfx-atelier`, versão **3**: seleções por nave/categoria, 50 calibrações, pinturas B, seed, simulação e câmera. Importação estrita e atômica rejeita campos extras, números inválidos, contagens fracionárias, alteração da baseline e alegações de aprovação. Sem conversão silenciosa da versão anterior. Tempo, pausa e stress são execução, não preset; use replay para comparação determinística.
+
+Ver [auditoria](../audits/2026-10-10-prototype-04-v2-audit.md) e [capturas](../evidence/vfx-atelier/README.md). Eventos são isolados e simulados: não implementam suspensão definitiva, colisão dinâmica, combate, som, IA ou integração com corrida. Aprovação artística, combinação e integração futura dependem de decisão expressa.

@@ -1,41 +1,46 @@
-# Auditoria — Reconstrução do Protótipo 04 V2
+# Rechecagem — reconstrução do VFX Atelier
 
-**Data:** 10/10/2026  
-**Estado:** laboratório implementado; alternativas **EM AVALIAÇÃO**.
+10/10/2026. **Nenhum VFX aprovado.** Substitui as afirmações da entrega V2 anterior, rejeitada pelo usuário.
 
-## Matriz de rastreabilidade
+## Correções verificadas
 
-| Área do laboratório histórico | Problema observado | Correção V2 | Validação |
-|---|---|---|---|
-| Geometria | modelos antigos não correspondiam ao baseline aprovado | bloco canônico do Protótipo 05 incorporado literalmente; galeria 3×3 | teste compara os blocos byte a byte e gera nove fingerprints |
-| Direção visual | efeito e nave podiam divergir da decisão D | shader toon, contorno vetorial e paleta de energia por nave | dependência D fixada e protegida no JSON |
-| Pintura | pipeline anterior não respeitava a aprovação 06/B | sete papéis e defaults B preservados | teste de baseline e validação estrita |
-| Catálogo | cobertura incompleta e presets pouco diferenciados | 10 categorias × 5 geradores de geometria distintos | teste percorre as 50 combinações e exige saída finita/não vazia |
-| Sincronização espacial | emissões nem sempre partiam da nave/evento correto | efeitos gerados em espaço local e transformados pela mesma matriz da nave | comparação e galeria usam a mesma transformação por viewport |
-| Sliders | controles podiam não produzir alteração ou vazar entre presets | cinco parâmetros efetivos por alternativa, armazenados separadamente | teste altera A/B e restaura apenas A |
-| Gatilhos/animação | estados contínuos e eventos não eram claramente separados | `eventTime`, serial de evento, duração, pausa, frame e replay | API headless e inspeção visual |
-| Câmera | avaliação limitada | perseguição, traseira, lateral e orbital; órbita/zoom por ponteiro | inspeção no navegador |
-| Reset | escopo ambíguo | reset de alternativa, categoria e global com escopos explícitos | teste do reset independente |
-| JSON | ausência de contrato completo e atômico | schema v2, chaves exatas, faixas e dependências bloqueadas | entradas inválidas rejeitadas sem mutação |
-| Aleatoriedade | resultados não reproduzíveis | PRNG local com seed e serial determinísticos | duas instâncias produzem geometria idêntica |
-| WebGL | risco de buffers temporários e contexto perdido | buffers estáticos em cache, pool dinâmico de três buffers, descarte e restauração | testes estruturais + telemetria em runtime |
-| Stress | ausência de cenário comparável | alternância de 1 para 18 naves/efeitos | métricas de FPS, draw calls, buffers e partículas |
-| Física | risco de confundir simulação visual com gameplay | estados físicos apenas simulados e rotulados | nenhum arquivo de `src/game` faz parte da alteração |
+| Problema | Correção |
+|---|---|
+| D/B parcialmente reproduzidos | Shader, arestas e resolver originais do 06; igualdade literal e baseline testadas |
+| Efeitos pouco distintos | 50 construções; dez comparativos A–E capturados |
+| Sliders sem resposta real | Teste mínimo/máximo de cada controle em quatro instantes |
+| Escapes/impactos desconectados | Bocais reais e âncoras laterais da malha |
+| Gravidade sem resposta efetiva | Tempo independente da gravidade; trajetórias comparadas |
+| Acúmulo de recursos | Arena/cache limitados, descarte; 300 trocas instrumentadas |
+| Comparação apertada | Layout compacto até 1100 px; mobile e desktop verificados |
+| Importação não reproduzível | Schema 3 estrito, atômico, reset e round-trip |
 
-## Evidências e resultados
+## Testes específicos
 
-- `npm test`: **61/61 testes aprovados**, incluindo oito regressões próprias do V2.
-- `npm run build`: aprovado; o Vite gerou `dist/prototypes/04_craft_vfx_v2.html` (86,92 kB; 29,05 kB gzip na execução).
-- Navegador real: renderização WebGL confirmada visualmente nos modos comparação e alternativa ampliada.
-- Stress: 18 naves/efeitos, amostra em **60 FPS**, 1.170 draw calls, 28.800 triângulos, 432 vértices VFX e 35 buffers totais (três buffers do pool dinâmico).
-- Console de uma sessão limpa do navegador: nenhum erro ou aviso.
-- Evidência visual: a aba local do laboratório foi mantida aberta como artefato inspecionável ao concluir a tarefa; a captura de validação mostra o modo Boost/D — Afterimages em stress, com telemetria visível.
+Quatorze testes em `tests/craft_vfx_v2.test.mjs`: gravidade/altura efetivas; pouso antes do replay nos extremos de gravidade/altura/duração; 300 trocas e descarte gráfico; nove fingerprints/bocais; igualdade D/B; 50 saídas distintas/finitas; resposta de todos os controles; independência e resets; JSON atômico; seed/replay e equivalência temporal 30/60/120; fim de eventos/espelhamento/hover; limites de arena/cache nas 450 combinações nave/efeito; âncoras nos dois lados das nove malhas; translação vertical de todas as alternativas de dano/colisão junto com o contato.
 
-O Protótipo 04 histórico permanece disponível para comparação.
+O teste de recursos usa WebGL instrumentado, não benchmark real. O teste temporal não mede FPS em dispositivos diferentes.
 
-## Limites conhecidos
+Resultado final: `npm test` — **67 testes passaram, 0 falhas**. `npm run build` — TypeScript e Vite concluídos, incluindo o HTML V2 no pacote de produção.
 
-- O laboratório usa estados sintéticos; não mede forças do runtime principal.
-- Comparação visual não equivale a aprovação artística.
-- Métricas de memória mostram recursos WebGL controlados pelo laboratório, não memória total do navegador/GPU.
-- A escolha de uma alternativa e sua integração ao jogo exigem decisão expressa posterior.
+## Navegador real
+
+Chromium embutido, `WebGL 1.0 (OpenGL ES 2.0 Chromium)`:
+
+- Dez categorias inspecionadas e capturadas em comparação simultânea.
+- Galeria com nove geometrias; cache atingiu 180 buffers e permaneceu nesse patamar nas inspeções seguintes.
+- Perda/restauração forçada: uma restauração, erro GL 0, cena e configuração recuperadas.
+- Stress de 12 naves: 421 draws; ~2.05 MiB estimados com cache completo; amostra de 60 FPS nesta sessão. Não é garantia para outros dispositivos.
+- Comprimento levado a 4 na interface; exportação confirmou 4; reset voltou a 1.8.
+- Gravidade levada a 4 e salto a 3; exportação confirmou os valores. Ciclo estendido até concluir o pouso, sem reinício aéreo. Reset geral recuperou gravidade 16, salto 1.5, seleções, câmera e calibrações.
+- JSON com seed fracionária rejeitado sem alterar a exportação; JSON válido reimportado com interface sincronizada.
+- Vista traseira confirmou escapes nos dois bocais da Falcon A.
+- Layout em 390×844 sem overflow horizontal e em 1280×800 com painéis. Override removido após o teste.
+- Consulta de console posterior à restauração sem avisos ou erros.
+- Rechecagem final corrigiu altura zero residual em algumas variantes de impacto e nivelou rastros de chão durante a inclinação da nave; quatro comparativos afetados foram recapturados.
+
+Ver [capturas](../evidence/vfx-atelier/README.md). Imagens são instantes de inspeção, não aprovação artística ou validação universal de desempenho.
+
+## Escopo preservado
+
+Protótipo 04 original e arquivos protegidos de física/gameplay intactos. Alterações alheias não entram no commit. Sem push ou merge. Continuam pendentes a avaliação artística do usuário, desempenho em outros dispositivos e integração futura. A física principal não é declarada concluída.

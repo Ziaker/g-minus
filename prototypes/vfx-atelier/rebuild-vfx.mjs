@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.dirname(fileURLToPath(import.meta.url));
+const repo=process.argv[2]||path.resolve(root,'../..');
+const source=fs.readFileSync(path.join(repo,'prototypes/06_craft_paint_lab.html'),'utf8');
+const p05=fs.readFileSync(path.join(repo,'prototypes/05_craft_geometry_lab.html'),'utf8');
+const between=(s,a,b)=>{const start=s.indexOf(a),end=s.indexOf(b,start);if(start<0||end<start)throw Error('Canonical source marker missing: '+a);return s.slice(start,end);};
+const geometry=between(p05,'/* @gminus-approved-craft-geometry:begin v1 */','/* @gminus-approved-craft-geometry:end v1 */')+'/* @gminus-approved-craft-geometry:end v1 */';
+const paint=between(source,"const SYSTEMS=['A','B','C']",'// cores-base editáveis');
+const renderer=between(source,"const canvas=document.getElementById('view');",'const D_BG_VITRINE=D_BG.vitrine;')
+ .replace('gl.attachShader(pr,sh(gl.VERTEX_SHADER,VERT));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FRAG));gl.linkProgram(pr);','const vs=sh(gl.VERTEX_SHADER,VERT),fs=sh(gl.FRAGMENT_SHADER,FRAG);gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);gl.deleteShader(vs);gl.deleteShader(fs);');
+const model=between(source,'function renderModel(', 'function drawScene()');
+const template=fs.readFileSync(path.join(root,'vfx-new.html'),'utf8');
+const parts=['vfx-state.js','vfx-effects.js','vfx-runtime.js'].map(f=>fs.readFileSync(path.join(root,f),'utf8'));
+const script=["'use strict';",geometry,paint,parts[0],renderer,model,parts[1],parts[2]].join('\n');
+new vm.Script(script);
+const html=template.replace('/* EMBED */',script);
+fs.writeFileSync(process.argv[3]||path.join(repo,'prototypes/04_craft_vfx_v2.html'),html);
+console.log('Built standalone lab: '+Buffer.byteLength(html)+' bytes');
