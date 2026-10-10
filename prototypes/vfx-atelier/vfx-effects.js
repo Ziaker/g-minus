@@ -12,6 +12,9 @@ class Arena{
  plasma(anchor,length,width,t,facets,alpha){const rows=[0,.16,.42,.68,1],radius=[.85,1.18,.72,.55,.015];for(let j=0;j<rows.length-1;j++)for(let i=0;i<facets;i++){const a=i/facets*TAU,b=(i+1)/facets*TAU,pt=(k,ang)=>[anchor.x+Math.cos(ang)*anchor.r*width*radius[k],anchor.y+Math.sin(ang)*anchor.r*width*radius[k],anchor.z-length*rows[k]];this.quad(pt(j,a),pt(j,b),pt(j+1,b),pt(j+1,a),i%3===0?FXCOL.pink:FXCOL.cyan,alpha*.7);}for(let i=0;i<4;i++){const a=i/4*TAU,b=(i+1)/4*TAU,r=anchor.r*width*.46,A=[anchor.x+Math.cos(a)*r,anchor.y+Math.sin(a)*r,anchor.z],B=[anchor.x+Math.cos(b)*r,anchor.y+Math.sin(b)*r,anchor.z];this.tri(A,B,[anchor.x,anchor.y,anchor.z-length*.72],FXCOL.white,alpha);}}
 }
 const arena=new Arena(),ghosts=[];
+const SWEEP_CACHE=new WeakMap();
+// raio de varredura do giro: maior distância horizontal de qualquer vértice ao eixo de rotação (centro da caixa, o mesmo de modelMatrix)
+function sweepData(entry){let s=SWEEP_CACHE.get(entry.mesh);if(s)return s;const b=entry.report.bounds,cx=(b.min[0]+b.max[0])/2,cz=(b.min[2]+b.max[2])/2;let R=0;for(const sh of entry.mesh.shapes)for(let i=0;i<sh.positions.length;i+=3)R=Math.max(R,Math.hypot(sh.positions[i]-cx,sh.positions[i+2]-cz));s={cx,cz,R};SWEEP_CACHE.set(entry.mesh,s);return s;}
 function noise(seed,i){let x=Math.imul((seed+i*374761393)>>>0,668265263);x=Math.imul(x^(x>>>13),1274126177);return((x^(x>>>16))>>>0)/4294967296;}
 function effectFrame(c,a,p,time,entry,sim=state.sim,side=state.side,seed=state.seed,out=arena){
  p=eventParams(c,p,sim);
@@ -47,7 +50,10 @@ function effectFrame(c,a,p,time,entry,sim=state.sim,side=state.side,seed=state.s
   if(a==='B')for(let i=0;i<n;i++){const q=angle+i/n*TAU;out.tri(rad(q,radius*.45),rad(q+.32,radius*1.15),rad(q-.1,radius*.92),i%2?pk:cy,alpha);ring([0,.03,0],radius*.97,.05*w,wh,alpha,'xz',9,q-.4,.65);}
   if(a==='C')for(let k=0;k<n;k++){const points=[];for(let j=0;j<12;j++){const q=(k+j/12)/n,an=angle+q*TAU*2;points.push(rad(an,radius,-.9+q*1.8));}out.ribbon(points,.13*w,k%2?cy:pk,alpha);}
   if(a==='D')for(let i=0;i<n;i++){const q=frac(t*.5+i/n);ring([0,-.2+q*.12,0],radius*(.35+q),.13*w*(1-q*.7),i%2?pk:cy,alpha*(1-q));}
-  if(a==='E'){ring([0,0,0],radius,.18*w,cy,alpha,'xz',n,angle);ring([0,.1,0],radius*1.1,.045*w,pk,alpha,'xz',n,-angle*.6);for(let i=0;i<n;i++){const q=angle+i/n*TAU;stroke(rad(q,radius),rad(q+.4,radius*.7),.055*w,wh,alpha);}}
+  if(a==='E'){// regra aprovada: raio externo = varredura do giro + SPIN_E_MARGIN, centrado no eixo de rotação
+   const sw=sweepData(entry),R=sw.R+SPIN_E_MARGIN,at=(an,r,y=0)=>[sw.cx+Math.cos(an)*r,y,sw.cz+Math.sin(an)*r],cw=Math.min(.18*w,R*.3);
+   out.ring([sw.cx,0,sw.cz],R,cw,cy,alpha,'xz',n,angle);out.ring([sw.cx,.1,sw.cz],R-cw-.03,.045*w,pk,alpha,'xz',n,-angle*.6);
+   for(let i=0;i<n;i++){const q=angle+i/n*TAU;stroke(at(q,R-cw*.5),at(q+.4,(R-cw*.5)*.7),.055*w,wh,alpha);}}
  }
  if(c==='side'){
   const x=side*(hx+.3),z=-.1,reach=extent*(.7+u),phase=t*2;
@@ -55,7 +61,11 @@ function effectFrame(c,a,p,time,entry,sim=state.sim,side=state.side,seed=state.s
   if(a==='B')for(let i=0;i<n;i++)ring([x,0,z],reach*(.5+i*.12),.1*w,i%2?cy:pk,alpha*(1-i/(n+1)),'yz',28,-Math.PI/2+phase*.1,Math.PI);
   if(a==='C')for(let i=0;i<n;i++){const y=.1+i*.15;out.quad([x-side*reach,y,-1.6],[x+side*reach,y,-1],[x+side*reach,y,.2],[x-side*reach,y,.9],i%2?cy:pk,alpha*(1-i/(n+1)));stroke([x-side*reach,y,-1.6],[x+side*reach,y,-1],.05*w,wh);}
   if(a==='D'){for(let i=0;i<n;i++){const q=frac(t*.6+i/n);ring([x+side*q*reach,0,0],.4+q,.08*w,cy,alpha*(1-q),'yz',20);}spray(contact,n*2,extent,1,pk);}
-  if(a==='E'){for(let i=1;i<=n;i++)ghosts.push({matrix:m4.T(-side*i*.28*extent*(.6+u),0,0),alpha:alpha*.3*(1-i/(n+1)),color:pk,edges:true,width:w});for(let i=0;i<n;i++)stroke(contact,[x+side*rand(i)*reach,(rand(i+8)-.5)*1.5,(rand(i+9)-.5)*2],.045*w,cy);}
+  if(a==='E'){// aprovado com modificação: afterimage mantido, descarga azul na asa removida, speedlines laterais
+   for(let i=1;i<=n;i++)ghosts.push({matrix:m4.T(-side*i*.28*extent*(.6+u),0,0),alpha:alpha*.3*(1-i/(n+1)),color:pk,edges:true,width:w});
+   const y0=b.min[1],y1=b.max[1];
+   for(let i=0;i<n*2;i++){const q=frac(t*1.4+rand(i+30)),y=lerp(y0,y1,rand(i+31)),z=lerp(rear,front,rand(i+32)),x0=-side*(hx*.15+q*hx*1.1*extent*(.6+u)),len=(.8+rand(i+33)*1.4)*extent*(.6+u);
+    stroke([x0,y,z],[x0-side*len,y,z],.035*w,i%3?wh:pk,alpha*(1-q)*.8);}}
  }
  if(c==='shield'){
   const r=p.radius*(.5+sim.impact)*(.65+.35*u),cx=contact[0];
@@ -72,6 +82,9 @@ function effectFrame(c,a,p,time,entry,sim=state.sim,side=state.side,seed=state.s
   if(a==='C')for(let i=0;i<n;i++){const points=[];for(let j=0;j<20;j++){const q=j/19;points.push([(i/(n-1)-.5)*hx*1.6+slip*q*q*len,y,front*.6-q*len*4]);}out.ribbon(points,.04*w,i%3?cy:pk,alpha*(.55+.25*Math.sin(flow+i)));}
   if(a==='D')for(let i=0;i<n;i++){const q=frac(flow*.25+i/n);ring([slip*.3,y,0],(.4+q*hx)*len*.65,.075*w,cy,alpha*(1-q));}
   if(a==='E')for(let i=0;i<n;i++){const q=frac(flow*.5+i/n);for(const k of [-1,1])out.quad([k*hx*.7+slip*q*len,y,rear-q*len*2],[k*hx*.7+slip*q*len+.14*w,y,rear-q*len*2],[k*hx*.7+slip*(q+.12)*len+.14*w,y,rear-(q+.12)*len*2],[k*hx*.7+slip*(q+.12)*len,y,rear-(q+.12)*len*2],k===1?cy:pk,alpha*(1-q));}
+  // aprovado: afterimage breve e constante enquanto o drift está ativo acima de DRIFT_AFTERIMAGE_KMH
+  const ai=clamp((sim.speed-DRIFT_AFTERIMAGE_KMH)/50,0,1);
+  if(ai>0)for(let i=1;i<=3;i++)ghosts.push({matrix:m4.T(-slip*.12*i,0,-i*.42),alpha:alpha*ai*.3*(1-i/4),color:pk,edges:true,width:w});
  }
  if(c==='collision'){
   const age=Math.min(1,u*p.rate),r=extent*(.4+sim.impact*1.4)*age;

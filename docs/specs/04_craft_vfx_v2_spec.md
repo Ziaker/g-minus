@@ -1,6 +1,6 @@
 # Protótipo 04 V2 — VFX Atelier
 
-**EM AVALIAÇÃO — VFX NÃO APROVADOS.** Reconstrução de 10/10/2026; substitui a implementação V2 anterior, não o Protótipo 04 histórico.
+**APROVAÇÃO REGISTRADA EM 10/10/2026** — [registro de decisão](../decisions/2026-10-10-prototype-04-v2-vfx-approval.md). Alternativas não escolhidas permanecem só para comparação. Reconstrução de 10/10/2026; substitui a implementação V2 anterior, não o Protótipo 04 histórico.
 
 ## Contrato acumulativo
 
@@ -59,6 +59,24 @@ Telemetria: FPS amostrado, draws, vértices da passagem dinâmica (inclui chão)
 
 ## JSON e validação
 
-Schema `gminus.craft-vfx-atelier`, versão **3**: seleções por nave/categoria, 50 calibrações, pinturas B, seed, simulação e câmera. Importação estrita e atômica rejeita campos extras, números inválidos, contagens fracionárias, alteração da baseline e alegações de aprovação. Sem conversão silenciosa da versão anterior. Tempo, pausa e stress são execução, não preset; use replay para comparação determinística.
+Schema `gminus.craft-vfx-atelier`, versão **4** (desde a aprovação): seleções por nave/categoria, 50 calibrações (49 controles no Spin E, cujo raio é regra fixa), composição do boost (`boostComposition`: compose + toggles A/D/E), pinturas B, seed, simulação e câmera. O campo `status` só aceita o texto fixo e não concede aprovação. A versão 3 é rejeitada; o JSON v3 enviado na aprovação está arquivado em `docs/decisions/`. Importação estrita e atômica rejeita campos extras, números inválidos, contagens fracionárias, alteração da baseline e alegações de aprovação. Sem conversão silenciosa da versão anterior. Tempo, pausa e stress são execução, não preset; use replay para comparação determinística.
 
 Ver [auditoria](../audits/2026-10-10-prototype-04-v2-audit.md) e [capturas](../evidence/vfx-atelier/README.md). Eventos são isolados e simulados: não implementam suspensão definitiva, colisão dinâmica, combate, som, IA ou integração com corrida. Aprovação artística, combinação e integração futura dependem de decisão expressa.
+
+## Aprovação de 10/10/2026 — o que mudou no laboratório
+
+Detalhes e justificativas: [registro de decisão](../decisions/2026-10-10-prototype-04-v2-vfx-approval.md).
+
+**Selos e calibração**
+- Cada alternativa mostra seu status: APROVADO, OBRIGATÓRIO NO JOGO, TOGGLE APROVADO, SELECIONÁVEL APROVADO, NÃO APROVADO ou NÃO ESCOLHIDO.
+- O padrão das alternativas aprovadas é a calibração enviada pelo responsável. O título da calibração indica se os valores atuais estão dentro ou fora dela.
+
+**Efeitos**
+- **Super Boost:** composição in-game com B sempre ativo e toggles A/D/E sobrepostos (modo Inspecionar). O modo Comparar continua mostrando A–E isolados.
+- **Spin E:** raio externo = raio de varredura do giro + 0,35 u, centrado no eixo de rotação. O controle de raio foi removido; o raio de cada nave aparece no painel.
+- **Side E:** sem descarga ciano na asa; afterimage mantido; speedlines brancas/rosa para o lado oposto ao ataque.
+- **Drift:** afterimage breve e constante (três cópias em contorno) acima de 1300 km/h, com rampa de 50 km/h.
+
+**Testes e evidências**
+- Testes de aprovação em `tests/craft_vfx_v2.test.mjs`.
+- Capturas 17–21 em `docs/evidence/vfx-atelier/`.
