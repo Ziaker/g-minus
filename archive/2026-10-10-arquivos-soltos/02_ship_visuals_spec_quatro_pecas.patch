@@ -1,0 +1,72 @@
+diff --git a/docs/specs/02_ship_visuals_spec.md b/docs/specs/02_ship_visuals_spec.md
+index 6e4a8a8..c1205fa 100644
+--- a/docs/specs/02_ship_visuals_spec.md
++++ b/docs/specs/02_ship_visuals_spec.md
+@@ -24,23 +24,45 @@ Os modelos atuais do jogo (`src/game/Vehicle.ts`) compartilham a mesma linguagem
+ 
+ Cada alternativa carrega **defaults próprios de sliders** (A: neutro; B: brilho 1.45, cabine 0.90; C: saturação +0.18, envergadura 1.08), de modo que as três opções são visualmente diferentes mesmo sem ajuste manual.
+ 
+-## 3. Dez Silhuetas Distintas (GDD [87, 89])
++## 3. Estrutura de 4 Peças por Nave (GDD [72, 78])
+ 
+-Cada nave é construída por um arquétipo próprio (agulha, prora, asa, garra etc.), agrupado em 4 sub-grupos nomeados (`nose`, `cockpit`, `wings`, `engines`) para espelhar a estrutura modular de 4 peças do GDD [72, 78]:
++Cada nave é composta de **exatamente 4 peças**, sem exceção — por mais detalhadas que sejam. Cada peça é um grupo próprio com **material e papel visual distintos**, e os detalhes internos (linhas de painel, entradas de ar, anéis de acento, antenas) ficam **dentro** da peça, nunca fora dela:
++
++| Peça | Nome | Material | Detalhes internos |
++| :---: | :--- | :--- | :--- |
++| **1** | Nariz (Nose) | Cor do corpo | Linhas de painel, entradas de ar, anel de acento na junta |
++| **2** | Cabine (Cockpit) | Vidro escuro | Bolha de canopy, antena, detalhe de moldura |
++| **3** | Asas (Wings) | Cor de acento | Superfície principal, winglets, flaps, linhas de painel |
++| **4** | Motores (Engines) | Metal escuro + glow | Bocal, anel de acento, pluma de glow |
++
++As peças são visualmente separadas por **material próprio** (não compartilham cor entre si) e por **anéis de acento** nas juntas, de modo que a estrutura de 4 peças é legível mesmo em silhuetas complexas. O seletor de peças na UI (botões 1-4) destaca cada peça individualmente para inspeção da estrutura modular.
++
++## 3.1. Dez Silhuetas Distintas (GDD [87, 89])
++
++Cada arquétipo distribui seus detalhes **dentro** das 4 peças — nenhum elemento fica solto fora da estrutura modular:
+ 
+ | Nave | Arquétipo | Família [87] | Elementos próprios [89] |
+ | :--- | :--- | :--- | :--- |
+-| Blue Falcon | Dart | Aerodinâmica | agulha delta, estabilizadores, carenagens de entrada |
+-| Golden Fox | Needle | Aerodinâmica | agulha ultraleve, canards, quilha dorsal |
+-| Wild Goose | Ram | Robusta | proa de abate em losango, saias blindadas, anéis de bocal |
+-| Fire Stingray | Manta | Aerodinâmica | corpo-asa largo arredondado, cauda, flaps de ponta |
+-| White Cat | Twin-Fork | Aerodinâmica | nariz bifurcado, barbatanas "orelha", bolha de cristal |
+-| Red Gazelle | Rocket | Aerodinâmica | corpo cilíndrico, aletas traseiras, motor único grande |
++| Blue Falcon | Dart | Aerodinâmica | agulha delta, entradas de ar, estabilizadores, linhas de painel |
++| Golden Fox | Needle | Aerodinâmica | agulha ultraleve, canards, quilha dorsal, linhas de painel |
++| Wild Goose | Ram | Robusta | proa de abate em losango, saias blindadas, anéis de bocal duplos |
++| Fire Stingray | Manta | Aerodinâmica | corpo-asa largo arredondado, cauda, flaps de ponta, entradas de ar |
++| White Cat | Twin-Fork | Aerodinâmica | nariz bifurcado, barbatanas "orelha", bolha de cristal, linhas de painel |
++| Red Gazelle | Rocket | Aerodinâmica | corpo cilíndrico, aletas traseiras, motor único grande, linhas de painel |
+ | Iron Tiger | Block | Robusta | lajes angulares escalonadas, gaiola de cabine, tríplice turbina |
+-| Deep Claw | Pincer | Agressiva | garras curvas biônicas de 2 segmentos, nadadeletas, espinhos |
++| Deep Claw | Pincer | Agressiva | garras curvas biônicas de 2 segmentos, nadadeletas, espinhos, entradas de ar |
+ | Black Bull | Brute | Robusta | casco largo, chifres dianteiros, escudos laterais, aletas diabo |
+ | Blood Hawk | Gull | Aerodinâmica | asas de gaivota (diédrico + varrimento), dentes, bico longo |
+ 
++### 3.2. Camada de polimento (todos os arquétipos)
++
++- **Linhas de painel** finas em acento ao longo das superfícies (detalhe mecânico).
++- **Entradas de ar** (vents) escuras no nariz e nas raízes das asas.
++- **Anéis de acento** nas juntas entre peças (separam visualmente os 4 módulos).
++- **Antenas** na cabine com ponta esférica.
++- **Turbinas** com anel de acento e pluma de glow aditivo (sprite).
++- **Materiais por peça** — cada módulo tem tratamento próprio (corpo / vidro / acento / metal escuro), garantindo leitura modular mesmo em silhuetas complexas.
++
+ ## 4. Parâmetros e Intervalos (sliders independentes)
+ 
+ | Parâmetro | Tipo / Range | Default (A) | Efeito |
+@@ -58,10 +80,11 @@ Cada nave é construída por um arquétipo próprio (agulha, prora, asa, garra e
+ | :--- | :--- |
+ | Orbitar / Zoom | Arrastar / roda do mouse |
+ | Direção visual | Botões A/B/C ou teclas <kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd> |
++| **Destacar peça (1-4)** | **Botões da seção "Peças" — isola Nariz/Cabine/Asas/Motores** |
+ | Vitrine ↔ Galeria (10 naves lado a lado) | Botões ou <kbd>V</kbd> |
+ | Rotação automática (turntable) | Botão ou <kbd>R</kbd> |
+ | Variação aleatória de silhueta | Botão "Embaralhar Silhueta" |
+-| Selecionar nave | Botões da seção 2 (na galeria, a câmera enquadra a nave escolhida) |
++| Selecionar nave | Botões da seção 3 (na galeria, a câmera enquadra a nave escolhida) |
+ 
+ A nave flutua suavemente (bob vertical) e gira em turntable; a galeria mostra as 10 silhuetas em 2 fileiras × 5 para comparação direta de variedade.
+ 
