@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070b17">
+<title>G-MINUS / 01 — Pilotagem V5.1 — 3 Perfis, Inclinação Dinâmica e Combate</title>
+<style>
+:root{color-scheme:dark;--bg:#060912;--pane:#10182a;--line:#263957;--ink:#ecf5ff;--soft:#9baac1;--cyan:#48e8f5;--pink:#ff4e91;--gold:#ffca65;--green:#65f4b2;--red:#ff6478}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font:14px/1.48 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}h1,h2,h3,p{margin:0}small{color:var(--soft)}.app{display:grid;grid-template-columns:minmax(0,1fr) 366px;grid-template-rows:auto minmax(0,1fr);height:100dvh;min-height:570px}.top{grid-column:1/-1;min-height:65px;background:#090f1c;border-bottom:1px solid #223250;display:flex;align-items:center;justify-content:space-between;padding:10px 22px;gap:14px}.logo{display:flex;align-items:center;gap:15px}.emblem{width:36px;height:36px;transform:skew(-13deg);display:grid;place-items:center;background:linear-gradient(135deg,#28e5e9,#5475ff);font-weight:1000;color:#05101d;box-shadow:6px 6px 0 #1f344e}.overline{font-size:10px;color:var(--cyan);font-weight:850;letter-spacing:.22em}.top h1{font-size:19px;letter-spacing:.075em;line-height:1.15}.top h1 span{font-weight:350;color:#91a7c5}.top-note{font-size:11px;color:#c6d6e7;max-width:390px}.action-row{display:flex;gap:7px;flex-wrap:wrap}.button{padding:9px 13px;background:#162239;border:1px solid #355072;color:#f1f9ff;border-radius:6px;font-size:11px;font-weight:750;letter-spacing:.04em;white-space:nowrap;transition:background .12s,border-color .12s}.button:hover{background:#1d3250;border-color:var(--cyan)}.button.primary{background:var(--cyan);color:#021018;border-color:var(--cyan)}.button.danger{border-color:#70344e;color:#ff94b0}.stage{position:relative;min-width:0;overflow:hidden;background:#071023}#view{display:block;width:100%;height:100%;touch-action:none}.stage:after{content:"";pointer-events:none;position:absolute;inset:0;background:linear-gradient(180deg,rgba(4,9,17,.4),transparent 30%,transparent 74%,rgba(4,8,18,.7))}.hud{pointer-events:none;position:absolute;z-index:2}.hud-left{left:24px;top:22px;display:grid;gap:12px}.hud-card{background:linear-gradient(110deg,rgba(6,13,29,.91),rgba(8,15,31,.67));backdrop-filter:blur(8px);border:1px solid #2a4263;border-left:3px solid var(--cyan);padding:12px 16px;min-width:205px;box-shadow:0 12px 32px #0004}.hud-card.warn{border-left-color:var(--pink)}.eyebrow{font-size:10px;font-weight:800;color:#a0bad2;letter-spacing:.13em}.speed-num{font-size:54px;line-height:1.1;font-weight:950;letter-spacing:-.06em;font-variant-numeric:tabular-nums}.speed-num small{font-size:11px;letter-spacing:.09em;margin-left:7px}.bar{height:6px;overflow:hidden;border-radius:3px;background:#19283d;margin:9px 0 6px}.bar>b{height:100%;display:block;width:100%;background:linear-gradient(90deg,#ff596f,#ffb85e,#72ffc2)}.readout{display:flex;gap:18px;margin-top:7px}.readout>div{min-width:65px}.readout strong{display:block;font-size:18px;font-variant-numeric:tabular-nums}.hud-right{right:22px;top:22px;text-align:right;text-shadow:0 1px 8px #000}.hud-right strong{display:block;font-size:29px;line-height:1.05;letter-spacing:.05em}.hud-right small{font-size:11px}.hud-bottom{left:24px;right:24px;bottom:22px;display:flex;justify-content:space-between;gap:20px;align-items:flex-end}.controls{padding:12px 15px;background:#07101fda;border:1px solid #233855;border-radius:8px;max-width:670px;font-size:11px;color:#c3d4e5;line-height:2.1}.controls kbd{display:inline-block;border:1px solid #4b637e;border-bottom-width:2px;border-radius:4px;padding:0 5px;color:#fff;font:800 10px/1.7 monospace;background:#15233a}.diagnostics{border:1px solid #2d4763;background:#07101fe6;border-radius:7px;padding:10px 12px;min-width:163px;text-align:right;font:11px/1.7 ui-monospace,monospace;color:#a5c5d7}.diagnostics b{color:var(--green)}.toast{position:absolute;top:22px;left:50%;transform:translateX(-50%);z-index:6;background:#d3faff;color:#071421;border-radius:30px;padding:8px 17px;font-size:12px;font-weight:800;opacity:0;transition:opacity .15s;pointer-events:none;max-width:80%;text-align:center}.toast.show{opacity:1}.side{overflow:auto;background:#0e1525;border-left:1px solid #2b3b55;padding:20px 20px 35px;scrollbar-color:#354c65 #0e1525}.side-head{margin-bottom:20px}.side-head h2{font-size:16px;letter-spacing:.035em}.side-head p{font-size:11px;color:#a6b7cd;margin-top:5px}.section{border-top:1px solid #273955;padding-top:16px;margin-top:17px}.section h3{display:flex;justify-content:space-between;margin-bottom:12px;font-size:11px;letter-spacing:.11em;color:#76e9f3;text-transform:uppercase}.section h3 span{color:#647d99}.tabgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.tabgrid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.pick{min-width:0;padding:10px 7px;border:1px solid #32435e;color:#aebbd0;border-radius:5px;background:#141f32;font-size:11px;font-weight:700}.pick.active{background:#153746;border-color:#52e5f3;color:#f0ffff;box-shadow:inset 0 0 0 1px #257184}.pick:hover{border-color:#78cae5}.profile{display:block;width:100%;text-align:left;background:#111c2c;color:#cbdcec;border:1px solid #2c415b;border-radius:6px;padding:12px 13px;margin-bottom:7px}.profile strong{display:flex;justify-content:space-between;gap:6px;font-size:12px}.profile em{font:800 11px ui-monospace,monospace;color:#90b2cc}.profile small{display:block;margin-top:4px;line-height:1.5}.profile.active{border-color:var(--cyan);background:#133041}.profile.active em{color:var(--cyan)}.param{margin-top:13px}.param>label{display:flex;justify-content:space-between;gap:10px;color:#cdd9e8;font-size:11px;font-weight:650}.param output{color:var(--cyan);font:800 11px ui-monospace,monospace;white-space:nowrap}.param input[type=range]{display:block;width:100%;accent-color:#42e6ed;margin:10px 0 0}.switch{display:flex;gap:13px;align-items:flex-start;justify-content:space-between;margin:10px 0}.switch span{font-size:12px;font-weight:700}.switch small{display:block;font-weight:400;font-size:10px;line-height:1.55;margin-top:3px}.switch input{accent-color:var(--cyan);width:17px;height:17px;cursor:pointer;flex-shrink:0}.fieldset{display:grid;gap:9px}.fieldset label{display:grid;gap:4px;font-size:11px;color:#bfcfe0}.fieldset select{background:#142238;color:#e9f6fc;border:1px solid #354d6a;border-radius:5px;padding:9px 10px;width:100%}.compact{display:grid;grid-template-columns:1fr 1fr;gap:8px}.json{display:block;resize:vertical;width:100%;min-height:105px;padding:10px;border:1px solid #314c65;background:#070e1a;color:#aee4ec;border-radius:6px;font:11px/1.55 ui-monospace,monospace;user-select:text}.note{margin-top:9px;font-size:11px;color:#8eabc2}.chip{display:inline-block;border:1px solid #50728e;color:#cceaff;font:800 10px ui-monospace,monospace;border-radius:3px;padding:3px 5px}.status{font-size:11px;color:#adc3d7;margin-top:9px;min-height:15px}.status.error{color:#ff8c99}@media(max-width:1080px){.app{grid-template-columns:minmax(0,1fr) 322px}.hud-card{min-width:170px}.controls{max-width:475px}.speed-num{font-size:43px}}@media(max-width:780px){.app{height:auto;min-height:100vh;display:flex;flex-direction:column}.top{flex-wrap:wrap}.top-note{display:none}.stage{height:70vh;min-height:500px}.side{overflow:visible}.hud-bottom{bottom:11px;left:10px;right:10px}.hud-left{left:11px;top:10px}.hud-card{padding:8px 11px;min-width:150px}.hud-right{right:12px;top:10px}.controls{font-size:10px;line-height:1.75}.diagnostics{display:none}.hud-left .hud-card.warn{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top"><div class="logo"><div class="emblem">G−</div><div><div class="overline">EXPERIMENTAL / BUILD 01V5.1 · CONTROLES PRESERVADOS</div><h1>G-MINUS <span>/ FLIGHT & COMBAT LAB</span></h1></div></div><div class="top-note">Núcleo experimental • pilotagem livre, suspensão e combate • avaliação pendente</div><div class="action-row"><button id="pause" class="button">Ⅱ PAUSAR</button><button id="reset" class="button">↺ REINICIAR</button><button id="audio" class="button">♫ ÁUDIO OFF</button></div></header>
+<main class="stage"><canvas id="view" aria-label="Laboratório de corrida em perspectiva 3D com direção manual"></canvas>
+<div class="hud hud-left"><div class="hud-card"><div class="eyebrow">VELOCIDADE / TELEMETRIA</div><div class="speed-num"><span id="speed">0</span><small>KM/H</small></div><div class="eyebrow" style="display:flex;justify-content:space-between;margin-top:9px"><span>ESCUDO / ENERGIA</span><span id="shield-text">100%</span></div><div class="bar"><b id="shield-bar"></b></div><div class="eyebrow" id="handling" style="color:var(--green)">TRAÇÃO NOMINAL</div><div class="eyebrow" id="drift-state" style="margin-top:5px;color:var(--cyan)">DRIFT · ESPAÇO+SETA OU Q+E+SETA</div></div><div class="hud-card warn"><div class="eyebrow">ORIENTAÇÃO & CONTATO</div><div class="readout"><div><div class="eyebrow">SLIP</div><strong id="slip">0°</strong></div><div><div class="eyebrow">DESVIO</div><strong id="offset">0m</strong></div><div><div class="eyebrow">K.O.</div><strong id="kills">0</strong></div></div></div></div>
+<div class="hud hud-right"><div class="eyebrow">CIRCUITO / TESTE</div><strong id="track-name">NEO CIRCUIT</strong><small id="lap">VOLTA 1 · 0:00.00</small><div class="eyebrow" style="margin-top:7px" id="position">POSIÇÃO 1/8</div><div class="eyebrow" id="nearest-rival" style="color:var(--cyan);margin-top:3px">RIVAL MAIS PRÓXIMO —</div><div class="eyebrow" style="margin-top:12px" id="assist-indicator">ASSISTÊNCIA DE TRAJETÓRIA: OFF</div></div>
+<div class="hud hud-bottom"><div class="controls"><div><b style="color:#72eeec">COMANDOS ORIGINAIS RESTAURADOS</b> · <kbd>X</kbd> acelerar · <kbd>←</kbd>/<kbd>→</kbd> esterçar · <kbd>ESPAÇO</kbd> freio/drift</div><div><kbd>Z</kbd>/<kbd>C</kbd> strafe/tilt · <kbd>Z</kbd>×2/<kbd>C</kbd>×2 ataque lateral · <kbd>Z+C</kbd> ou <kbd>SHIFT</kbd> spin</div><div><kbd>A</kbd> BOOST · <kbd>Q</kbd>/<kbd>E</kbd> airbrakes · <kbd>V</kbd> câmera · <kbd>P</kbd> pausa · <kbd>R</kbd> reset · W/S/↑/↓ auxiliares</div></div><div class="diagnostics">SIM <b>120 Hz</b><br>FPS <b id="fps">–</b><br>INPUT→SIM <b id="input-latency">– ms</b><br>GRADE <b id="grade">7 IA</b></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div></main>
+<aside class="side"><div class="side-head"><div class="overline">01 // CALIBRATION SUITE</div><h2>Pilotagem, antigravidade e combate</h2><p>Direção livre, hover spring, curvas GX-inspiradas e armas físicas. Referência experimental; sem integração ao jogo principal.</p></div>
+<section class="section"><h3>01 / Perfil de direção <span>3 alternativas</span></h3><button class="profile active" data-profile="A"><strong>A — Direto / Preciso <em>RESPOSTA IMEDIATA</em></strong><small>Yaw orientado ao comando, resposta angular imediata e aderência elevada.</small></button><button class="profile" data-profile="B"><strong>B — Progressivo <em>RAMPA AJUSTÁVEL</em></strong><small>Entrada angular filtrada, direção mais gradual e microcorreções suaves.</small></button><button class="profile" data-profile="C"><strong>C — Inercial / Drift <em>CONTRAESTERÇO</em></strong><small>Maior slip, transferência de momento, exigindo contraesterço em curvas.</small></button><div id="parameters"></div></section>
+<section class="section"><h3>02 / Assistências <span>independentes</span></h3><label class="switch"><span>Assistência de trajetória <small>Corrige o ângulo em direção à pista. <b>Desligada por padrão:</b> sem dirigir por você.</small></span><input id="track-assist" type="checkbox"></label><div class="param" id="assist-strength-param"><label for="assist-strength">Força de assistência <output id="assist-strength-out">35%</output></label><input id="assist-strength" type="range" min="0" max="100" value="35"></div><label class="switch"><span>Estabilização física natural <small>Reduz yaw residual quando solta a seta; <b>não</b> acompanha curvas.</small></span><input id="natural-stability" type="checkbox" checked></label><label class="switch"><span>Barreiras de segurança <small>Ricochete e dano ao bater; sem correção automática de direção.</small></span><input id="barriers" type="checkbox" checked></label><label class="switch"><span>Regeneração passiva <small>Ensaio opcional; regra final ainda não definida no GDD.</small></span><input id="regeneration" type="checkbox"></label></section>
+<section class="section"><h3>03 / Cenário & câmera <span>estudos visuais</span></h3><div class="eyebrow" style="margin-bottom:8px">CENÁRIO (REFERÊNCIA VISUAL 03)</div><div class="tabgrid"><button class="pick active" data-visual="A">NEON<br>CANYON</button><button class="pick" data-visual="B">SKYLINE<br>CIRCUIT</button><button class="pick" data-visual="C">INDUSTRIAL<br>MIDNIGHT</button></div><div class="eyebrow" style="margin:14px 0 8px">TRAÇADO EXPERIMENTAL</div><div class="tabgrid"><button class="pick active" data-track="circuit">CIRCUITO</button><button class="pick" data-track="straight">RETA</button><button class="pick" data-track="elevated">ELEVADA</button></div><div class="eyebrow" style="margin:14px 0 8px">CÂMERA</div><div class="tabgrid"><button class="pick active" data-camera="chase">CHASE</button><button class="pick" data-camera="cockpit">POV</button><button class="pick" data-camera="orbit">ÓRBITA</button></div></section>
+<section class="section"><h3>04 / Máquinas & rivais <span>testes</span></h3><div class="fieldset"><label>Nave / silhueta experimental<select id="machine"></select></label></div><div class="param"><label for="ai-count">Rivais de IA <output id="ai-count-out">7</output></label><input id="ai-count" type="range" min="0" max="29" step="1" value="7"></div><label class="switch"><span>Exibir hitboxes <small>Volumes orientados e pontos de contato no mundo.</small></span><input id="debug-hitboxes" type="checkbox"></label><label class="switch"><span>Visualizar física de suspensão <small>Indicadores de flutuação, pitch, roll e deslocamento lateral.</small></span><input id="debug-hover" type="checkbox"></label><div style="margin-top:14px"><button class="button" id="spawn">SPAWN RIVAL</button></div></section>
+<section class="section" id="input-contract"><h3>Controles preservados <span>original 01</span></h3><p class="note" style="margin-top:0"><b>Z / C</b> pressionados: deslocamento lateral com inclinação. <b>Dois toques rápidos na mesma tecla</b>: ataque lateral. <b>Z+C</b> ou <b>Shift</b>: ataque giratório visível. <b>Espaço</b>: freio, ou drift com a seta de curva. <b>A</b>: boost. <b>Q/E</b>: freios aerodinâmicos; Q+E com direção: drift experimental. Esses atalhos preservam o comportamento original; as sobreposições de comandos divergentes no documento técnico permanecem registradas no relatório.</p></section>
+<section class="section"><h3>05 / Tempo & testes <span>120 Hz</span></h3><div class="param"><label for="time-scale">Velocidade da simulação <output id="time-scale-out">1.0×</output></label><input id="time-scale" type="range" min="0.1" max="2" step="0.1" value="1"></div><div class="compact" style="margin-top:12px"><button class="button" id="boost-button">ATIVAR BOOST [A]</button><button class="button" id="spin-button">SPIN ATTACK [SHIFT]</button><button class="button" id="side-left">← SIDE ATTACK [Z×2]</button><button class="button" id="side-right">SIDE ATTACK [C×2] →</button></div><div class="note">Telemetry INPUT→SIM mede somente a fila do navegador até o próximo passo físico. Não mede atraso de dispositivo, monitor ou sistema operacional.</div></section>
+<section class="section"><h3>06 / Configuração JSON <span>compatível V5</span></h3><textarea class="json" id="json" spellcheck="false" aria-label="Configuração JSON exportável"></textarea><div class="compact" style="margin-top:9px"><button class="button" id="export">GERAR / COPIAR</button><button class="button primary" id="import">APLICAR JSON</button></div><p class="status" id="status">Perfis A/B/C armazenam sliders independentes. Importação atômica.</p><p class="note">É um laboratório exploratório: combate, valores de física, silhuetas e visuais não representam aprovação dos protótipos 02–04.</p></section>
+</aside></div>
+<script>
+'use strict';
+// G-MINUS // Steering Lab 01R. Independent single-file Canvas 2D projection of a 3D world.
+// Design invariant: player world-space x/z/yaw are never assigned from the track curve.
+// Track tangent is ONLY used for spawning, contact/hover reference and optional assistance.
+(() => {
+const $ = id => document.getElementById(id);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const wrapAngle=a=>Math.atan2(Math.sin(a),Math.cos(a));
+const expDecay=(k,dt)=>1-Math.exp(-k*dt);
+const len=(x,z)=>Math.hypot(x,z);
+const COLORS={A:{sky:'#090b20',floor:'#091324',fog:'#1e3760',lane:'#182841',line:'#49e8f3',alt:'#ff4caa',building:'#111b34',win:'#47f0e1'},B:{sky:'#0e1c35',floor:'#102035',fog:'#4c88a5',lane:'#233c59',line:'#7ee8ff',alt:'#7b7dff',building:'#243d60',win:'#9de5ff'},C:{sky:'#110b14',floor:'#170f1c',fog:'#5d2d3c',lane:'#302334',line:'#ffb361',alt:'#ff4766',building:'#261e2b',win:'#ff9c5d'}};
+const MACHINES=[['falcon','Blue Falcon','#266aff','#48e6fb','fighter'],['fox','Golden Fox','#f5b637','#fff38e','sleek'],['goose','Wild Goose','#37ac67','#afff7b','heavy'],['stingray','Fire Stingray','#f04b57','#ffca72','manta'],['white_cat','White Cat','#d8edf7','#77eeff','sleek'],['red_gazelle','Red Gazelle','#de364c','#ff8d80','fighter'],['iron_tiger','Iron Tiger','#e9892b','#ffe28a','heavy'],['deep_claw','Deep Claw','#8551db','#ee7ffa','fighter'],['black_bull','Black Bull','#424553','#f9507d','heavy'],['blood_hawk','Blood Hawk','#9a263a','#ff5466','manta']];
+const LIMITS={steerRate:[20,120,1,'Taxa de esterço','°/s base'],progressivity:[1,3.5,.1,'Progressividade','×'],inertia:[5,80,1,'Inércia de massa','u'],grip:[30,100,1,'Aderência','%'],recenter:[1,25,.5,'Estabilização de orientação','u'],speedInstability:[0,1,.05,'Instabilidade com velocidade','×'],sideAttackForce:[80,350,5,'Impulso side-attack','u']};
+const DEFAULTS={A:{steerRate:65,progressivity:1,inertia:18,grip:92,recenter:14,speedInstability:.15,sideAttackForce:190},B:{steerRate:52,progressivity:2.2,inertia:28,grip:85,recenter:9,speedInstability:.3,sideAttackForce:170},C:{steerRate:75,progressivity:1.4,inertia:55,grip:68,recenter:4.5,speedInstability:.6,sideAttackForce:220}};
+const state={configName:null,profile:'A',profiles:structuredClone(DEFAULTS),visual:'A',track:'circuit',camera:'chase',machine:'falcon',aiCount:7,timeScale:1,assist:false,assistStrength:35,naturalStability:true,barriers:true,regeneration:false,debugHitboxes:false,debugHover:false,paused:false,muted:true};
+const canvas=$('view'),ctx=canvas.getContext('2d',{alpha:false});
+let W=1,H=1,DPR=1,sceneTrack=[],trackLength=1,segments=[],buildings=[],pads=[],rivals=[],particles=[],fps=0,renderCount=0,fpsElapsed=0,frameTime=performance.now(),accumulator=0,simTime=0,raceTime=0,lap=1,kills=0,player,crashCooldown=0,noticeUntil=0,seed=2409,lastLatency=0,cam={},audioCtx=null,engineOsc=null,engineGain=null,trackIndex=0;
+const held=new Set(),edges=[],keys={};const KEYMAP=new Set(['KeyW','KeyX','ArrowUp','KeyS','ArrowDown','KeyA','ArrowLeft','ArrowRight','KeyQ','KeyE','KeyZ','KeyC','KeyF','KeyB','Space','ShiftLeft','ShiftRight','KeyV','KeyR','KeyP']);
+let lastZ=-1000,lastC=-1000,attackId=0,pulseSteer=0,pulseThrottle=false;
+let tapStrafeRemaining=0,tapStrafeDir=0,lastInputAction="nenhuma";
+let tapSteerDir=0,tapSteerRemaining=0,tapThrottleRemaining=0,wallContacts=0;
+let wallEngaged=false,impactCount=0,rivalContacts=0,steerInputSince=-1,hitFlash=0,shake=0;
+let latestInput={steer:0,slide:0,drift:false,throttle:false,brake:false};
+const TWO_PI=2*Math.PI;const rivalPairContact=new Set();
+
+function rand(){seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;}
+function notice(message){$('toast').textContent=message;$('toast').classList.add('show');noticeUntil=performance.now()+2000;}
+function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
+function setTabs(name,val){document.querySelectorAll(`[data-${name}]`).forEach(b=>b.classList.toggle('active',b.dataset[name]===val));}
+function setProfile(key){state.profile=key;setTabs('profile',key);const root=$('parameters');root.replaceChildren();for(const [name,[min,max,step,label,unit]] of Object.entries(LIMITS)){
+const wrap=document.createElement('div');wrap.className='param';const head=document.createElement('label'),output=document.createElement('output');output.textContent=fmtParam(name,state.profiles[key][name]);const slider=document.createElement('input');slider.type='range';slider.min=min;slider.max=max;slider.step=step;slider.value=state.profiles[key][name];slider.id='param-'+name;head.htmlFor=slider.id;head.textContent=label;head.append(output);wrap.append(head,slider);root.append(wrap);slider.addEventListener('input',()=>{state.profiles[key][name]=Number(slider.value);output.textContent=fmtParam(name,Number(slider.value));});}
+notice('Perfil '+key+' — configuração independente');}
+function fmtParam(name,v){return name==='grip'?v+'%':Number(v).toFixed(['progressivity','recenter','speedInstability'].includes(name)?2:0);}
+// Sampled 3D ribbon, for display, nearest-surface collision and AI reference only.
+function buildTrack(){seed=2409;sceneTrack=[];segments=[];buildings=[];pads=[];const count=state.track==='straight'?135:192;const closed=state.track!=='straight';let lengthTotal=0;
+for(let i=0;i<=count;i++){const u=i/count,theta=u*Math.PI*2;let x,z,y;
+if(state.track==='straight'){x=0;z=2400*u;y=5;}
+else if(state.track==='elevated'){x=220*(1-Math.cos(theta));z=420*Math.sin(theta);y=38+24*Math.sin(2*theta)+12*Math.cos(theta);}
+else{x=285*(1-Math.cos(theta))+22*(1-Math.cos(3*theta));z=440*Math.sin(theta)+25*Math.sin(3*theta);y=7+14*Math.sin(theta*2)+3*Math.sin(theta*4);}
+// Wide-to-narrow sections blend continuously; every subsystem reads this same width.
+ const width=state.track==='straight'
+  ?74+17*Math.sin(theta*1.6-.5)+9*Math.sin(theta*3.5+.8)
+  :state.track==='elevated'
+   ?70+15*Math.sin(theta*2+.55)+8*Math.sin(theta*4-.2)
+   :82+18*Math.sin(theta*2+.9)+10*Math.sin(theta*4-.4);
+ sceneTrack.push({x,z,y,u,w:clamp(width,48,114)});}
+for(let i=0;i<count;i++){const a=sceneTrack[i],b=sceneTrack[i+1],dx=b.x-a.x,dz=b.z-a.z,L=Math.hypot(dx,dz);const rightX=dz/L,rightZ=-dx/L;segments.push({a,b,dx,dz,L,L2:dx*dx+dz*dz,rx:rightX,rz:rightZ,d: lengthTotal});lengthTotal+=L;}
+trackLength=lengthTotal;for(let i=0;i<segments.length;i++)segments[i].dEnd=segments[i].d+segments[i].L;
+for(const u of [.085,.27,.50,.72,.89])pads.push({u,offset:0,hit:false});
+for(let i=0;i<(state.visual==='A'?90:state.visual==='B'?55:65);i++){const t=rand(),base=sampleTrack(t),sign=rand()<.5?-1:1,side=sign*(base.w*.5+58+rand()*330),h=state.visual==='B'?55+rand()*160:state.visual==='C'?45+rand()*200:65+rand()*290;buildings.push({x:base.x+base.rx*side+(rand()-.5)*80,z:base.z+base.rz*side+(rand()-.5)*80,y:base.y,h,w:14+rand()*36,d:14+rand()*34,windows:rand()>.15});}
+resetSimulation(false);
+}
+function sampleTrack(u){const t=clamp(u,0,1)*segments.length,index=Math.min(segments.length-1,Math.floor(t)),seg=segments[index],f=t-index;return{x:seg.a.x+seg.dx*f,z:seg.a.z+seg.dz*f,y:seg.a.y+(seg.b.y-seg.a.y)*f,rx:seg.rx,rz:seg.rz,yaw:Math.atan2(seg.dx,seg.dz),w:seg.a.w+(seg.b.w-seg.a.w)*f,u:(index+f)/segments.length};}
+function distanceAtU(u){const q=clamp(u,0,.999999)*segments.length,i=Math.floor(q),f=q-i;return segments[i].d+segments[i].L*f;}
+function sampleTrackDistance(distance){let d=distance;if(state.track==='straight')d=clamp(d,0,trackLength);else d=((d%trackLength)+trackLength)%trackLength;
+ let low=0,high=segments.length-1;while(low<high){const mid=(low+high)>>1;if(segments[mid].dEnd<d)low=mid+1;else high=mid;}
+ const seg=segments[low],f=clamp((d-seg.d)/seg.L,0,1);return{x:seg.a.x+seg.dx*f,z:seg.a.z+seg.dz*f,y:seg.a.y+(seg.b.y-seg.a.y)*f,rx:seg.rx,rz:seg.rz,yaw:Math.atan2(seg.dx,seg.dz),w:seg.a.w+(seg.b.w-seg.a.w)*f,u:(low+f)/segments.length};}
+function nearestTrack(x,z){let best=null,min=Infinity;
+// Reusing previous hit avoids most segment comparisons on long tracks without changing correctness.
+for(let i=0;i<segments.length;i++){const s=segments[i],dx=x-s.a.x,dz=z-s.a.z,f=clamp((dx*s.dx+dz*s.dz)/s.L2,0,1),px=s.a.x+f*s.dx,pz=s.a.z+f*s.dz,d2=(x-px)**2+(z-pz)**2;if(d2<min){min=d2;best={x:px,z:pz,y:s.a.y+(s.b.y-s.a.y)*f,rx:s.rx,rz:s.rz,yaw:Math.atan2(s.dx,s.dz),offset:(x-px)*s.rx+(z-pz)*s.rz,dist:Math.sqrt(d2),width:s.a.w+(s.b.w-s.a.w)*f,u:(i+f)/segments.length,along:s.d+f*s.L,index:i};}}return best;}
+function spawnAI(){
+ rivalPairContact.clear();rivals=[];
+ for(let i=0;i<state.aiCount;i++){
+  const a={id:i,model:MACHINES[(i+1)%MACHINES.length][0],u:(.012+i*.015)%1,
+   offset:((i%5)-2)*3.5,lane:((i%5)-2)*3.5,laps:0,personality:['aggressive','defensive','technical','opportunist'][i%4],nemesis:i===0,speed:90+rand()*35,shield:100,
+   dead:0,ko:false,cooldown:0,attackCooldown:2+rand()*3,hitBy:-1,contactActive:false,
+   lateralVel:0,hitVX:0,hitVZ:0,impX:0,impZ:0,distance:0,x:0,z:0,y:0,yaw:0,
+   roll:0,pitch:0,visualYaw:0,hitSpin:0,sideTime:0,sideDir:0,spin:0,spinAngle:0};
+  a.distance=distanceAtU(a.u);rivals.push(a);
+ }
+ updateAITransforms();$('grade').textContent=rivals.length+' IA';
+}
+function updateAITransforms(){
+ for(const a of rivals){
+  if(a.ko)continue;
+  const t=sampleTrackDistance(a.distance);a.u=t.u;
+  a.x=t.x+a.offset*t.rx+a.impX;a.z=t.z+a.offset*t.rz+a.impZ;
+  a.groundY=t.y;a.y=t.y+1.55;a.yaw=t.yaw;
+ }
+}
+function resetSimulation(alert=true){
+ simTime=0;raceTime=0;lap=1;kills=0;crashCooldown=0;attackId=0;seed=2409;
+ particles.length=0;held.clear();edges.length=0;lastZ=lastC=-1000;pulseSteer=0;pulseThrottle=false;
+ tapSteerDir=tapStrafeDir=0;tapSteerRemaining=tapThrottleRemaining=tapStrafeRemaining=0;wallEngaged=false;wallContacts=0;
+ impactCount=rivalContacts=0;steerInputSince=-1;hitFlash=0;shake=0;lastInputAction='reset';rivalPairContact.clear();
+ const point=sampleTrack(.004);
+ player={x:point.x,z:point.z,y:point.y+2.2,yaw:point.yaw,yawRate:0,
+  speed:42,vx:Math.sin(point.yaw)*42,vz:Math.cos(point.yaw)*42,
+  slip:0,drift:false,slide:false,driftAngle:0,driftTime:0,roll:0,pitch:0,visualYaw:0,
+  steerFiltered:0,verticalVelocity:0,hoverError:0,hoverPhase:0,fallen:false,
+  shield:100,boost:0,sideTime:0,sideDuration:0.34,sideDir:0,spin:0,
+  spinAngle:0,spinElapsed:0,spinDuration:0.63,hitIds:new Set(),lapDistance:0,
+  prevU:.004,closest:nearestTrack(point.x,point.z),onTrack:true,offTime:0,padCooldown:0,shake:0};
+ spawnAI();const f={x:Math.sin(player.yaw),z:Math.cos(player.yaw)};
+ cam={x:player.x-f.x*18,z:player.z-f.z*18,y:player.y+8,
+   fx:player.x+f.x*30,fz:player.z+f.z*30,fy:player.y+1,
+   forward:{x:0,y:0,z:1},right:{x:1,z:0},up:{x:0,y:1,z:0}};
+ if(alert)notice('Ensaio reiniciado');updateHUD();
+}
+function createAudio(){if(state.muted||audioCtx)return;try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();engineOsc=audioCtx.createOscillator();engineGain=audioCtx.createGain();const filt=audioCtx.createBiquadFilter();filt.type='lowpass';filt.frequency.value=550;engineOsc.type='sawtooth';engineOsc.connect(filt);filt.connect(engineGain);engineGain.connect(audioCtx.destination);engineGain.gain.value=0;engineOsc.start();}catch(e){state.muted=true;status('Web Audio indisponível',true);}}
+function sound(freq=220,duration=.12,wave='sawtooth',volume=.07){if(state.muted)return;createAudio();if(!audioCtx)return;const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=wave;o.frequency.setValueAtTime(freq,audioCtx.currentTime);o.frequency.exponentialRampToValueAtTime(Math.max(32,freq*.52),audioCtx.currentTime+duration);g.gain.setValueAtTime(volume,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration+.01);}
+function blurInputs(){held.clear();edges.length=0;tapSteerDir=tapStrafeDir=0;tapSteerRemaining=tapThrottleRemaining=tapStrafeRemaining=0;steerInputSince=-1;}
+// Release gameplay focus after pointer-adjusting a range input.
+// Otherwise ignoreKeys() suppresses steering until the user clicks outside the sidebar.
+document.addEventListener('pointerup',()=>{const focused=document.activeElement;if(focused?.tagName==='INPUT'&&focused.type==='range')focused.blur();});
+window.addEventListener('blur',blurInputs);document.addEventListener('visibilitychange',()=>{if(document.hidden){blurInputs();accumulator=0;}});
+const ignoreKeys=code=>{const a=document.activeElement;return a?.tagName==='TEXTAREA'||a?.tagName==='SELECT'||a?.isContentEditable||(a?.tagName==='INPUT'&&(['text','search','number','password'].includes(a.type)));};
+window.addEventListener('keydown',event=>{if(ignoreKeys(event.code))return;if(KEYMAP.has(event.code))event.preventDefault();if(event.repeat||held.has(event.code))return;held.add(event.code);edges.push({code:event.code,stamp:performance.now()});if(!state.muted)createAudio();},{passive:false});
+window.addEventListener('keyup',event=>{held.delete(event.code);if(KEYMAP.has(event.code))event.preventDefault();},{passive:false});
+// Edge queue prevents short taps disappearing when keydown+keyup occur between frames.
+function consumeEdges(){
+ pulseSteer=0;pulseThrottle=false;
+ const pending=edges.splice(0);
+ for(const e of pending){
+  lastLatency=clamp(performance.now()-e.stamp,0,999);const k=e.code;
+  if(['ArrowLeft','ArrowRight'].includes(k)){
+   pulseSteer=k==='ArrowLeft'?-1:1;
+   if(!held.has(k)){tapSteerDir=pulseSteer;tapSteerRemaining=Math.max(tapSteerRemaining,.055);}
+  }
+  if(['KeyX','KeyW','ArrowUp'].includes(k)&&!held.has(k))tapThrottleRemaining=Math.max(tapThrottleRemaining,.05);
+  if(k==='KeyP'){togglePause();continue;}
+  if(k==='KeyR'){resetSimulation();continue;}
+  if(k==='KeyV'){setCamera(['chase','cockpit','orbit'][(1+['chase','cockpit','orbit'].indexOf(state.camera))%3]);continue;}
+  if(state.paused)continue;
+  // Original baseline (2026-10-09 supplied HTML): Z/C steer-side while held,
+  // double-tap the SAME side within 280 ms to attack; hold both or Shift to spin.
+  // Distinct Q/E remain independent airbrakes; no steering key has been reassigned.
+  if(k==='KeyZ'||k==='KeyC'){
+   const dir=k==='KeyZ'?-1:1;
+   const other=dir<0?'KeyC':'KeyZ';
+   if(held.has(other)){spinAttack();lastInputAction='spin (Z+C)';lastZ=lastC=-1000;continue;}
+   const last=dir<0?lastZ:lastC;
+   if(e.stamp-last>0&&e.stamp-last<280){sideAttack(dir);lastInputAction='ataque duplo '+(dir<0?'Z':'C');
+    if(dir<0)lastZ=-1000;else lastC=-1000;
+   }else{
+    lastInputAction='strafe '+(dir<0?'Z':'C');
+    if(dir<0)lastZ=e.stamp;else lastC=e.stamp;
+    if(!held.has(k)){tapStrafeDir=dir;tapStrafeRemaining=Math.max(tapStrafeRemaining,.07);}
+   }
+   continue;
+  }
+  if(k==='ShiftLeft'||k==='ShiftRight'){spinAttack();lastInputAction='spin Shift';continue;}
+  if(k==='KeyA'||k==='KeyB'){boost();lastInputAction='boost A';continue;}
+  if(k==='KeyF'){
+   const steer=Number(held.has('ArrowRight'))-Number(held.has('ArrowLeft'));
+   sideAttack(steer||1);lastInputAction='ataque auxiliar F';continue;
+  }
+
+ }
+}
+function boost(){if(player.boost>0||player.shield<16||state.paused)return;player.boost=2.4;player.shield-=14;{const delta=Math.max(0,190-player.speed);player.vx+=Math.sin(player.yaw)*delta;player.vz+=Math.cos(player.yaw)*delta;player.speed=Math.hypot(player.vx,player.vz);}sound(380,.32,'sine',.12);emit(player.x,player.y,player.z,22,'#ffbd65');notice('BOOST / ESCUDO −14');}
+function sideAttack(dir){
+ if(player.sideTime>0||player.spin>0||state.paused||player.fallen)return;
+ player.sideTime=player.sideDuration=.46;player.sideDir=dir;
+ // Short, physically integrated lateral tackle. The hull banks and lunges visibly.
+ const impulse=state.profiles[state.profile].sideAttackForce*.29;
+ player.vx+=Math.cos(player.yaw)*dir*impulse;
+ player.vz-=Math.sin(player.yaw)*dir*impulse;
+ player.slip+=dir*impulse;player.shield=Math.max(0,player.shield-3);
+ player.hitIds.clear();attackId++;shake=Math.max(shake,.42);
+ emit(player.x,player.y,player.z,18,'#ff568f');sound(165,.18,'sawtooth');
+}
+function spinAttack(){
+ if(player.spin>0||state.paused||player.fallen)return;
+ player.shield=Math.max(0,player.shield-6);
+ player.sideTime=0;player.spin=player.spinDuration=.66;player.spinElapsed=0;player.spinAngle=0;
+ player.hitIds.clear();attackId++;shake=Math.max(shake,.20);
+ emit(player.x,player.y,player.z,22,'#73f9ff');sound(450,.28,'triangle');
+}
+function spawnRival(){
+ if(!rivals.length){state.aiCount=1;$('ai-count').value='1';$('ai-count-out').textContent='1';spawnAI();}
+ const a=rivals[0],p=player,r=Math.cos(p.yaw),rz=-Math.sin(p.yaw);
+ a.distance=player.closest.along;a.offset=clamp(player.closest.offset+6,-10,10);a.lane=a.offset;
+ a.impX=p.x+r*7-(sampleTrackDistance(a.distance).x+a.offset*sampleTrackDistance(a.distance).rx);
+ a.impZ=p.z+rz*7-(sampleTrackDistance(a.distance).z+a.offset*sampleTrackDistance(a.distance).rz);
+ a.hitVX=a.hitVZ=0;a.speed=p.speed;a.ko=false;a.dead=0;a.shield=100;
+ a.attackCooldown=4;a.contactActive=false;updateAITransforms();notice('Rival posicionado para teste');
+}
+function emit(x,y,z,n,color){for(let i=0;i<n;i++){if(particles.length>250)particles.shift();particles.push({x,y,z,vx:(rand()-.5)*24,vy:rand()*15+2,vz:(rand()-.5)*24,life:.24+rand()*.3,max:.54,color});}}
+// World-space velocity is authoritative. Steering rotates the *vehicle*, not its velocity vector.
+// The two remain independent until tire/repulsor lateral friction gradually aligns them.
+const craftDimensions=model=>{const shape=(MACHINES.find(m=>m[0]===model)||MACHINES[0])[4];
+ return shape==='heavy'?{hw:3.75,hl:3.55}:shape==='manta'?{hw:4.3,hl:3.65}:shape==='sleek'?{hw:3,hl:4.75}:{hw:3.55,hl:4.05};};
+function hullHalfHeight(e,model){return 0.92+Math.abs(Math.sin(e.roll||0))*craftDimensions(model).hw*.52;}
+function verticalContact(a,b,modelA,modelB){return Math.abs((a.y||0)-(b.y||0)) <= hullHalfHeight(a,modelA)+hullHalfHeight(b,modelB);}
+function hitBox(e,model){const d=craftDimensions(model),bodyYaw=e.yaw+(e.spin>0?e.spinAngle:0)+(e.visualYaw||0),sx=Math.cos(bodyYaw),sz=-Math.sin(bodyYaw),fx=Math.sin(bodyYaw),fz=Math.cos(bodyYaw);
+ return{x:e.x,z:e.z,rx:sx,rz:sz,fx,fz,hw:d.hw,hl:d.hl};}
+function satBoxes(a,b){const dx=a.x-b.x,dz=a.z-b.z;let min=Infinity,nx=0,nz=0;
+ for(const [ax,az] of [[a.rx,a.rz],[a.fx,a.fz],[b.rx,b.rz],[b.fx,b.fz]]){
+  const projected=Math.abs(ax*dx+az*dz);
+  const ar=a.hw*Math.abs(ax*a.rx+az*a.rz)+a.hl*Math.abs(ax*a.fx+az*a.fz);
+  const br=b.hw*Math.abs(ax*b.rx+az*b.rz)+b.hl*Math.abs(ax*b.fx+az*b.fz);
+  const overlap=ar+br-projected;if(overlap<=0)return null;
+  if(overlap<min){min=overlap;const side=(ax*dx+az*dz)>=0?1:-1;nx=ax*side;nz=az*side;}}
+ return{depth:min,nx,nz};}
+function knockout(a,message='K.O. / IMPACTO CONFIRMADO'){
+ if(a.ko)return;
+ a.ko=true;a.dead=Infinity;a.shield=0;a.contactActive=false;kills++;
+ emit(a.x,a.y,a.z,35,'#ff758e');notice(message+' · RIVAL FORA DA DISPUTA');
+}
+function vehicleMotion(e){
+ if(e===player)return {vx:e.vx,vz:e.vz};
+ const t=sampleTrackDistance(e.distance);
+ return {vx:Math.sin(t.yaw)*e.speed+t.rx*e.lateralVel+e.hitVX,
+         vz:Math.cos(t.yaw)*e.speed+t.rz*e.lateralVel+e.hitVZ};
+}
+function craftMass(model){const shape=(MACHINES.find(m=>m[0]===model)||MACHINES[0])[4];return shape==='heavy'?1.95:shape==='manta'?1.24:shape==='sleek'?.84:1.0;}
+function collisionImpulse(a,b,nx,nz,elasticity=.14){
+ const va=vehicleMotion(a),vb=vehicleMotion(b);
+ const closing=(va.vx-vb.vx)*nx+(va.vz-vb.vz)*nz;
+ if(closing>=0)return 0;
+ const massA=craftMass(a===player?state.machine:a.model)+(a===player?state.profiles[state.profile].inertia/180:0);
+ const massB=craftMass(b===player?state.machine:b.model);
+ const impulse=-(1+elasticity)*closing/(1/massA+1/massB);
+ const deltaA=impulse/massA,deltaB=impulse/massB;
+ if(a===player){a.vx+=nx*deltaA;a.vz+=nz*deltaA;}
+ else{a.hitVX+=nx*deltaA;a.hitVZ+=nz*deltaA;}
+ if(b===player){b.vx-=nx*deltaB;b.vz-=nz*deltaB;}
+ else{b.hitVX-=nx*deltaB;b.hitVZ-=nz*deltaB;}
+ return -closing;
+}
+// Attack volumes are separate from the hull collider, and can hit once per action.
+function attackContact(a){
+ if(player.hitIds.has(a.id)||a.ko||Math.abs(player.y-a.y)>3.6)return false;
+ let hit=false,sign=player.sideDir||1;
+ if(player.sideTime>0){
+  const r={x:Math.cos(player.yaw),z:-Math.sin(player.yaw)};
+  const forward={x:Math.sin(player.yaw),z:Math.cos(player.yaw)};
+  const b=craftDimensions(state.machine);
+  const attackX=player.x+r.x*sign*(b.hw+3.1);
+  const attackZ=player.z+r.z*sign*(b.hw+3.1);
+  const attackBody={x:attackX,z:attackZ,rx:r.x,rz:r.z,fx:forward.x,fz:forward.z,hw:4.0,hl:b.hl*1.20};
+  hit=!!satBoxes(attackBody,hitBox(a,a.model));
+ }else if(player.spin>0){
+  // Actual swept spin envelope around the craft, not ordinary contact alone.
+  const radius=craftDimensions(state.machine).hw+craftDimensions(a.model).hw+3.1;
+  hit=Math.hypot(a.x-player.x,a.z-player.z)<radius;
+ }
+ if(!hit)return false;
+ player.hitIds.add(a.id);
+ const rx=Math.cos(player.yaw),rz=-Math.sin(player.yaw),dx=a.x-player.x,dz=a.z-player.z;
+ sign=player.sideTime>0?player.sideDir:(Math.sign(dx*rx+dz*rz)||1);
+ const n=player.spin>0?Math.hypot(dx,dz)||1:1;
+ const nx=player.spin>0?dx/n:rx*sign,nz=player.spin>0?dz/n:rz*sign;
+ const force=player.spin>0?76:98;
+ a.hitVX+=nx*force;a.hitVZ+=nz*force;
+ a.impX+=nx*.5;a.impZ+=nz*.5;
+ a.shield-=player.spin>0?47:59;a.hitSpin+=player.spin>0?1.9:1.2;
+ shake=Math.max(shake,.65);
+ emit(a.x,a.y,a.z,22,player.spin>0?'#61e9ff':'#ff548d');sound(230,.15);
+ if(a.shield<=0)knockout(a);
+ return true;
+}
+function solveRivalPair(a,oldPX,oldPZ,oldAX,oldAZ){
+ if(!verticalContact(player,a,state.machine,a.model)){a.contactActive=false;return false;}
+ // SAT at destination, plus conservative continuous swept-circle broad phase.
+ let hit=satBoxes(hitBox(player,state.machine),hitBox(a,a.model));
+ if(!hit){
+  const r=craftDimensions(state.machine),b=craftDimensions(a.model);
+  const relativeDX=player.x-oldPX-(a.x-oldAX),relativeDZ=player.z-oldPZ-(a.z-oldAZ);
+  const initialDX=oldPX-oldAX,initialDZ=oldPZ-oldAZ;
+  const denom=relativeDX*relativeDX+relativeDZ*relativeDZ;
+  const t=denom>1e-8?clamp(-(initialDX*relativeDX+initialDZ*relativeDZ)/denom,0,1):0;
+  const sepX=initialDX+relativeDX*t,sepZ=initialDZ+relativeDZ*t;
+  if(sepX*sepX+sepZ*sepZ < (Math.hypot(r.hw,r.hl)+Math.hypot(b.hw,b.hl))**2){
+   const p0={...player,x:oldPX+(player.x-oldPX)*t,z:oldPZ+(player.z-oldPZ)*t};
+   const a0={...a,x:oldAX+(a.x-oldAX)*t,z:oldAZ+(a.z-oldAZ)*t};
+   hit=satBoxes(hitBox(p0,state.machine),hitBox(a0,a.model));
+   if(hit){player.x=p0.x;player.z=p0.z;a.x=a0.x;a.z=a0.z;}
+  }
+ }
+ if(!hit){a.contactActive=false;return false;}
+ const separation=Math.min(hit.depth+.025,3.5);
+ player.x+=hit.nx*separation*.56;player.z+=hit.nz*separation*.56;
+ a.impX-=hit.nx*separation*.44;a.impZ-=hit.nz*separation*.44;
+ a.x-=hit.nx*separation*.44;a.z-=hit.nz*separation*.44;
+ const strength=collisionImpulse(player,a,hit.nx,hit.nz);
+ if(!a.contactActive){rivalContacts++;
+  if(strength>8){player.shield=Math.max(0,player.shield-Math.min(13,strength*.07));
+   emit((player.x+a.x)*.5,player.y,(player.z+a.z)*.5,8,'#ffb66c');
+   shake=Math.max(shake,.32);}
+ }
+ a.contactActive=true;return true;
+}
+function solveRivalPairs(){
+ for(let i=0;i<rivals.length;i++){
+  const a=rivals[i];if(a.ko)continue;
+  for(let j=i+1;j<rivals.length;j++){
+   const b=rivals[j];if(b.ko)continue;
+   const key=i+':'+j,dx=a.x-b.x,dz=a.z-b.z;
+   if(dx*dx+dz*dz>170||!verticalContact(a,b,a.model,b.model)){rivalPairContact.delete(key);continue;}
+   const hit=satBoxes(hitBox(a,a.model),hitBox(b,b.model));
+   if(!hit){rivalPairContact.delete(key);continue;}
+   const ma=craftMass(a.model),mb=craftMass(b.model),amount=Math.min(hit.depth+.02,2.8);
+   const da=amount*mb/(ma+mb),db=amount*ma/(ma+mb);
+   a.x+=hit.nx*da;a.z+=hit.nz*da;a.impX+=hit.nx*da;a.impZ+=hit.nz*da;
+   b.x-=hit.nx*db;b.z-=hit.nz*db;b.impX-=hit.nx*db;b.impZ-=hit.nz*db;
+   const strength=collisionImpulse(a,b,hit.nx,hit.nz);
+   if(strength>14&&!rivalPairContact.has(key)){
+    a.shield-=strength*.07;b.shield-=strength*.07;
+    a.hitSpin+=Math.min(1,strength*.01);b.hitSpin-=Math.min(1,strength*.01);
+    if(a.shield<=0)knockout(a);if(b.shield<=0)knockout(b);
+   }
+   rivalPairContact.add(key);
+  }
+ }
+}
+function resolveWall(dt){
+ if(!state.barriers)return;
+ let hit=false;
+ // Independent corner distances: collisions follow the actual curved ribbon, not a single tangent.
+ const box=hitBox(player,state.machine);
+ for(let iteration=0;iteration<3;iteration++){
+  let deepest=0,normalX=0,normalZ=0;
+  for(const right of [-box.hw,box.hw])for(const ahead of [-box.hl,box.hl]){
+   const cornerX=player.x+box.rx*right+box.fx*ahead;
+   const cornerZ=player.z+box.rz*right+box.fz*ahead;
+   const t=nearestTrack(cornerX,cornerZ),outside=Math.abs(t.offset)-(t.width*.5-.38);
+   if(outside>deepest){deepest=outside;const s=Math.sign(t.offset)||1;normalX=t.rx*s;normalZ=t.rz*s;}
+  }
+  if(deepest<.0001)break;
+  // Do not teleport a craft back from dozens of meters beyond the course.
+  if(deepest>12){player.offTime+=dt;player.onTrack=false;break;}
+  const push=Math.min(deepest+.012,3.6);
+  player.x-=normalX*push;player.z-=normalZ*push;
+  const outward=player.vx*normalX+player.vz*normalZ;
+  if(outward>0){
+   // remove normal component and retain tangential velocity; small restitution.
+   player.vx-=normalX*outward*1.10;player.vz-=normalZ*outward*1.10;
+   if(outward>15&&!wallEngaged){
+    const damage=clamp((outward-15)*.12,0,19);
+    player.shield=Math.max(0,player.shield-damage);impactCount++;
+    emit(player.x,player.y,player.z,Math.ceil(8+damage),'#ff758e');sound(105,.16,'square');
+    shake=Math.max(shake,clamp(outward*.012,.2,1.2));hitFlash=Math.max(hitFlash,.22);
+   }
+   wallContacts++;hit=true;
+  }
+ }
+ wallEngaged=hit||wallEngaged;
+ const t=nearestTrack(player.x,player.z);
+ const safe=Math.abs(t.offset)<t.width*.5-craftDimensions(state.machine).hw-1.0;
+ if(safe)wallEngaged=false;
+ player.closest=t;
+ if(Math.abs(t.offset)<t.width*.5-1&&!player.fallen)player.onTrack=true;
+}
+function step(dt){
+ consumeEdges();if(state.paused)return;
+ dt=Math.min(dt,1/60);simTime+=dt;raceTime+=dt;
+ const cfg=state.profiles[state.profile];
+ const steerLeft=held.has('ArrowLeft');
+ const steerRight=held.has('ArrowRight');
+ const directSteer=Number(steerRight)-Number(steerLeft);
+ const steer=directSteer||(tapSteerRemaining>0?tapSteerDir:0);
+ const accelerating=held.has('KeyW')||held.has('KeyX')||held.has('ArrowUp')||tapThrottleRemaining>0;
+ const space=held.has('Space');
+ const hardBrake=held.has('KeyS')||held.has('ArrowDown')||(space&&!steer);
+ const leftTrigger=held.has('KeyQ'),rightTrigger=held.has('KeyE');
+ const both=leftTrigger&&rightTrigger;
+ const intentionalDrift=(both||space)&&Math.abs(steer)>.1&&player.speed>20;
+ const slide=(!both&&((leftTrigger&&steer<0)||(rightTrigger&&steer>0)))&&player.speed>12;
+ const triggerShift=both?0:Number(rightTrigger)-Number(leftTrigger);
+ const strafe=Number(held.has('KeyC'))-Number(held.has('KeyZ'))||
+   (tapStrafeRemaining>0?tapStrafeDir:0);
+ const mass=clamp((cfg.inertia-5)/75,0,1);
+ tapSteerRemaining=Math.max(0,tapSteerRemaining-dt);
+ tapThrottleRemaining=Math.max(0,tapThrottleRemaining-dt);
+ tapStrafeRemaining=Math.max(0,tapStrafeRemaining-dt);
+ player.drift=intentionalDrift;player.slide=slide;
+ player.driftTime=intentionalDrift?Math.min(4,player.driftTime+dt):Math.max(0,player.driftTime-dt*2.5);
+ latestInput={steer,strafe,slide:triggerShift,drift:intentionalDrift,throttle:accelerating,brake:hardBrake};
+ const ratio=clamp(player.speed/175,0,1.65);
+ const instability=clamp(Math.max(0,ratio-.58)*cfg.speedInstability,0,.70);
+ const filteredRate=(state.profile==='A'?100:state.profile==='B'?17:9)/(Math.sqrt(cfg.progressivity)*(1+.45*mass));
+ player.steerFiltered+=(steer-player.steerFiltered)*expDecay(filteredRate,dt);
+ const directWeight=state.profile==='A'?1:state.profile==='B'?.67:.52;
+ const steering=(steer*directWeight+player.steerFiltered*(1-directWeight));
+ const progressiveStrength=state.profile==='A'?(1-.13*(cfg.progressivity-1)*Math.exp(-player.driftTime*.7)):1;
+ const steerPower=cfg.steerRate*Math.PI/180*(.49+Math.min(1.4,ratio)*.52)*(1-instability*.22);
+ let yawTarget=steering*steerPower*progressiveStrength;
+ if(slide)yawTarget*=1.38;
+ if(intentionalDrift)yawTarget*=(state.profile==='A'?1.58:state.profile==='B'?1.69:1.75);
+ if(triggerShift&&!both)yawTarget+=triggerShift*(slide?.13:.18);
+ const yawAccel=state.profile==='A'?95:state.profile==='B'?22/(1+.35*mass):15/(1+.65*mass);
+ if(steer||triggerShift){player.yawRate+=(yawTarget-player.yawRate)*expDecay(yawAccel,dt);}
+ else{const rate=state.naturalStability?cfg.recenter:0.8;
+  player.yawRate*=Math.exp(-rate*dt);}
+ if(state.assist&&player.speed>12){
+  const look=sampleTrackDistance(player.closest.along+clamp(player.speed*.36,18,65));
+  const targetYaw=Math.atan2(look.x-player.x,look.z-player.z);
+  const err=wrapAngle(targetYaw-player.yaw);
+  player.yawRate+=clamp(err*1.7,-.9,.9)*state.assistStrength*.01*expDecay(7,dt);
+ }
+ player.yawRate=clamp(player.yawRate,-3.1,3.1);
+ player.yaw=wrapAngle(player.yaw+player.yawRate*dt);
+ // Physical banking: inward wing dips in the direction of Z/C, ordinary turns and drift.
+ // Body lean is part of the integrator, not merely a rendering effect.
+ const lateralG=player.yawRate*player.speed/95;
+ const sidePhase=player.sideTime>0?Math.sin(Math.PI*(1-player.sideTime/player.sideDuration)):0;
+ const sideLean=player.sideTime>0?-player.sideDir*sidePhase*.78:0;
+ const driftLean=intentionalDrift?-steer*.48:0;
+ const rollTarget=clamp(-lateralG*.16-steer*.08+driftLean+sideLean-triggerShift*.10-strafe*.32,-1.05,1.05);
+ const bodyResponse=state.profile==='C'?7:state.profile==='B'?10:14;
+ player.roll+=(rollTarget-player.roll)*expDecay(bodyResponse,dt);
+ const fx=Math.sin(player.yaw),fz=Math.cos(player.yaw),rx=Math.cos(player.yaw),rz=-Math.sin(player.yaw);
+ let vf=player.vx*fx+player.vz*fz;
+ let vl=player.vx*rx+player.vz*rz;
+ // A banked craft exchanges forward speed for turning force, including Z/C and drift.
+ // The lateral acceleration follows its visible banking, independent of track tangent.
+ const bankLoad=Math.sin(player.roll);
+ const bankTurn=-bankLoad*(18+Math.min(1.65,ratio)*19)*(intentionalDrift?1.20:1);
+ const bankDrag=Math.abs(bankLoad)*(6+player.speed*.08)*(intentionalDrift?.68:1);
+ // Longitudinal thrust and drag; slide loses speed, drift-turn conserves momentum.
+ const topSpeed=player.boost>0?255:183;
+ const accel=accelerating?(player.boost>0?115:84):0;
+ const coast=accelerating?4.5:16;
+ const brakes=hardBrake?(space&&!held.has('KeyS')&&!held.has('ArrowDown')?65:135):slide?24:intentionalDrift?4.5:0;
+ vf+= (accel-coast-brakes-bankDrag)*dt;
+ if(vf<0)vf=Math.min(0,vf+55*dt);
+ vf=clamp(vf,-20,topSpeed);
+ const baseGrip=(state.profile==='A'?24:state.profile==='B'?19:15)*(cfg.grip/100)*(1-.45*mass);
+ let sideDamping=Math.max(3.2,baseGrip*(1-instability*.62));
+ if(slide)sideDamping*=.57;
+ if(intentionalDrift)sideDamping=Math.max(1.9,sideDamping*.21);
+ // Side trigger can also shift the machine independently; zero when both held.
+ if(triggerShift)vl+=triggerShift*(31+cfg.steerRate*.1)*dt;
+ // Original independent Z/C strafe: impulse-free continuous lateral thrust.
+ if(strafe)vl+=strafe*(160+cfg.steerRate*.65)*dt;
+ vl+=bankTurn*dt;
+ vl*=Math.exp(-sideDamping*dt);
+ // In drift-turn, build modest speed when sliding under throttle, as in GX's handling concept.
+ if(intentionalDrift&&accelerating&&player.driftTime>.13&&Math.abs(vl)>4&&vf>60){
+  vf=Math.min(topSpeed,vf+(state.profile==='C'?7:4)*dt);
+ }
+ // Attack impulses remain in world velocity, with no snapping to heading.
+ player.vx=fx*vf+rx*vl;player.vz=fz*vf+rz*vl;
+ const beforeX=player.x,beforeZ=player.z;
+ player.x+=player.vx*dt;player.z+=player.vz*dt;
+ player.speed=Math.hypot(player.vx,player.vz);
+ player.slip=vl;player.driftAngle=Math.atan2(vl,Math.max(1,vf));
+ player.closest=nearestTrack(player.x,player.z);
+ const nearest=player.closest;
+ const dims=craftDimensions(state.machine);
+ const projectedWidth=Math.abs(nearest.rx*rx+nearest.rz*rz)*dims.hw+
+   Math.abs(nearest.rx*fx+nearest.rz*fz)*dims.hl;
+ const penetration=Math.abs(nearest.offset)-(nearest.width*.5-projectedWidth-.2);
+ player.onTrack=penetration<=0&&!player.fallen;
+ player.offTime=penetration>0?player.offTime+dt:0;
+ if(state.barriers)resolveWall(dt);
+ else if(player.offTime>1.3){player.vx*=Math.exp(-1.0*dt);player.vz*=Math.exp(-1.0*dt);}
+ const ground=player.closest;
+ // True vertically-integrated antigravity spring; reacts to track rises, impacts and speed.
+ if(!player.onTrack&&(!state.barriers||player.offTime>.25)){
+  player.verticalVelocity=Math.max(-85,player.verticalVelocity-30*dt);
+  player.y+=player.verticalVelocity*dt;
+  if(player.y<ground.y-10){player.fallen=true;}
+ }else{
+  const wake=Math.sin(simTime*5.3+player.speed*.02)*(.07+.09*ratio)+Math.sin(simTime*2.3)*.10;
+  const hoverTarget=ground.y+2.10+wake+(intentionalDrift?.16:0);
+  const spring=state.profile==='C'?66:state.profile==='B'?95:120;
+  const damp=state.profile==='C'?13:state.profile==='B'?16:19;
+  player.verticalVelocity=clamp(player.verticalVelocity+(spring*(hoverTarget-player.y)-damp*player.verticalVelocity)*dt,-24,24);
+  player.y+=player.verticalVelocity*dt;
+  player.hoverError=player.y-ground.y;
+ }
+ // Track grade modifies pitch; physical roll and its turning force were integrated above.
+ const ahead=sampleTrackDistance(ground.along+10),behind=sampleTrackDistance(ground.along-10);
+ const roadSlope=Math.atan2(ahead.y-behind.y,20);
+ const pitchTarget=clamp(roadSlope*1.5-(accelerating?.07:-.03)+
+   (hardBrake?.16:0)+clamp(player.verticalVelocity*.012,-.20,.20),-.60,.60);
+ player.pitch+=(pitchTarget-player.pitch)*expDecay(bodyResponse*.8,dt);
+ // Physically independent yaw from velocity + model yaw animation from drift.
+ player.visualYaw=clamp(-player.driftAngle*.15,-.16,.16);
+ if(intentionalDrift&&Math.abs(player.driftAngle)>.05&&Math.floor(simTime*36)%2===0&&particles.length<210){
+  emit(player.x-fx*2.5,player.y-.7,player.z-fz*2.5,1,'#ffe09b');}
+ if(player.sideTime>0)player.sideTime=Math.max(0,player.sideTime-dt);
+ if(player.spin>0){
+  player.spinElapsed=Math.min(player.spinDuration,player.spinElapsed+dt);
+  player.spin=Math.max(0,player.spinDuration-player.spinElapsed);
+  const t=player.spinElapsed/player.spinDuration;
+  // One visibly completed 360° rotation, easing in/out, independent of heading physics.
+  player.spinAngle=TWO_PI*(t*t*(3-2*t));
+ }else{player.spinAngle=0;}
+ if(player.boost>0){player.boost=Math.max(0,player.boost-dt);player.shield=Math.max(0,player.shield-4.5*dt);}
+ if(state.regeneration)player.shield=Math.min(100,player.shield+6*dt);
+ const crossed=(player.prevU>.972&&ground.u<.028&&Math.cos(wrapAngle(player.yaw-ground.yaw))>.25);
+ if(state.track!=='straight'&&crossed&&player.onTrack)lap++;
+ player.prevU=ground.u;
+ // Swept-style pad trigger with one activation per entry.
+ for(const pad of pads){
+  const t=sampleTrack(pad.u),dist=Math.hypot(player.x-t.x,player.z-t.z),near=dist<10&&player.onTrack;
+  if(near&&!pad.hit){pad.hit=true;const increment=Math.max(0,Math.min(250-player.speed,65));
+   player.vx+=fx*increment;player.vz+=fz*increment;
+   emit(player.x,player.y,player.z,16,'#ffb85c');sound(700,.15,'sine');}
+  if(!near)pad.hit=false;
+ }
+ if(ground.u>.92&&ground.u<.985&&ground.offset>4&&ground.offset<13&&player.onTrack){
+  player.shield=Math.min(100,player.shield+34*dt);}
+ for(const a of rivals){
+  if(a.ko)continue;
+  const oldAX=a.x,oldAZ=a.z;
+  a.distance+=a.speed*dt;
+  if(a.distance>=trackLength){a.laps++;a.distance%=trackLength;}
+  a.lateralVel*=Math.exp(-4.8*dt);
+  a.offset=clamp(a.offset+a.lateralVel*dt+(a.lane-a.offset)*expDecay(.25,dt),-11,11);
+  a.impX=(a.impX+a.hitVX*dt)*Math.exp(-.44*dt);
+  a.impZ=(a.impZ+a.hitVZ*dt)*Math.exp(-.44*dt);
+  a.hitVX*=Math.exp(-3.1*dt);a.hitVZ*=Math.exp(-3.1*dt);
+  const t=sampleTrackDistance(a.distance);a.u=t.u;
+  a.x=t.x+a.offset*t.rx+a.impX;a.z=t.z+a.offset*t.rz+a.impZ;
+  a.groundY=t.y;a.y=t.y+2.03+Math.sin(simTime*3+a.id)*.12;
+  a.yaw=t.yaw+clamp(a.lateralVel*.004,-.25,.25);
+  a.roll+=(clamp(-a.lateralVel*.013,-.45,.45)-a.roll)*expDecay(6,dt);
+  a.pitch+=(Math.atan2(sampleTrackDistance(a.distance+8).y-sampleTrackDistance(a.distance-8).y,16)-a.pitch)*expDecay(8,dt);
+  a.sideTime=Math.max(0,a.sideTime-dt);a.spin=Math.max(0,a.spin-dt);
+  a.attackCooldown=Math.max(0,a.attackCooldown-dt);
+  a.hitSpin*=Math.exp(-3.1*dt);a.visualYaw=clamp(a.hitSpin*Math.sin(simTime*15+a.id),-1.2,1.2);
+  // A rival can counterattack when the player is alongside, without snap teleportation.
+  const dx=player.x-a.x,dz=player.z-a.z;
+  if(a.attackCooldown===0&&a.personality!=='defensive'&&a.speed>50&&Math.abs(player.y-a.y)<3.8&&Math.hypot(dx,dz)<10){
+    const side=dx*t.rx+dz*t.rz;
+    if(Math.abs(side)>2){a.sideDir=Math.sign(side);a.sideTime=.28;
+      const strike=36;a.hitVX+=a.sideDir*t.rx*strike;a.hitVZ+=a.sideDir*t.rz*strike;
+      player.vx+=a.sideDir*t.rx*16;player.vz+=a.sideDir*t.rz*16;
+      player.shield=Math.max(0,player.shield-7);player.yawRate+=a.sideDir*.18;shake=Math.max(shake,.4);
+      emit(a.x,a.y,a.z,13,'#fa995e');sound(220,.13);
+      a.attackCooldown=(a.personality==='aggressive'?3:a.personality==='technical'?5:7)+rand()*3;
+    }
+  }
+  if(!verticalContact(player,a,state.machine,a.model)){a.contactActive=false;continue;}
+  // Simultaneous attacks are resolved through the normal contact and attack systems.
+  attackContact(a);
+  if(!a.ko)solveRivalPair(a,beforeX,beforeZ,oldAX,oldAZ);
+ }
+ solveRivalPairs();
+ if(state.barriers)resolveWall(dt);
+ player.closest=nearestTrack(player.x,player.z);
+ player.speed=Math.hypot(player.vx,player.vz);
+ const currentFX=Math.sin(player.yaw),currentFZ=Math.cos(player.yaw);
+ const currentRX=Math.cos(player.yaw),currentRZ=-Math.sin(player.yaw);
+ player.slip=player.vx*currentRX+player.vz*currentRZ;
+ player.driftAngle=Math.atan2(player.slip,Math.max(1,player.vx*currentFX+player.vz*currentFZ));
+ hitFlash=Math.max(0,hitFlash-dt);shake=Math.max(0,shake-dt*1.7);
+ for(let i=particles.length-1;i>=0;i--){const part=particles[i];
+  part.x+=part.vx*dt;part.z+=part.vz*dt;part.y+=part.vy*dt;
+  part.vy-=24*dt;part.life-=dt;if(part.life<=0)particles.splice(i,1);}
+}
+function togglePause(){state.paused=!state.paused;held.clear();$('pause').textContent=state.paused?'▶ CONTINUAR':'Ⅱ PAUSAR';notice(state.paused?'SIMULAÇÃO PAUSADA':'SIMULAÇÃO ATIVA');}
+function setCamera(v){state.camera=v;setTabs('camera',v);notice('Câmera / '+v.toUpperCase());}
+function resize(){const rect=canvas.getBoundingClientRect();DPR=Math.min(window.devicePixelRatio||1,1.6);W=Math.max(1,Math.floor(rect.width));H=Math.max(1,Math.floor(rect.height));canvas.width=Math.floor(W*DPR);canvas.height=Math.floor(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);}
+new ResizeObserver(resize).observe(canvas);window.addEventListener('resize',resize);
+function updateCamera(dt){
+ const fx=Math.sin(player.yaw),fz=Math.cos(player.yaw);
+ const cameraLean=clamp(player.roll*.12,-.10,.10);
+ let target;
+ if(state.camera==='cockpit'){
+  target={x:player.x+fx*.7,z:player.z+fz*.7,y:player.y+1.0,
+          fx:player.x+fx*45,fz:player.z+fz*45,fy:player.y+.8};
+ }else if(state.camera==='orbit'){
+  const angle=simTime*.35;
+  target={x:player.x+Math.sin(angle)*25,z:player.z+Math.cos(angle)*25,
+          y:player.y+12,fx:player.x,fz:player.z,fy:player.y};
+ }else{
+  const velYaw=player.speed>18?Math.atan2(player.vx,player.vz):player.yaw;
+  const cameraYaw=player.yaw+clamp(wrapAngle(velYaw-player.yaw),-.32,.32)*.24;
+  const bx=Math.sin(cameraYaw),bz=Math.cos(cameraYaw);
+  target={x:player.x-bx*19,z:player.z-bz*19,y:player.y+7.4,
+          fx:player.x+fx*38,fz:player.z+fz*38,fy:player.y+.8};
+ }
+ // First-frame camera responsiveness is essential for steering feedback.
+ const follow=state.camera==='orbit'?expDecay(9,dt):1;
+ for(const key of Object.keys(target))cam[key]+=(target[key]-cam[key])*follow;
+ if(shake>0){const magnitude=shake*.18;
+  cam.x+=Math.sin(simTime*73)*magnitude;cam.y+=Math.cos(simTime*61)*magnitude;
+ }
+ const dx=cam.fx-cam.x,dz=cam.fz-cam.z,dy=cam.fy-cam.y;
+ const magnitude=Math.hypot(dx,dz,dy)||1;
+ const f={x:dx/magnitude,y:dy/magnitude,z:dz/magnitude};
+ const l=Math.hypot(f.x,f.z)||1;
+ const right={x:f.z/l,y:0,z:-f.x/l};
+ cam.forward=f;cam.right=right;
+ // Orthogonal basis: up is perpendicular to forward AND screen-right.
+ cam.up={x:f.y*right.z,y:l,z:-f.y*right.x};
+ if(state.camera==='cockpit'&&Math.abs(cameraLean)>.01){
+  const co=Math.cos(cameraLean),si=Math.sin(cameraLean);
+  const ur={x:cam.up.x*co-right.x*si,y:cam.up.y*co-right.y*si,z:cam.up.z*co-right.z*si};
+  const rr={x:right.x*co+cam.up.x*si,y:right.y*co+cam.up.y*si,z:right.z*co+cam.up.z*si};
+  cam.up=ur;cam.right=rr;
+ }
+}
+function project(x,y,z){const dx=x-cam.x,dy=y-cam.y,dz=z-cam.z;const depth=dx*cam.forward.x+dy*cam.forward.y+dz*cam.forward.z;if(depth<.85)return null;const f=H*(.78+(player.speed/230)*-.09);const sx=(dx*cam.right.x+dy*(cam.right.y||0)+dz*cam.right.z)*f/depth+W*.5;const sy=H*.48-(dx*cam.up.x+dy*cam.up.y+dz*cam.up.z)*f/depth;return{x:sx,y:sy,d:depth,s: f/depth};}
+function poly(points,color,outline=null,lineW=1){
+ const near=.86;
+ const depth=q=>(q[0]-cam.x)*cam.forward.x+(q[1]-cam.y)*cam.forward.y+(q[2]-cam.z)*cam.forward.z;
+ let vertices=points;
+ const cut=[];
+ for(let i=0;i<vertices.length;i++){
+  const a=vertices[i],b=vertices[(i+1)%vertices.length],da=depth(a),db=depth(b);
+  if(da>=near)cut.push(a);
+  if((da>=near)!==(db>=near)){
+   const fraction=(near-da)/(db-da);
+   cut.push([a[0]+(b[0]-a[0])*fraction,a[1]+(b[1]-a[1])*fraction,a[2]+(b[2]-a[2])*fraction]);
+  }
+ }
+ if(cut.length<3)return;
+ const pp=cut.map(q=>project(q[0],q[1],q[2]));
+ if(pp.some(p=>!p))return;
+ ctx.beginPath();ctx.moveTo(pp[0].x,pp[0].y);
+ for(let i=1;i<pp.length;i++)ctx.lineTo(pp[i].x,pp[i].y);
+ ctx.closePath();ctx.fillStyle=color;ctx.fill();
+ if(outline){ctx.lineWidth=lineW;ctx.strokeStyle=outline;ctx.stroke();}
+}
+function line3(a,b,color,width=2){
+ const near=.86;
+ const depth=q=>(q[0]-cam.x)*cam.forward.x+(q[1]-cam.y)*cam.forward.y+(q[2]-cam.z)*cam.forward.z;
+ const da=depth(a),db=depth(b);
+ if(da<near&&db<near)return;
+ if(da<near||db<near){const fraction=(near-da)/(db-da),p=[a[0]+(b[0]-a[0])*fraction,a[1]+(b[1]-a[1])*fraction,a[2]+(b[2]-a[2])*fraction];if(da<near)a=p;else b=p;}
+ const p=project(...a),q=project(...b);if(!p||!q)return;
+ ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();
+}
+function drawBuilding(b,c){const {x,z,y,h,w,d}=b;if(Math.hypot(x-player.x,z-player.z)>650)return;const x1=x-w/2,x2=x+w/2,z1=z-d/2,z2=z+d/2;poly([[x1,y,z1],[x2,y,z1],[x2,y+h,z1],[x1,y+h,z1]],c.building,'#050a13',1);poly([[x1,y,z1],[x1,y,z2],[x1,y+h,z2],[x1,y+h,z1]],'#0b1427','#07101c',1);poly([[x1,y+h,z1],[x2,y+h,z1],[x2,y+h,z2],[x1,y+h,z2]],'#1c2944','#050a14');line3([x1,y+h,z1],[x2,y+h,z1],c.alt,1);if(b.windows){for(let j=1;j<Math.min(11,h/16);j++){const yy=y+j*16;line3([x1+3,yy,z1-.2],[x2-3,yy,z1-.2],j%3===0?c.alt:c.win,.7);}}}
+function drawTrack(c){const near=[];for(let i=0;i<segments.length;i++){const seg=segments[i],a=seg.a,b=seg.b,mx=(a.x+b.x)/2,mz=(a.z+b.z)/2;if(Math.hypot(mx-player.x,mz-player.z)>730)continue;const ra=seg.rx,rz=seg.rz,wa=a.w/2,wb=b.w/2;near.push({d:(mx-cam.x)*cam.forward.x+(mz-cam.z)*cam.forward.z,seg,a,b,ra,rz,wa,wb,i});}
+near.sort((a,b)=>b.d-a.d);for(const e of near){const{a,b,ra,rz,wa,wb,i}=e;const x1=a.x-ra*wa,z1=a.z-rz*wa,x2=a.x+ra*wa,z2=a.z+rz*wa;const X1=b.x-ra*wb,Z1=b.z-rz*wb,X2=b.x+ra*wb,Z2=b.z+rz*wb;poly([[x1,a.y,z1],[x2,a.y,z2],[X2,b.y,Z2],[X1,b.y,Z1]],i%6===0?c.lane:'#131e30','#1a2b43',.65);if(i%4===0){line3([a.x,a.y+.04,a.z],[b.x,b.y+.04,b.z],c.line,1.3);}
+line3([x1,a.y+.2,z1],[X1,b.y+.2,Z1],c.line,2.4);line3([x2,a.y+.2,z2],[X2,b.y+.2,Z2],c.alt,2.4);if(state.barriers){line3([x1,a.y+2,z1],[X1,b.y+2,Z1],c.line,.8);line3([x2,a.y+2,z2],[X2,b.y+2,Z2],c.alt,.8);if(i%8===0){line3([x1,a.y,z1],[x1,a.y+2,z1],c.line,2);line3([x2,a.y,z2],[x2,a.y+2,z2],c.alt,2);}}}}
+function drawMarkers(){for(const pad of pads){const p=sampleTrack(pad.u),fx=Math.sin(p.yaw),fz=Math.cos(p.yaw),rx=p.rx,rz=p.rz;poly([[p.x+rx*5-fx*6,p.y+.14,p.z+rz*5-fz*6],[p.x-rx*5-fx*6,p.y+.14,p.z-rz*5-fz*6],[p.x-rx*5+fx*6,p.y+.14,p.z-rz*5+fz*6],[p.x+rx*5+fx*6,p.y+.14,p.z+rz*5+fz*6]],'#a98239','#ffc664',2);line3([p.x-fx*3,p.y+.15,p.z-fz*3],[p.x+fx*4,p.y+.15,p.z+fz*4],'#ffe6a1',3);}
+for(let i=0;i<12;i++){const u=.92+i*.005,p=sampleTrack(u);line3([p.x+p.rx*4,p.y+.2,p.z+p.rz*4],[p.x+p.rx*12,p.y+.2,p.z+p.rz*12],'#65f4b2',3);}}
+function craftPoint(entity,x,y,z){
+ const sideProgress=entity.sideTime>0?Math.sin(Math.PI*(1-entity.sideTime/(entity.sideDuration||.37))):0;
+ const slideX=(entity.sideDir||0)*sideProgress*(entity===player?1.50:.54);
+ const bank=(entity.roll||0)-(entity.sideDir||0)*sideProgress*(entity===player?.23:.16);
+ const pitch=entity.pitch||0;
+ const cp=Math.cos(pitch),sp=Math.sin(pitch),cr=Math.cos(bank),sr=Math.sin(bank);
+ // Rotation about local X (pitch), then forward Z (roll), then world Y (yaw).
+ const zPitch=z*cp-y*sp,yPitch=z*sp+y*cp;
+ const xRoll=(x+slideX)*cr-yPitch*sr,yRoll=(x+slideX)*sr+yPitch*cr;
+ const yaw=entity.yaw+(entity.visualYaw||0)+(entity.sideDir||0)*sideProgress*(entity===player?.21:.14)+(entity.spin>0?entity.spinAngle:0);
+ const sn=Math.sin(yaw),cs=Math.cos(yaw);
+ return [entity.x+cs*xRoll+sn*zPitch,entity.y+yRoll,entity.z-sn*xRoll+cs*zPitch];
+}
+function drawCraft(entity,model,playerShip=false){
+ if(entity.ko||entity.dead>0)return;
+ const def=MACHINES.find(item=>item[0]===model)||MACHINES[0];
+ const body=def[2],accent=def[3],shape=def[4];
+ const span=shape==='heavy'?3.5:shape==='manta'?4.2:shape==='sleek'?2.8:3.4;
+ const nose=shape==='sleek'?4.6:shape==='heavy'?3.1:3.9;
+ const p=(x,y,z)=>craftPoint(entity,x,y,z);
+ const cockpit=playerShip&&state.camera==='cockpit';
+ if(cockpit)return;
+ // The shadow is on the track surface, NOT welded beneath the floating hull.
+ const ground=entity===player?player.closest:{y:entity.groundY??entity.y-2.0};
+ const shadowAltitude=ground.y+.13;
+ const shadowYaw=entity.yaw,shx=Math.cos(shadowYaw),shz=-Math.sin(shadowYaw),fhx=Math.sin(shadowYaw),fhz=Math.cos(shadowYaw);
+ const shadow=(x,z)=>[entity.x+shx*x+fhx*z,shadowAltitude,entity.z+shz*x+fhz*z];
+ const altitude=Math.max(0,entity.y-ground.y);
+ ctx.globalAlpha=clamp(0.68-altitude*.048,.13,.60);
+ poly([shadow(-span*1.2,-3.3),shadow(span*1.2,-3.3),shadow(span*.9,3.5),shadow(-span*.9,3.5)],'#020710');
+ ctx.globalAlpha=1;
+ // Visible antigravity cone bridges craft to track: motion/hover separation.
+ if(altitude>.4){
+  const hoverColor=playerShip?'#44f5f483':'#b7dbff4d';
+  for(const sx of [-span*.75,span*.75]){
+   const top=p(sx,-.44,-1.1),bottom=shadow(sx,-1.0);
+   line3(top,bottom,hoverColor,Math.min(3,altitude*.8));
+  }
+ }
+ // Low-poly silhouette uses the SAME dimensions as the physical hitbox within approximation.
+ poly([p(-span,0,-.9),p(-1.0,.08,1.3),p(-.1,.2,-1.8),p(-1.1,0,-2.2)],accent,'#02080d',2.2);
+ poly([p(span,0,-.9),p(1.0,.08,1.3),p(.1,.2,-1.8),p(1.1,0,-2.2)],accent,'#02080d',2.2);
+ poly([p(-1.35,-.22,-2.1),p(1.35,-.22,-2.1),p(1.0,.4,1.5),p(0,.2,nose),p(-1.0,.4,1.5)],body,'#02040a',2.5);
+ poly([p(-.65,.38,-.35),p(.65,.38,-.35),p(.42,.88,1.1),p(-.42,.88,1.1)],'#111c31','#00040d',2.5);
+ poly([p(-.58,.71,.1),p(.58,.71,.1),p(0,.93,1.3)],'#6fbdde','#08121d',1.5);
+ line3(p(-1.03,.43,1.4),p(0,.25,nose),accent,1.6);
+ line3(p(1.03,.43,1.4),p(0,.25,nose),accent,1.6);
+ for(const x of [-.8,.8]){
+  poly([p(x-.42,-.2,-2.45),p(x+.42,-.2,-2.45),p(x+.42,.24,-2.45),p(x-.42,.24,-2.45)],'#111c31','#02040a',2);
+  const flame=1.3+clamp((entity.speed||90)/180,0,1.5)*(playerShip&&player.boost>0?3.2:1.2);
+  poly([p(x-.3,0,-2.5),p(x+.3,0,-2.5),p(x,-.1,-2.5-flame)],accent);
+ }
+ if(entity.sideTime>0){
+  const strength=Math.sin(Math.PI*(1-entity.sideTime/(entity.sideDuration||.37)));
+  const side=entity.sideDir||1;
+  const edge=p(side*span*.9,.1,0),rear=p(side*span*1.5,.1,-1.2),noseP=p(side*span*1.5,.1,1.3);
+  ctx.globalAlpha=strength*.85;line3(rear,noseP,'#ff518e',Math.max(2,4*strength));
+  line3(edge,noseP,'#ffb5db',2);ctx.globalAlpha=1;
+ }
+ if(entity.spin>0){
+  const center=project(entity.x,entity.y,entity.z);
+  if(center){ctx.save();ctx.strokeStyle='#65faffca';ctx.lineWidth=3;
+   ctx.beginPath();ctx.ellipse(center.x,center.y,Math.min(250,center.s*7.8),Math.min(100,center.s*2.1),0,entity.spinAngle,entity.spinAngle+Math.PI*1.5);ctx.stroke();ctx.restore();}
+ }
+}
+function drawHitbox(entity,model,color){const b=hitBox(entity,model),h=hullHalfHeight(entity,model);
+ const p=(r,f,y)=>[b.x+b.rx*r+b.fx*f,y,b.z+b.rz*r+b.fz*f];
+ const ys=[entity.y-h,entity.y+h];
+ const corners=y=>[p(-b.hw,-b.hl,y),p(b.hw,-b.hl,y),p(b.hw,b.hl,y),p(-b.hw,b.hl,y)];
+ const bot=corners(ys[0]),top=corners(ys[1]);
+ for(let i=0;i<4;i++){line3(bot[i],bot[(i+1)%4],color,1.2);line3(top[i],top[(i+1)%4],color,2.2);line3(bot[i],top[i],color,1.1);}
+ line3(p(0,0,entity.y),p(0,b.hl,entity.y),color,1.3);}
+function drawBackground(c){const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,c.sky);grad.addColorStop(.66,c.fog);grad.addColorStop(1,c.floor);ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);const haze=ctx.createRadialGradient(W*.5,H*.42,12,W*.5,H*.42,W*.65);haze.addColorStop(0,state.visual==='C'?'#ff955016':'#58c8ff1d');haze.addColorStop(1,'#00000000');ctx.fillStyle=haze;ctx.fillRect(0,0,W,H);
+ctx.strokeStyle='#ffffff0b';ctx.lineWidth=1;for(let i=0;i<13;i++){const x=(i*127+seed%67)%W,yy=(i*83)%Math.max(1,H*.4);ctx.fillStyle='#bbebffb8';ctx.fillRect(x,yy,1.2,1.2);}}
+function render(dt){updateCamera(dt);const c=COLORS[state.visual];drawBackground(c);drawTrack(c);drawMarkers();const sortedBuildings=buildings.slice().sort((a,b)=>len(b.x-cam.x,b.z-cam.z)-len(a.x-cam.x,a.z-cam.z));for(const b of sortedBuildings)drawBuilding(b,c);
+const crafts=rivals.filter(a=>a.dead<=0).map(a=>({a,dist:len(a.x-cam.x,a.z-cam.z)}));crafts.push({a:player,dist:len(player.x-cam.x,player.z-cam.z),playerShip:true});crafts.sort((a,b)=>b.dist-a.dist);for(const x of crafts){if(x.dist<700){drawCraft(x.a,x.playerShip?state.machine:x.a.model,!!x.playerShip);if(state.debugHitboxes)drawHitbox(x.a,x.playerShip?state.machine:x.a.model,x.playerShip?"#ffe578":"#ff5b92");}}
+for(const p of particles){const q=project(p.x,p.y,p.z);if(!q)continue;const size=clamp(q.s*.2,.8,5)*(p.life/p.max);ctx.globalAlpha=clamp(p.life/p.max,0,1);ctx.fillStyle=p.color;ctx.fillRect(q.x-size*.5,q.y-size*.5,size,size);ctx.globalAlpha=1;}
+if(state.debugHover){ctx.save();ctx.font='12px ui-monospace,monospace';ctx.fillStyle='#b8efff';ctx.textAlign='right';ctx.fillText('HOVER '+(player.y-player.closest.y).toFixed(2)+'m  •  PITCH '+(player.pitch*180/Math.PI).toFixed(1)+'°  •  ROLL '+(player.roll*180/Math.PI).toFixed(1)+'°',W-15,H-128);ctx.restore();}
+if(hitFlash>0){ctx.fillStyle=`rgba(255,63,104,${hitFlash*.19})`;ctx.fillRect(0,0,W,H);}
+if(player.speed>120){const intensity=clamp((player.speed-120)/120,0,.7);ctx.strokeStyle=`rgba(155,237,255,${intensity*.18})`;ctx.lineWidth=1;const n=Math.floor(intensity*22);for(let i=0;i<n;i++){const phase=(i*137+Math.floor(simTime*130))%997/997;const ang=i*2.399963,rr=70+phase*W*.5,x=W/2+Math.cos(ang)*rr,y=H/2+Math.sin(ang)*rr;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+Math.cos(ang)*(15+phase*110),y+Math.sin(ang)*(15+phase*110));ctx.stroke();}}
+if(state.paused){ctx.fillStyle='#0409178a';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.font='900 44px system-ui';ctx.fillStyle='#e8faff';ctx.fillText('SIMULAÇÃO PAUSADA',W/2,H*.49);ctx.font='15px system-ui';ctx.fillStyle='#82ebff';ctx.fillText('P / CONTINUAR',W/2,H*.54);ctx.textAlign='left';}
+}
+function updateHUD(){$('speed').textContent=Math.round(player.speed*6.8);$('shield-text').textContent=Math.round(player.shield)+'%';$('shield-bar').style.width=player.shield+'%';$('slip').textContent=(player.driftAngle*180/Math.PI).toFixed(1)+'°';$('drift-state').textContent=player.drift?'DRIFT TURN · '+Math.abs(player.driftAngle*180/Math.PI).toFixed(1)+'°':player.slide?'SLIDE TURN · AIRBRAKE':'DRIFT · ESPAÇO+SETA OU Q+E+SETA';$('drift-state').style.color=player.drift?'var(--gold)':'var(--cyan)';$('offset').textContent=player.closest.offset.toFixed(1)+'m';$('kills').textContent=kills;const quality=Math.abs(player.slip);$('handling').textContent=player.onTrack?(player.spin>0?'SPIN ATTACK':player.sideTime>0?'SIDE ATTACK':player.drift?'DRIFT TURN / CONTRAESTERÇO':player.slide?'SLIDE TURN':quality>35?'DERRAPAGEM CRÍTICA':quality>12?'SLIP / CONTRAESTERÇO':'SUSPENSÃO ATIVA'):'FORA DOS LIMITES DA PISTA';$('handling').style.color=player.onTrack?(quality>12?'var(--gold)':'var(--green)'):'var(--red)';$('lap').textContent='VOLTA '+lap+' · '+Math.floor(raceTime/60)+':'+(raceTime%60).toFixed(2).padStart(5,'0');$('assist-indicator').textContent='ASSISTÊNCIA DE TRAJETÓRIA: '+(state.assist?'ON':'OFF');$('assist-indicator').style.color=state.assist?'var(--gold)':'var(--green)';$('track-name').textContent=state.track==='straight'?'RETA DE ENSAIO':state.track==='elevated'?'ELEVATED LOOP':'NEO CIRCUIT';const alive=rivals.filter(a=>!a.ko);const progress=(lap-1)*trackLength+player.closest.along;const rank=1+alive.filter(a=>((a.laps||0)*trackLength+a.distance)>progress).length;$('position').textContent='POSIÇÃO '+rank+'/'+(alive.length+1);const nearest=alive.length?Math.min(...alive.map(a=>Math.hypot(a.x-player.x,a.z-player.z))):null;$('nearest-rival').textContent=nearest===null?'SEM RIVAIS':'RIVAL MAIS PRÓXIMO '+Math.round(nearest)+'m';$('input-latency').textContent=lastLatency.toFixed(1)+' ms';}
+function frame(now){
+ requestAnimationFrame(frame);
+ const realDt=clamp((now-frameTime)/1000,0,.10);frameTime=now;
+ fpsElapsed+=realDt;renderCount++;
+ if(fpsElapsed>.5){fps=Math.round(renderCount/fpsElapsed);fpsElapsed=0;renderCount=0;$('fps').textContent=fps;}
+ if(!state.paused&&!document.hidden){
+  accumulator=Math.min(accumulator+realDt*state.timeScale,8/120);
+  if(edges.length&&accumulator<1/120)accumulator=1/120;
+  let steps=0;
+  while(accumulator+1e-10>=1/120&&steps++<8){step(1/120);accumulator=Math.max(0,accumulator-1/120);}
+ }else{consumeEdges();accumulator=0;}
+ // HUD updates every presentation frame; no three-frame stale input readouts.
+ updateHUD();render(realDt);
+ if(!state.muted&&audioCtx&&engineGain){
+  engineGain.gain.setTargetAtTime(state.paused?0:.025,audioCtx.currentTime,.04);
+  engineOsc.frequency.setTargetAtTime(65+player.speed*.9+(player.boost>0?80:0),audioCtx.currentTime,.04);
+ }
+ if(noticeUntil&&performance.now()>noticeUntil){$('toast').classList.remove('show');noticeUntil=0;}
+}
+function exportConfig(){
+ return {version:4,prototype:'G-MINUS-STEERING-01V5',...(state.configName?{name:state.configName}:{}),profile:state.profile,
+ profiles:structuredClone(state.profiles),visual:state.visual,track:state.track,camera:state.camera,
+ machine:state.machine,aiCount:state.aiCount,timeScale:state.timeScale,
+ options:{trackAssist:state.assist,assistStrength:state.assistStrength,
+  naturalStability:state.naturalStability,barriers:state.barriers,regeneration:state.regeneration,
+  debugHitboxes:state.debugHitboxes,debugHover:state.debugHover}};
+}
+function refreshExport(){$('json').value=JSON.stringify(exportConfig(),null,2);}
+function parseConfig(raw){
+ const original=JSON.parse(raw);let v=structuredClone(original);
+ // Backward-compatible import of the original prototype's partial flat JSON.
+ if(v&&typeof v==='object'&&!Array.isArray(v)&&v.version===undefined){
+  const fields=Object.keys(v);
+  if(!fields.every(k=>k==='name'||Object.hasOwn(LIMITS,k)))throw Error('campo do JSON original desconhecido');
+  const migrated=exportConfig();
+  for(const [key,n] of Object.entries(v)){
+   if(key==='name'){
+    if(typeof n!=='string'||n.length>100)throw Error('nome da configuração inválido');
+    migrated.name=n;continue;
+   }
+   const [min,max,step]=LIMITS[key];
+   if(typeof n!=='number'||!Number.isFinite(n)||n<min||n>max)
+    throw Error('parâmetro fora dos limites: '+key);
+   if(Math.abs(Math.round((n-min)/step)-(n-min)/step)>1e-5)
+    throw Error('valor antigo não coincide com o passo do slider: '+key);
+   migrated.profiles[state.profile][key]=n;
+  }
+  v=migrated;
+ }
+ const exact=(object,keys)=>object&&typeof object==='object'&&!Array.isArray(object)&&
+  Object.keys(object).sort().join('|')===keys.slice().sort().join('|');
+ if(!v||typeof v!=='object'||Array.isArray(v))throw Error('JSON deve ser um objeto');
+ const old=v.version===2&&v.prototype==='G-MINUS-STEERING-01R';
+ const former=v.version===3&&v.prototype==='G-MINUS-STEERING-01V4';
+ if(!old&&!former&&(v.version!==4||v.prototype!=='G-MINUS-STEERING-01V5'))throw Error('versão/identificador incompatível');
+ if(!exact(v,['version','prototype','profile','profiles','visual','track','camera','machine','aiCount','timeScale','options',...(v.name===undefined?[]:['name'])]))throw Error('campos de configuração ausentes/desconhecidos');
+ if(v.name!==undefined&&(typeof v.name!=='string'||v.name.length>100))throw Error('nome inválido');
+ if(!['A','B','C'].includes(v.profile)||!['A','B','C'].includes(v.visual)||
+  !['circuit','straight','elevated'].includes(v.track)||!['chase','cockpit','orbit'].includes(v.camera)||
+  !MACHINES.some(machine=>machine[0]===v.machine))throw Error('opção desconhecida');
+ if(!exact(v.profiles,['A','B','C']))throw Error('três perfis são obrigatórios');
+ for(const profile of ['A','B','C']){
+  if(!exact(v.profiles[profile],Object.keys(LIMITS)))throw Error('parâmetros incompletos '+profile);
+  for(const [name,[min,max,step]] of Object.entries(LIMITS)){
+   const n=v.profiles[profile][name];
+   if(typeof n!=='number'||!Number.isFinite(n)||n<min||n>max||
+     Math.abs(Math.round((n-min)/step)-(n-min)/step)>1e-5)throw Error('valor inválido: '+profile+'.'+name);
+  }
+ }
+ if(!Number.isInteger(v.aiCount)||v.aiCount<0||v.aiCount>29||typeof v.timeScale!=='number'||
+  !Number.isFinite(v.timeScale)||v.timeScale<.1||v.timeScale>2)throw Error('IA ou escala de tempo inválidos');
+ const o=v.options;
+ if(!exact(o,old?['trackAssist','assistStrength','naturalStability','barriers','regeneration']:
+ ['trackAssist','assistStrength','naturalStability','barriers','regeneration','debugHitboxes','debugHover']))throw Error('opções inválidas');
+ const check=['trackAssist','naturalStability','barriers','regeneration'];
+ if(!old)check.push('debugHitboxes','debugHover');
+ if(check.some(k=>typeof o[k]!=='boolean')||!Number.isInteger(o.assistStrength)||
+    o.assistStrength<0||o.assistStrength>100)throw Error('valores de assistência/diagnóstico inválidos');
+ if(old){o.debugHitboxes=false;o.debugHover=false;}
+ if(old||former){v.version=4;v.prototype='G-MINUS-STEERING-01V5';}
+ return v;
+}
+function applyConfig(v){
+ state.configName=v.name??null;state.profile=v.profile;state.profiles=structuredClone(v.profiles);
+ state.visual=v.visual;state.track=v.track;state.camera=v.camera;state.machine=v.machine;
+ state.aiCount=v.aiCount;state.timeScale=v.timeScale;
+ state.assist=v.options.trackAssist;state.assistStrength=v.options.assistStrength;
+ state.naturalStability=v.options.naturalStability;state.barriers=v.options.barriers;
+ state.regeneration=v.options.regeneration;
+ state.debugHitboxes=v.options.debugHitboxes;state.debugHover=v.options.debugHover;
+ syncControls();buildTrack();
+}
+function syncControls(){
+ setProfile(state.profile);for(const k of ['visual','track','camera'])setTabs(k,state[k]);
+ $('machine').value=state.machine;$('ai-count').value=state.aiCount;
+ $('ai-count-out').textContent=state.aiCount;
+ $('time-scale').value=state.timeScale;$('time-scale-out').textContent=state.timeScale.toFixed(1)+'×';
+ $('track-assist').checked=state.assist;
+ $('assist-strength').value=state.assistStrength;
+ $('assist-strength-out').textContent=state.assistStrength+'%';
+ $('natural-stability').checked=state.naturalStability;
+ $('barriers').checked=state.barriers;$('regeneration').checked=state.regeneration;
+ $('debug-hitboxes').checked=state.debugHitboxes;$('debug-hover').checked=state.debugHover;
+}
+$('pause').onclick=togglePause;$('reset').onclick=()=>resetSimulation();$('audio').onclick=()=>{state.muted=!state.muted;if(!state.muted){createAudio();audioCtx?.resume();}else if(engineGain)engineGain.gain.value=0;$('audio').textContent=state.muted?'♫ ÁUDIO OFF':'♫ ÁUDIO ON';};
+$('machine').replaceChildren(...MACHINES.map(m=>{const option=document.createElement('option');option.value=m[0];option.textContent=m[1];return option;}));$('machine').onchange=e=>{state.machine=e.target.value;notice('Máquina / '+state.machine.toUpperCase());e.target.blur();};
+document.querySelectorAll('[data-profile]').forEach(b=>b.onclick=()=>setProfile(b.dataset.profile));document.querySelectorAll('[data-visual]').forEach(b=>b.onclick=()=>{state.visual=b.dataset.visual;setTabs('visual',state.visual);notice('Estudo visual / '+state.visual);});document.querySelectorAll('[data-track]').forEach(b=>b.onclick=()=>{state.track=b.dataset.track;setTabs('track',state.track);buildTrack();notice('Pista / '+state.track);});document.querySelectorAll('[data-camera]').forEach(b=>b.onclick=()=>setCamera(b.dataset.camera));
+$('track-assist').onchange=e=>{state.assist=e.target.checked;notice('Assistência de trajetória '+(state.assist?'ATIVADA':'DESLIGADA'));};$('assist-strength').oninput=e=>{state.assistStrength=Number(e.target.value);$('assist-strength-out').textContent=state.assistStrength+'%';};$('natural-stability').onchange=e=>state.naturalStability=e.target.checked;$('barriers').onchange=e=>state.barriers=e.target.checked;$('regeneration').onchange=e=>state.regeneration=e.target.checked;$('debug-hitboxes').onchange=e=>state.debugHitboxes=e.target.checked;
+$('ai-count').oninput=e=>{state.aiCount=Number(e.target.value);$('ai-count-out').textContent=state.aiCount;spawnAI();};$('time-scale').oninput=e=>{state.timeScale=Number(e.target.value);$('time-scale-out').textContent=state.timeScale.toFixed(1)+'×';};$('spawn').onclick=spawnRival;$('boost-button').onclick=boost;$('spin-button').onclick=spinAttack;$('side-left').onclick=()=>sideAttack(-1);$('side-right').onclick=()=>sideAttack(1);$('debug-hover').onchange=e=>state.debugHover=e.target.checked;
+$('export').onclick=async()=>{refreshExport();try{await navigator.clipboard.writeText($('json').value);status('JSON exportado e copiado.');}catch(e){$('json').focus();$('json').select();status('JSON gerado. Cópia manual disponível na caixa.');}};
+$('import').onclick=()=>{try{const parsed=parseConfig($('json').value);applyConfig(parsed);refreshExport();status('JSON aplicado integralmente; cenário reiniciado.');notice('CONFIGURAÇÃO APLICADA');}catch(e){status('JSON rejeitado sem alterações: '+e.message,true);}};
+// Public read-only test hooks for reproducible browser regression, never used to control play.
+Object.defineProperty(window,'__GMINUS_LAB_TEST__',{value:Object.freeze({
+ getState:()=>({x:player.x,z:player.z,y:player.y,yaw:player.yaw,yawRate:player.yawRate,vx:player.vx,vz:player.vz,speed:player.speed,drift:player.drift,slide:player.slide,driftAngle:player.driftAngle,slip:player.slip,roll:player.roll,pitch:player.pitch,verticalVelocity:player.verticalVelocity,spin:player.spin,spinAngle:player.spinAngle,sideTime:player.sideTime,sideDir:player.sideDir,offset:player.closest.offset,trackYaw:player.closest.yaw,assist:state.assist,lap,shield:player.shield,simTime,impactCount,wallContacts,rivalContacts,onTrack:player.onTrack,kills}),
+ step:(dt=1/120)=>step(dt),reset:()=>resetSimulation(false),export:exportConfig,
+ import:raw=>applyConfig(parseConfig(raw)),setHeld:(code,value)=>value?held.add(code):held.delete(code),
+ nearest:()=>nearestTrack(player.x,player.z),setPosition:(x,z)=>{player.x=x;player.z=z;player.closest=nearestTrack(x,z);},setMotion:(vx,vz)=>{player.vx=vx;player.vz=vz;player.speed=Math.hypot(vx,vz);},setYaw:yaw=>{player.yaw=yaw;player.yawRate=0;},getDimensions:()=>craftDimensions(state.machine),testVertical:(a,b,modelA='falcon',modelB='fox')=>verticalContact(a,b,modelA,modelB),testBoxes:(a,b,modelA='falcon',modelB='fox')=>satBoxes(hitBox(a,modelA),hitBox(b,modelB)),setRivalNear:(id,along,offset)=>{const a=rivals[id];if(!a)return false;const t=sampleTrackDistance(along);a.distance=along;a.offset=offset;a.x=t.x+offset*t.rx;a.z=t.z+offset*t.rz;a.y=t.y+1.35;a.yaw=t.yaw;a.speed=0;a.lateralVel=0;a.impX=0;a.impZ=0;a.hitVX=0;a.hitVZ=0;return true;},setHitboxes:value=>{state.debugHitboxes=value;document.getElementById('debug-hitboxes').checked=value;},
+ getRivals:()=>rivals.map(a=>({x:a.x,z:a.z,distance:a.distance,offset:a.offset,shield:a.shield,dead:a.dead,ko:a.ko,impX:a.impX,impZ:a.impZ})),
+ getVisualPoint:(x,y,z)=>craftPoint(player,x,y,z),getTrackLength:()=>trackLength,sampleAhead:distance=>sampleTrackDistance(player.closest.along+distance),setRivalAttack:(id,speed,cooldown=0)=>{const a=rivals[id];if(!a)return false;a.speed=speed;a.attackCooldown=cooldown;return true;},setRivalShield:(id,value)=>{if(!rivals[id])return false;rivals[id].shield=clamp(value,0,100);return true;},getInputLatency:()=>lastLatency,getLastInputAction:()=>lastInputAction,getKeys:()=>Array.from(held),getLiveInput:()=>({...latestInput}),sideAttack:dir=>sideAttack(dir),spinAttack:()=>spinAttack(),boost:()=>boost(),getCameraBasis:()=>structuredClone({right:cam.right,forward:cam.forward,up:cam.up})})});
+resize();setProfile('A');syncControls();buildTrack();refreshExport();frameTime=performance.now();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
