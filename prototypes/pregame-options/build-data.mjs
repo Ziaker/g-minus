@@ -62,7 +62,7 @@ export function buildData() {
 }
 
 const BEGIN = '/* @p07-data:begin */', END = '/* @p07-data:end */';
-export function embedded(text) { const a = text.indexOf(BEGIN), b = text.indexOf(END); return a < 0 || b < a ? null : text.slice(a + BEGIN.length, b); }
+export function embedded(text) { text = text.replace(/\r\n/g, '\n'); const a = text.indexOf(BEGIN), b = text.indexOf(END); return a < 0 || b < a ? null : text.slice(a + BEGIN.length, b); }
 export function render(data) { return '\nconst P07_DATA=' + JSON.stringify(data) + ';\n'; }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

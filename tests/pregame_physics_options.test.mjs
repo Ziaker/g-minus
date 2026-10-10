@@ -75,13 +75,14 @@ test('perfil C usa os valores do export enviado (esterço 89, inclinação 34, 5
   for (const p of d.params.filter(x => x.ambiguous)) assert.ok(p.candidates.length > 1 && p.candidates.includes(p.profiles.C), p.key);
 });
 
-test('estado inicial: perfil C nas três alternativas; alternativas independentes; perfil reaplicável', () => {
+test('estado inicial: perfil C nas quatro organizações; organizações independentes; perfil reaplicável', () => {
   const { api } = boot();
   const s = plain(api.getState());
-  for (const a of ['A', 'B', 'C']) { assert.equal(s.configs[a].profile, 'C'); assert.equal(s.configs[a].values.steerRate, 89); }
+  assert.equal(s.alt, 'D');
+  for (const a of ['D', 'A', 'B', 'C']) { assert.equal(s.configs[a].profile, 'C'); assert.equal(s.configs[a].values.steerRate, 89); }
   api.selectAlt('B'); api.setValue('steerRate', 120); api.setValue('grip', 90);
   let st = plain(api.getState());
-  assert.equal(st.configs.B.values.steerRate, 120); assert.equal(st.configs.A.values.steerRate, 89); assert.equal(st.configs.C.values.steerRate, 89);
+  assert.equal(st.configs.B.values.steerRate, 120); assert.equal(st.configs.A.values.steerRate, 89); assert.equal(st.configs.D.values.steerRate, 89); assert.equal(st.configs.C.values.steerRate, 89);
   assert.deepEqual(plain(api.changedKeys('B')).sort(), ['grip', 'steerRate']);
   api.applyProfile('A'); st = plain(api.getState());
   assert.equal(st.configs.B.profile, 'A'); assert.deepEqual(plain(api.changedKeys('B')), []);
@@ -115,12 +116,12 @@ test('JSON estrito e atômico; não aceita alegação de aprovação', () => {
   api.setValue('inertia', 70);
   const good = plain(api.exportConfig()), before = JSON.stringify(api.getState());
   const mut = f => { const c = plain(good); f(c); return JSON.stringify(c); };
-  for (const bad of ['{', mut(c => { c.approval = 'approved'; }), mut(c => { c.alt = 'D'; }), mut(c => { c.configs.A.profile = 'X'; }), mut(c => { c.configs.B.values.steerRate = 999; }),
-    mut(c => { delete c.configs.C.values.grip; }), mut(c => { c.configs.C.values.extra = 1; }), mut(c => { c.configs.A.values.aiAggressiveness = 50; }), mut(c => { c.schemaVersion = 2; }), mut(c => { c.configs.A.values.grip = '68'; })]) {
+  for (const bad of ['{', mut(c => { c.approval = 'approved'; }), mut(c => { c.alt = 'E'; }), mut(c => { delete c.configs.D; }), mut(c => { c.configs.A.profile = 'X'; }), mut(c => { c.configs.B.values.steerRate = 999; }),
+    mut(c => { delete c.configs.C.values.grip; }), mut(c => { c.configs.C.values.extra = 1; }), mut(c => { c.configs.A.values.aiAggressiveness = 50; }), mut(c => { c.schemaVersion = 1; }), mut(c => { c.configs.A.values.grip = '68'; })]) {
     assert.throws(() => api.importJSON(bad), /\S/); assert.equal(JSON.stringify(api.getState()), before);
   }
   api.reset(); api.importJSON(JSON.stringify(good));
-  assert.equal(plain(api.getState()).configs.A.values.inertia, 70);
+  assert.equal(plain(api.getState()).configs.D.values.inertia, 70);
 });
 
 test('planejamento: os 40 sem efeito aparecem identificados, sem controle e fora do menu', () => {
@@ -141,8 +142,24 @@ test('planejamento: os 40 sem efeito aparecem identificados, sem controle e fora
   for (const k of plain(api.planningKeys())) assert.ok(!plain(api.rowsShown()).includes(k), k);
 });
 
-test('protótipo não integrado ao jogo e não declara aprovação', () => {
-  assert.match(html, /Em avaliação — nenhuma alternativa aprovada/);
+test('combinada A + B + C: essenciais da B, categorias da A e, com filtro, lista da C', () => {
+  const { api } = boot();
+  assert.equal(plain(api.getState()).alt, 'D');
+  const d = buildData().params.filter(p => p.status === 'functional'), basic = d.filter(p => p.basic).map(p => p.key);
+  let shown = plain(api.rowsShown());
+  assert.equal(shown.length, 53); assert.equal(new Set(shown).size, 53);
+  assert.deepEqual(shown.slice(0, basic.length), basic);
+  api.setFilter('query', 'drift'); shown = plain(api.rowsShown());
+  assert.ok(shown.length > 0 && shown.length < 53 && shown.every(k => /drift/i.test(k + d.find(p => p.key === k).label)));
+  api.setFilter('query', ''); api.setValue('grip', 90); api.setFilter('onlyChanged', true);
+  assert.deepEqual(plain(api.rowsShown()), ['grip']);
+  assert.equal(plain(api.getState()).configs.A.values.grip, 68);
+  assert.throws(() => api.setFilter('advanced', true), /inválido/);
+});
+
+test('protótipo não integrado ao jogo e não declara aprovação além da organização escolhida', () => {
+  assert.match(html, /Organização escolhida pelo responsável: A \+ B \+ C combinadas/);
+  assert.match(html, /nada foi integrado ao jogo/);
   for (const f of ['src/main.ts', 'src/game/Game.ts', 'src/game/Vehicle.ts', 'index.html'])
     assert.ok(!readFileSync(path.join(root, f), 'utf8').includes('07_pregame_physics_options'), f);
 });

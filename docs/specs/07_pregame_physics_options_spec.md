@@ -1,6 +1,6 @@
 # Especificação Técnica — Protótipo 07: Opções de Física no Pré-Jogo
 
-**Status:** EM AVALIAÇÃO — nenhuma alternativa aprovada; não integrado ao jogo.
+**Status:** EM AVALIAÇÃO — organização escolhida pelo responsável: **A + B + C combinadas** (10/10/2026). O layout combinado aguarda avaliação visual; não integrado ao jogo.
 **Data:** 2026-10-10
 **Arquivo:** [`prototypes/07_pregame_physics_options.html`](../../prototypes/07_pregame_physics_options.html), HTML autônomo, abre direto do disco.
 **Dados:** gerados por [`prototypes/pregame-options/build-data.mjs`](../../prototypes/pregame-options/build-data.mjs) (`node prototypes/pregame-options/build-data.mjs`; `--check` confere sem reescrever).
@@ -17,6 +17,7 @@ Pedido: *"todos os sliders presentes no primeiro protótipo sejam opções de pr
 | Valores iniciais | **O export do Perfil C enviado pelo responsável** ([original](../decisions/2026-10-10-prototype-01-profile-c-export-original.txt), [JSON](../decisions/2026-10-10-prototype-01-profile-c-export.json)). Exemplos: esterço 89 °/s, inclinação máxima 34°, velocidade 500 / boost 600. |
 | Organização | **Perfis A/B/C como ponto de partida** e **configuração salva entre sessões**. |
 | Processo | **Protótipo do menu primeiro**, com três alternativas, antes da integração. |
+| Organização do menu (após ver A, B e C) | **As três em conjunto: A + B + C.** Implementada como a organização combinada (seção 5). |
 
 Revisão do responsável sobre a primeira versão: os 93 campos de `PhysicsCalibration.ts` **não** funcionam todos. Antes do commit era preciso identificar quais estão conectados, quais existem só na calibração e quais dependem de sistemas futuros. Os não funcionais podem aparecer para planejamento, desde que identificados e sem serem apresentados como configuráveis no jogo atual. A seção 3 registra essa correção.
 
@@ -72,9 +73,20 @@ Das 12 divergências entre o export e o jogo:
 - 5 são configuráveis: `steerRate`, `maxRoll`, `spinAttackDuration`, `hoverHeight`, `cameraDistance`;
 - 7 são da IA e ficam em planejamento.
 
-## 5. As três alternativas de organização
+## 5. Organização do menu
 
-As alternativas de organização do menu (A/B/C) são **independentes dos perfis de física A/B/C**.
+As organizações do menu são **independentes dos perfis de física A/B/C**.
+
+### 5.1 Combinada A + B + C (escolha do responsável)
+
+Abre por padrão e reúne as três alternativas numa só tela:
+- **da C:** barra de busca e filtros no topo (nome/chave, grupo, "só alterados", "só ambíguos");
+- **sem busca ou filtro:** primeiro os **11 essenciais** da B; abaixo, os **outros 42** nas categorias sanfonadas da A (7 grupos, fechados, com contador de alterados);
+- **com busca ou filtro:** a lista da C, com a coluna do valor do perfil base.
+
+Cada controle aparece uma só vez. O conjunto de essenciais continua sendo a proposta da seção 5.2, ainda não confirmada.
+
+### 5.2 Alternativas originais (mantidas como referência)
 
 | | Nome | Organização | Teste de hipótese |
 | :-: | :--- | :--- | :--- |
@@ -86,23 +98,23 @@ As alternativas de organização do menu (A/B/C) são **independentes dos perfis
 - cartões de perfil A/B/C no topo; escolher um perfil carrega os valores dele;
 - os valores que diferem do perfil base ficam destacados;
 - selos **⚠ ambíguo** e **jogo hoje**;
-- salvamento automático no navegador (`localStorage`, chave `gminus.p07.v1`), restaurado ao reabrir a página. Dados salvos inválidos são ignorados. Se o armazenamento estiver bloqueado, a página avisa e o JSON continua disponível.
+- salvamento automático no navegador (`localStorage`, chave `gminus.p07.v2`), restaurado ao reabrir a página. Dados salvos inválidos são ignorados. Se o armazenamento estiver bloqueado, a página avisa e o JSON continua disponível.
 - **Planejamento:** abaixo do menu, em todas as alternativas. Mostra os 40 parâmetros sem efeito no jogo atual, separados em "Dependem de sistema futuro" (selo *sistema futuro: voo e pouso*) e "Só em PhysicsCalibration.ts" (selo *sem efeito no jogo atual*), com o valor do perfil escolhido e **sem slider**. Eles não entram no estado, no JSON nem na configuração enviada ao jogo.
 
-**Independência:** cada alternativa guarda o próprio perfil base e os próprios 53 valores, para comparar as organizações sem interferência.
+**Independência:** cada organização (combinada, A, B e C) guarda o próprio perfil base e os próprios 53 valores, para comparar sem interferência.
 
 ## 6. Ferramentas de avaliação (laterais; não fazem parte do menu proposto)
 
 - **"O que o jogo receberia":** os 53 valores configuráveis no formato de `PhysicsCalibration.ts`. Grip e retenção de drift passam de % para fração, e os nomes viram os campos do código (ex.: `maxRoll` → `banking.maxRollDegrees`).
-- **JSON** `gminus.pregame-physics-options` v1:
+- **JSON** `gminus.pregame-physics-options` v2 (a v2 inclui a organização combinada `D`; dados salvos da v1 são ignorados):
 
 ```json
-{ "schema": "gminus.pregame-physics-options", "schemaVersion": 1, "approval": "none", "alt": "A",
-  "configs": { "A": { "profile": "C", "values": { "steerRate": 89, "...": 0 } }, "B": { }, "C": { } } }
+{ "schema": "gminus.pregame-physics-options", "schemaVersion": 2, "approval": "none", "alt": "D",
+  "configs": { "D": { "profile": "C", "values": { "steerRate": 89, "...": 0 } }, "A": { }, "B": { }, "C": { } } }
 ```
 
 - **Validação do JSON:** estrita e atômica:
-  - as três alternativas e os 53 valores configuráveis são obrigatórios;
+  - as quatro organizações (`D` = A + B + C, `A`, `B`, `C`) e os 53 valores configuráveis são obrigatórios;
   - parâmetro de planejamento ou desconhecido é rejeitado;
   - números finitos dentro dos limites;
   - perfil A/B/C;
@@ -111,20 +123,21 @@ As alternativas de organização do menu (A/B/C) são **independentes dos perfis
 
 ## 7. Testes (2026-10-10)
 
-`tests/pregame_physics_options.test.mjs` (11 testes):
+`tests/pregame_physics_options.test.mjs` (12 testes):
 1. dados embutidos idênticos aos gerados das fontes;
 2. escopo de 93 parâmetros, 18 ambíguos e básicos só entre os funcionais;
 3. classificação 53 / 25 / 15; `param-status.json` cobre os 93 declarados, e a conexão confere com o código atual;
 4. amostra da simulação real: o esterço muda o resultado; a agressividade da IA e a sustentação de voo não mudam;
 5. perfil C igual ao export (89, 34, 500/600), sem escolher valores ambíguos;
-6. três alternativas independentes; aplicação de perfil e limites; parâmetros de planejamento não são ajustáveis;
+6. organização combinada aberta por padrão; quatro organizações independentes; aplicação de perfil e limites; parâmetros de planejamento não são ajustáveis;
 7. conversão para o formato do jogo, só com os 53 funcionais;
 8. persistência entre cargas da página e descarte de dados inválidos;
 9. JSON estrito e atômico, que rejeita parâmetro de planejamento;
 10. seção de planejamento com os 40 identificados, sem controles e fora do menu;
-11. não integrado e sem declarar aprovação.
+11. combinada: 53 controles sem repetição, essenciais primeiro, busca e "só alterados" trocam para a lista da C;
+12. não integrado e sem declarar aprovação além da organização escolhida.
 
-**Navegador real:** sem erros de console. As alternativas A, B e C mostram 53, 11 e 53 controles. O planejamento mostra 40 linhas e nenhum controle. A configuração para o jogo tem só os 7 grupos com efeito.
+**Navegador real:** sem erros de console. A combinada abre por padrão com "Essenciais (11)" e "Todos os outros, por categoria (42)" em 7 grupos; a busca "boost" mostra 11 controles na lista. As alternativas A, B e C mostram 53, 11 e 53 controles. O planejamento mostra 40 linhas e nenhum controle. A configuração para o jogo tem só os 7 grupos com efeito.
 
 ## 8. Limitações
 
@@ -136,9 +149,10 @@ As alternativas de organização do menu (A/B/C) são **independentes dos perfis
 
 ## 9. Decisões pendentes de aprovação
 
-- [ ] Alternativa de organização: **A**, **B** ou **C** (ou combinação).
+- [x] Organização do menu: **A + B + C combinadas** (escolha do responsável, 10/10/2026).
+- [ ] Avaliação visual do layout combinado (seção 5.1).
 - [ ] Os 18 valores ambíguos do perfil C: confirmar cada um ou enviar um export em JSON.
-- [ ] Conjunto "básico" da alternativa B, se ela for escolhida.
+- [ ] Conjunto de essenciais (11, proposta) usado na organização combinada.
 - [ ] Se os perfis A e B entram no jogo com os valores do laboratório ou precisam de calibração própria.
 - [ ] Os 25 parâmetros que existem só na calibração: conectar ao código (inclusive os 11 da IA) ou retirar.
 - [ ] Integração: substituir os valores de `PhysicsCalibration.ts` pelos do export e tornar a física configurável em tempo de execução. Depois disso, um teste de equivalência entre menu, laboratório e jogo.
