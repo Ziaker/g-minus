@@ -295,7 +295,7 @@ Atalhos: `Q`/`W`/`E` nave, `1`–`3` alternativa, `M` modo, `V` vista, `R` rota�
 - `selection.variants` guarda a alternativa ativa de **cada** nave; `selection.variant` (opcional) deve coincidir com a da nave ativa.
 - `params` é **obrigatório e completo**: as três naves, as três alternativas e exatamente os 12 parâmetros de cada uma, números finitos dentro do intervalo.
 - `inspection` e `finish` são opcionais; se presentes, são validados integralmente (enums, intervalos, booleanos).
-- `geometryApproval` só aceita `"none"`: o laboratório não registra aprovações.
+- `geometryApproval` só aceita `"none"`. O valor **não** quer dizer que os modelos estejam desaprovados. Ele existe para que **nenhum arquivo JSON possa declarar uma aprovação por conta própria**. A aprovação das nove geometrias vale apenas pelo [registro de decisão](../decisions/2026-10-10-prototype-05-craft-geometry-approval.md) e é protegida pelos testes de impressão digital (item 14 da seção 11). Por isso o contrato JSON v1 não mudou: inclusive a [baseline aprovada](../decisions/2026-10-10-prototype-05-approved-baseline.json) é exportada com `"none"`.
 - **Validação estrita:** chaves desconhecidas, ausentes, identificadores desconhecidos, alternativa fora de A/B/C, valores não finitos, nulos, strings ou fora do intervalo → rejeição completa com mensagem em português.
 - **Atômica:** tudo é validado antes de alterar o estado; em erro, nada muda. Em sucesso, botões, sliders, título e o próprio campo JSON são ressincronizados.
 - Interface: *Copiar JSON* (API de área de transferência → fallback `execCommand` → seleção manual), *Aplicar JSON*, *Ver estado atual* (descarta rascunho), *Baixar .json*. O indicador mostra “sincronizado” ou “rascunho não aplicado”.
@@ -311,7 +311,7 @@ Atalhos: `Q`/`W`/`E` nave, `1`–`3` alternativa, `M` modo, `V` vista, `R` rota�
 
 ## 11. Testes e resultados (2026-10-10)
 
-**Automatizados** (`npm test`, Node 25.8): **33/33 aprovados** — 20 regressões pré-existentes + 13 novas em `tests/craft_geometry_lab.test.mjs`:
+**Automatizados** (`npm test`, Node 25.8): **37/37 aprovados** — 20 regressões pré-existentes + 17 em `tests/craft_geometry_lab.test.mjs` (13 da avaliação + 4 adicionados com a aprovação de 10/10/2026, itens 14–17). Na avaliação, antes da aprovação, o resultado era 33/33.
 
 1. três naves × três alternativas = nove combinações; quatro grupos;
 2. nove malhas padrão fechadas, 2-manifold, volume positivo, finitas, simétricas, com formas nos quatro grupos;
@@ -325,7 +325,11 @@ Atalhos: `Q`/`W`/`E` nave, `1`–`3` alternativa, `M` modo, `V` vista, `R` rota�
 10. renderizador com **WebGL simulado** (apenas contagem de buffers/draw calls): todos os modos desenham; 40 ciclos de troca de nave/alternativa/modo/vista/parâmetro sem crescimento de buffers vivos (contagem = criados − excluídos);
 11. sem WebGL: modal de falha e controles/JSON funcionando;
 12. constantes do passe D da v6 presentes; nenhuma outra direção artística oferecida;
-13. SHA-256 da v6 aprovada inalterado (`560f751d…`, com normalização de fim de linha) e nenhuma referência ao laboratório em `src/` ou `index.html`.
+13. SHA-256 da v6 aprovada inalterado (`560f751d…`, com normalização de fim de linha) e nenhuma referência ao laboratório em `src/` ou `index.html`;
+14. baseline aprovada: as nove impressões digitais padrão coincidem com as do registro de decisão;
+15. selo da interface distingue baseline aprovada de variação exploratória;
+16. protótipos `NN ≥ 06` que envolvem naves devem embutir o bloco `@gminus-approved-craft-geometry v1` sem alterações;
+17. o JSON da baseline aprovada importa sem erro e reproduz exatamente os padrões.
 
 **Build:** `npm run build` (tsc + Vite) concluído sem erros; o laboratório passa a ser emitido em `dist/prototypes/05_craft_geometry_lab.html` (104 kB).
 
