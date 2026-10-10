@@ -170,6 +170,8 @@ Cada solicitação de protótipo deve entregar:
 
 **Decisão vigente — Protótipo 01 (10/10/2026):** o Perfil C — Inercial / Drift foi aprovado como baseline de física e dinâmica. A aprovação abrange o comportamento funcional proposto pelo laboratório e exclui visual, VFX, áudio e pistas. O registro e o estado de integração estão em [`docs/decisions/2026-10-10-prototype-01-physics-approval.md`](decisions/2026-10-10-prototype-01-physics-approval.md).
 
+**Decisão vigente — Protótipo 05 (10/10/2026):** aprovadas as nove geometrias das três primeiras naves (Blue Falcon, Golden Fox e Wild Goose × A/B/C), com os valores padrão do laboratório como baseline. **Regra obrigatória:** todo protótipo futuro que envolva essas naves deve usar esses modelos, embutindo sem alterações o bloco geométrico canônico do laboratório 05. Cores por peça e uma opção de cores aleatórias ficam registradas como diretriz para protótipo próprio. Peças definitivas, atributos e integração no jogo continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-05-craft-geometry-approval.md`](decisions/2026-10-10-prototype-05-craft-geometry-approval.md).
+
 ### 11.2 Telemetria e depuração [102]
 
 Deve existir um sistema de telemetria e debug que facilite o teste do jogador e de todos os comportamentos de IA, inclusive situações difíceis de reproduzir. Requisitos explícitos:

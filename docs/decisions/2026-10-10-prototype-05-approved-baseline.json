@@ -1,0 +1,169 @@
+{
+ "schema": "gminus.craft-geometry-lab",
+ "schemaVersion": 1,
+ "artDirection": "D-TOON-VECTOR-FLUX",
+ "geometryApproval": "none",
+ "selection": {
+  "ship": "falcon",
+  "variant": "A",
+  "variants": {
+   "falcon": "A",
+   "fox": "A",
+   "goose": "A"
+  }
+ },
+ "params": {
+  "falcon": {
+   "A": {
+    "length": 1,
+    "width": 1,
+    "height": 1,
+    "noseLength": 1,
+    "span": 1,
+    "sweep": 45,
+    "dihedral": 3,
+    "cockpitSize": 1,
+    "cockpitPos": 0,
+    "finHeight": 1,
+    "finCant": 18,
+    "engineSize": 1
+   },
+   "B": {
+    "length": 1,
+    "width": 1,
+    "height": 1,
+    "noseLength": 1,
+    "boomGap": 1.32,
+    "boomLength": 1,
+    "span": 1,
+    "sweep": 22,
+    "cockpitSize": 1,
+    "cockpitPos": 0,
+    "tailHeight": 1,
+    "engineSize": 1
+   },
+   "C": {
+    "length": 1,
+    "width": 1,
+    "height": 1,
+    "noseLength": 1,
+    "span": 1,
+    "sweep": 57,
+    "tipDroop": 40,
+    "cockpitSize": 1,
+    "cockpitPos": 0,
+    "dorsalFin": 1,
+    "bankWidth": 1,
+    "engineSize": 1
+   }
+  },
+  "fox": {
+   "A": {
+    "length": 1,
+    "width": 1,
+    "height": 1,
+    "noseLength": 1,
+    "span": 1,
+    "sweep": 50,
+    "canard": 1,
+    "cockpitSize": 1,
+    "cockpitPos": 0,
+    "engineSize": 1,
+    "booster": 1,
+    "winglet": 1
+   },
+   "B": {
+    "length": 1,
+    "width": 1,
+    "height": 1,
+    "noseLength": 1,
+    "foilSpan": 1,
+    "sidepod": 1,
+    "podGap": 1.45,
+    "podSize": 1,
+    "rearWingHeight": 0.9,
+    "rearWingSpan": 1,
+    "cockpitSize": 1,
+    "cockpitPos": 0
+   },
+   "C": {
+    "length": 1,
+    "width": 1,
+    "height": 1,
+    "noseLength": 1,
+    "span": 1,
+    "forwardSweep": 20,
+    "earHeight": 1,
+    "earCant": 22,
+    "cockpitSize": 1,
+    "cockpitPos": 0,
+    "ringSize": 1,
+    "ringLength": 1
+   }
+  },
+  "goose": {
+   "A": {
+    "length": 1,
+    "width": 1,
+    "height": 1,
+    "ramWidth": 1,
+    "ramSweep": 24,
+    "ramRake": 32,
+    "armor": 1,
+    "skirtDepth": 1,
+    "cockpitSize": 1,
+    "cockpitPos": 0,
+    "engineSize": 1,
+    "rearScale": 1
+   },
+   "B": {
+    "length": 1,
+    "width": 1,
+    "height": 1,
+    "sponsonSize": 1,
+    "sponsonGap": 0.15,
+    "sponsonLength": 1,
+    "bumper": 1,
+    "armor": 1,
+    "turretSize": 1,
+    "turretPos": 0,
+    "engineSize": 1,
+    "mainEngine": 1
+   },
+   "C": {
+    "length": 1,
+    "width": 1,
+    "height": 1,
+    "noseLength": 1,
+    "shoulderSize": 1,
+    "shoulderCant": 16,
+    "shoulderPos": 0,
+    "tuskLength": 1,
+    "cockpitSize": 1,
+    "cowlHeight": 1,
+    "engineSize": 1,
+    "rearScale": 1
+   }
+  }
+ },
+ "inspection": {
+  "mode": "single",
+  "view": "threeQuarter",
+  "yaw": 0.62,
+  "elev": 0.36,
+  "zoom": 1,
+  "autoRotate": false,
+  "turntable": 0,
+  "render": "flux",
+  "background": "vitrine",
+  "focus": "all",
+  "focusMode": "highlight",
+  "light": "fixed",
+  "ink": "v6",
+  "pigment": "v6"
+ },
+ "finish": {
+  "glow": 1,
+  "saturation": 0
+ }
+}

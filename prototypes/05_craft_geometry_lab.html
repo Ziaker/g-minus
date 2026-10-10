@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G-MINUS · Protótipo 05 — Geometria das Naves</title>
+<style>
+:root{color-scheme:dark;--bg:#090e17;--panel:#0b1320;--line:#263247;--muted:#8799b5;--ink:#f1f6ff;--cyan:#70deff;--mag:#ff6eac;--green:#86f1bc;--warn:#ffcf7a;--err:#ffabb8}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Inter,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
+button,input,textarea,select{font:inherit}
+.app{display:grid;grid-template-columns:340px minmax(0,1fr);height:100dvh}
+.sidebar{min-width:0;overflow-y:auto;background:var(--panel);border-right:1px solid #2a3447;padding:16px 16px 28px;scrollbar-color:#354765 transparent}
+.brand{font-weight:950;font-size:22px;letter-spacing:.08em}.brand span{color:var(--cyan)}
+.eyebrow{font-size:10px;letter-spacing:.2em;font-weight:900;color:var(--cyan);text-transform:uppercase}
+.caption{color:var(--muted);font-size:11px;line-height:1.5;margin-top:6px}
+.pending.approved{border-left-color:var(--green);background:#0f2019;color:#c6f0dc}
+.badge.explore{background:var(--warn)}.badge.base{background:var(--green)}
+.pending{margin-top:10px;padding:8px 10px;border-left:3px solid var(--warn);background:#1f1a10;color:#f3dcae;font-size:10.5px;line-height:1.45;border-radius:0 6px 6px 0}
+.section{margin-top:18px}
+.section h2{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:#b6c7e2;margin:0 0 8px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.section h2 small{font-size:9px;letter-spacing:.04em;color:#7e90aa;text-transform:none;font-weight:600}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.seg.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.seg.c4{grid-template-columns:repeat(4,minmax(0,1fr))}.seg.c5{grid-template-columns:repeat(5,minmax(0,1fr))}.seg.c6{grid-template-columns:repeat(3,minmax(0,1fr))}
+.btn{cursor:pointer;background:#121e30;color:#dce9fc;border:1px solid #2c405d;padding:7px 6px;border-radius:7px;font-weight:750;font-size:11px;min-height:34px;line-height:1.2;transition:background .12s,border-color .12s}
+.btn:hover{background:#1c2b43;border-color:#5986b5}
+.btn:focus-visible{outline:2px solid var(--cyan);outline-offset:1px}
+.btn.active{background:rgba(38,156,203,.2);border-color:#66cffa;box-shadow:inset 0 0 0 1px rgba(102,207,250,.36);color:#fff}
+.btn .small{display:block;color:#94abc7;font-weight:550;font-size:9px;margin-top:3px}
+.btn.danger{border-color:#6b3a48;color:#ffc6d1}.btn.danger.armed{background:#4a1c2a;border-color:#ff6e8f;color:#fff}
+.ship .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.variant{font-size:17px;min-height:50px}.variant .small{font-size:9px;letter-spacing:.02em}
+.card{padding:10px 11px;margin-top:8px;border-left:3px solid var(--mag);background:#131c2b;border-radius:0 6px 6px 0}
+.card strong{font-size:12px}.card p{margin:5px 0 0;color:#a4b9d6;font-size:10.5px;line-height:1.45}
+.rangeRow{margin:9px 0}
+.rangeRow header{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#c5d2e6;gap:6px}
+.rangeRow output{font-variant-numeric:tabular-nums;color:var(--cyan);font-family:ui-monospace,monospace;font-size:11px;white-space:nowrap}
+.rangeRow output.changed{color:var(--mag)}
+.rangeRow input{width:100%;accent-color:#64cdff;margin:6px 0 0;height:14px}
+.rangeRow .lim{font-size:9px;color:#6f819b;margin-top:2px;display:flex;justify-content:space-between}
+.row{display:flex;gap:5px;margin-top:6px}.row>*{flex:1}
+textarea{width:100%;min-height:150px;background:#080f1a;border:1px solid #30405d;border-radius:7px;resize:vertical;padding:9px;font-family:ui-monospace,monospace;font-size:10px;color:#b3e7ff;line-height:1.45}
+.notice{font-size:10.5px;margin-top:7px;min-height:1.4em;color:#91d9b6;line-height:1.4}.notice.err{color:var(--err)}
+.tiny{font-size:10px;color:#89a0bd;line-height:1.5}
+kbd{font-family:ui-monospace,monospace;font-size:9.5px;border:1px solid #3a4b66;border-radius:3px;padding:0 3px;color:#cfe0f5}
+.stage{position:relative;min-width:0;overflow:hidden;background:#090912}
+#view{display:block;width:100%;height:100%;touch-action:none;outline:none;cursor:grab}
+#view:active{cursor:grabbing}
+.hud{position:absolute;top:14px;left:18px;pointer-events:none;max-width:calc(100% - 36px)}
+.hud .eyebrow{color:#ff8fc0}
+.hud h1{font-size:clamp(18px,2.4vw,32px);line-height:1.05;margin:4px 0 4px;font-weight:950;text-transform:uppercase;text-shadow:0 2px 18px #000}
+.hud p{margin:0;font-size:11px;letter-spacing:.06em;color:#c3d3ea;text-shadow:0 1px 8px #000;max-width:620px;line-height:1.45}
+.stage:not([data-mode="single"]) .hud h1{font-size:clamp(15px,1.6vw,22px)}.stage:not([data-mode="single"]) .hud p{display:none}
+.badge{display:inline-block;margin-top:6px;font-size:9.5px;letter-spacing:.12em;font-weight:900;color:#1a1204;background:var(--warn);padding:3px 7px;border-radius:3px}
+.labels{position:absolute;inset:0;pointer-events:none}
+.labels .lab{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:8px}
+.labels .lab span{background:rgba(7,10,22,.82);border:1px solid #3b4d6c;border-radius:5px;padding:4px 8px;font-size:10px;color:#eaf4ff;text-align:center;max-width:96%}
+.labels .lab span b{color:var(--cyan)}
+.labels .lab.active span{border-color:var(--mag)}
+.diag{position:absolute;right:12px;top:12px;background:rgba(6,10,20,.84);border:1px solid #2f4262;border-radius:7px;font-size:10px;color:#a9bdd8;max-width:290px}
+.diag summary{cursor:pointer;padding:6px 9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;font-size:9.5px;color:#cfe3ff}
+.diag dl{display:grid;grid-template-columns:auto auto;gap:2px 10px;margin:0;padding:0 10px 8px}
+.diag dt{color:#7f93b1}.diag dd{margin:0;font-family:ui-monospace,monospace;color:#e2efff;text-align:right}
+.diag .note{grid-column:1/-1;color:#6f819b;font-size:9px;line-height:1.35;margin-top:3px}
+.modal{position:absolute;inset:0;background:rgba(2,4,9,.86);z-index:5;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal[hidden]{display:none}
+.modal .inner{max-width:520px;border:1px solid #724657;padding:24px;border-radius:10px;background:#101720}
+.modal h2{color:var(--err);margin:0 0 8px;font-size:16px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(max-width:1020px){.app{grid-template-columns:300px minmax(0,1fr)}.sidebar{padding:12px}}
+@media(max-width:760px){
+ body{overflow:auto}
+ .app{display:flex;flex-direction:column;height:auto;min-height:100dvh}
+ .stage{height:62dvh;min-height:340px;order:0;flex:none}
+ .sidebar{order:1;overflow:visible;border-right:0;border-top:1px solid #2a3447}
+ .hud p{display:none}
+ .diag{max-width:200px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" aria-label="Controles do laboratório de geometria">
+ <div class="eyebrow">Protótipo 05 · geometria de naves</div>
+ <div class="brand">G<span>–</span>MINUS <span style="font-size:12px;color:#8ebedc">/ FORM LAB</span></div>
+ <div class="caption">Três naves × três arquiteturas (A/B/C) = nove modelos 3D aprovados, todos renderizados na direção aprovada <b>D — Toon Vector Flux</b>. A/B/C são geometrias, não estilos.</div>
+ <div class="pending approved" role="note"><b>Nove geometrias aprovadas em 10/10/2026</b> — baseline = valores padrão de cada alternativa. Ajustes nos sliders são explorações e não alteram a aprovação. Os quatro grupos visuais continuam provisórios.</div>
+
+ <section class="section" aria-labelledby="h-ship"><h2 id="h-ship">Nave <small><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd></small></h2><div class="seg" id="shipList" role="group" aria-label="Selecionar nave"></div></section>
+ <section class="section" aria-labelledby="h-var"><h2 id="h-var">Alternativa geométrica <small><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd></small></h2><div class="seg" id="variantList" role="group" aria-label="Selecionar alternativa"></div><div class="card" id="variantCard"></div></section>
+ <section class="section" aria-labelledby="h-mode"><h2 id="h-mode">Modo <small><kbd>M</kbd></small></h2><div class="seg" id="modeList" role="group" aria-label="Modo de inspeção"></div></section>
+ <section class="section" aria-labelledby="h-view"><h2 id="h-view">Vista <small id="viewHint">arrastar: órbita · roda: zoom</small></h2><div class="seg c6" id="viewList" role="group" aria-label="Vistas técnicas"></div>
+  <div class="row"><button class="btn" type="button" id="btnRotate">Pausar rotação</button><button class="btn" type="button" id="btnFrame">Enquadrar</button><button class="btn" type="button" id="btnResetCam">Reset câmera</button></div></section>
+ <section class="section" aria-labelledby="h-insp"><h2 id="h-insp">Inspeção</h2>
+  <div class="tiny">Renderização <kbd>S</kbd></div><div class="seg" id="renderList" role="group" aria-label="Modo de renderização"></div>
+  <div class="tiny" style="margin-top:7px">Grupos visuais provisórios</div><div class="seg c5" id="focusList" role="group" aria-label="Grupo visual"></div>
+  <div class="seg c2" id="focusModeList" role="group" aria-label="Tratamento dos outros grupos" style="margin-top:5px"></div>
+  <div class="tiny" style="margin-top:7px">Fundo de legibilidade</div><div class="seg" id="bgList" role="group" aria-label="Fundo"></div>
+  <details style="margin-top:8px"><summary class="tiny" style="cursor:pointer">Diagnóstico de renderização (fora da v6)</summary>
+   <div class="tiny" style="margin-top:5px">Luz</div><div class="seg c2" id="lightList" role="group" aria-label="Luz"></div>
+   <div class="tiny" style="margin-top:5px">Contorno de tinta</div><div class="seg" id="inkList" role="group" aria-label="Contorno"></div>
+   <div class="tiny" style="margin-top:5px">Pigmento da pintura</div><div class="seg c2" id="pigmentList" role="group" aria-label="Pigmento"></div>
+   <div class="tiny" style="margin-top:5px">Padrão = comportamento da v6. As demais opções servem só para diagnóstico e não estão aprovadas.</div>
+  </details>
+ </section>
+ <section class="section" aria-labelledby="h-geo"><h2 id="h-geo">Geometria <small id="paramScope">—</small></h2>
+  <div id="sliders"></div>
+  <div class="row"><button class="btn" type="button" id="btnResetVariant">Reset alternativa</button><button class="btn" type="button" id="btnResetShip">Reset nave (A/B/C)</button></div>
+  <div class="row"><button class="btn danger" type="button" id="btnResetAll">Restaurar configuração inicial completa</button></div>
+  <div class="tiny" style="margin-top:6px">Cada alternativa guarda seus próprios valores. Trocar nave ou alternativa não altera as demais.</div>
+ </section>
+ <section class="section" aria-labelledby="h-fin"><h2 id="h-fin">Acabamento D <small>global · não por alternativa</small></h2><div id="finishSliders"></div></section>
+ <section class="section" aria-labelledby="h-json"><h2 id="h-json">Configuração JSON <small id="jsonState">sincronizado</small></h2>
+  <label class="sr" for="jsonBox">Configuração JSON</label><textarea id="jsonBox" spellcheck="false"></textarea>
+  <div class="row"><button class="btn" type="button" id="btnCopy">Copiar JSON</button><button class="btn" type="button" id="btnApply">Aplicar JSON</button></div>
+  <div class="row"><button class="btn" type="button" id="btnShowJson">Ver estado atual</button><button class="btn" type="button" id="btnDownload">Baixar .json</button></div>
+  <div id="notice" class="notice" role="status" aria-live="polite"></div>
+ </section>
+ <section class="section"><div class="tiny">Atalhos: <kbd>Q</kbd>/<kbd>W</kbd>/<kbd>E</kbd> nave · <kbd>1</kbd>–<kbd>3</kbd> alternativa · <kbd>M</kbd> modo · <kbd>V</kbd> próxima vista · <kbd>R</kbd> rotação · <kbd>S</kbd> render · <kbd>0</kbd> reset câmera · setas/<kbd>+</kbd>/<kbd>−</kbd> com o canvas focado.</div></section>
+</aside>
+<main class="stage" id="stage" data-mode="single">
+ <canvas id="view" tabindex="0" aria-label="Visualização 3D das naves. Arraste para orbitar, use a roda para zoom."></canvas>
+ <div class="hud" id="hud"><div class="eyebrow" id="hudEyebrow">D · TOON VECTOR FLUX</div><h1 id="hudTitle">—</h1><p id="hudSub"></p><span class="badge base" id="approvalBadge">GEOMETRIA APROVADA · BASELINE</span></div>
+ <div class="labels" id="labels" aria-hidden="true"></div>
+ <details class="diag" id="diagBox" open><summary>Diagnóstico técnico</summary><dl id="diag"></dl></details>
+ <div class="modal" id="failure" hidden><div class="inner"><h2>Renderização WebGL indisponível</h2><p id="failureText" class="tiny"></p><p class="tiny">Os controles, sliders e o JSON continuam funcionando; apenas a imagem 3D não pode ser exibida.</p></div></div>
+</main>
+</div>
+<script>
+'use strict';
+/* ==========================================================================
+   G-MINUS · Protótipo 05 — Laboratório de geometria das três primeiras naves
+   Direção artística fixa: D — Toon Vector Flux (registro 02_toon_vector_flux_approval.md).
+   Renderização adaptada do passe D de prototypes/02_ship_visuals_v6_webgl.html.
+   As nove geometrias foram APROVADAS em 10/10/2026 com os valores padrão como baseline
+   (docs/decisions/2026-10-10-prototype-05-craft-geometry-approval.md). O bloco entre os
+   marcadores @gminus-approved-craft-geometry é a fonte canônica obrigatória para os próximos
+   protótipos que envolvem naves e deve ser copiado sem alterações.
+   ========================================================================== */
+const LAB_SCHEMA='gminus.craft-geometry-lab', SCHEMA_VERSION=1, ART_DIRECTION='D-TOON-VECTOR-FLUX';
+/* @gminus-approved-craft-geometry:begin v1 */
+const D2R=Math.PI/180, TAU=Math.PI*2;
+const PARTS=['nose','cockpit','wings','engines'];
+const PART_LABEL={nose:'Proa',cockpit:'Cabine',wings:'Asas',engines:'Motores'};
+const ROLES={paint:0,secondary:1,accent:2,structure:3,glass:4,energy:5,marking:6};
+
+/* ---------- matemática ---------- */
+const m4={
+ I:()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+ mul(a,b){const o=new Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;},
+ T:(x,y,z)=>[1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1],
+ S:(x,y,z)=>[x,0,0,0,0,y,0,0,0,0,z,0,0,0,0,1],
+ RX(a){const c=Math.cos(a),s=Math.sin(a);return [1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1];},
+ RY(a){const c=Math.cos(a),s=Math.sin(a);return [c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1];},
+ RZ(a){const c=Math.cos(a),s=Math.sin(a);return [c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1];}
+};
+// M(a,b,c): aplica a, depois b, depois c.
+const M=(...ops)=>ops.reduce((acc,op)=>m4.mul(op,acc),m4.I());
+const ap=(m,v)=>[m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12],m[1]*v[0]+m[5]*v[1]+m[9]*v[2]+m[13],m[2]*v[0]+m[6]*v[1]+m[10]*v[2]+m[14]];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+function triNormal(a,b,c){const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx,l=Math.hypot(nx,ny,nz);return l>0?[nx/l,ny/l,nz/l,l]:[0,1,0,0];}
+function signedArea2(p){let a=0;for(let i=0;i<p.length;i++){const q=p[(i+1)%p.length];a+=p[i][0]*q[1]-q[0]*p[i][1];}return a/2;}
+function earclip(pts){
+ const n=pts.length;if(n<3)return [];
+ const sg=signedArea2(pts)>=0?1:-1,idx=[...Array(n).keys()],out=[];
+ const cr=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+ const inside=(p,a,b,c)=>cr(a,b,p)*sg>1e-12&&cr(b,c,p)*sg>1e-12&&cr(c,a,p)*sg>1e-12;
+ let guard=0;
+ while(idx.length>3&&guard++<800){
+  let clipped=false;
+  for(let k=0;k<idx.length;k++){
+   const a=idx[(k+idx.length-1)%idx.length],b=idx[k],c=idx[(k+1)%idx.length];
+   if(cr(pts[a],pts[b],pts[c])*sg<=1e-12)continue;
+   let bad=false;for(const m of idx){if(m===a||m===b||m===c)continue;if(inside(pts[m],pts[a],pts[b],pts[c])){bad=true;break;}}
+   if(bad)continue;out.push([a,b,c]);idx.splice(k,1);clipped=true;break;
+  }
+  if(!clipped)break;
+ }
+ if(idx.length===3)out.push([idx[0],idx[1],idx[2]]);
+ else for(let k=1;k<idx.length-1;k++)out.push([idx[0],idx[k],idx[k+1]]);
+ return out;
+}
+function insetToward(p,c,d){const dx=p[0]-c[0],dy=p[1]-c[1],l=Math.hypot(dx,dy);if(l<1e-9)return [p[0],p[1]];const k=Math.max(.25,1-d/l);return [c[0]+dx*k,c[1]+dy*k];}
+function centroid2(p){return [p.reduce((s,v)=>s+v[0],0)/p.length,p.reduce((s,v)=>s+v[1],0)/p.length];}
+
+/* ---------- construtor de malhas (todas fechadas, faces planas, orientação corrigida por volume) ---------- */
+class Builder{
+ constructor(){this.shapes=[];this.stack=[m4.I()];}
+ get xf(){return this.stack[this.stack.length-1];}
+ with(m,fn){this.stack.push(m4.mul(this.xf,m));try{return fn();}finally{this.stack.pop();}}
+ sym(fn){fn(1);this.with(m4.S(-1,1,1),()=>fn(-1));}
+ add(part,role,tris,kind,closed=true){
+  const m=this.xf,T=[];
+  for(const t of tris){const a=ap(m,t[0]),b=ap(m,t[1]),c=ap(m,t[2]);if(triNormal(a,b,c)[3]<1e-9)continue;T.push([a,b,c]);}
+  if(!T.length)return null;
+  let vol=0;for(const [a,b,c] of T)vol+=a[0]*(b[1]*c[2]-b[2]*c[1])-a[1]*(b[0]*c[2]-b[2]*c[0])+a[2]*(b[0]*c[1]-b[1]*c[0]);vol/=6;
+  if(closed&&vol<0){for(const t of T){const s=t[1];t[1]=t[2];t[2]=s;}vol=-vol;}
+  const nV=T.length*3,pos=new Float32Array(nV*3),nor=new Float32Array(nV*3),onr=new Float32Array(nV*3);
+  let o=0;for(const [a,b,c] of T){const n=triNormal(a,b,c);for(const v of [a,b,c]){pos[o]=v[0];pos[o+1]=v[1];pos[o+2]=v[2];nor[o]=n[0];nor[o+1]=n[1];nor[o+2]=n[2];o+=3;}}
+  const key=i=>Math.round(pos[i]*1e4)+','+Math.round(pos[i+1]*1e4)+','+Math.round(pos[i+2]*1e4),acc=new Map();
+  for(let i=0;i<nV*3;i+=3){const k=key(i),s=acc.get(k)||[0,0,0];s[0]+=nor[i];s[1]+=nor[i+1];s[2]+=nor[i+2];acc.set(k,s);}
+  for(let i=0;i<nV*3;i+=3){const s=acc.get(key(i)),l=Math.hypot(s[0],s[1],s[2])||1;onr[i]=s[0]/l;onr[i+1]=s[1]/l;onr[i+2]=s[2]/l;}
+  const shape={part,role:ROLES[role],roleName:role,kind,closed,positions:pos,normals:nor,onormals:onr,volume:vol};
+  this.shapes.push(shape);return shape;
+ }
+ // anel superelíptico: w/h semi-eixos, hb semi-eixo inferior, n expoente (2=elipse, <2 quinado, >2 quadrado), pinch estreita o topo.
+ ring(r,seg,phase){
+  const pts=[],e=2/(r.n||2);
+  for(let i=0;i<seg;i++){
+   const th=phase+TAU*i/seg,c=Math.cos(th),s=Math.sin(th);
+   let x=Math.sign(c)*Math.pow(Math.abs(c),e)*r.w;
+   const hh=s>=0?r.h:(r.hb??r.h);
+   const y=Math.sign(s)*Math.pow(Math.abs(s),e)*hh;
+   if(r.pinch&&y>0)x*=1-r.pinch*(y/r.h);
+   if(r.flare&&y<0)x*=1+r.flare*(-y/hh);
+   pts.push([(r.x||0)+x,(r.y||0)+y,r.z]);
+  }
+  return pts;
+ }
+ loft(part,role,rings,{seg=10,phase=0}={}){
+  const rows=rings.map(r=>r.point?{pt:[r.x||0,r.y||0,r.z]}:{pts:this.ring(r,seg,phase),c:[r.x||0,r.y||0,r.z]}),tris=[];
+  for(let k=0;k<rows.length-1;k++){
+   const A=rows[k],B=rows[k+1];
+   for(let i=0;i<seg;i++){const j=(i+1)%seg;
+    if(A.pt&&B.pts)tris.push([A.pt,B.pts[j],B.pts[i]]);
+    else if(A.pts&&B.pt)tris.push([A.pts[i],A.pts[j],B.pt]);
+    else if(A.pts&&B.pts)tris.push([A.pts[i],A.pts[j],B.pts[j]],[A.pts[i],B.pts[j],B.pts[i]]);}
+  }
+  const f=rows[0],l=rows[rows.length-1];
+  if(f.pts)for(let i=0;i<seg;i++){const j=(i+1)%seg;tris.push([f.c,f.pts[j],f.pts[i]]);}
+  if(l.pts)for(let i=0;i<seg;i++){const j=(i+1)%seg;tris.push([l.c,l.pts[i],l.pts[j]]);}
+  this.add(part,role,tris,'loft');
+  return {rows,seg,phase};
+ }
+ // faixa gráfica sobre as facetas de um loft (sem contorno, sem arestas vetoriais)
+ loftStripe(part,role,lo,theta,half,k0,k1,lift=.014){
+  const at=(row,th)=>{
+   let t=((th-lo.phase)/TAU)*lo.seg;t=((t%lo.seg)+lo.seg)%lo.seg;
+   const i=Math.floor(t)%lo.seg,f=t-Math.floor(t),j=(i+1)%lo.seg,a=row.pts[i],b=row.pts[j];
+   const p=[lerp(a[0],b[0],f),lerp(a[1],b[1],f),a[2]];
+   let nx=b[1]-a[1],ny=-(b[0]-a[0]);const nl=Math.hypot(nx,ny)||1;nx/=nl;ny/=nl;
+   if(nx*(p[0]-row.c[0])+ny*(p[1]-row.c[1])<0){nx=-nx;ny=-ny;}
+   return [p[0]+nx*lift,p[1]+ny*lift,p[2]];
+  };
+  const ths=[theta-half,theta,theta+half],tris=[];
+  for(let k=k0;k<k1;k++){
+   const A=lo.rows[k],B=lo.rows[k+1];if(!A.pts||!B.pts)continue;
+   const a=ths.map(t=>at(A,t)),b=ths.map(t=>at(B,t));
+   for(let s=0;s<2;s++)tris.push([a[s],a[s+1],b[s+1]],[a[s],b[s+1],b[s]]);
+  }
+  this.add(part,role,tris,'stripe',false);
+ }
+ // varredura genérica de um perfil 2D ao longo de um eixo; estações {a,du,dv,s}
+ sweep(part,role,prof,stations,axis='x',kind='prism'){
+  const c=centroid2(prof);
+  const mk=(u,v,a)=>axis==='x'?[a,v,u]:axis==='z'?[u,v,a]:[u,a,v];
+  const rows=stations.map(st=>prof.map(p=>{const q=st.ins?insetToward(p,c,st.ins):p;return mk(q[0]+(st.du||0),q[1]+(st.dv||0),st.a);}));
+  const tris=[],n=prof.length;
+  for(let k=0;k<rows.length-1;k++)for(let i=0;i<n;i++){const j=(i+1)%n,A=rows[k],B=rows[k+1];tris.push([A[i],A[j],B[j]],[A[i],B[j],B[i]]);}
+  const cap=earclip(prof),f=rows[0],l=rows[rows.length-1];
+  for(const [a,b,cc] of cap){tris.push([f[cc],f[b],f[a]]);tris.push([l[a],l[b],l[cc]]);}
+  this.add(part,role,tris,kind);
+ }
+ prism(part,role,prof,{axis='x',a0,a1,bevel=0,ins}={}){
+  const span=Math.abs(a1-a0),b=Math.min(bevel,span*.3),sg=a1>=a0?1:-1,d=ins??b*1.6;
+  const st=b>0?[{a:a0,ins:d},{a:a0+sg*b},{a:a1-sg*b},{a:a1,ins:d}]:[{a:a0},{a:a1}];
+  this.sweep(part,role,prof,st,axis);
+ }
+ // placa horizontal com chanfro superior (técnica 'poly' da v6); vértices [x,z,espessura?]
+ slab(part,role,poly,{y=0,t=.1,bevel=.06}={}){
+  const P=poly.map(p=>[p[0],p[1]]),c=centroid2(P),th=poly.map(p=>p[2]??t);
+  const top=P.map((p,i)=>{const q=insetToward(p,c,bevel);return [q[0],y+th[i]*.5,q[1]];});
+  const rim=P.map((p,i)=>[p[0],y+th[i]*.29,p[1]]),bot=P.map((p,i)=>[p[0],y-th[i]*.5,p[1]]);
+  const tris=[],n=P.length;
+  for(const [a,b,cc] of earclip(P)){tris.push([top[a],top[b],top[cc]]);tris.push([bot[cc],bot[b],bot[a]]);}
+  for(let i=0;i<n;i++){const j=(i+1)%n;tris.push([top[i],rim[i],rim[j]],[top[i],rim[j],top[j]],[rim[i],bot[i],bot[j]],[rim[i],bot[j],rim[j]]);}
+  this.add(part,role,tris,'plate');
+ }
+ // revolução de um perfil fechado [r,z] (r>0) em torno do eixo z local → anel/toroide fechado
+ lathe(part,role,prof,{seg=16,phase=0,cx=0,cy=0}={}){
+  const rows=prof.map(([r,z])=>{const out=[];for(let i=0;i<seg;i++){const th=phase+TAU*i/seg;out.push([cx+r*Math.cos(th),cy+r*Math.sin(th),z]);}return out;}),tris=[],n=rows.length;
+  for(let k=0;k<n;k++){const A=rows[k],B=rows[(k+1)%n];for(let i=0;i<seg;i++){const j=(i+1)%seg;tris.push([A[i],A[j],B[j]],[A[i],B[j],B[i]]);}}
+  this.add(part,role,tris,'lathe');
+ }
+ // faixa plana (ribbon da v6) seguindo uma polilinha [x,y,z]
+ ribbon(part,role,pts,width){
+  const h=width/2,tris=[];
+  for(let i=0;i<pts.length-1;i++){
+   const [x,y,z]=pts[i],[xx,yy,zz]=pts[i+1],dx=xx-x,dz=zz-z,l=Math.hypot(dx,dz)||1,nx=-dz/l*h,nz=dx/l*h;
+   tris.push([[x+nx,y,z+nz],[x-nx,y,z-nz],[xx-nx,yy,zz-nz]],[[x+nx,y,z+nz],[xx-nx,yy,zz-nz],[xx+nx,yy,zz+nz]]);
+  }
+  this.add(part,role,tris,'stripe',false);
+ }
+ // bocal: carenagem + garganta escura + núcleo de energia (rosto do bocal ligeiramente saliente)
+ nozzle(part,{x=0,y=0,z,r,w,h,len=1,n=2,seg=12,phase=0,role='secondary',lip=true}){
+  const W=w??r,H=h??r;
+  this.loft(part,role,[{z:z+len,x,y,w:W*.8,h:H*.8,n},{z:z+len*.5,x,y,w:W,h:H,n},{z:z+.12,x,y,w:W*1.03,h:H*1.03,n},{z,x,y,w:W*1.1,h:H*1.1,n}],{seg,phase});
+  this.loft(part,'structure',[{z:z+.03,x,y,w:W*.88,h:H*.88,n},{z:z-.035,x,y,w:W*.84,h:H*.84,n}],{seg,phase});
+  this.loft(part,'energy',[{z:z-.02,x,y,w:W*.6,h:H*.6,n},{z:z-.075,x,y,w:W*.5,h:H*.5,n}],{seg,phase});
+  if(lip&&n===2)this.lathe(part,'accent',[[W*1.1,z+.2],[W*1.19,z+.15],[W*1.19,z+.03],[W*1.12,z-.005]],{seg:Math.max(seg,14),cx:x,cy:y});
+ }
+ canopy(part,{z,y,len,w,h,seg=10,phase=Math.PI/10,n=2,front=.55,frame=true}){
+  const lo=this.loft(part,'glass',[
+   {z:z+len*front,y:y-.02,point:true},
+   {z:z+len*front*.55,y:y+h*.08,w:w*.62,h:h*.62,hb:.07,n},
+   {z,y,w,h,hb:.09,n},
+   {z:z-len*(1-front)*.62,y:y-.01,w:w*.82,h:h*.72,hb:.09,n},
+   {z:z-len*(1-front),y:y-.05,point:true}],{seg,phase});
+  if(frame)this.loftStripe(part,'marking',lo,Math.PI/2,.07,1,3,.012);
+  return lo;
+ }
+}
+// interpolação de perfil de casco a partir dos anéis (para posicionar peças sobre a superfície)
+function hullProfile(rings){
+ const R=rings.filter(r=>!r.point).slice().sort((a,b)=>b.z-a.z);
+ const f=(z,fn)=>{if(z>=R[0].z)return fn(R[0]);for(let i=0;i<R.length-1;i++){const a=R[i],b=R[i+1];if(z<=a.z&&z>=b.z){const t=(a.z-z)/((a.z-b.z)||1);return lerp(fn(a),fn(b),t);}}return fn(R[R.length-1]);};
+ return {top:z=>f(z,r=>(r.y||0)+r.h),bot:z=>f(z,r=>(r.y||0)-(r.hb??r.h)),half:z=>f(z,r=>r.w),mid:z=>f(z,r=>r.y||0)};
+}
+
+/* ==========================================================================
+   NAVES E ALTERNATIVAS — construtores geométricos (aprovados em 10/10/2026 — baseline = padrões)
+   Convenção: +Z = proa, +Y = topo, X = lateral. Unidades do laboratório v6.
+   ========================================================================== */
+const ALL=PARTS;
+const P=(id,label,min,max,def,o={})=>({id,label,min,max,def,step:o.step??.01,unit:o.unit??'×',affects:o.affects??ALL});
+const PI=Math.PI;
+
+/* ---- BLUE FALCON ---- */
+function falconA(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.engineSize;
+ const zN=2.0*L,tip=zN+1.55*NL;
+ const rg=[
+  {z:tip,y:-.03,point:true},
+  {z:zN+.8*NL,y:-.02,w:.25*W,h:.12*H,hb:.09*H,n:1.25},
+  {z:zN,y:0,w:.5*W,h:.24*H,hb:.18*H,n:1.5},
+  {z:.85*L,y:.01,w:.68*W,h:.33*H,hb:.24*H,n:1.85},
+  {z:-.75*L,y:.02,w:.76*W,h:.36*H,hb:.27*H,n:2.3},
+  {z:-1.95*L,y:.02,w:.74*W,h:.33*H,hb:.28*H,n:2.8},
+  {z:-2.8*L,y:.02,w:.6*W,h:.26*H,hb:.24*H,n:3.2}];
+ const hp=hullProfile(rg),o={seg:8,phase:0};
+ const nose=S.loft('nose','paint',rg.slice(0,4),o);
+ S.loft('cockpit','paint',rg.slice(3,6),o);
+ S.loft('engines','secondary',rg.slice(5),o);
+ S.loftStripe('nose','accent',nose,0,.09,1,3);S.loftStripe('nose','accent',nose,PI,.09,1,3);
+ S.loftStripe('nose','marking',nose,PI/2,.07,1,3);
+ // tomadas de ar laterais sob a raiz da asa
+ S.sym(()=>S.prism('nose','structure',[[.95*L,-.17*H],[.95*L,.09*H],[.1*L,.12*H],[-.2*L,-.2*H]],{axis:'x',a0:.48*W,a1:.86*W,bevel:.03}));
+ // espinha dorsal
+ S.loft('cockpit','secondary',[
+  {z:.1*L,y:hp.top(.1*L)-.05,point:true},
+  {z:-.5*L,y:hp.top(-.5*L)-.03,w:.12*W,h:.13*H,hb:.08,n:1.5},
+  {z:-1.9*L,y:hp.top(-1.9*L)-.03,w:.14*W,h:.12*H,hb:.08,n:1.5},
+  {z:-2.7*L,y:hp.top(-2.7*L)-.05,w:.08*W,h:.06*H,hb:.06,n:1.5}],{seg:6,phase:PI/2});
+ const cs=p.cockpitSize,zc=.55*L+p.cockpitPos;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.06,len:1.35*cs,w:.25*cs*Math.sqrt(W),h:.25*cs});
+ // asa delta com quebra (strake + painel externo)
+ const s=p.span,sw=p.sweep*D2R,cx=.75*s,tx=2.2*s,crz=-.15*L,tle=crz-(tx-cx)*Math.tan(sw);
+ S.sym(()=>S.with(M(m4.RZ(p.dihedral*D2R),m4.T(.5*W,-.06*H,0)),()=>{
+  S.slab('wings','paint',[[0,.9*L,.17*H],[cx,crz,.14*H],[tx,tle,.05],[tx+.06,tle-.55,.05],[0,-2.2*L,.17*H]],{bevel:.06});
+  S.ribbon('wings','accent',[[cx*.95,.07*H+.02,crz-.32],[tx-.1,.045,tle-.2]],.07);
+  S.slab('wings','secondary',[[tx-.06,tle+.1,.08],[tx+.16,tle-.12,.08],[tx+.18,tle-.64,.08],[tx-.03,tle-.62,.08]],{bevel:.025});
+  const fx=cx+.45*(tx-cx),fz=lerp(crz,tle,.45);
+  S.with(m4.T(fx,0,0),()=>S.prism('wings','secondary',[[fz+.05,0],[fz-.75,0],[fz-.85,.13],[fz-.12,.11]],{axis:'x',a0:-.018,a1:.018,bevel:.006}));
+ }));
+ S.sym(()=>S.prism('cockpit','structure',[[-.35*L,hp.top(-.35*L)-.06],[-.35*L,hp.top(-.35*L)+.035],[-1.05*L,hp.top(-1.05*L)+.01],[-1.15*L,hp.top(-1.15*L)-.06]],{axis:'x',a0:.24*W,a1:.36*W,bevel:.012}));
+ // estabilizadores gêmeos inclinados
+ const fh=p.finHeight,fc=p.finCant*D2R,zf=-2.2*L;
+ S.sym(()=>S.with(M(m4.RZ(-fc),m4.T(.4*W,hp.top(zf)-.14*H,0)),()=>{
+  S.prism('wings','paint',[[-1.4*L,0],[-2.3*L,.95*fh],[-2.85*L,.95*fh],[-2.8*L,0]],{axis:'x',a0:-.045,a1:.045,bevel:.015});
+  S.prism('wings','accent',[[-2.17*L,.8*fh],[-2.3*L,.98*fh],[-2.87*L,.98*fh],[-2.84*L,.8*fh]],{axis:'x',a0:-.058,a1:.058,bevel:.012});
+ }));
+ // propulsão dupla + quilhas ventrais + placa inferior
+ S.sym(()=>S.nozzle('engines',{x:Math.max(.36*W,.3*E),y:0,z:-2.95*L,r:.25*E,len:1.25,seg:12}));
+ S.sym(()=>S.with(M(m4.RZ(.45),m4.T(.3*W,hp.bot(-2.3*L)+.06,0)),()=>S.prism('engines','structure',[[-1.8*L,0],[-2.75*L,0],[-2.95*L,-.34],[-2.45*L,-.3]],{axis:'x',a0:-.035,a1:.035,bevel:.01})));
+ S.slab('cockpit','structure',[[-.42*W,.6*L],[.42*W,.6*L],[.5*W,-1.6*L],[-.5*W,-1.6*L]],{y:hp.bot(-.5*L)+.03,t:.09,bevel:.04});
+}
+function falconB(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,G=p.boomGap,BL=p.boomLength,E=p.engineSize,th=p.tailHeight;
+ const rg=[
+  {z:1.9*L+1.3*NL,y:-.06,point:true},
+  {z:1.9*L+.55*NL,y:-.04,w:.2*W,h:.14*H,hb:.12*H,n:2},
+  {z:1.9*L,y:-.02,w:.36*W,h:.25*H,hb:.2*H,n:2.2},
+  {z:.4*L,y:0,w:.5*W,h:.36*H,hb:.26*H,n:2.4},
+  {z:-.9*L,y:0,w:.46*W,h:.33*H,hb:.25*H,n:2.4},
+  {z:-1.7*L,y:0,w:.28*W,h:.22*H,hb:.18*H,n:2.2}];
+ const hp=hullProfile(rg),o={seg:12,phase:0};
+ const nose=S.loft('nose','paint',rg.slice(0,3),o);
+ S.loft('cockpit','paint',rg.slice(2),o);
+ S.loftStripe('nose','marking',nose,PI/2,.12,1,2);
+ S.prism('nose','structure',[[1.75*L,hp.bot(1.75*L)+.05],[1.75*L,hp.bot(1.75*L)-.09],[.6*L,hp.bot(.6*L)-.08],[.4*L,hp.bot(.4*L)+.05]],{axis:'x',a0:-.17*W,a1:.17*W,bevel:.03});
+ const cs=p.cockpitSize,zc=.75*L+p.cockpitPos;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.07,len:1.5*cs,w:.3*cs,h:.3*cs,front:.6});
+ S.nozzle('engines',{x:0,y:0,z:-1.78*L,r:.13*E,len:.6,seg:12});
+ // vigas laterais (booms) com motores
+ const boom=[
+  {z:2.45*L*BL,x:G,y:-.05,point:true},
+  {z:1.85*L*BL,x:G,y:-.04,w:.16,h:.14*H,hb:.12*H,n:1.8},
+  {z:.85*L*BL,x:G,y:-.02,w:.29,h:.26*H,hb:.22*H,n:2.6},
+  {z:-1.0*L,x:G,y:0,w:.32,h:.29*H,hb:.25*H,n:3},
+  {z:-2.6*L*BL,x:G,y:0,w:.32,h:.28*H,hb:.25*H,n:3},
+  {z:-2.95*L*BL,x:G,y:0,w:.28,h:.25*H,hb:.23*H,n:3}];
+ const bp=hullProfile(boom),fz=bp.top(-2.4*L*BL)-.08,ft=12*D2R;
+ S.sym(()=>{
+  const bf=S.loft('wings','paint',boom.slice(0,4),{seg:10,phase:PI/10});
+  S.loft('engines','secondary',boom.slice(3),{seg:10,phase:PI/10});
+  S.loftStripe('wings','accent',bf,PI/2,.1,1,3);
+  S.nozzle('engines',{x:G,y:0,z:-3.02*L*BL,r:.22*E,len:1.1,seg:12});
+  S.with(M(m4.RZ(ft),m4.T(G,fz,0)),()=>S.prism('wings','paint',[[-1.85*L*BL,0],[-2.45*L*BL,.85*th],[-2.98*L*BL,.85*th],[-2.95*L*BL,0]],{axis:'x',a0:-.05,a1:.05,bevel:.015}));
+  // asa externa + ponta caída
+  const s=p.span,sw=p.sweep*D2R,ox=1.35*s,tle=-.05*L-ox*Math.tan(sw);
+  S.with(m4.T(G+.18,-.05,0),()=>{
+   S.slab('wings','paint',[[-.25,.15*L,.13*H],[ox,tle,.05],[ox+.02,tle-.5,.05],[-.25,-1.15*L,.13*H]],{bevel:.05});
+   S.with(M(m4.RZ(-70*D2R),m4.T(ox,0,0)),()=>S.slab('wings','accent',[[0,tle+.05,.05],[.42,tle-.15,.04],[.42,tle-.5,.04],[0,tle-.52,.05]],{bevel:.03}));
+  });
+ });
+ // ponte central e empenagem horizontal ligando as vigas
+ S.slab('wings','paint',[[-G,.2*L],[0,.55*L],[G,.2*L],[G,-1.3*L],[0,-1.05*L],[-G,-1.3*L]],{y:-.04,t:.15*H,bevel:.05});
+ const fx=G-Math.sin(ft)*.85*th,fy=fz+.85*th*Math.cos(ft);
+ S.slab('wings','secondary',[[-fx-.22,-2.4*L*BL],[fx+.22,-2.4*L*BL],[fx+.28,-2.98*L*BL],[-fx-.28,-2.98*L*BL]],{y:fy-.03,t:.09,bevel:.04});
+}
+function falconC(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.engineSize,BW=p.bankWidth;
+ const rg=[
+  {z:2.4*L+1.1*NL,y:-.03,point:true},
+  {z:2.4*L+.45*NL,y:-.02,w:.2*W,h:.07*H,hb:.045*H,n:1.3},
+  {z:2.4*L,y:-.01,w:.42*W,h:.12*H,hb:.07*H,n:1.35},
+  {z:.9*L,y:0,w:.95*W,h:.27*H,hb:.13*H,n:1.45},
+  {z:-.6*L,y:0,w:1.15*W,h:.31*H,hb:.15*H,n:1.55},
+  {z:-2.0*L,y:0,w:1.05*W,h:.27*H,hb:.15*H,n:1.8},
+  {z:-2.6*L,y:0,w:.95*W,h:.22*H,hb:.14*H,n:2.2}];
+ const hp=hullProfile(rg),o={seg:12,phase:0};
+ const nose=S.loft('nose','paint',rg.slice(0,4),o);
+ S.loft('cockpit','paint',rg.slice(3,5),o);
+ S.loft('engines','secondary',rg.slice(4),o);
+ S.loftStripe('nose','marking',nose,PI/2,.1,1,3);
+ S.loftStripe('nose','accent',nose,0,.06,2,3);S.loftStripe('nose','accent',nose,PI,.06,2,3);
+ // braços em chevron (corpo sustentador)
+ const s=p.span,sw=p.sweep*D2R,rx=.5*W,X=2.0*s,rle=1.5*L,tle=rle-X*Math.tan(sw),tn=Math.tan(sw);
+ S.sym(()=>S.with(m4.T(rx,-.01,0),()=>{
+  S.slab('wings','paint',[[0,rle,.2*H],[X,tle,.06],[X+.05,tle-.7,.06],[0,-1.3*L,.2*H]],{bevel:.06});
+  const yt=x=>lerp(.2*H,.06,x/X)*.5+.012;
+  S.ribbon('wings','accent',[[.2*X,yt(.2*X),rle-.2*X*tn-.2],[.85*X,yt(.85*X),rle-.85*X*tn-.2]],.08);
+  S.with(M(m4.RZ(-p.tipDroop*D2R),m4.T(X+.02,0,0)),()=>S.slab('wings','accent',[[0,tle+.02,.06],[.5,tle-.25,.045],[.5,tle-.72,.045],[0,tle-.72,.06]],{bevel:.03}));
+ }));
+ const cs=p.cockpitSize,zc=.95*L+p.cockpitPos;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.05,len:1.55*cs,w:.33*cs,h:.17*cs,seg:6,phase:PI/6,n:1.6,front:.6});
+ const df=p.dorsalFin;
+ S.with(m4.T(0,hp.top(-1.4*L)-.06,0),()=>S.prism('wings','secondary',[[-.7*L,0],[-1.7*L,.62*df],[-2.25*L,.62*df],[-2.3*L,0]],{axis:'x',a0:-.05,a1:.05,bevel:.015}));
+ // banco de motores com três bocais retangulares
+ const bw=.78*W*BW,bh=.17*H+.05;
+ S.prism('engines','structure',[[-bw,-.13*H],[bw,-.13*H],[bw+.06,bh],[-bw-.06,bh]],{axis:'z',a0:-1.7*L,a1:-2.85*L,bevel:.05});
+ for(const k of [-1,0,1])S.nozzle('engines',{x:k*.62*bw,y:.02,z:-2.95*L,w:.2*bw*E,h:.11*E,n:4.5,len:.9,seg:12,lip:false});
+ S.slab('cockpit','structure',[[-.35*W,1.6*L],[.35*W,1.6*L],[.45*W,-1.9*L],[-.45*W,-1.9*L]],{y:hp.bot(0)+.02,t:.08,bevel:.03});
+}
+
+/* ---- GOLDEN FOX ---- */
+function foxA(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.engineSize;
+ const zN=1.8*L,tip=zN+2.3*NL;
+ const rg=[
+  {z:tip,y:0,point:true},
+  {z:zN+1.45*NL,y:0,w:.075*W,h:.07*H,hb:.065*H,n:2},
+  {z:zN+.55*NL,y:0,w:.16*W,h:.15*H,hb:.12*H,n:2},
+  {z:zN,y:0,w:.23*W,h:.2*H,hb:.16*H,n:2},
+  {z:0,y:.01,w:.33*W,h:.26*H,hb:.2*H,n:2.1},
+  {z:-1.25*L,y:.02,w:.39*W,h:.29*H,hb:.22*H,n:2.2},
+  {z:-2.6*L,y:.02,w:.41*W,h:.29*H,hb:.24*H,n:2.3},
+  {z:-3.05*L,y:.02,w:.36*W,h:.26*H,hb:.22*H,n:2.3}];
+ const hp=hullProfile(rg),o={seg:12,phase:0};
+ const nose=S.loft('nose','paint',rg.slice(0,4),o);
+ const mid=S.loft('cockpit','paint',rg.slice(3,6),o);
+ S.loft('engines','secondary',rg.slice(5),o);
+ S.loftStripe('nose','marking',nose,PI/2,.11,1,3);
+ S.loftStripe('cockpit','marking',mid,PI/2,.09,0,1);
+ for(const t of [0,PI])S.loftStripe('cockpit','accent',mid,t,.07,0,2);
+ // canards
+ const cn=p.canard,zcn=zN+.45*NL;
+ S.sym(()=>S.with(M(m4.RZ(8*D2R),m4.T(.07*W,-.02,zcn)),()=>S.slab('nose','accent',[[0,.3*cn+.05,.05],[.62*cn,-.02,.03],[.66*cn,-.2,.03],[0,-.28,.05]],{bevel:.03})));
+ // delta traseira pequena + winglets
+ const s=p.span,sw=p.sweep*D2R,tx=1.25*s,rle=-.9*L,tle=rle-tx*Math.tan(sw),rte=-2.75*L,wl=p.winglet;
+ S.sym(()=>S.with(M(m4.RZ(-4*D2R),m4.T(.22*W,-.06*H,0)),()=>{
+  S.slab('wings','paint',[[0,rle,.12*H],[tx,tle,.04],[tx,tle-.36,.04],[0,rte,.12*H]],{bevel:.05});
+  S.with(M(m4.RZ(-10*D2R),m4.T(tx-.02,0,0)),()=>S.prism('wings','accent',[[tle+.02,0],[tle-.2,.5*wl],[tle-.4,.54*wl],[tle-.38,0]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+ }));
+ // motor axial dominante + boosters
+ S.nozzle('engines',{x:0,y:.02,z:-3.15*L,r:.3*E,len:1.2,seg:14});
+ const B=p.booster;
+ S.sym(()=>S.nozzle('engines',{x:.47*W,y:.04,z:-2.9*L,r:.13*B,len:1.15,seg:10,lip:false}));
+ // cabine recuada estilo dragster + tomada dorsal
+ const cs=p.cockpitSize,zc=-.55*L+p.cockpitPos,a=zc-.45*cs;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.05,len:1.05*cs,w:.2*cs,h:.21*cs,front:.6});
+ S.with(m4.T(0,hp.top(a-.5)-.05,0),()=>S.prism('cockpit','structure',[[a,0],[a-.12,.15],[a-.95,.12],[a-1.15,0]],{axis:'x',a0:-.1,a1:.1,bevel:.02}));
+ S.with(m4.T(0,hp.bot(-2.5*L)+.05,0),()=>S.prism('engines','structure',[[-2.0*L,0],[-2.95*L,0],[-3.15*L,-.36],[-2.6*L,-.34]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+}
+function foxB(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.podSize,sp=p.sidepod,pg=p.podGap;
+ const rg=[
+  {z:2.6*L+.95*NL,y:-.1,point:true},
+  {z:2.6*L+.35*NL,y:-.08,w:.13*W,h:.09*H,hb:.08*H,n:2.6},
+  {z:2.2*L,y:-.05,w:.19*W,h:.14*H,hb:.12*H,n:2.8},
+  {z:.55*L,y:0,w:.29*W,h:.22*H,hb:.17*H,n:3},
+  {z:-1.25*L,y:0,w:.31*W,h:.24*H,hb:.18*H,n:3},
+  {z:-2.55*L,y:.01,w:.23*W,h:.19*H,hb:.16*H,n:2.6},
+  {z:-3.0*L,y:.01,w:.15*W,h:.13*H,hb:.12*H,n:2.4}];
+ const hp=hullProfile(rg),o={seg:8,phase:PI/8};
+ const nose=S.loft('nose','paint',rg.slice(0,3),o);
+ const tub=S.loft('cockpit','paint',rg.slice(2,5),o);
+ S.loft('engines','secondary',rg.slice(4),o);
+ S.loftStripe('nose','marking',nose,PI/2,.18,1,2);
+ S.loftStripe('cockpit','marking',tub,PI/2,.16,0,1);
+ // aerofólio dianteiro em chevron com placas e pilones
+ const fs=p.foilSpan,zf=2.45*L+.3*NL,yf=-.3;
+ S.slab('nose','secondary',[[-1.7*fs,zf-.05],[0,zf+.3],[1.7*fs,zf-.05],[1.75*fs,zf-.42],[0,zf-.2],[-1.75*fs,zf-.42]],{y:yf,t:.08,bevel:.04});
+ S.ribbon('nose','accent',[[-1.5*fs,yf+.055,zf-.2],[0,yf+.055,zf+.08],[1.5*fs,yf+.055,zf-.2]],.06);
+ S.sym(()=>{
+  S.with(m4.T(1.73*fs,yf,0),()=>S.prism('nose','paint',[[zf+.06,.17],[zf-.5,.15],[zf-.56,-.13],[zf-.02,-.11]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+  S.prism('nose','structure',[[zf+.06,yf],[zf-.24,yf],[zf-.3,hp.bot(zf)+.05],[zf-.02,hp.bot(zf)+.05]],{axis:'x',a0:.04,a1:.1,bevel:.01});
+ });
+ // sidepods com bocas de entrada
+ S.sym(()=>{
+  const x=.27*W+.2*sp;
+  const pod=S.loft('wings','paint',[
+   {z:.55*L,x,y:-.04,w:.14*sp,h:.1*sp,hb:.1*sp,n:3},
+   {z:.35*L,x,y:-.03,w:.22*sp,h:.16*sp,hb:.14*sp,n:3.2},
+   {z:-.9*L,x,y:-.03,w:.23*sp,h:.17*sp,hb:.15*sp,n:3.2},
+   {z:-1.9*L,x:x*.8,y:-.02,w:.12*sp,h:.09*sp,hb:.1*sp,n:3}],{seg:8,phase:PI/8});
+  S.loft('wings','structure',[{z:.6*L,x,y:-.04,w:.105*sp,h:.07*sp,n:3},{z:.5*L,x,y:-.04,w:.105*sp,h:.07*sp,n:3}],{seg:8,phase:PI/8});
+  S.loftStripe('wings','accent',pod,PI/2,.14,1,2);
+ });
+ // pods de propulsão externos ligados por vigas
+ S.sym(()=>{
+  const pod=S.loft('engines','paint',[
+   {z:-1.1*L,x:pg,y:0,point:true},
+   {z:-1.45*L,x:pg,y:0,w:.17*E,h:.17*E,n:2},
+   {z:-2.2*L,x:pg,y:0,w:.26*E,h:.26*E,n:2},
+   {z:-2.95*L,x:pg,y:0,w:.25*E,h:.25*E,n:2}],{seg:12,phase:0});
+  S.loftStripe('engines','accent',pod,PI/2,.12,1,3);
+  S.nozzle('engines',{x:pg,y:0,z:-3.05*L,r:.21*E,len:.8,seg:12});
+  S.slab('wings','secondary',[[.18*W,-1.55*L],[pg,-1.95*L],[pg,-2.5*L],[.18*W,-2.3*L]],{y:0,t:.09,bevel:.03});
+ });
+ // asa traseira elevada (dois elementos) sobre pilone pescoço-de-cisne
+ const rh=p.rearWingHeight,rs=p.rearWingSpan,yw=hp.top(-2.6*L)+.2+.55*rh,half=(pg+.18)*rs;
+ S.slab('wings','paint',[[-half,-2.55*L],[half,-2.55*L],[half,-3.02*L],[-half,-3.02*L]],{y:yw,t:.09,bevel:.04});
+ S.slab('wings','accent',[[-half,-2.95*L],[half,-2.95*L],[half,-3.28*L],[-half,-3.28*L]],{y:yw+.065,t:.05,bevel:.03});
+ S.sym(()=>S.with(m4.T(half,0,0),()=>S.prism('wings','secondary',[[-2.45*L,yw+.24],[-3.35*L,yw+.27],[-3.35*L,yw-.22],[-2.5*L,yw-.18]],{axis:'x',a0:-.03,a1:.03,bevel:.01})));
+ S.prism('wings','structure',[[-2.2*L,hp.top(-2.2*L)-.05],[-2.62*L,yw+.02],[-2.9*L,yw+.02],[-2.6*L,hp.top(-2.6*L)-.05]],{axis:'x',a0:-.035,a1:.035,bevel:.01});
+ // cockpit aberto com santantônio
+ const cs=p.cockpitSize,zc=.3*L+p.cockpitPos,zh=zc-.55*cs,yh=hp.top(zh)-.03;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.04,len:.95*cs,w:.19*cs,h:.17*cs,front:.6});
+ const U=[[-.2,0],[-.2,.26],[-.1,.36],[.1,.36],[.2,.26],[.2,0],[.12,0],[.12,.22],[.07,.28],[-.07,.28],[-.12,.22],[-.12,0]];
+ S.prism('cockpit','structure',U.map(([x,y])=>[x*cs,yh+y*cs]),{axis:'z',a0:zh,a1:zh-.12,bevel:.02});
+ const fy=Math.min(hp.bot(-.5*L),-.03-.15*sp)+.03;
+ S.slab('cockpit','structure',[[-.27*W-.38*sp,.35*L],[.27*W+.38*sp,.35*L],[.22*W+.3*sp,-1.8*L],[-.22*W-.3*sp,-1.8*L]],{y:fy,t:.06,bevel:.03});
+}
+function foxC(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,Rg=p.ringSize,RL=p.ringLength;
+ const rg=[
+  {z:2.0*L+.95*NL,y:-.05,point:true},
+  {z:2.0*L+.4*NL,y:-.03,w:.2*W,h:.15*H,hb:.11*H,n:1.8},
+  {z:2.0*L,y:-.01,w:.36*W,h:.27*H,hb:.2*H,n:2},
+  {z:.7*L,y:.02,w:.6*W,h:.42*H,hb:.3*H,n:2.3},
+  {z:-.6*L,y:.02,w:.62*W,h:.42*H,hb:.31*H,n:2.4},
+  {z:-1.8*L,y:.02,w:.48*W,h:.34*H,hb:.27*H,n:2.4},
+  {z:-2.45*L,y:.02,w:.34*W,h:.25*H,hb:.21*H,n:2.2}];
+ const hp=hullProfile(rg),o={seg:10,phase:PI/10};
+ const nose=S.loft('nose','paint',rg.slice(0,3),o);
+ const mid=S.loft('cockpit','paint',rg.slice(2,5),o);
+ S.loft('engines','secondary',rg.slice(4),o);
+ S.loftStripe('nose','marking',nose,PI/2,.12,1,2);
+ for(const t of [PI*.1,PI*.9])S.loftStripe('cockpit','accent',mid,t,.06,0,2);
+ S.prism('nose','structure',[[1.85*L,hp.bot(1.85*L)+.05],[1.85*L,hp.bot(1.85*L)-.08],[.8*L,hp.bot(.8*L)-.07],[.6*L,hp.bot(.6*L)+.05]],{axis:'x',a0:-.17*W,a1:.17*W,bevel:.03});
+ // asas de enflechamento negativo com aletas de ponta
+ const s=p.span,fsw=p.forwardSweep*D2R,tx=2.05*s,rLE=-.45*L,rTE=-1.95*L,tLE=rLE+tx*Math.tan(fsw),tTE=tLE-.5;
+ S.sym(()=>S.with(M(m4.RZ(5*D2R),m4.T(.4*W,-.1*H,0)),()=>{
+  S.slab('wings','paint',[[0,rLE,.15*H],[tx,tLE,.05],[tx,tTE,.05],[0,rTE,.15*H]],{bevel:.06});
+  S.ribbon('wings','accent',[[.15*tx,.07*H+.02,lerp(rLE,tLE,.15)-.12],[.9*tx,.045,lerp(rLE,tLE,.9)-.12]],.07);
+  S.with(m4.T(tx-.03,0,0),()=>S.prism('wings','accent',[[tLE+.05,0],[tLE-.15,.42],[tTE+.02,.45],[tTE-.02,0]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+ }));
+ // "orelhas": barbatanas dorsais inclinadas atrás da cabine
+ const eh=p.earHeight,ec=p.earCant*D2R,ze=-.15*L;
+ S.sym(()=>S.with(M(m4.RZ(-ec),m4.T(.2*W,hp.top(ze)-.08,0)),()=>{
+  S.prism('cockpit','paint',[[ze+.15,0],[ze-.35,.9*eh],[ze-.55,.86*eh],[ze-1.15*L,0]],{axis:'x',a0:-.05,a1:.05,bevel:.02});
+  S.prism('cockpit','accent',[[ze,.08],[ze-.33,.68*eh],[ze-.45,.65*eh],[ze-.9*L,.08]],{axis:'x',a0:-.065,a1:.065,bevel:.015});
+ }));
+ const cs=p.cockpitSize,zc=.95*L+p.cockpitPos;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.07,len:1.2*cs,w:.3*cs,h:.28*cs,front:.58});
+ // motor único em duto anelar (ducted ring) com três suportes
+ const ze2=-2.25*L,ri=Math.max(.5*Rg,.42*W+.06),ro=ri+.12*Rg+.05,z1=ze2-.95*RL;
+ S.nozzle('engines',{x:0,y:.02,z:ze2-.5,r:.27*Rg,len:1.1,seg:12});
+ S.lathe('engines','paint',[[ri,ze2],[ro,ze2-.12],[ro+.02,z1+.16],[ri+.03,z1]],{seg:16,cy:.02});
+ S.lathe('engines','accent',[[ro-.01,ze2-.2],[ro+.035,ze2-.25],[ro+.035,ze2-.42],[ro-.01,ze2-.46]],{seg:16,cy:.02});
+ for(const a of [PI/2,PI/2+TAU/3,PI/2+2*TAU/3])S.with(M(m4.RZ(a),m4.T(0,.02,0)),()=>S.slab('engines','structure',[[.22*Rg,ze2-.02],[ri+.04,ze2-.06],[ri+.04,ze2-.42],[.22*Rg,ze2-.5]],{t:.06,bevel:.015}));
+ S.with(m4.T(0,hp.bot(-1.4*L)+.05,0),()=>S.prism('engines','structure',[[-.8*L,0],[-1.7*L,0],[-1.95*L,-.3],[-1.3*L,-.28]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+}
+
+/* ---- WILD GOOSE ---- */
+function gooseA(p,S){
+ const L=p.length,W=p.width,H=p.height,A=p.armor,E=p.engineSize,Rr=p.rearScale,pin=.15;
+ const rg=[
+  {z:1.95*L,y:-.02,w:.92*W,h:.34*H,hb:.32*H,n:3,pinch:pin},
+  {z:1.25*L,y:0,w:1.05*W,h:.47*H,hb:.36*H,n:3.4,pinch:pin},
+  {z:-.6*L,y:0,w:1.12*W,h:.5*H,hb:.38*H,n:3.6,pinch:pin},
+  {z:-1.75*L,y:0,w:1.12*W,h:.48*H,hb:.38*H,n:3.6,pinch:pin},
+  {z:-2.45*L,y:0,w:1.05*W*Rr,h:.46*H,hb:.38*H,n:3.8,pinch:.12},
+  {z:-2.75*L,y:0,w:.95*W*Rr,h:.4*H,hb:.34*H,n:3.8,pinch:.1}];
+ const hp=hullProfile(rg),o={seg:8,phase:PI/8};
+ S.loft('nose','paint',rg.slice(0,2),o);
+ const mid=S.loft('cockpit','paint',rg.slice(1,4),o);
+ S.loft('engines','secondary',rg.slice(3),o);
+ S.loftStripe('cockpit','marking',mid,PI/2,.2,0,2);
+ // aríete em V: perfil lateral inclinado varrido ao longo de X com cisalhamento
+ const RW=p.ramWidth,rs=p.ramSweep*D2R,rr=p.ramRake*D2R;
+ const zt=1.95*L+.1,yT=hp.top(1.95*L)+.08,yB=hp.bot(1.95*L)-.12,lip=zt+(yT-yB)*Math.tan(rr),tr=.16*A+.08,half=1.38*W*RW;
+ const sh=x=>-Math.abs(x)*Math.tan(rs);
+ S.sweep('nose','structure',[[zt,yT],[lip,yB],[lip-.16-tr,yB],[zt-tr,yT-.05]],[{a:-half,du:sh(half),ins:.05},{a:-half+.05,du:sh(half-.05)},{a:0},{a:half-.05,du:sh(half-.05)},{a:half,du:sh(half),ins:.05}],'x');
+ for(const u of [.3,.62]){
+  const dz=lip-zt,dy=yB-yT,dl=Math.hypot(dz,dy),nz=-dy/dl,ny=dz/dl,tz=dz/dl*.06,ty=dy/dl*.06,e=.05;
+  const c=[lerp(zt,lip,u)+nz*.03,lerp(yT,yB,u)+ny*.03],hb=half-.12;
+  const bar=[[c[0]-tz-nz*e,c[1]-ty-ny*e],[c[0]+tz-nz*e,c[1]+ty-ny*e],[c[0]+tz+nz*e,c[1]+ty+ny*e],[c[0]-tz+nz*e,c[1]-ty+ny*e]];
+  S.sweep('nose','accent',bar,[{a:-hb,du:sh(hb)},{a:0},{a:hb,du:sh(hb)}],'x');
+ }
+ S.sym(()=>S.prism('nose','marking',[[-.32*W,.12*H],[-.66*W,.12*H],[-.7*W,.2*H],[-.36*W,.21*H]],{axis:'z',a0:1.6*L,a1:1.95*L+.035,bevel:.012}));
+ // saias blindadas + placa superior + friso
+ const SD=p.skirtDepth,hx=1.08*W,yb=-.42*H-.22*SD;
+ S.sym(()=>{
+  S.prism('wings','secondary',[[1.45*L,.16*H],[1.62*L,-.18*H],[1.3*L,yb],[-2.25*L,yb],[-2.6*L,-.2*H],[-2.42*L,.16*H]],{axis:'x',a0:hx-.08,a1:hx+.14*A,bevel:.03});
+  S.prism('wings','paint',[[1.2*L,.36*H],[1.32*L,.04],[-2.0*L,.04],[-2.12*L,.36*H]],{axis:'x',a0:hx-.04,a1:hx+.22*A,bevel:.03});
+  S.prism('wings','accent',[[1.25*L,yb+.14],[1.32*L,yb+.06],[-2.1*L,yb+.06],[-2.16*L,yb+.14]],{axis:'x',a0:hx+.1*A,a1:hx+.16*A,bevel:.01});
+ });
+ // cabine em fenda sob capô blindado
+ const cs=p.cockpitSize,zc=.7*L+p.cockpitPos,yc=hp.top(zc)-.05;
+ S.canopy('cockpit',{z:zc,y:yc,len:1.05*cs,w:.44*cs,h:.15*cs,seg:8,phase:PI/8,n:3,front:.55,frame:false});
+ S.prism('cockpit','secondary',[[zc+.08*cs,yc+.19*cs],[zc-.62*cs,yc+.25*cs],[zc-.8*cs-.3,yc-.02],[zc-.05,yc-.02]],{axis:'x',a0:-.5*cs,a1:.5*cs,bevel:.04});
+ // bloco de propulsão 2×2 com gaiola traseira
+ const ex=Math.max(.45*W,.27*E+.02),ey=Math.max(.17*H,.26*E),ez=-2.88*L,ro=.21*E*1.19;
+ for(const sx of [-1,1])for(const sy of [-1,1])S.nozzle('engines',{x:sx*ex,y:sy*ey,z:ez,r:.21*E,len:1.0,seg:12});
+ const fxo=ex+ro+.12,fyo=ey+ro+.1,z0=-2.55*L,z1=-2.86*L;
+ S.prism('engines','structure',[[-fxo,ey+ro],[fxo,ey+ro],[fxo,fyo],[-fxo,fyo]],{axis:'z',a0:z0,a1:z1,bevel:.02});
+ S.prism('engines','structure',[[-fxo,-fyo],[fxo,-fyo],[fxo,-ey-ro],[-fxo,-ey-ro]],{axis:'z',a0:z0,a1:z1,bevel:.02});
+ S.sym(()=>S.prism('engines','structure',[[ex+ro,-fyo+.01],[fxo,-fyo+.01],[fxo,fyo-.01],[ex+ro,fyo-.01]],{axis:'z',a0:z0,a1:z1,bevel:.02}));
+}
+function gooseB(p,S){
+ const L=p.length,W=p.width,H=p.height,SP=p.sponsonSize,SG=p.sponsonGap,SL=p.sponsonLength,A=p.armor,T=p.turretSize,E=p.engineSize;
+ const rg=[
+  {z:2.3*L,y:-.12,w:.6*W,h:.12*H,hb:.16*H,n:2.6},
+  {z:1.55*L,y:0,w:.75*W,h:.34*H,hb:.26*H,n:3},
+  {z:-1.0*L,y:0,w:.8*W,h:.38*H,hb:.28*H,n:3.2},
+  {z:-2.4*L,y:0,w:.78*W,h:.36*H,hb:.28*H,n:3.2},
+  {z:-2.8*L,y:0,w:.68*W,h:.3*H,hb:.25*H,n:3}];
+ const hp=hullProfile(rg),o={seg:8,phase:PI/8};
+ S.loft('nose','paint',rg.slice(0,2),o);
+ S.loft('cockpit','paint',rg.slice(1,3),o);
+ S.loft('engines','secondary',rg.slice(2),o);
+ // sponsons (flutuadores laterais de comprimento total)
+ const xs=.8*W+SG+.44*SP,sy=-.08,bu=p.bumper;
+ const spon=[
+  {z:2.55*L*SL,x:xs,y:sy-.04,w:.32*SP,h:.2*SP,hb:.3*SP,n:3.6},
+  {z:2.25*L*SL,x:xs,y:sy,w:.44*SP,h:.34*SP,hb:.38*SP,n:4},
+  {z:-1.0*L,x:xs,y:sy,w:.44*SP,h:.34*SP,hb:.38*SP,n:4},
+  {z:-2.55*L*SL,x:xs,y:sy,w:.44*SP,h:.34*SP,hb:.38*SP,n:4},
+  {z:-2.85*L*SL,x:xs,y:sy,w:.38*SP,h:.29*SP,hb:.33*SP,n:3.8}];
+ S.sym(()=>{
+  const f=S.loft('wings','paint',spon.slice(0,3),o);
+  S.loft('engines','secondary',spon.slice(2),o);
+  S.loftStripe('wings','accent',f,PI/2,.2,1,2);
+  S.prism('nose','structure',[[xs-.47*SP,sy-.42*SP],[xs+.47*SP,sy-.42*SP],[xs+.5*SP,sy+.22*SP],[xs-.5*SP,sy+.22*SP]],{axis:'z',a0:2.3*L*SL,a1:2.62*L*SL+.32*bu,bevel:.06});
+  S.prism('nose','accent',[[xs-.4*SP,sy-.05],[xs+.4*SP,sy-.05],[xs+.4*SP,sy+.04],[xs-.4*SP,sy+.04]],{axis:'z',a0:2.4*L*SL,a1:2.62*L*SL+.32*bu+.025,bevel:.01});
+  S.slab('wings','secondary',[[.6*W,.9*L],[xs,.7*L],[xs,-1.7*L],[.6*W,-1.9*L]],{y:.02,t:.24*A,bevel:.05});
+  S.nozzle('engines',{x:xs,y:sy,z:-2.95*L*SL,r:.25*E,len:1.0,seg:12});
+ });
+ S.slab('nose','secondary',[[-xs,2.35*L*SL],[xs,2.35*L*SL],[xs,1.5*L],[-xs,1.5*L]],{y:sy-.3*SP,t:.1,bevel:.04});
+ S.slab('engines','secondary',[[-.56*W,-1.1*L],[.56*W,-1.1*L],[.5*W,-2.35*L],[-.5*W,-2.35*L]],{y:hp.top(-1.7*L)-.02,t:.1*A+.04,bevel:.05});
+ // torre/cúpula blindada com visor em fenda e escotilha
+ const zt=.35*L+p.turretPos,yb=hp.top(zt)-.07;
+ S.loft('cockpit','paint',[
+  {z:zt+.78*T,y:yb,point:true},
+  {z:zt+.58*T,y:yb+.05,w:.42*T,h:.22*T,hb:.06,n:2.2},
+  {z:zt+.1*T,y:yb+.04,w:.64*T,h:.38*T,hb:.08,n:2.2},
+  {z:zt-.5*T,y:yb+.02,w:.6*T,h:.33*T,hb:.08,n:2.2},
+  {z:zt-.82*T,y:yb,w:.38*T,h:.16*T,hb:.06,n:2.2}],{seg:8,phase:PI/8});
+ S.loft('cockpit','glass',[
+  {z:zt+.8*T,y:yb+.15*T,point:true},
+  {z:zt+.7*T,y:yb+.16*T,w:.4*T,h:.06*T,n:3},
+  {z:zt+.48*T,y:yb+.17*T,w:.58*T,h:.07*T,n:3},
+  {z:zt+.22*T,y:yb+.17*T,point:true}],{seg:8,phase:PI/8});
+ S.with(M(m4.RX(-PI/2),m4.T(0,yb+.04+.33*T,zt-.15*T)),()=>S.lathe('cockpit','structure',[[.1*T,0],[.17*T,0],[.17*T,.06],[.1*T,.07]],{seg:12}));
+ S.with(m4.T(-.36*T,yb+.04,zt-.55*T),()=>S.prism('cockpit','structure',[[.04,0],[-.06,0],[-.2,.62*T+.25],[-.16,.62*T+.25]],{axis:'x',a0:-.018,a1:.018,bevel:.006}));
+ S.nozzle('engines',{x:0,y:0,z:-2.95*L,r:.36*p.mainEngine,len:1.1,seg:14});
+}
+function gooseC(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.engineSize,Rr=p.rearScale;
+ const rg=[
+  {z:2.2*L+.9*NL,y:-.12,w:.24*W,h:.1*H,hb:.13*H,n:2.4,pinch:.1},
+  {z:2.2*L+.5*NL,y:-.08,w:.4*W,h:.22*H,hb:.22*H,n:2.4,pinch:.18},
+  {z:1.4*L,y:-.02,w:.62*W,h:.4*H,hb:.3*H,n:2.5,pinch:.24},
+  {z:.3*L,y:.02,w:.82*W,h:.56*H,hb:.34*H,n:2.6,pinch:.28},
+  {z:-.7*L,y:.04,w:.92*W,h:.63*H,hb:.36*H,n:2.8,pinch:.3},
+  {z:-2.0*L,y:.02,w:.8*W*Rr,h:.48*H,hb:.34*H,n:2.8,pinch:.25},
+  {z:-2.7*L,y:0,w:.6*W*Rr,h:.36*H,hb:.3*H,n:2.6,pinch:.2}];
+ const hp=hullProfile(rg),o={seg:8,phase:0};
+ S.loft('nose','paint',rg.slice(0,3),o);
+ const mid=S.loft('cockpit','paint',rg.slice(2,5),o);
+ S.loft('engines','secondary',rg.slice(4),o);
+ for(const t of [PI*.25,PI*.75])S.loftStripe('cockpit','accent',mid,t,.07,0,2);
+ // ombreiras de impacto (ponto mais largo da nave)
+ const sh=p.shoulderSize,sc=p.shoulderCant*D2R,zs=-.45*L+p.shoulderPos,xh=hp.half(zs)*.72;
+ S.sym(()=>S.with(M(m4.RZ(-sc),m4.T(xh,.04,zs)),()=>{
+  S.prism('wings','secondary',[[0,-.3],[.6*sh,-.27],[.8*sh,.06],[.62*sh,.38*sh+.06],[0,.36]],{axis:'z',a0:1.05*sh,a1:-1.3*sh,bevel:.1});
+  S.prism('wings','paint',[[.42*sh,-.3],[.86*sh,-.22],[.98*sh,.1],[.74*sh,.46*sh+.06],[.4*sh,.42*sh+.05]],{axis:'z',a0:1.2*sh,a1:-1.42*sh,bevel:.13});
+  S.prism('wings','accent',[[.84*sh,-.17],[.96*sh,-.15],[1.0*sh,.08],[.9*sh,.07]],{axis:'z',a0:1.0*sh,a1:-1.2*sh,bevel:.02});
+  for(const zz of [.55*sh,-.15*sh,-.85*sh])S.loft('wings','structure',[{z:zz+.11,x:.62*sh,y:.4*sh+.02,w:.07,h:.04,n:1.4},{z:zz,x:.62*sh,y:.4*sh+.1,point:true}],{seg:4,phase:PI/4});
+ }));
+ // presas inferiores de abalroamento
+ const tl=p.tuskLength,zf=2.2*L+.9*NL;
+ S.sym(()=>S.slab('nose','structure',[[.12*W,1.3*L,.2],[.34*W,1.45*L,.2],[.3*W,zf+.55*tl,.06],[.2*W,zf+.35*tl,.08]],{y:hp.bot(1.8*L)+.08,bevel:.04}));
+ // capô frontal (cowl) e cabine corcunda atrás dele
+ const CH=p.cowlHeight;
+ S.prism('cockpit','secondary',[[1.65*L,hp.top(1.65*L)-.12],[1.0*L,hp.top(1.0*L)+.16*CH],[.45*L,hp.top(.45*L)+.13*CH],[.35*L,hp.top(.35*L)-.12]],{axis:'x',a0:-.36*W,a1:.36*W,bevel:.05});
+ const cs=p.cockpitSize,zc=-.05*L;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.08,len:.95*cs,w:.3*cs,h:.2*cs,seg:8,phase:PI/8,n:2.4,front:.6});
+ S.prism('engines','secondary',[[-.75*L,hp.top(-.75*L)-.06],[-1.0*L,hp.top(-1.0*L)+.13],[-2.25*L,hp.top(-2.25*L)+.09],[-2.55*L,hp.top(-2.55*L)-.06]],{axis:'x',a0:-.045,a1:.045,bevel:.015});
+ // trio de bocais em triângulo
+ const rho=Math.max(.36*W,.38*E),ez=-2.85*L;
+ for(const a of [PI/2,PI/2+TAU/3,PI/2+2*TAU/3])S.nozzle('engines',{x:Math.cos(a)*rho,y:.02+Math.sin(a)*rho*.85,z:ez,r:.24*E,len:1.0,seg:12});
+ S.slab('cockpit','structure',[[-.5*W,1.0*L],[.5*W,1.0*L],[.6*W,-1.8*L],[-.6*W,-1.8*L]],{y:hp.bot(-.4*L)+.04,t:.1,bevel:.04});
+}
+
+/* ---- registro: naves, alternativas, intenções e parâmetros ---- */
+const SHIPS=[
+ {id:'falcon',name:'BLUE FALCON',paint:'#2468f6',accent:'#58e9ff',roster:'B · C · B',identity:'Corrida aerodinâmica, equilibrada e versátil.'},
+ {id:'fox',name:'GOLDEN FOX',paint:'#f8c32c',accent:'#edfaff',roster:'D · A · D',identity:'Leve e ágil, voltada à aceleração.'},
+ {id:'goose',name:'WILD GOOSE',paint:'#218e54',accent:'#b476ff',roster:'A · B · C',identity:'Robusta e pesada, voltada ao combate físico.'}];
+const SHIP_MAP=Object.fromEntries(SHIPS.map(s=>[s.id,s]));
+const VARIANT_CODES=['A','B','C'];
+const VARIANTS={
+ falcon:{
+  A:{name:'Lança Delta',tag:'Interceptor de dardo com asa delta quebrada',build:falconA,
+   intent:'Fuselagem única dominante com proa quinada (seção em losango), cabine em gota sobre espinha dorsal, asa delta com strake, estabilizadores gêmeos inclinados e dupla propulsão integrada. Leitura: flecha contínua.',
+   params:[P('length','Comprimento da fuselagem',.82,1.22,1),P('width','Largura do casco central',.8,1.3,1),P('height','Altura / espessura do casco',.75,1.35,1),
+    P('noseLength','Comprimento da proa',.7,1.45,1,{affects:['nose']}),P('span','Envergadura',.75,1.35,1,{affects:['wings']}),P('sweep','Enflechamento externo',28,58,45,{step:1,unit:'°',affects:['wings']}),
+    P('dihedral','Diedro das asas',-8,12,3,{step:.5,unit:'°',affects:['wings']}),P('cockpitSize','Volume da cabine',.75,1.35,1,{affects:['cockpit']}),P('cockpitPos','Posição da cabine',-.5,.6,0,{unit:'u',affects:['cockpit']}),
+    P('finHeight','Altura dos estabilizadores',.6,1.5,1,{affects:['wings']}),P('finCant','Inclinação dos estabilizadores',0,38,18,{step:1,unit:'°',affects:['wings']}),P('engineSize','Tamanho dos motores',.75,1.35,1,{affects:['engines']})]},
+  B:{name:'Bi-Viga',tag:'Cápsula central + duas vigas-motor (twin-boom)',build:falconB,
+   intent:'Arquitetura em três corpos: cápsula de cabine curta e alta, duas vigas longas com motores e deriva própria, ponte alar e empenagem horizontal que fecha um vão vazado. Leitura superior em tridente com espaço negativo.',
+   params:[P('length','Comprimento da cápsula',.82,1.2,1),P('width','Largura da cápsula',.8,1.3,1),P('height','Altura dos cascos',.75,1.35,1),
+    P('noseLength','Comprimento da proa',.7,1.4,1,{affects:['nose']}),P('boomGap','Afastamento das vigas',1.05,1.8,1.32,{unit:'u',affects:['wings','engines']}),P('boomLength','Comprimento das vigas',.8,1.15,1,{affects:['wings','engines']}),
+    P('span','Envergadura externa',.7,1.4,1,{affects:['wings']}),P('sweep','Enflechamento externo',-15,45,22,{step:1,unit:'°',affects:['wings']}),P('cockpitSize','Volume da cabine',.8,1.35,1,{affects:['cockpit']}),
+    P('cockpitPos','Posição da cabine',-.5,.5,0,{unit:'u',affects:['cockpit']}),P('tailHeight','Altura da empenagem',.6,1.5,1,{affects:['wings']}),P('engineSize','Tamanho dos motores',.75,1.35,1,{affects:['engines']})]},
+  C:{name:'Ponta de Flecha',tag:'Corpo sustentador em chevron, perfil baixíssimo',build:falconC,
+   intent:'Corpo achatado de bordas cortantes que se funde a braços em chevron com pontas caídas; cabine facetada embutida, deriva dorsal única e banco de três bocais retangulares. Leitura frontal: lâmina fina; superior: ponta de flecha recortada.',
+   params:[P('length','Comprimento do corpo',.82,1.2,1),P('width','Largura do corpo central',.8,1.25,1),P('height','Espessura do corpo',.75,1.4,1),
+    P('noseLength','Comprimento da proa',.7,1.4,1,{affects:['nose']}),P('span','Envergadura dos braços',.8,1.25,1,{affects:['wings']}),P('sweep','Enflechamento do chevron',48,64,57,{step:1,unit:'°',affects:['wings']}),
+    P('tipDroop','Queda das pontas',0,80,40,{step:1,unit:'°',affects:['wings']}),P('cockpitSize','Volume da cabine',.75,1.35,1,{affects:['cockpit']}),P('cockpitPos','Posição da cabine',-.5,.5,0,{unit:'u',affects:['cockpit']}),
+    P('dorsalFin','Deriva dorsal',.3,1.4,1,{affects:['wings']}),P('bankWidth','Largura do banco de motores',.75,1.25,1,{affects:['engines']}),P('engineSize','Tamanho dos bocais',.75,1.35,1,{affects:['engines']})]}
+ },
+ fox:{
+  A:{name:'Agulha',tag:'Dragster-agulha com canards e cabine recuada',build:foxA,
+   intent:'Fuselagem extremamente longa e fina, proa-agulha, canards dianteiros, pequena delta traseira com winglets, cabine bem recuada e um motor axial dominante com dois boosters. Leitura: linha reta tensionada, massa concentrada atrás.',
+   params:[P('length','Comprimento da fuselagem',.85,1.2,1),P('width','Largura da fuselagem',.8,1.3,1),P('height','Altura da fuselagem',.8,1.35,1),
+    P('noseLength','Comprimento da agulha',.7,1.5,1,{affects:['nose']}),P('span','Envergadura',.75,1.35,1,{affects:['wings']}),P('sweep','Enflechamento',38,58,50,{step:1,unit:'°',affects:['wings']}),
+    P('canard','Tamanho dos canards',.4,1.5,1,{affects:['nose']}),P('cockpitSize','Volume da cabine',.75,1.35,1,{affects:['cockpit']}),P('cockpitPos','Posição da cabine',-.6,.6,0,{unit:'u',affects:['cockpit']}),
+    P('engineSize','Motor principal',.75,1.35,1,{affects:['engines']}),P('booster','Boosters laterais',.5,1.5,1,{affects:['engines']}),P('winglet','Altura dos winglets',.3,1.5,1,{affects:['wings']})]},
+  B:{name:'Ampulheta',tag:'Monoposto de aerofólios com pods externos',build:foxB,
+   intent:'Cintura estreita entre um aerofólio dianteiro largo e um conjunto traseiro largo (dois pods de propulsão em vigas + asa elevada em pilone). Cockpit aberto com santantônio. Leitura superior em ampulheta; perfil com asa alta.',
+   params:[P('length','Comprimento do monocoque',.85,1.2,1),P('width','Largura do monocoque',.8,1.3,1),P('height','Altura do monocoque',.8,1.35,1),
+    P('noseLength','Comprimento da proa',.6,1.5,1,{affects:['nose']}),P('foilSpan','Envergadura do aerofólio dianteiro',.7,1.35,1,{affects:['nose']}),P('sidepod','Volume dos sidepods',.6,1.4,1,{affects:['wings','cockpit']}),
+    P('podGap','Afastamento dos pods',1.2,1.9,1.45,{unit:'u',affects:['engines','wings']}),P('podSize','Tamanho dos pods/motores',.7,1.35,1,{affects:['engines']}),P('rearWingHeight','Altura da asa traseira',.3,1.4,.9,{affects:['wings']}),
+    P('rearWingSpan','Envergadura da asa traseira',.75,1.3,1,{affects:['wings']}),P('cockpitSize','Volume da cabine',.75,1.35,1,{affects:['cockpit']}),P('cockpitPos','Posição da cabine',-.5,.5,0,{unit:'u',affects:['cockpit']})]},
+  C:{name:'Kitsune',tag:'Gota compacta, asa invertida e duto anelar',build:foxC,
+   intent:'Corpo curto em gota com cabine avançada, asas de enflechamento negativo com aletas, duas "orelhas" dorsais inclinadas e um único motor dentro de um duto anelar sustentado por três suportes. Leitura superior em X; traseira circular.',
+   params:[P('length','Comprimento do corpo',.85,1.2,1),P('width','Largura do corpo',.8,1.25,1),P('height','Altura do corpo',.8,1.3,1),
+    P('noseLength','Comprimento da proa',.6,1.5,1,{affects:['nose']}),P('span','Envergadura',.75,1.35,1,{affects:['wings']}),P('forwardSweep','Enflechamento negativo',0,35,20,{step:1,unit:'°',affects:['wings']}),
+    P('earHeight','Altura das orelhas',.4,1.5,1,{affects:['cockpit']}),P('earCant','Abertura das orelhas',0,40,22,{step:1,unit:'°',affects:['cockpit']}),P('cockpitSize','Volume da cabine',.75,1.3,1,{affects:['cockpit']}),
+    P('cockpitPos','Posição da cabine',-.5,.4,0,{unit:'u',affects:['cockpit']}),P('ringSize','Diâmetro do duto/motor',.75,1.35,1,{affects:['engines']}),P('ringLength','Comprimento do duto',.6,1.5,1,{affects:['engines']})]}
+ },
+ goose:{
+  A:{name:'Aríete',tag:'Casco-caixa com arado em V e saias blindadas',build:gooseA,
+   intent:'Casco retangular de laterais planas, arado frontal em V inclinado mais largo que o casco, saias blindadas profundas, cabine em fenda sob capô e bloco de quatro motores em gaiola. Leitura: mais largo na frente, massa baixa.',
+   params:[P('length','Comprimento do casco',.85,1.2,1),P('width','Largura do casco',.85,1.3,1),P('height','Altura do casco',.8,1.3,1),
+    P('ramWidth','Largura do aríete',.8,1.35,1,{affects:['nose']}),P('ramSweep','Abertura em V do aríete',0,35,24,{step:1,unit:'°',affects:['nose']}),P('ramRake','Inclinação da face do aríete',12,55,32,{step:1,unit:'°',affects:['nose']}),
+    P('armor','Espessura da blindagem',.6,1.6,1,{affects:['nose','wings']}),P('skirtDepth','Profundidade das saias',.5,1.5,1,{affects:['wings']}),P('cockpitSize','Volume da cabine',.75,1.3,1,{affects:['cockpit']}),
+    P('cockpitPos','Posição da cabine',-.6,.5,0,{unit:'u',affects:['cockpit']}),P('engineSize','Tamanho dos motores',.75,1.3,1,{affects:['engines']}),P('rearScale','Proporção traseira',.8,1.25,1,{affects:['engines']})]},
+  B:{name:'Tanque Flutuante',tag:'Casco central entre dois sponsons de comprimento total',build:gooseB,
+   intent:'Dois flutuadores laterais retangulares, longos e independentes, com para-choques maciços, ligados ao casco por pontes; torre/cúpula blindada com visor em fenda e três motores (dois nos sponsons + um central). Leitura: retângulo largo e uniforme.',
+   params:[P('length','Comprimento do casco',.85,1.2,1),P('width','Largura do casco central',.8,1.25,1),P('height','Altura do casco',.8,1.3,1),
+    P('sponsonSize','Seção dos sponsons',.75,1.3,1,{affects:['wings','engines','nose']}),P('sponsonGap','Afastamento dos sponsons',0,.45,.15,{unit:'u',affects:['wings','engines','nose']}),P('sponsonLength','Comprimento dos sponsons',.85,1.12,1,{affects:['wings','engines','nose']}),
+    P('bumper','Massa dos para-choques',.4,1.5,1,{affects:['nose']}),P('armor','Espessura da blindagem',.6,1.6,1,{affects:['wings','engines']}),P('turretSize','Volume da torre/cabine',.75,1.3,1,{affects:['cockpit']}),
+    P('turretPos','Posição da torre',-.6,.6,0,{unit:'u',affects:['cockpit']}),P('engineSize','Motores dos sponsons',.75,1.3,1,{affects:['engines']}),P('mainEngine','Motor central',.7,1.35,1,{affects:['engines']})]},
+  C:{name:'Ombreira',tag:'Brigão corcunda com ombreiras de impacto',build:gooseC,
+   intent:'Casco em losango com espinha elevada (corcunda), ombreiras de impacto inclinadas que formam o ponto mais largo no meio da nave, presas inferiores, capô frontal que esconde a cabine e trio de bocais em triângulo. Leitura superior em losango.',
+   params:[P('length','Comprimento do casco',.85,1.2,1),P('width','Largura do casco',.85,1.3,1),P('height','Altura da corcunda',.8,1.35,1),
+    P('noseLength','Comprimento da proa',.5,1.5,1,{affects:['nose','cockpit']}),P('shoulderSize','Tamanho das ombreiras',.7,1.4,1,{affects:['wings']}),P('shoulderCant','Inclinação das ombreiras',0,35,16,{step:1,unit:'°',affects:['wings']}),
+    P('shoulderPos','Posição das ombreiras',-.6,.6,0,{unit:'u',affects:['wings']}),P('tuskLength','Comprimento das presas',.3,1.5,1,{affects:['nose']}),P('cockpitSize','Volume da cabine',.75,1.3,1,{affects:['cockpit']}),
+    P('cowlHeight','Altura do capô',.4,1.5,1,{affects:['cockpit']}),P('engineSize','Tamanho dos bocais',.75,1.3,1,{affects:['engines']}),P('rearScale','Proporção traseira',.8,1.25,1,{affects:['engines']})]}
+ }
+};
+function paramDefs(ship,v){return VARIANTS[ship][v].params;}
+function defaultsFor(ship,v){return Object.fromEntries(paramDefs(ship,v).map(d=>[d.id,d.def]));}
+function defaultParams(){const o={};for(const s of SHIPS){o[s.id]={};for(const v of VARIANT_CODES)o[s.id][v]=defaultsFor(s.id,v);}return o;}
+function fnv(arr,h=2166136261){for(let i=0;i<arr.length;i++){h=Math.imul(h^Math.round(arr[i]*1000),16777619)>>>0;}return h;}
+function buildMesh(ship,v,params){
+ const defs=paramDefs(ship,v),p={};
+ for(const d of defs){const x=Number(params?.[d.id]);p[d.id]=Number.isFinite(x)?clamp(x,d.min,d.max):d.def;}
+ const S=new Builder();VARIANTS[ship][v].build(p,S);
+ return {ship,variant:v,params:p,shapes:S.shapes};
+}
+function meshReport(mesh){
+ let min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity],tris=0,h=2166136261;const parts={};
+ for(const k of PARTS)parts[k]={triangles:0,shapes:0,hash:2166136261};
+ for(const s of mesh.shapes){
+  const n=s.positions.length/9;tris+=n;h=fnv(s.positions,h);
+  const pr=parts[s.part];pr.triangles+=n;pr.shapes++;pr.hash=fnv(s.positions,pr.hash);
+  for(let i=0;i<s.positions.length;i+=3)for(let k=0;k<3;k++){const x=s.positions[i+k];if(x<min[k])min[k]=x;if(x>max[k])max[k]=x;}
+ }
+ for(const k of PARTS)parts[k].fingerprint=parts[k].hash.toString(16).padStart(8,'0');
+ return {triangles:tris,shapes:mesh.shapes.length,bounds:{min,max},fingerprint:h.toString(16).padStart(8,'0'),parts};
+}
+/* @gminus-approved-craft-geometry:end v1 */
+
+/* ==========================================================================
+   ESTADO, CONFIGURAÇÃO E VALIDAÇÃO JSON
+   ========================================================================== */
+const VIEWS={
+ threeQuarter:{label:'¾ frontal',yaw:.62,elev:.36},front:{label:'Frente',yaw:0,elev:.1},rear:{label:'Traseira',yaw:Math.PI,elev:.12},
+ side:{label:'Perfil',yaw:Math.PI/2,elev:.02},top:{label:'Superior',yaw:Math.PI,elev:1.553},bottom:{label:'Inferior',yaw:0,elev:-1.553}};
+const VIEW_KEYS=Object.keys(VIEWS);
+const ENUMS={mode:['single','compare','gallery'],view:[...VIEW_KEYS,'custom'],render:['flux','neutral','silhouette'],background:['vitrine','light','gray'],
+ focus:['all',...PARTS],focusMode:['highlight','isolate'],light:['fixed','camera'],ink:['v6','continuous','structural'],pigment:['v6','identity']};
+const ELEV_MAX=1.553,ZOOM_MIN=.45,ZOOM_MAX=3;
+const DEFAULT_INSPECTION={mode:'single',view:'threeQuarter',yaw:VIEWS.threeQuarter.yaw,elev:VIEWS.threeQuarter.elev,zoom:1,autoRotate:false,turntable:0,
+ render:'flux',background:'vitrine',focus:'all',focusMode:'highlight',light:'fixed',ink:'v6',pigment:'v6'};
+const FINISH_DEFS=[P('glow','Brilho das emissões',0,2,1,{affects:[]}),P('saturation','Saturação',-.38,.38,0,{unit:'',affects:[]})];
+const DEFAULT_FINISH={glow:1,saturation:0};
+const DEFAULT_SELECTION={ship:'falcon',variants:{falcon:'A',fox:'A',goose:'A'}};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const state={ship:DEFAULT_SELECTION.ship,variants:{...DEFAULT_SELECTION.variants},params:defaultParams(),insp:{...DEFAULT_INSPECTION},finish:{...DEFAULT_FINISH}};
+const r4=x=>Math.round(x*1e4)/1e4;
+function activeVariant(){return state.variants[state.ship];}
+function exportConfig(){
+ const params={};for(const s of SHIPS){params[s.id]={};for(const v of VARIANT_CODES){params[s.id][v]={};for(const d of paramDefs(s.id,v))params[s.id][v][d.id]=r4(state.params[s.id][v][d.id]);}}
+ const insp={...state.insp,yaw:r4(((state.insp.yaw%TAU)+TAU)%TAU),elev:r4(state.insp.elev),zoom:r4(state.insp.zoom),turntable:r4(((state.insp.turntable%TAU)+TAU)%TAU)};
+ return {schema:LAB_SCHEMA,schemaVersion:SCHEMA_VERSION,artDirection:ART_DIRECTION,geometryApproval:'none',
+  selection:{ship:state.ship,variant:activeVariant(),variants:{...state.variants}},params,inspection:insp,finish:{glow:r4(state.finish.glow),saturation:r4(state.finish.saturation)}};
+}
+const isObj=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
+function exactKeys(o,keys,where){
+ if(!isObj(o))throw new Error(`${where}: deve ser um objeto.`);
+ for(const k of Object.keys(o))if(!keys.includes(k))throw new Error(`${where}: chave desconhecida "${k}".`);
+ for(const k of keys)if(!(k in o))throw new Error(`${where}: chave obrigatória ausente "${k}".`);
+}
+function num(x,min,max,where){if(typeof x!=='number'||!Number.isFinite(x))throw new Error(`${where}: deve ser um número finito.`);if(x<min||x>max)throw new Error(`${where}: ${x} fora do intervalo [${min}, ${max}].`);return x;}
+// Valida tudo antes de alterar qualquer estado (aplicação atômica). Lança Error com mensagem em português.
+function parseConfig(text){
+ let o;try{o=JSON.parse(text);}catch(e){throw new Error('JSON sintaticamente inválido — '+e.message);}
+ if(!isObj(o))throw new Error('A configuração deve ser um objeto JSON.');
+ const TOP=['schema','schemaVersion','artDirection','geometryApproval','selection','params','inspection','finish'];
+ for(const k of Object.keys(o))if(!TOP.includes(k))throw new Error(`Chave desconhecida "${k}" no nível superior.`);
+ if(o.schema!==LAB_SCHEMA)throw new Error(`"schema" deve ser "${LAB_SCHEMA}".`);
+ if(o.schemaVersion!==SCHEMA_VERSION)throw new Error(`Versão de esquema incompatível (esperado ${SCHEMA_VERSION}).`);
+ if(o.artDirection!==ART_DIRECTION)throw new Error(`"artDirection" é fixa: "${ART_DIRECTION}". Este laboratório não troca a direção artística.`);
+ if('geometryApproval' in o&&o.geometryApproval!=='none')throw new Error('"geometryApproval" deve ser "none": aprovações não são registradas pelo laboratório.');
+ // seleção
+ if(!isObj(o.selection))throw new Error('"selection" ausente ou inválida.');
+ for(const k of Object.keys(o.selection))if(!['ship','variant','variants'].includes(k))throw new Error(`selection: chave desconhecida "${k}".`);
+ const ship=o.selection.ship;if(!SHIP_MAP[ship])throw new Error(`selection.ship: identificador de nave desconhecido "${ship}".`);
+ exactKeys(o.selection.variants,SHIPS.map(s=>s.id),'selection.variants');
+ const variants={};for(const s of SHIPS){const v=o.selection.variants[s.id];if(!VARIANT_CODES.includes(v))throw new Error(`selection.variants.${s.id}: alternativa deve ser A, B ou C.`);variants[s.id]=v;}
+ if('variant' in o.selection&&o.selection.variant!==variants[ship])throw new Error('selection.variant inconsistente com selection.variants da nave ativa.');
+ // parâmetros (todas as nove alternativas, completas)
+ exactKeys(o.params,SHIPS.map(s=>s.id),'params');
+ const params={};
+ for(const s of SHIPS){exactKeys(o.params[s.id],VARIANT_CODES,`params.${s.id}`);params[s.id]={};
+  for(const v of VARIANT_CODES){const defs=paramDefs(s.id,v),src=o.params[s.id][v];exactKeys(src,defs.map(d=>d.id),`params.${s.id}.${v}`);
+   params[s.id][v]={};for(const d of defs)params[s.id][v][d.id]=num(src[d.id],d.min,d.max,`params.${s.id}.${v}.${d.id}`);}}
+ // inspeção (opcional)
+ let insp=null;
+ if('inspection' in o){
+  exactKeys(o.inspection,Object.keys(DEFAULT_INSPECTION),'inspection');const I=o.inspection;insp={};
+  for(const k of Object.keys(ENUMS)){if(!ENUMS[k].includes(I[k]))throw new Error(`inspection.${k}: valor inválido "${I[k]}".`);insp[k]=I[k];}
+  insp.yaw=num(I.yaw,-1e6,1e6,'inspection.yaw');insp.elev=num(I.elev,-ELEV_MAX,ELEV_MAX,'inspection.elev');insp.zoom=num(I.zoom,ZOOM_MIN,ZOOM_MAX,'inspection.zoom');
+  insp.turntable=num(I.turntable,-1e6,1e6,'inspection.turntable');
+  if(typeof I.autoRotate!=='boolean')throw new Error('inspection.autoRotate: deve ser true ou false.');insp.autoRotate=I.autoRotate;
+ }
+ let finish=null;
+ if('finish' in o){exactKeys(o.finish,FINISH_DEFS.map(d=>d.id),'finish');finish={};for(const d of FINISH_DEFS)finish[d.id]=num(o.finish[d.id],d.min,d.max,`finish.${d.id}`);}
+ return {ship,variants,params,insp,finish};
+}
+function applyParsed(c){
+ state.ship=c.ship;state.variants=c.variants;state.params=c.params;
+ if(c.insp)state.insp=c.insp;
+ if(c.finish)state.finish=c.finish;
+}
+
+/* ==========================================================================
+   RENDERIZADOR WebGL — adaptação do passe D (Toon Vector Flux) da v6
+   ========================================================================== */
+const canvas=document.getElementById('view');
+const D_BG={vitrine:[.035,.034,.083],light:[.86,.87,.9],gray:[.4,.41,.44]};
+const D_INK=[.025,.036,.087],D_WIRE=[1,.22,.61],NEUTRAL_WIRE=[.16,.17,.2],SIL_FILL=[.05,.055,.075];
+const PODIUM_COL=[[.055,.09,.16],[.32,.94,.87],[.95,.27,.61]];
+const INK_T=.032,LIGHT_V6=[.45,.93,.64],VIEW_V6=[.31,.65,.73];
+const NEUTRAL=[[.62,.63,.65],[.38,.39,.42],[.82,.83,.85],[.2,.2,.23],[.28,.28,.31],[.72,.72,.74],[.9,.9,.9]];
+const VERT=`precision highp float;
+attribute vec3 a_pos;attribute vec3 a_normal;attribute vec3 a_onormal;
+uniform mat4 u_vp;uniform mat4 u_model;uniform mat3 u_rot;uniform float u_outline;uniform float u_wire;uniform float u_smooth;
+varying vec3 v_normal;
+void main(){
+ vec3 n=normalize(a_normal+vec3(0.0001));
+ vec3 on=normalize(mix(n,a_onormal,u_smooth)+vec3(0.0001));
+ vec3 p=a_pos+on*u_outline+n*(u_wire*.012);
+ v_normal=normalize(u_rot*n);
+ gl_Position=u_vp*(u_model*vec4(p,1.0));
+}`;
+const FRAG=`precision highp float;
+uniform vec3 u_color;uniform float u_role;uniform float u_outline;uniform float u_wire;uniform float u_opacity;uniform float u_flat;uniform float u_isFloor;
+uniform vec3 u_light;uniform vec3 u_view;uniform vec3 u_ink;uniform vec3 u_wireColor;
+varying vec3 v_normal;
+void main(){
+ if(u_wire>0.5){gl_FragColor=vec4(u_wireColor,u_opacity);return;}
+ if(u_outline>0.0){gl_FragColor=vec4(u_ink,u_opacity);return;}
+ if(u_flat>0.5||u_isFloor>0.5){gl_FragColor=vec4(u_color,u_opacity);return;}
+ vec3 N=normalize(v_normal),L=normalize(u_light),V=normalize(u_view);
+ float nd=max(dot(N,L),0.0);float rim=pow(1.0-max(dot(N,V),0.0),3.0);
+ vec3 c=u_color;
+ float steps=floor((.25+.78*nd)*3.2)/3.0;
+ c=c*(.44+1.18*steps);
+ vec2 uv=mod(gl_FragCoord.xy,vec2(5.0));
+ float dotv=step(length(uv-2.5),1.35);
+ c*=1.0-.14*dotv*(1.0-steps);
+ c+=vec3(.19,.06,.15)*rim*.54;
+ if(u_role>4.5&&u_role<6.5)c+=vec3(.19,.34,.30);
+ gl_FragColor=vec4(pow(clamp(c,0.0,1.0),vec3(.82)),u_opacity);
+}`;
+const GLR={gl:null,prog:null,a:{},u:{},ok:false,lost:false,reason:'',live:0,podium:null,version:'—',frame:{draws:0,tris:0}};
+function showFailure(msg){const f=document.getElementById('failure');document.getElementById('failureText').textContent=msg;f.hidden=false;}
+function hideFailure(){document.getElementById('failure').hidden=true;}
+function glInit(){
+ let gl=null;
+ try{gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true,depth:true,stencil:false,powerPreference:'high-performance'})||canvas.getContext('experimental-webgl');}catch(e){gl=null;}
+ if(!gl){GLR.ok=false;GLR.reason='O navegador não forneceu um contexto WebGL (desativado, bloqueado ou sem suporte de GPU).';showFailure(GLR.reason);return false;}
+ GLR.gl=gl;return glSetup();
+}
+function glSetup(){
+ const gl=GLR.gl;
+ try{
+  const sh=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error('Shader: '+gl.getShaderInfoLog(s));return s;};
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VERT));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FRAG));gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('Programa: '+gl.getProgramInfoLog(pr));
+  gl.useProgram(pr);GLR.prog=pr;
+  GLR.a={p:gl.getAttribLocation(pr,'a_pos'),n:gl.getAttribLocation(pr,'a_normal'),o:gl.getAttribLocation(pr,'a_onormal')};
+  GLR.u={};for(const k of ['vp','model','rot','outline','wire','smooth','color','role','opacity','flat','isFloor','light','view','ink','wireColor'])GLR.u[k]=gl.getUniformLocation(pr,'u_'+k);
+  gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  GLR.version=String(gl.getParameter(gl.VERSION)||'WebGL');
+  GLR.podium=buildPodium();GLR.ok=true;GLR.lost=false;GLR.reason='';hideFailure();
+ }catch(e){GLR.ok=false;GLR.reason=String(e&&e.message||e);showFailure(GLR.reason);}
+ return GLR.ok;
+}
+function mkBuf(data){const gl=GLR.gl,b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);GLR.live++;return b;}
+function delBuf(b){if(b&&GLR.gl&&!GLR.lost)GLR.gl.deleteBuffer(b);GLR.live=Math.max(0,GLR.live-1);}
+function interleave(list){
+ let n=0;for(const s of list)n+=s.positions.length/3;
+ const out=new Float32Array(n*9);let o=0;
+ for(const s of list){const P=s.positions,N=s.normals,O=s.onormals||s.normals;for(let i=0;i<P.length;i+=3){out[o++]=P[i];out[o++]=P[i+1];out[o++]=P[i+2];out[o++]=N[i];out[o++]=N[i+1];out[o++]=N[i+2];out[o++]=O[i];out[o++]=O[i+1];out[o++]=O[i+2];}}
+ return {data:out,count:n};
+}
+// arestas vetoriais (regra da v6: comprimento ≥ 0,4 e diedro com cos ≤ 0,80; vidro e faixas excluídos)
+function featureEdges(shape){
+ if(shape.kind==='stripe'||shape.roleName==='glass')return null;
+ const p=shape.positions,n=shape.normals,table=new Map(),key=(x,y,z)=>Math.round(x*500)+','+Math.round(y*500)+','+Math.round(z*500);
+ for(let i=0;i<p.length;i+=9){
+  const v=[[p[i],p[i+1],p[i+2]],[p[i+3],p[i+4],p[i+5]],[p[i+6],p[i+7],p[i+8]]],nn=[n[i],n[i+1],n[i+2]];
+  for(let j=0;j<3;j++){const a=v[j],b=v[(j+1)%3],ka=key(...a),kb=key(...b),id=ka<kb?ka+'|'+kb:kb+'|'+ka;const e=table.get(id);if(e)e.normals.push(nn);else table.set(id,{a,b,normals:[nn]});}
+ }
+ const pos=[],nor=[];
+ for(const e of table.values()){
+  if(Math.hypot(e.a[0]-e.b[0],e.a[1]-e.b[1],e.a[2]-e.b[2])<.4)continue;
+  const c=e.normals.length<2?-1:e.normals[0][0]*e.normals[1][0]+e.normals[0][1]*e.normals[1][1]+e.normals[0][2]*e.normals[1][2];
+  if(c>.8)continue;const m=e.normals[0];for(const v of [e.a,e.b]){pos.push(...v);nor.push(...m);}
+ }
+ return pos.length?{positions:new Float32Array(pos),normals:new Float32Array(nor)}:null;
+}
+function uploadMesh(mesh){
+ const groups=new Map(),edges=new Map();
+ for(const s of mesh.shapes){
+  const stripe=s.kind==='stripe',k=s.part+'|'+s.role+'|'+(stripe?1:0);
+  if(!groups.has(k))groups.set(k,{part:s.part,role:s.role,stripe,list:[]});groups.get(k).list.push(s);
+  const e=featureEdges(s);if(e){if(!edges.has(s.part))edges.set(s.part,[]);edges.get(s.part).push(e);}
+ }
+ const batches=[...groups.values()].map(g=>{const il=interleave(g.list);return {part:g.part,role:g.role,stripe:g.stripe,buf:mkBuf(il.data),count:il.count};});
+ const lines=[...edges.entries()].map(([part,list])=>{const il=interleave(list);return {part,buf:mkBuf(il.data),count:il.count};});
+ return {batches,lines};
+}
+function disposeGpu(g){if(!g)return;for(const b of g.batches)delBuf(b.buf);for(const l of g.lines)delBuf(l.buf);}
+function buildPodium(){
+ const ring=(r1,r2,y,seg=72)=>{const pos=[],nor=[];for(let i=0;i<seg;i++){const a=i/seg*TAU,b=(i+1)/seg*TAU,A=[Math.cos(a)*r1,y,Math.sin(a)*r1],B=[Math.cos(b)*r1,y,Math.sin(b)*r1],C=[Math.cos(b)*r2,y,Math.sin(b)*r2],D=[Math.cos(a)*r2,y,Math.sin(a)*r2];for(const v of [A,B,C,A,C,D]){pos.push(...v);nor.push(0,1,0);}}return interleave([{positions:new Float32Array(pos),normals:new Float32Array(nor)}]);};
+ return [ring(0,1,0),ring(1.012,1.024,.004),ring(.765,.776,.006)].map((il,i)=>({buf:mkBuf(il.data),count:il.count,color:PODIUM_COL[i]}));
+}
+/* cache de malhas: reconstruído somente quando os parâmetros daquela alternativa mudam */
+const cache=new Map();
+function getEntry(ship,v){
+ const k=ship+':'+v,pk=JSON.stringify(state.params[ship][v]);let e=cache.get(k);
+ if(e&&e.pk!==pk){disposeGpu(e.gpu);cache.delete(k);e=null;}
+ if(!e){const mesh=buildMesh(ship,v,state.params[ship][v]);e={ship,variant:v,pk,mesh,report:meshReport(mesh),gpu:null};cache.set(k,e);}
+ if(GLR.ok&&!GLR.lost&&!e.gpu)e.gpu=uploadMesh(e.mesh);
+ return e;
+}
+function dropGpuCache(deleteBuffers){for(const e of cache.values()){if(deleteBuffers)disposeGpu(e.gpu);e.gpu=null;}}
+/* paleta D (fórmula exata da v6, estilo índice 3) */
+function rgbHex(h){const n=parseInt(h.slice(1),16);return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255];}
+const mix3=(a,b,t)=>a.map((v,i)=>v*(1-t)+b[i]*t);
+function colorFor(ship,role){
+ const paint=rgbHex(SHIP_MAP[ship].paint),I=state.insp;
+ let c;
+ if(I.render==='neutral')c=NEUTRAL[role].slice();
+ else{const base=I.pigment==='identity'?paint:mix3(paint,[.96,.37,.68],.55);
+  c=[base,mix3(paint,[.06,.032,.13],.68),[.44,.98,.96],[.052,.031,.11],[.13,.06,.17],[1,.78,.35],[1,.95,.78]][role].slice();}
+ if(role===ROLES.energy)c=c.map(x=>Math.min(1,x*(.7+.3*state.finish.glow)));
+ if(I.render!=='neutral'){const lum=c[0]*.21+c[1]*.72+c[2]*.07,sat=state.finish.saturation;c=c.map(x=>clamp(lum+(x-lum)*(1+sat),0,1));}
+ return c;
+}
+/* câmera */
+function mat4Persp(fovy,aspect,near,far){const f=1/Math.tan(fovy/2),o=new Float32Array(16);o[0]=f/aspect;o[5]=f;o[10]=(far+near)/(near-far);o[11]=-1;o[14]=2*far*near/(near-far);return o;}
+const v3={sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],norm:a=>{const l=Math.hypot(a[0],a[1],a[2])||1;return [a[0]/l,a[1]/l,a[2]/l];},cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2]};
+function camBasis(yaw,elev){const f=[Math.sin(yaw)*Math.cos(elev),Math.sin(elev),Math.cos(yaw)*Math.cos(elev)],x=v3.norm(v3.cross([0,1,0],f)),y=v3.cross(f,x);return {z:f,x,y};}
+function lookAt(eye,target){const z=v3.norm(v3.sub(eye,target)),x=v3.norm(v3.cross([0,1,0],z)),y=v3.cross(z,x),o=new Float32Array(16);
+ o[0]=x[0];o[1]=y[0];o[2]=z[0];o[4]=x[1];o[5]=y[1];o[6]=z[1];o[8]=x[2];o[9]=y[2];o[10]=z[2];o[12]=-v3.dot(x,eye);o[13]=-v3.dot(y,eye);o[14]=-v3.dot(z,eye);o[15]=1;return o;}
+const REF=camBasis(.59,.49);
+const toRef=v=>{const n=v3.norm(v);return [v3.dot(n,REF.x),v3.dot(n,REF.y),v3.dot(n,REF.z)];};
+const LIGHT_REF=toRef(LIGHT_V6),VIEW_REF=toRef(VIEW_V6);
+function lightingFor(){
+ if(state.insp.light!=='camera')return {L:LIGHT_V6,V:VIEW_V6};
+ const b=camBasis(state.insp.yaw,state.insp.elev),f=r=>[b.x[0]*r[0]+b.y[0]*r[1]+b.z[0]*r[2],b.x[1]*r[0]+b.y[1]*r[1]+b.z[1]*r[2],b.x[2]*r[0]+b.y[2]*r[1]+b.z[2]*r[2]];
+ return {L:f(LIGHT_REF),V:f(VIEW_REF)};
+}
+/* layout dos viewports (px CSS, origem no topo) */
+function layoutItems(cw,ch){
+ const m=state.insp.mode,out=[];
+ if(m==='single')out.push({ship:state.ship,variant:activeVariant(),x:0,y:0,w:cw,h:ch});
+ else if(m==='compare'){const cols=cw/Math.max(1,ch)>=1.15;
+  for(let i=0;i<3;i++){const v=VARIANT_CODES[i];if(cols){const a=Math.round(cw*i/3),b=Math.round(cw*(i+1)/3);out.push({ship:state.ship,variant:v,x:a,y:0,w:b-a,h:ch});}
+   else{const a=Math.round(ch*i/3),b=Math.round(ch*(i+1)/3);out.push({ship:state.ship,variant:v,x:0,y:a,w:cw,h:b-a});}}}
+ else for(let r=0;r<3;r++)for(let c=0;c<3;c++){const x0=Math.round(cw*c/3),x1=Math.round(cw*(c+1)/3),y0=Math.round(ch*r/3),y1=Math.round(ch*(r+1)/3);out.push({ship:SHIPS[r].id,variant:VARIANT_CODES[c],x:x0,y:y0,w:x1-x0,h:y1-y0});}
+ return out;
+}
+// escala de referência comum: o mesmo raio/distância para todos os modelos de um modo (sem normalizar o tamanho de cada nave)
+function groupFrame(entries){
+ let minY=Infinity,maxY=-Infinity,R=0,foot=0;
+ for(const e of entries){const b=e.report.bounds;minY=Math.min(minY,b.min[1]);maxY=Math.max(maxY,b.max[1]);}
+ const hy=(maxY-minY)/2;
+ for(const e of entries){const b=e.report.bounds,hx=(b.max[0]-b.min[0])/2,hz=(b.max[2]-b.min[2])/2;R=Math.max(R,Math.hypot(hx,hy,hz));foot=Math.max(foot,hx,hz);}
+ return {R,ty:(minY+maxY)/2,groundY:minY-.3,podiumR:foot*1.04};
+}
+function modelMatrix(e,turn){const b=e.report.bounds,cx=(b.min[0]+b.max[0])/2,cz=(b.min[2]+b.max[2])/2;return M(m4.T(-cx,0,-cz),m4.RY(turn));}
+function rotMat3(turn){const c=Math.cos(turn),s=Math.sin(turn);return new Float32Array([c,0,-s,0,1,0,s,0,c]);}
+function cameraFor(rect,fr){
+ const I=state.insp,aspect=rect.w/Math.max(1,rect.h),fovY=40*D2R,fovX=2*Math.atan(Math.tan(fovY/2)*aspect),fov=Math.min(fovY,fovX);
+ const dist=Math.max(fr.R*1.12,fr.R/Math.sin(fov/2)*(I.mode==='single'?.84:1)*I.zoom),target=[0,fr.ty,0];
+ const eye=[Math.sin(I.yaw)*Math.cos(I.elev)*dist,fr.ty+Math.sin(I.elev)*dist,Math.cos(I.yaw)*Math.cos(I.elev)*dist];
+ return {vp:m4.mul([...mat4Persp(fovY,aspect,Math.max(.05,dist-fr.R*2.2),dist+fr.R*3+8)],[...lookAt(eye,target)]),eye};
+}
+function bindBuf(b){const gl=GLR.gl,a=GLR.a;gl.bindBuffer(gl.ARRAY_BUFFER,b.buf);gl.vertexAttribPointer(a.p,3,gl.FLOAT,false,36,0);gl.enableVertexAttribArray(a.p);
+ if(a.n>=0){gl.vertexAttribPointer(a.n,3,gl.FLOAT,false,36,12);gl.enableVertexAttribArray(a.n);}if(a.o>=0){gl.vertexAttribPointer(a.o,3,gl.FLOAT,false,36,24);gl.enableVertexAttribArray(a.o);}}
+function draw(b,mode,tris){GLR.gl.drawArrays(mode,0,b.count);GLR.frame.draws++;if(tris)GLR.frame.tris+=b.count/3;}
+function setU(o){const gl=GLR.gl,u=GLR.u;
+ gl.uniform1f(u.outline,o.outline||0);gl.uniform1f(u.wire,o.wire||0);gl.uniform1f(u.opacity,o.opacity??1);gl.uniform1f(u.flat,o.flat?1:0);gl.uniform1f(u.isFloor,o.floor?1:0);
+ gl.uniform1f(u.role,o.role??0);if(o.color)gl.uniform3fv(u.color,o.color);}
+function renderModel(e,model,rot){
+ const gl=GLR.gl,u=GLR.u,I=state.insp,sil=I.render==='silhouette',focus=I.focus,iso=I.focusMode==='isolate';
+ gl.uniformMatrix4fv(u.model,false,new Float32Array(model));gl.uniformMatrix3fv(u.rot,false,rot);
+ gl.uniform1f(u.smooth,I.ink==='v6'?0:1);gl.uniform3fv(u.ink,sil?SIL_FILL:D_INK);
+ const shown=e.gpu.batches.filter(b=>focus==='all'||!iso||b.part===focus),dim=b=>focus!=='all'&&b.part!==focus;
+ const ink=(depthWrite)=>{gl.enable(gl.CULL_FACE);gl.cullFace(gl.FRONT);
+  for(const b of shown){if(b.stripe)continue;const d=dim(b);if(depthWrite&&d)continue;gl.depthMask(depthWrite);bindBuf(b);setU({outline:INK_T,opacity:d?.08:1});draw(b,gl.TRIANGLES,true);}
+  gl.cullFace(gl.BACK);gl.disable(gl.CULL_FACE);gl.depthMask(true);};
+ const fill=(dimPass)=>{gl.disable(gl.CULL_FACE);gl.enable(gl.POLYGON_OFFSET_FILL);gl.polygonOffset(1,1);
+  for(const b of shown){if(dim(b)!==dimPass)continue;gl.depthMask(!dimPass);bindBuf(b);
+   const neutralRole=I.render==='neutral'?0:b.role;setU({color:sil?SIL_FILL:colorFor(e.ship,b.role),role:neutralRole,opacity:dimPass?.16:1,flat:sil});draw(b,gl.TRIANGLES,true);}
+  gl.disable(gl.POLYGON_OFFSET_FILL);gl.depthMask(true);};
+ if(I.ink==='structural'){fill(false);ink(true);fill(true);}else{ink(false);fill(false);fill(true);}
+ if(!sil){gl.uniform3fv(u.wireColor,I.render==='neutral'?NEUTRAL_WIRE:D_WIRE);gl.depthMask(false);
+  for(const l of e.gpu.lines){if(focus!=='all'&&iso&&l.part!==focus)continue;bindBuf(l);setU({wire:1,opacity:focus!=='all'&&l.part!==focus?.1:.46});draw(l,gl.LINES,false);}
+  gl.depthMask(true);}
+}
+function renderPodium(fr){
+ const gl=GLR.gl,u=GLR.u;
+ gl.uniformMatrix4fv(u.model,false,new Float32Array(M(m4.S(fr.podiumR,1,fr.podiumR),m4.T(0,fr.groundY,0))));gl.uniformMatrix3fv(u.rot,false,rotMat3(0));
+ gl.disable(gl.CULL_FACE);gl.depthMask(true);
+ for(const p of GLR.podium){bindBuf(p);setU({color:p.color,floor:true});draw(p,gl.TRIANGLES,true);}
+}
+let lastLayout=[];
+function drawScene(){
+ const gl=GLR.gl;GLR.frame={draws:0,tris:0};
+ const dpr=Math.min(window.devicePixelRatio||1,2),cw=Math.max(1,canvas.clientWidth),ch=Math.max(1,canvas.clientHeight),W=Math.max(1,Math.floor(cw*dpr)),H=Math.max(1,Math.floor(ch*dpr));
+ if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}
+ const items=layoutItems(cw,ch),entries=items.map(it=>getEntry(it.ship,it.variant)),fr=groupFrame(entries),I=state.insp;
+ const sil=I.render==='silhouette',bg=sil?D_BG.light:D_BG[I.background],lt=lightingFor(),sx=W/cw,sy=H/ch;
+ gl.useProgram(GLR.prog);gl.uniform3fv(GLR.u.light,lt.L);gl.uniform3fv(GLR.u.view,lt.V);
+ gl.disable(gl.SCISSOR_TEST);gl.viewport(0,0,W,H);gl.clearColor(bg[0],bg[1],bg[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ gl.enable(gl.SCISSOR_TEST);
+ items.forEach((it,i)=>{
+  const x=Math.round(it.x*sx),y=Math.round(H-(it.y+it.h)*sy),w=Math.max(1,Math.round(it.w*sx)),h=Math.max(1,Math.round(it.h*sy));
+  gl.viewport(x,y,w,h);gl.scissor(x,y,w,h);
+  const c=items.length>1&&(i%2===1)?bg.map(v=>v+(v>.5?-.025:.018)):bg;gl.clearColor(c[0],c[1],c[2],1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const cam=cameraFor(it,fr);gl.uniformMatrix4fv(GLR.u.vp,false,new Float32Array(cam.vp));
+  if(!sil&&cam.eye[1]>fr.groundY+.05)renderPodium(fr);
+  renderModel(entries[i],modelMatrix(entries[i],I.turntable),rotMat3(I.turntable));
+ });
+ gl.disable(gl.SCISSOR_TEST);
+ lastLayout=items;
+}
+
+/* ==========================================================================
+   INTERFACE
+   ========================================================================== */
+const $=id=>document.getElementById(id);
+const ui={ship:{},variant:{},mode:{},view:{},render:{},focus:{},focusMode:{},bg:{},light:{},ink:{},pigment:{},sliders:{},finish:{},sliderKey:''};
+let needsRender=true,draftDirty=false;
+const requestRender=()=>{needsRender=true;};
+function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;}
+function mkBtn(label,sub,onClick,cls=''){const b=el('button','btn '+cls);b.type='button';b.innerHTML=label+(sub?`<span class="small">${sub}</span>`:'');b.setAttribute('aria-pressed','false');b.addEventListener('click',onClick);return b;}
+function buildSeg(id,map,items,onPick,cls=''){const box=$(id);box.replaceChildren(...items.map(([key,label,sub,title])=>{const b=mkBtn(label,sub,()=>onPick(key),cls);if(title)b.title=title;map[key]=b;return b;}));}
+function setActive(map,key){for(const k in map){const on=k===key;map[k].classList.toggle('active',on);map[k].setAttribute('aria-pressed',on?'true':'false');}}
+function fmt(v,d){return d.unit==='°'?v.toFixed(d.step>=1?0:1)+'°':d.unit==='u'?(v>=0?'+':'')+v.toFixed(2):v.toFixed(2)+(d.unit||'');}
+function notice(msg,ok=true){const n=$('notice');n.textContent=msg;n.classList.toggle('err',!ok);}
+function buildStatic(){
+ buildSeg('shipList',ui.ship,SHIPS.map(s=>[s.id,`<span class="sw" style="background:${s.paint}"></span>${s.name.split(' ')[1]}`,s.name.split(' ')[0]]),selectShip,'ship');
+ buildSeg('variantList',ui.variant,VARIANT_CODES.map(v=>[v,v,'']),selectVariant,'variant');
+ buildSeg('modeList',ui.mode,[['single','Individual','1 modelo'],['compare','A · B · C','lado a lado'],['gallery','Galeria','9 modelos']],setMode);
+ buildSeg('viewList',ui.view,VIEW_KEYS.map(k=>[k,VIEWS[k].label,'']),setView);
+ buildSeg('renderList',ui.render,[['flux','Toon Flux','cor D'],['neutral','Neutro','sem matiz'],['silhouette','Silhueta','forma pura']],k=>{state.insp.render=k;afterChange();});
+ buildSeg('focusList',ui.focus,[['all','Tudo'],...PARTS.map(p=>[p,PART_LABEL[p]])],k=>{state.insp.focus=k;afterChange();});
+ buildSeg('focusModeList',ui.focusMode,[['highlight','Destacar','outros esmaecidos'],['isolate','Isolar','oculta os outros']],k=>{state.insp.focusMode=k;afterChange();});
+ buildSeg('bgList',ui.bg,[['vitrine','Vitrine D'],['light','Claro'],['gray','Cinza']],k=>{state.insp.background=k;afterChange();});
+ buildSeg('lightList',ui.light,[['fixed','Fixa (v6)'],['camera','Acompanha câmera']],k=>{state.insp.light=k;afterChange();});
+ buildSeg('inkList',ui.ink,[['v6','v6','silhueta'],['continuous','Contínuo','normais suaves'],['structural','Estrutural','+ internos']],k=>{state.insp.ink=k;afterChange();});
+ buildSeg('pigmentList',ui.pigment,[['v6','v6 (55% rosa)'],['identity','Cor pura']],k=>{state.insp.pigment=k;afterChange();});
+ ui.finish={};$('finishSliders').replaceChildren(...FINISH_DEFS.map(d=>sliderRow(d,ui.finish,v=>{state.finish[d.id]=v;afterChange(false);})));
+ $('btnRotate').addEventListener('click',()=>{state.insp.autoRotate=!state.insp.autoRotate;afterChange();});
+ $('btnFrame').addEventListener('click',()=>{state.insp.zoom=1;afterChange();});
+ $('btnResetCam').addEventListener('click',resetCamera);
+ $('btnResetVariant').addEventListener('click',resetVariant);
+ $('btnResetShip').addEventListener('click',resetShip);
+ $('btnResetAll').addEventListener('click',armResetAll);
+ $('btnCopy').addEventListener('click',copyJSON);
+ $('btnApply').addEventListener('click',()=>{try{importJSON($('jsonBox').value);}catch(e){notice('Configuração rejeitada — nada foi alterado. '+e.message,false);}});
+ $('btnShowJson').addEventListener('click',()=>{draftDirty=false;refreshJSON(true);notice('Exibindo a configuração atual.');});
+ $('btnDownload').addEventListener('click',downloadJSON);
+ $('jsonBox').addEventListener('input',()=>{draftDirty=true;$('jsonState').textContent='rascunho não aplicado';});
+}
+function sliderRow(d,store,onValue){
+ const row=el('div','rangeRow'),head=el('header'),lab=el('label',null,d.label),out=el('output'),inp=el('input'),lim=el('div','lim');
+ const id='p-'+d.id;lab.htmlFor=id;inp.id=id;inp.type='range';inp.min=String(d.min);inp.max=String(d.max);inp.step=String(d.step);
+ out.setAttribute('for',id);lim.id='lim-'+d.id;inp.setAttribute('aria-describedby',lim.id);
+ lim.append(el('span',null,fmt(d.min,d)),el('span',null,'padrão '+fmt(d.def,d)),el('span',null,fmt(d.max,d)));
+ inp.addEventListener('input',()=>onValue(Number(inp.value)));
+ head.append(lab,out);row.append(head,inp,lim);store[d.id]={input:inp,output:out,def:d};return row;
+}
+function rebuildSliders(){
+ const ship=state.ship,v=activeVariant(),key=ship+':'+v;if(ui.sliderKey===key)return;
+ ui.sliderKey=key;ui.sliders={};
+ $('sliders').replaceChildren(...paramDefs(ship,v).map(d=>sliderRow(d,ui.sliders,val=>setParam(d.id,val))));
+}
+function syncSliders(){
+ const cur=state.params[state.ship][activeVariant()];
+ for(const id in ui.sliders){const s=ui.sliders[id],v=cur[id];s.input.value=String(v);s.output.textContent=fmt(v,s.def);s.output.classList.toggle('changed',Math.abs(v-s.def.def)>1e-9);}
+ for(const id in ui.finish){const s=ui.finish[id],v=state.finish[id];s.input.value=String(v);s.output.textContent=fmt(v,s.def);s.output.classList.toggle('changed',Math.abs(v-s.def.def)>1e-9);}
+}
+function syncUI(){
+ const I=state.insp,ship=SHIP_MAP[state.ship],v=activeVariant(),meta=VARIANTS[state.ship][v];
+ setActive(ui.ship,state.ship);setActive(ui.variant,v);setActive(ui.mode,I.mode);setActive(ui.view,I.view);setActive(ui.render,I.render);
+ setActive(ui.focus,I.focus);setActive(ui.focusMode,I.focusMode);setActive(ui.bg,I.background);setActive(ui.light,I.light);setActive(ui.ink,I.ink);setActive(ui.pigment,I.pigment);
+ for(const c of VARIANT_CODES)ui.variant[c].innerHTML=`${c}<span class="small">${VARIANTS[state.ship][c].name}</span>`;
+ $('variantCard').innerHTML=`<strong>${ship.name} ${v} — ${meta.name}</strong><p><i>${meta.tag}.</i> ${meta.intent}</p><p>Aprovada em 10/10/2026 — baseline: valores padrão.</p>`;
+ $('paramScope').textContent=`${ship.name.split(' ')[1]} ${v} · ${paramDefs(state.ship,v).length} controles`;
+ $('btnRotate').textContent=I.autoRotate?'Pausar rotação':'Rotação automática';$('btnRotate').setAttribute('aria-pressed',I.autoRotate?'true':'false');
+ rebuildSliders();syncSliders();
+ const st=$('stage');if(st.dataset)st.dataset.mode=I.mode;
+ const t=$('hudTitle'),s=$('hudSub');
+ if(I.mode==='single'){t.textContent=`${ship.name} · ${v} — ${meta.name}`;s.textContent=meta.tag+'. '+ship.identity;}
+ else if(I.mode==='compare'){t.textContent=`${ship.name} · A / B / C`;s.textContent='Mesma escala, mesma luz e mesmo enquadramento para as três alternativas.';}
+ else{t.textContent='Nove propostas · 3 naves × A/B/C';s.textContent='Linhas: Blue Falcon, Golden Fox, Wild Goose · colunas: A, B, C · escala comum.';}
+ $('hudEyebrow').textContent='D · TOON VECTOR FLUX'+(I.render==='neutral'?' · NEUTRO':I.render==='silhouette'?' · SILHUETA':'')+(I.focus!=='all'?' · GRUPO '+PART_LABEL[I.focus].toUpperCase():'');
+ updateLabels();refreshJSON(false);updateBadge();
+}
+function updateLabels(){
+ const box=$('labels'),cw=canvas.clientWidth||1,ch=canvas.clientHeight||1,items=layoutItems(cw,ch);
+ if(state.insp.mode==='single'){box.replaceChildren();return;}
+ box.replaceChildren(...items.map(it=>{const d=el('div','lab'+(it.ship===state.ship&&it.variant===activeVariant()?' active':''));d.style.left=it.x+'px';d.style.top=it.y+'px';d.style.width=it.w+'px';d.style.height=it.h+'px';
+  const s=el('span');s.innerHTML=state.insp.mode==='gallery'?`<b>${SHIP_MAP[it.ship].name.split(' ')[1]} ${it.variant}</b> · ${VARIANTS[it.ship][it.variant].name}`:`<b>${it.variant}</b> · ${VARIANTS[it.ship][it.variant].name}`;d.append(s);return d;}));
+}
+function isBaseline(ship,v){const d=defaultsFor(ship,v),c=state.params[ship][v];return Object.keys(d).every(k=>Math.abs(c[k]-d[k])<1e-9);}
+function updateBadge(){
+ const I=state.insp,b=$('approvalBadge'),items=I.mode==='single'?[[state.ship,activeVariant()]]:I.mode==='compare'?VARIANT_CODES.map(v=>[state.ship,v]):SHIPS.flatMap(s=>VARIANT_CODES.map(v=>[s.id,v]));
+ const base=items.every(([s,v])=>isBaseline(s,v));
+ b.textContent=base?'GEOMETRIA APROVADA · BASELINE':'VARIAÇÃO EXPLORATÓRIA · FORA DA BASELINE APROVADA';
+ b.classList.toggle('base',base);b.classList.toggle('explore',!base);
+}
+function refreshJSON(force){if(force)draftDirty=false;if(draftDirty)return;$('jsonBox').value=JSON.stringify(exportConfig(),null,1);$('jsonState').textContent='sincronizado';}
+function afterChange(full=true){if(full)syncUI();else{syncSliders();refreshJSON(false);updateBadge();}requestRender();}
+
+/* ---- ações (usadas pela interface, pelo teclado e pela API de teste) ---- */
+function selectShip(id){if(!SHIP_MAP[id])throw new Error('Nave desconhecida: '+id);state.ship=id;afterChange();}
+function selectVariant(v){if(!VARIANT_CODES.includes(v))throw new Error('Alternativa deve ser A, B ou C.');state.variants[state.ship]=v;afterChange();}
+function setMode(m){if(!ENUMS.mode.includes(m))throw new Error('Modo inválido.');if(m!=='single'&&state.insp.mode==='single')$('diagBox').open=false;state.insp.mode=m;afterChange();}
+function setView(k){const v=VIEWS[k];if(!v)throw new Error('Vista inválida.');Object.assign(state.insp,{view:k,yaw:v.yaw,elev:v.elev,turntable:0,autoRotate:false});afterChange();}
+function resetCamera(){Object.assign(state.insp,{view:'threeQuarter',yaw:VIEWS.threeQuarter.yaw,elev:VIEWS.threeQuarter.elev,zoom:1,turntable:0,autoRotate:false});afterChange();notice('Câmera restaurada (¾ frontal, zoom 1).');}
+function setParam(id,value,ship=state.ship,v=state.variants[ship]){
+ const d=paramDefs(ship,v).find(x=>x.id===id);if(!d)throw new Error(`Parâmetro "${id}" não existe em ${ship} ${v}.`);
+ if(typeof value!=='number'||!Number.isFinite(value))throw new Error('Valor numérico inválido.');
+ state.params[ship][v][id]=clamp(value,d.min,d.max);afterChange(false);
+}
+function resetVariant(){const s=state.ship,v=activeVariant();state.params[s][v]=defaultsFor(s,v);afterChange();notice(`Parâmetros de ${SHIP_MAP[s].name} ${v} restaurados. Outras alternativas não foram alteradas.`);}
+function resetShip(){const s=state.ship;for(const v of VARIANT_CODES)state.params[s][v]=defaultsFor(s,v);afterChange();notice(`Parâmetros de ${SHIP_MAP[s].name} A/B/C restaurados. Outras naves não foram alteradas.`);}
+let armTimer=null;
+function armResetAll(){
+ const b=$('btnResetAll');
+ if(!b.classList.contains('armed')){b.classList.add('armed');b.textContent='Confirmar: restaurar TUDO (parâmetros, seleção, vista)';notice('Clique novamente em até 5 s para restaurar toda a configuração inicial.',false);
+  armTimer=setTimeout(()=>{b.classList.remove('armed');b.textContent='Restaurar configuração inicial completa';},5000);return;}
+ clearTimeout(armTimer);b.classList.remove('armed');b.textContent='Restaurar configuração inicial completa';resetAll();
+}
+function resetAll(){state.ship=DEFAULT_SELECTION.ship;state.variants={...DEFAULT_SELECTION.variants};state.params=defaultParams();state.insp={...DEFAULT_INSPECTION};state.finish={...DEFAULT_FINISH};draftDirty=false;afterChange();notice('Configuração inicial completa restaurada.');}
+function importJSON(text){const c=parseConfig(text);applyParsed(c);draftDirty=false;afterChange();notice(`Configuração aplicada: ${SHIP_MAP[state.ship].name} ${activeVariant()} ativa; parâmetros das nove alternativas restaurados.`);return true;}
+async function copyJSON(){
+ const box=$('jsonBox'),text=box.value;notice('Copiando…');
+ try{if(!navigator.clipboard||!navigator.clipboard.writeText)throw new Error('sem API');await navigator.clipboard.writeText(text);notice(draftDirty?'Rascunho (não aplicado) copiado.':'JSON copiado para a área de transferência.');}
+ catch(e){let ok=false;try{box.focus();box.select();ok=!!(document.execCommand&&document.execCommand('copy'));}catch(_){ok=false;}
+  notice(ok?'JSON copiado (método alternativo).':'A área de transferência está bloqueada. O texto foi selecionado: use Ctrl+C, ou "Baixar .json".',ok);}
+}
+function downloadJSON(){
+ try{const blob=new Blob([JSON.stringify(exportConfig(),null,1)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='gminus_05_craft_geometry.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notice('Arquivo gminus_05_craft_geometry.json gerado.');}
+ catch(e){notice('Download indisponível neste contexto: '+e.message,false);}
+}
+
+/* ---- entrada: órbita, zoom, teclado ---- */
+const drag={active:false,x:0,y:0,id:null};
+function orbit(dx,dy){const I=state.insp;I.yaw-=dx;I.elev=clamp(I.elev+dy,-ELEV_MAX,ELEV_MAX);if(I.view!=='custom'){I.view='custom';setActive(ui.view,'custom');}refreshJSON(false);requestRender();}
+function zoomBy(f){state.insp.zoom=clamp(state.insp.zoom*f,ZOOM_MIN,ZOOM_MAX);refreshJSON(false);requestRender();}
+canvas.addEventListener('pointerdown',e=>{drag.active=true;drag.x=e.clientX;drag.y=e.clientY;drag.id=e.pointerId;try{canvas.setPointerCapture(e.pointerId);}catch(_){}});
+canvas.addEventListener('pointermove',e=>{if(!drag.active)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;drag.x=e.clientX;drag.y=e.clientY;orbit(dx*.007,dy*.006);});
+const endDrag=()=>{drag.active=false;};canvas.addEventListener('pointerup',endDrag);canvas.addEventListener('pointercancel',endDrag);canvas.addEventListener('lostpointercapture',endDrag);
+canvas.addEventListener('wheel',e=>{e.preventDefault();zoomBy(Math.exp(e.deltaY*.0012));},{passive:false});
+canvas.addEventListener('dblclick',()=>{state.insp.zoom=1;afterChange();});
+canvas.addEventListener('keydown',e=>{const k=e.key;
+ if(k==='ArrowLeft'){orbit(-.08,0);e.preventDefault();}else if(k==='ArrowRight'){orbit(.08,0);e.preventDefault();}
+ else if(k==='ArrowUp'){orbit(0,.06);e.preventDefault();}else if(k==='ArrowDown'){orbit(0,-.06);e.preventDefault();}
+ else if(k==='+'||k==='='){zoomBy(.9);}else if(k==='-'||k==='_'){zoomBy(1.1);}});
+window.addEventListener('keydown',e=>{
+ const t=e.target&&e.target.tagName;if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT'||e.ctrlKey||e.metaKey||e.altKey)return;
+ const k=(e.key||'').toLowerCase(),shipKeys={q:'falcon',w:'fox',e:'goose'};
+ if(shipKeys[k])selectShip(shipKeys[k]);else if(k==='1'||k==='2'||k==='3')selectVariant(VARIANT_CODES[Number(k)-1]);
+ else if(k==='m')setMode(ENUMS.mode[(ENUMS.mode.indexOf(state.insp.mode)+1)%3]);
+ else if(k==='v'){const i=VIEW_KEYS.indexOf(state.insp.view);setView(VIEW_KEYS[(i+1)%VIEW_KEYS.length]);}
+ else if(k==='r'){state.insp.autoRotate=!state.insp.autoRotate;afterChange();}
+ else if(k==='s'){state.insp.render=ENUMS.render[(ENUMS.render.indexOf(state.insp.render)+1)%3];afterChange();}
+ else if(k==='0')resetCamera();
+});
+window.addEventListener('resize',()=>{updateLabels();requestRender();});
+if(typeof ResizeObserver==='function'){try{new ResizeObserver(()=>{updateLabels();requestRender();}).observe(canvas);}catch(_){}}
+canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();GLR.lost=true;GLR.ok=false;GLR.reason='Contexto WebGL perdido; aguardando restauração pelo navegador.';dropGpuCache(false);GLR.live=0;showFailure(GLR.reason);});
+canvas.addEventListener('webglcontextrestored',()=>{GLR.lost=false;GLR.live=0;dropGpuCache(false);if(glSetup())requestRender();});
+
+/* ---- diagnóstico ---- */
+const perf={frames:0,since:0,fps:0,cpu:0,lastUi:0};
+function updateDiag(now){
+ const e=cache.get(state.ship+':'+activeVariant()),r=e?e.report:meshReport(buildMesh(state.ship,activeVariant(),state.params[state.ship][activeVariant()]));
+ const idle=now-perf.since>1200&&perf.frames===0;
+ const rows=[
+  ['Renderizador',GLR.ok?GLR.version:(GLR.lost?'contexto perdido':'indisponível')],
+  ['FPS (quadros desenhados)',GLR.ok?(state.insp.autoRotate||drag.active?perf.fps.toFixed(0):'sob demanda'):'—'],
+  ['CPU por quadro (JS)',GLR.ok?perf.cpu.toFixed(2)+' ms':'—'],
+  ['Draw calls (último quadro)',GLR.frame.draws],
+  ['Triângulos enviados*',Math.round(GLR.frame.tris).toLocaleString('pt-BR')],
+  ['Modelo ativo',`${state.ship} ${activeVariant()}`],
+  ['Triângulos do modelo',r.triangles.toLocaleString('pt-BR')],
+  ['Formas geométricas',r.shapes],
+  ['Impressão da malha',r.fingerprint],
+  ['Buffers WebGL vivos',GLR.live],
+  ['Modelos em cache',cache.size]];
+ $('diag').replaceChildren(...rows.flatMap(([a,b])=>[el('dt',null,a),el('dd',null,String(b))]),el('div','note','* inclui passes de tinta e pódio. Contagens feitas no JavaScript; não são medições de GPU. FPS só é contínuo com rotação/arrasto (renderização sob demanda).'));
+ void idle;
+}
+function frame(now){
+ requestAnimationFrame(frame);
+ const dt=perf.last?Math.min(100,now-perf.last):16;perf.last=now;
+ if(state.insp.autoRotate&&!drag.active){state.insp.turntable=(state.insp.turntable+dt*.00035)%TAU;needsRender=true;}
+ if(needsRender&&GLR.ok&&!GLR.lost){
+  needsRender=false;const t0=performance.now();
+  try{drawScene();}catch(err){GLR.ok=false;GLR.reason='Erro de renderização: '+(err&&err.message||err);showFailure(GLR.reason);}
+  perf.cpu=performance.now()-t0;perf.frames++;
+ }
+ if(now-perf.since>=1000){perf.fps=perf.frames*1000/(now-perf.since||1);perf.frames=0;perf.since=now;}
+ if(now-perf.lastUi>500){perf.lastUi=now;updateDiag(now);if(state.insp.autoRotate&&!draftDirty)refreshJSON(false);}
+}
+
+/* ---- inicialização ---- */
+buildStatic();
+if((window.innerWidth||1200)<900)$('diagBox').open=false;
+glInit();
+syncUI();
+requestAnimationFrame(frame);
+
+/* ---- API de inspeção para testes automatizados (não é interface de jogo) ---- */
+window.__GMINUS_GEOMETRY_LAB__={
+ ships:()=>SHIPS.map(s=>s.id),variants:ship=>Object.keys(VARIANTS[ship]),parts:()=>PARTS.slice(),
+ paramDefs:(ship,v)=>clone(paramDefs(ship,v)),defaults:(ship,v)=>defaultsFor(ship,v),
+ buildMesh,meshReport,parseConfig,
+ getState:()=>clone({ship:state.ship,variants:state.variants,params:state.params,insp:state.insp,finish:state.finish}),
+ selectShip,selectVariant,setMode,setView,setParam,resetVariant,resetShip,resetAll,armResetAll,resetCamera,
+ setInspection:(k,v)=>{if(!(k in DEFAULT_INSPECTION))throw new Error('chave');state.insp[k]=v;afterChange();},
+ exportConfig,exportJSON:()=>JSON.stringify(exportConfig()),importJSON,
+ uiSnapshot:()=>({ship:Object.keys(ui.ship).find(k=>ui.ship[k].getAttribute('aria-pressed')==='true'),variant:Object.keys(ui.variant).find(k=>ui.variant[k].getAttribute('aria-pressed')==='true'),
+  mode:Object.keys(ui.mode).find(k=>ui.mode[k].getAttribute('aria-pressed')==='true'),sliderKey:ui.sliderKey,
+  sliders:Object.fromEntries(Object.entries(ui.sliders).map(([k,s])=>[k,Number(s.input.value)])),json:$('jsonBox').value,badge:$('approvalBadge').textContent}),
+ renderNow:()=>{if(GLR.ok&&!GLR.lost){drawScene();return true;}return false;},
+ renderer:()=>({ok:GLR.ok,lost:GLR.lost,reason:GLR.reason,liveBuffers:GLR.live,cachedModels:cache.size,draws:GLR.frame.draws,tris:GLR.frame.tris,version:GLR.version}),
+ activeReport:()=>clone({...getEntry(state.ship,activeVariant()).report})
+};
+</script>
+</body></html>
