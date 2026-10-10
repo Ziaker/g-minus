@@ -73,7 +73,8 @@ Detalhes e justificativas: [registro de decisão](../decisions/2026-10-10-protot
 
 **Efeitos**
 - **Super Boost:** composição in-game com B sempre ativo e toggles A/D/E sobrepostos (modo Inspecionar). O modo Comparar continua mostrando A–E isolados.
-- **Spin E:** raio externo = raio de varredura do giro + 0,35 u, centrado no eixo de rotação. O controle de raio foi removido; o raio de cada nave aparece no painel.
+- **Spin E — implementação atual:** raio externo = raio de varredura do giro + 0,35 u, centrado no eixo de rotação. O controle de raio foi removido; o raio de cada nave aparece no painel.
+- **Spin E — dimensão desejada (provisória, não implementada):** o responsável definiu **130 % do raio de varredura (+30 %)**. A regra deve substituir os +0,35 u numa revisão futura do laboratório ou na integração, com teste correspondente. Até lá, o laboratório, o JSON de baseline e os testes continuam em +0,35 u. Ver [registro de decisão, seção 2.1](../decisions/2026-10-10-prototype-04-v2-vfx-approval.md#21-spin-e--dimensão-do-campo).
 - **Side E:** sem descarga ciano na asa; afterimage mantido; speedlines brancas/rosa para o lado oposto ao ataque.
 - **Drift:** afterimage breve e constante (três cópias em contorno) acima de 1300 km/h, com rampa de 50 km/h.
 
