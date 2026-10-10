@@ -948,7 +948,7 @@ const ELEV_MAX=1.553,ZOOM_MIN=.45,ZOOM_MAX=3;
 const DEFAULT_INSPECTION={mode:'single',view:'threeQuarter',yaw:VIEWS.threeQuarter.yaw,elev:VIEWS.threeQuarter.elev,zoom:1,autoRotate:false,turntable:0,background:'vitrine',focus:'all',focusMode:'highlight'};
 // campos fixos usados pelo renderizador herdado do Protótipo 05 (não exportados): passe D padrão da v6
 const FIXED_RENDER={render:'flux',light:'fixed',ink:'v6',pigment:'v6'};
-const DEFAULT_SELECTION={ship:'falcon',system:'A',models:{falcon:'A',fox:'A',goose:'A'}};
+const DEFAULT_SELECTION={ship:'falcon',system:APPROVED_SYSTEM,models:{falcon:'A',fox:'A',goose:'A'}};
 const clone=o=>JSON.parse(JSON.stringify(o));
 const r4=x=>Math.round(x*1e4)/1e4;
 // geometria: SEMPRE a baseline aprovada do Protótipo 05 (sem sliders geométricos)

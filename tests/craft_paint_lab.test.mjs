@@ -191,7 +191,7 @@ test('restaurações: nave do sistema, sistema inteiro e configuração completa
   api.setMode('gallery');
   api.armResetAll(); assert.equal(plain(api.getState()).liveries.B.fox.roles.accent, '#00aa00', 'reset completo sem confirmação');
   api.armResetAll(); st = plain(api.getState());
-  assert.equal(st.liveries.B.fox.roles.accent, 'D'); assert.equal(st.insp.mode, 'single'); assert.equal(st.system, 'A'); assert.equal(st.ship, 'falcon');
+  assert.equal(st.liveries.B.fox.roles.accent, 'D'); assert.equal(st.insp.mode, 'single'); assert.equal(st.system, 'B', 'reset completo deve voltar ao sistema aprovado'); assert.equal(st.ship, 'falcon');
 });
 
 test('JSON: exportação e importação reproduzem seleção, as nove pinturas e a inspeção, com interface sincronizada', () => {
@@ -265,6 +265,12 @@ test('direção D preservada, somente o Sistema B declarado aprovado e laborató
   assert.match(html, /sistemas? A e C não (foram )?escolhidos/i);
   for (const f of ['src/main.ts', 'src/game/Game.ts', 'src/game/Vehicle.ts', 'index.html'])
     assert.ok(!readFileSync(path.join(root, f), 'utf8').includes('06_craft_paint_lab'), `${f} referencia o laboratório`);
+});
+
+test('laboratório abre no sistema aprovado B com o selo de aprovação', () => {
+  const fresh = boot();
+  assert.equal(fresh.api.getState().system, 'B');
+  assert.match(fresh.api.uiSnapshot().badge, /SISTEMA B APROVADO/);
 });
 
 test('aprovação de 10/10/2026: selo distingue B no padrão, B com pipeline alterado e A/C não escolhidos', () => {

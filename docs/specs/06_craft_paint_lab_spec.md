@@ -1,6 +1,6 @@
 # Especificação Técnica — Protótipo 06: Pintura e Personalização das Naves
 
-**Status:** **SISTEMA B APROVADO em 10/10/2026** (A e C não escolhidos) — [registro de decisão](../decisions/2026-10-10-prototype-06-paint-system-approval.md). Não integrado ao jogo.
+**Status:** **SISTEMA B APROVADO em 10/10/2026** (A e C não escolhidos) — [registro de decisão](../decisions/2026-10-10-prototype-06-paint-system-approval.md). O laboratório abre no Sistema B, e a restauração completa também volta para ele. Não integrado ao jogo.
 **Data:** 2026-10-10
 **Arquivo:** [`prototypes/06_craft_paint_lab.html`](../../prototypes/06_craft_paint_lab.html) — HTML autônomo, WebGL 1 nativo, sem dependências externas.
 **Testes:** [`tests/craft_paint_lab.test.mjs`](../../tests/craft_paint_lab.test.mjs).
@@ -150,7 +150,7 @@ Cada sistema guarda **uma pintura por nave** (`liveries[sistema][nave]`), válid
 {
  "schema": "gminus.craft-paint-lab", "schemaVersion": 1,
  "artDirection": "D-TOON-VECTOR-FLUX", "geometryBaseline": "prototype05-v1", "paintApproval": "none",
- "selection": { "ship": "falcon", "model": "A", "models": { "falcon": "A", "fox": "A", "goose": "A" }, "system": "A" },
+ "selection": { "ship": "falcon", "model": "A", "models": { "falcon": "A", "fox": "A", "goose": "A" }, "system": "B" },
  "liveries": {
   "A": { "falcon": { "groups": { "nose": "#2468f6", "cockpit": "#2468f6", "wings": "#2468f6", "engines": "#2468f6" }, "pinkMix": 0.55, "shadeMix": 0.68, "unify": 0, "saturation": 0, "glow": 1 }, "fox": {}, "goose": {} },
   "B": { "falcon": { "roles": { "paint": "#2468f6", "secondary": "D", "accent": "D", "structure": "D", "glass": "D", "energy": "D", "marking": "D" }, "pinkMix": 0.55, "shadeMix": 0.68, "hierarchy": 0, "saturation": 0, "glow": 1 }, "fox": {}, "goose": {} },
