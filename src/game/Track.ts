@@ -24,7 +24,7 @@ export interface PitZone {
 
 export class Track {
   public curve: THREE.CatmullRomCurve3;
-  public trackWidth = 26;
+  public trackWidth = 54;
   public trackMesh: THREE.Mesh;
   public railsGroup: THREE.Group;
   public sceneryGroup: THREE.Group;
@@ -33,6 +33,13 @@ export class Track {
 
   private sampledPoints = 300;
   private trackLength = 0;
+
+  public getTrackWidthAt(t: number): number {
+    let wrappedT = ((t % 1) + 1) % 1;
+    const theta = wrappedT * Math.PI * 2;
+    const width = 82 + 18 * Math.sin(theta * 2 + 0.9) + 10 * Math.sin(theta * 4 - 0.4);
+    return Math.min(114, Math.max(48, width));
+  }
 
   constructor(scene: THREE.Scene) {
     // Define a thrilling sci-fi circuit with smooth continuous flow
@@ -83,9 +90,6 @@ export class Track {
     const uvs: number[] = [];
     const colors: number[] = [];
     const indices: number[] = [];
-
-    const halfWidth = this.trackWidth / 2;
-
     const leftRailPoints: THREE.Vector3[] = [];
     const rightRailPoints: THREE.Vector3[] = [];
 
@@ -100,9 +104,11 @@ export class Track {
       const normal = up.clone().sub(tangent.clone().multiplyScalar(dot)).normalize();
       const binormal = new THREE.Vector3().crossVectors(normal, tangent).normalize();
 
-      // Left edge & Right edge
-      const leftPt = pt.clone().add(binormal.clone().multiplyScalar(-halfWidth));
-      const rightPt = pt.clone().add(binormal.clone().multiplyScalar(halfWidth));
+      const halfWidth = this.getTrackWidthAt(t) / 2;
+
+      // Left edge (+binormal) & Right edge (-binormal)
+      const leftPt = pt.clone().add(binormal.clone().multiplyScalar(halfWidth));
+      const rightPt = pt.clone().add(binormal.clone().multiplyScalar(-halfWidth));
 
       vertices.push(leftPt.x, leftPt.y, leftPt.z);
       vertices.push(rightPt.x, rightPt.y, rightPt.z);
@@ -114,15 +120,14 @@ export class Track {
       colors.push(0.05, 0.08, 0.14);
       colors.push(0.05, 0.08, 0.14);
 
-      leftRailPoints.push(leftPt.clone().add(normal.clone().multiplyScalar(0.7)));
-      rightRailPoints.push(rightPt.clone().add(normal.clone().multiplyScalar(0.7)));
+      leftRailPoints.push(leftPt.clone().add(normal.clone().multiplyScalar(0.8)));
+      rightRailPoints.push(rightPt.clone().add(normal.clone().multiplyScalar(0.8)));
 
       if (i < segments) {
         const row1 = i * 2;
         const row2 = (i + 1) * 2;
-        // Two triangles for the quad
-        indices.push(row1, row2, row1 + 1);
-        indices.push(row1 + 1, row2, row2 + 1);
+        indices.push(row1, row1 + 1, row2);
+        indices.push(row1 + 1, row2 + 1, row2);
       }
     }
 
@@ -200,13 +205,13 @@ export class Track {
   }
 
   private setupBoostPads(scene: THREE.Scene): void {
-    // Specific locations along the circuit
+    // Strategic placement across spacious lanes along the circuit
     const padLocations = [
       { t: 0.08, offset: 0 },
-      { t: 0.28, offset: -4 },
-      { t: 0.52, offset: 3 },
+      { t: 0.28, offset: -8 },
+      { t: 0.52, offset: 7 },
       { t: 0.72, offset: 0 },
-      { t: 0.88, offset: -3 }
+      { t: 0.88, offset: -8 }
     ];
 
     const padMat = new THREE.MeshBasicMaterial({
@@ -215,7 +220,7 @@ export class Track {
     });
 
     for (const loc of padLocations) {
-      const geo = new THREE.PlaneGeometry(6, 12);
+      const geo = new THREE.PlaneGeometry(8, 14);
       geo.rotateX(-Math.PI / 2);
       const mesh = new THREE.Mesh(geo, padMat);
 
@@ -234,20 +239,20 @@ export class Track {
       this.boostPads.push({
         t: loc.t,
         offset: loc.offset,
-        width: 6,
-        length: 12,
+        width: 8,
+        length: 14,
         mesh
       });
     }
   }
 
   private setupPitZone(scene: THREE.Scene): void {
-    // Pit zone from t = 0.94 to t = 1.0 (right side of track before finish line)
+    // Pit recharge zone on the spacious right lane before the finish line
     this.pitZones.push({
       tStart: 0.93,
       tEnd: 0.99,
-      offsetMin: 4,
-      offsetMax: 11
+      offsetMin: 12,
+      offsetMax: 26
     });
 
     // Create glowing emerald green recharge lane visual
@@ -257,13 +262,13 @@ export class Track {
       const t = 0.93 + (i / steps) * (0.99 - 0.93);
       const info = this.getTrackInfoAt(t);
       const p = info.position.clone()
-        .add(info.binormal.clone().multiplyScalar(-7.5))
+        .add(info.binormal.clone().multiplyScalar(-19))
         .add(info.normal.clone().multiplyScalar(0.08));
       pitPts.push(p);
     }
 
     const pitCurve = new THREE.CatmullRomCurve3(pitPts);
-    const pitGeo = new THREE.TubeGeometry(pitCurve, 30, 3.5, 4, false);
+    const pitGeo = new THREE.TubeGeometry(pitCurve, 30, 6.5, 4, false);
     const pitMat = new THREE.MeshBasicMaterial({
       color: 0x00ff88,
       transparent: true,
@@ -278,7 +283,7 @@ export class Track {
     const ringMat = new THREE.MeshBasicMaterial({ color: 0xff0055, wireframe: true });
     for (let t = 0.15; t < 0.95; t += 0.18) {
       const info = this.getTrackInfoAt(t);
-      const ringGeo = new THREE.TorusGeometry(20, 0.4, 8, 24);
+      const ringGeo = new THREE.TorusGeometry(32, 0.6, 8, 24);
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
       ringMesh.position.copy(info.position);
       ringMesh.quaternion.setFromRotationMatrix(
@@ -313,9 +318,9 @@ export class Track {
     // Start / Finish Line Banner Arch
     const startInfo = this.getTrackInfoAt(0);
     const archMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    const archGeo = new THREE.BoxGeometry(this.trackWidth + 6, 2, 2);
+    const archGeo = new THREE.BoxGeometry(this.getTrackWidthAt(0) + 8, 2.5, 2.5);
     const archMesh = new THREE.Mesh(archGeo, archMat);
-    archMesh.position.copy(startInfo.position).add(startInfo.normal.clone().multiplyScalar(10));
+    archMesh.position.copy(startInfo.position).add(startInfo.normal.clone().multiplyScalar(12));
     archMesh.quaternion.setFromRotationMatrix(
       new THREE.Matrix4().makeBasis(startInfo.binormal, startInfo.normal, startInfo.tangent)
     );

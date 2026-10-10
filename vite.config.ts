@@ -1,13 +1,21 @@
 import { defineConfig } from 'vite';
+import { resolve } from 'path';
 
 export default defineConfig({
-  base: './', // Crucial for direct GitHub Pages deployment from subfolder
+  base: './',
+  appType: 'mpa',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: true,
     chunkSizeWarningLimit: 600,
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        prototype01: resolve(__dirname, 'prototypes/01_steering_profiles.html'),
+        prototype03: resolve(__dirname, 'prototypes/03_neo_metropolis_visual.html'),
+        prototype04: resolve(__dirname, 'prototypes/04_craft_vfx.html')
+      },
       output: {
         manualChunks: {
           three: ['three']
@@ -16,7 +24,7 @@ export default defineConfig({
     }
   },
   server: {
-    port: 3000,
-    open: true
+    port: 5173,
+    host: true
   }
 });

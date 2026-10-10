@@ -4,6 +4,7 @@ import { Vehicle, VehicleConfig, MachineModel, StatGrade } from './Vehicle';
 import { CombatSystem } from './Combat';
 import { AudioManager } from './Audio';
 import { InputManager } from './Input';
+import { APPROVED_PHYSICS, APPROVED_PHYSICS_PROFILE } from './PhysicsCalibration';
 
 export interface MachineDefinition {
   id: string;
@@ -263,7 +264,7 @@ export class Game {
     this.scene.add(cyanPoint);
   }
 
-  public initRoster(selectedId: string = 'falcon', engineBalance: number = 0): void {
+  public initRoster(selectedId: string = 'falcon', engineBalance: number = 0, steeringProfile: 'A' | 'B' | 'C' = APPROVED_PHYSICS_PROFILE): void {
     if (this.scene && this.allVehicles) {
       for (const vehicle of this.allVehicles) {
         this.scene.remove(vehicle.group);
@@ -275,7 +276,8 @@ export class Game {
       ...playerDef,
       id: 'player',
       isAI: false,
-      engineBalance
+      engineBalance,
+      steeringProfile
     };
 
     this.player = new Vehicle(playerConfig, this.track, this.combat, this.audio, this.scene);
@@ -283,11 +285,11 @@ export class Game {
     this.player.lateralOffset = 0;
     this.player.speed = 0;
 
-    // Spawn 7 Rivals staggered on starting grid
+    // Spawn 7 Rivals staggered on starting grid across spacious lanes
     const rivalKeys = Object.keys(MACHINE_ROSTER).filter(k => k !== playerDef.id).slice(0, 7);
     this.rivals = [];
 
-    const gridOffsets = [-6, 6, -3, 3, -7, 7, 0];
+    const gridOffsets = [-12, 12, -6, 6, -15, 15, 0];
     const gridProgress = [0.010, 0.016, 0.022, 0.028, 0.034, 0.040, 0.046];
 
     for (let i = 0; i < rivalKeys.length; i++) {
@@ -296,7 +298,8 @@ export class Game {
         ...def,
         id: `rival-${i + 1}`,
         isAI: true,
-        engineBalance: (Math.random() - 0.5) * 0.5
+        engineBalance: (Math.random() - 0.5) * 0.5,
+        steeringProfile
       };
 
       const v = new Vehicle(rivalConfig, this.track, this.combat, this.audio, this.scene);
@@ -320,7 +323,7 @@ export class Game {
     this.audio.stopEngine();
   }
 
-  public start(selectedId: string = 'falcon', engineBalance: number = 0): void {
+  public start(selectedId: string = 'falcon', engineBalance: number = 0, steeringProfile: 'A' | 'B' | 'C' = APPROVED_PHYSICS_PROFILE): void {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
@@ -331,7 +334,7 @@ export class Game {
     this.playerKills = 0;
     this.cameraShakeIntensity = 0;
 
-    this.initRoster(selectedId, engineBalance);
+    this.initRoster(selectedId, engineBalance, steeringProfile);
     this.audio.init();
     this.isRunning = true;
     this.isRaceFinished = false;
@@ -505,14 +508,14 @@ export class Game {
 
         // F-Zero X SPIN ATTACK AOE Check (Within Whirl radius)
         if (vA.isSpinAttacking || vB.isSpinAttacking) {
-          if (dist < 6.8) {
+          if (dist < APPROVED_PHYSICS.combat.spinAttackRadius * 2) {
             if (vA.isSpinAttacking) {
               const cdKey = `spin-${vA.config.id}-${vA.attackSerial}-${vB.config.id}`;
               if (!this.attackCooldowns.has(cdKey)) {
-                this.attackCooldowns.set(cdKey, 0.6);
+                this.attackCooldowns.set(cdKey, APPROVED_PHYSICS.combat.spinAttackCooldown);
                 const pushDir = Math.sign(vB.lateralOffset - vA.lateralOffset) || 1;
-                vB.lateralVelocity += pushDir * 150;
-                vB.takeDamage(45, true);
+                vB.lateralVelocity += pushDir * APPROVED_PHYSICS.combat.spinAttackForce;
+                vB.takeDamage(APPROVED_PHYSICS.combat.spinAttackDamage, true);
                 if (vA.config.id === 'player' && vB.isDestroyed) {
                   this.playerKills++;
                 }
@@ -526,10 +529,10 @@ export class Game {
             if (!vB.isDestroyed && vB.isSpinAttacking) {
               const cdKey = `spin-${vB.config.id}-${vB.attackSerial}-${vA.config.id}`;
               if (!this.attackCooldowns.has(cdKey)) {
-                this.attackCooldowns.set(cdKey, 0.6);
+                this.attackCooldowns.set(cdKey, APPROVED_PHYSICS.combat.spinAttackCooldown);
                 const pushDir = Math.sign(vA.lateralOffset - vB.lateralOffset) || -1;
-                vA.lateralVelocity += pushDir * 150;
-                vA.takeDamage(45, true);
+                vA.lateralVelocity += pushDir * APPROVED_PHYSICS.combat.spinAttackForce;
+                vA.takeDamage(APPROVED_PHYSICS.combat.spinAttackDamage, true);
                 this.combat.spawnSparks(midPoint, 36, 0x00f0ff);
                 this.audio.playImpact();
                 if (vA === this.player || vB === this.player) {
@@ -541,19 +544,18 @@ export class Game {
           }
         }
 
-        // Physical vehicle-to-vehicle contact
-        if (dist < radius * 2) {
-          const sideAttackA = vA.isSideAttacking;
-          const sideAttackB = vB.isSideAttacking;
+        const sideAttackA = vA.isSideAttacking;
+        const sideAttackB = vB.isSideAttacking;
 
-          if (sideAttackA || sideAttackB) {
-            // High-impact Side-Attack bash
+        if (sideAttackA || sideAttackB) {
+          if (dist < APPROVED_PHYSICS.combat.sideAttackReach * 2) {
+            // High-impact Side-Attack bash across open lateral sweep
             if (sideAttackA) {
               const cdKey = `side-${vA.config.id}-${vA.attackSerial}-${vB.config.id}`;
               if (!this.attackCooldowns.has(cdKey)) {
-                this.attackCooldowns.set(cdKey, 0.6);
-                vB.lateralVelocity += vA.sideAttackDir * 135;
-                vB.takeDamage(36, true);
+                this.attackCooldowns.set(cdKey, APPROVED_PHYSICS.combat.sideAttackCooldown);
+                vB.lateralVelocity += vA.sideAttackDir * APPROVED_PHYSICS.combat.sideAttackForce;
+                vB.takeDamage(APPROVED_PHYSICS.combat.sideAttackDamage, true);
                 if (vA.config.id === 'player' && vB.isDestroyed) this.playerKills++;
                 this.combat.spawnSparks(midPoint, 28, 0xff0055);
                 this.audio.playImpact();
@@ -565,9 +567,9 @@ export class Game {
             if (!vB.isDestroyed && sideAttackB) {
               const cdKey = `side-${vB.config.id}-${vB.attackSerial}-${vA.config.id}`;
               if (!this.attackCooldowns.has(cdKey)) {
-                this.attackCooldowns.set(cdKey, 0.6);
-                vA.lateralVelocity += vB.sideAttackDir * 135;
-                vA.takeDamage(36, true);
+                this.attackCooldowns.set(cdKey, APPROVED_PHYSICS.combat.sideAttackCooldown);
+                vA.lateralVelocity += vB.sideAttackDir * APPROVED_PHYSICS.combat.sideAttackForce;
+                vA.takeDamage(APPROVED_PHYSICS.combat.sideAttackDamage, true);
                 this.combat.spawnSparks(midPoint, 28, 0xff0055);
                 this.audio.playImpact();
                 if (vA === this.player || vB === this.player) {
@@ -575,7 +577,12 @@ export class Game {
                 }
               }
             }
-          } else {
+            continue;
+          }
+        }
+
+        // Physical vehicle-to-vehicle contact
+        if (dist < radius * 2) {
             // Smooth glancing bump with elastic separation
             const lateralDiff = vA.lateralOffset - vB.lateralOffset;
             const pushDir = Math.sign(lateralDiff) || 1;
@@ -606,7 +613,6 @@ export class Game {
         }
       }
     }
-  }
 
   private addCameraShake(intensity: number): void {
     this.cameraShakeIntensity = Math.min(this.cameraShakeIntensity + intensity, 1.2);
@@ -617,12 +623,14 @@ export class Game {
     const playerPos = this.player.group.position;
 
     const speedRatio = Math.min(this.player.speed / this.player.effectiveMaxSpeed, 1.6);
-    const targetFov = 65 + (speedRatio - 0.5) * 26 + (this.player.isBoosting ? 14 : 0);
+    const targetFov = 65
+      + (speedRatio - 0.5) * (APPROVED_PHYSICS.camera.speedFov * 260)
+      + (this.player.isBoosting ? APPROVED_PHYSICS.camera.boostFovPulse * 100 : 0);
     this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, targetFov, Math.min(dt * 5, 1));
     this.camera.updateProjectionMatrix();
 
-    const chaseDist = 13.5;
-    const chaseHeight = 4.8;
+    const chaseDist = APPROVED_PHYSICS.camera.distance;
+    const chaseHeight = APPROVED_PHYSICS.camera.height;
 
     const backward = playerInfo.tangent.clone().negate();
     const up = playerInfo.normal.clone();
@@ -635,12 +643,14 @@ export class Game {
       idealCamPos.x += (Math.random() - 0.5) * this.cameraShakeIntensity * 1.5;
       idealCamPos.y += (Math.random() - 0.5) * this.cameraShakeIntensity * 1.5;
       idealCamPos.z += (Math.random() - 0.5) * this.cameraShakeIntensity * 1.5;
-      this.cameraShakeIntensity = Math.max(this.cameraShakeIntensity - dt * 2.2, 0);
+      this.cameraShakeIntensity = Math.max(this.cameraShakeIntensity - dt * APPROVED_PHYSICS.camera.shakeDecay, 0);
     }
 
-    this.camera.position.lerp(idealCamPos, Math.min(dt * 14, 1));
+    this.camera.position.lerp(idealCamPos, Math.min(dt * APPROVED_PHYSICS.camera.lag, 1));
 
-    const lookTarget = playerPos.clone().add(playerInfo.tangent.clone().multiplyScalar(15));
+    const lookTarget = playerPos.clone().add(
+      playerInfo.tangent.clone().multiplyScalar(APPROVED_PHYSICS.camera.lookahead)
+    );
     this.camera.up.copy(playerInfo.normal);
     this.camera.lookAt(lookTarget);
   }

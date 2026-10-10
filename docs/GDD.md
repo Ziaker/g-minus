@@ -160,6 +160,8 @@ Cada solicitação de protótipo deve entregar:
 
 **Critério de aprovação:** registrar a opção aprovada e uma configuração final reproduzível. Sem aprovação não se deve implementar gameplay correspondente. Quando uma divergência técnica impossibilitar fidelidade exata, expor a divergência e pedir decisão antes de alterar escopo ou comportamento.
 
+**Decisão vigente — Protótipo 01 (10/10/2026):** o Perfil C — Inercial / Drift foi aprovado como baseline de física e dinâmica. A aprovação abrange o comportamento funcional proposto pelo laboratório e exclui visual, VFX, áudio e pistas. O registro e o estado de integração estão em [`docs/decisions/2026-10-10-prototype-01-physics-approval.md`](decisions/2026-10-10-prototype-01-physics-approval.md).
+
 ### 11.2 Telemetria e depuração [102]
 
 Deve existir um sistema de telemetria e debug que facilite o teste do jogador e de todos os comportamentos de IA, inclusive situações difíceis de reproduzir. Requisitos explícitos:

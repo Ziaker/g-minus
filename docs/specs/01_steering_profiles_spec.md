@@ -1,81 +1,144 @@
-# Especificação Técnica — Protótipo 01: Laboratório Completo de Física, Combate e IA
+# Especificação Técnica — Protótipo 01: Pilotagem, Física de Repulsor e Câmera Dinâmica
 
-> **Revisão 09/10/2026:** ver [correções e validação](../audits/2026-10-09-fixes.md). A descrição histórica abaixo não comprova integração/aprovação: o traçado chamado anteriormente “Tubo Zero-G” é uma fita elevada, sem condução cilíndrica/invertida; a reta não contém cones de slalom; os quatro grupos são visuais, sem troca de peças. Não há física livre de orientação/curvatura nem clash automático por colisão. O botão de clash inicia um ensaio manual.
-
-> **Contrato atualizado:** simulação em passos de 1/120 s; pausa/aba oculta não avançam a física. Cada A/B/C preserva seus ajustes durante a sessão. R reinicia nave, comandos, golpes, boost, clash, K.O.s e grid com seed de IA 12345; cenário/efeitos visuais não são determinísticos. JSON continua sendo um objeto plano de parâmetros, com nome opcional; importações parciais válidas preservam campos omitidos, e entradas inválidas rejeitam toda a operação. Limites são os sliders existentes. O JSON não exporta pista/câmera/opções/grid. Isso ainda deve ser ampliado antes de uma aprovação final reproduzível de todas as opções do laboratório.
-
-> **Eixos:** A = deslocamento lógico negativo e D = positivo. A matriz de orientação permanece SO(3), com +Z para frente e +X do modelo. Para a câmera atrás de uma nave voltada para +Z, direita da tela é −X do modelo; por isso a translação usa o negativo do primeiro vetor da base. Pads, recarga e IA seguem a mesma convenção, validada por projeção em câmera.
-
-> **Pads/combate:** área longitudinal usa os 12 u do visual; ativação única por entrada, +75 u/s no laboratório (teto 245), com desaceleração existente de 22 u/s² para remover o excedente gradualmente. Cada golpe atinge cada alvo uma vez. Clash vence no comando que alcança 100; o rival destruído reaparece após 3 s. Essas regras do laboratório não foram integradas como novo perfil de direção no principal. G lateral é uma estimativa da variação de velocidade lateral, usando escala derivada do velocímetro (6,8/3,6 m por unidade); não inclui aceleração centrípeta da spline.
-
-**Status:** Laboratório de Prototipação e Especificação Técnica Integrada (GDD Seções 1 a 11).  
-**Data:** 2026-10-08  
-**Arquivo do Protótipo:** `prototypes/01_steering_profiles.html`  
-**Referência GDD:** Itens [21] (3 Perfis de Direção), [22] (Instabilidade em Alta Velocidade), [23] (Auto-estabilização ao soltar), [24] (Mecânica de Drift e Inércia), [26] (Airbrakes <kbd>Q</kbd>/<kbd>E</kbd>), [31–40] (Escudo, Boost, Pit Zones, Dash Plates), [41–50] (Side-Attack, Spin Attack, Clash Duel Mashing), [51–60] (Grid de IA e K.O.s), [61–70] (Circuitos e Tubo Zero-G), [91–94] (Câmeras Múltiplas e FOV dinâmico) e [101–102] (Telemetria, Controle de Tempo e Exportação JSON).
+> **Data de Atualização:** 2026-10-10
+>
+> **Arquivo do Protótipo:** [`prototypes/01_steering_profiles.html`](file:///c:/Users/zerke/OneDrive/%C3%81rea%20de%20Trabalho/G%20Minus/prototypes/01_steering_profiles.html)
+>
+> **Status:** **APROVADO para implementação funcional**, com o **Perfil C — Inercial / Drift** e o export entregue em 10/10/2026 como baseline.
+>
+> **Limite da aprovação:** física e dinâmica propostas pelo laboratório. Visual, VFX, áudio e pistas não foram aprovados por esta decisão.
+>
+> **Registro da decisão:** [`docs/decisions/2026-10-10-prototype-01-physics-approval.md`](../decisions/2026-10-10-prototype-01-physics-approval.md).
+> **Referência GDD:** Itens [10] (Sensação F-Zero GX), [21] (3 Perfis de Direção), [22] (Instabilidade em Alta Velocidade), [23] (Auto-estabilização ao Soltar), [24] (Mecânica de Drift e Inércia), [25] (Freios), [26] (Freios Aerodinâmicos / Airbrakes Independentes), [27] (Perda de Velocidade por Erro), [29] (Superfícies Inclinadas), [91–95] (Câmera Dinâmica e Sensação de Velocidade), [101–102] (Gate de Prototipação, Telemetria e JSON).
 
 ---
 
-## 1. Visão Geral do Laboratório de Prototipação
+## 1. Visão Geral e Filosofia dos Três Perfis
 
-O arquivo `prototypes/01_steering_profiles.html` é o ambiente de teste e calibração definitiva do **G-MINUS**. Ele reúne em uma única aplicação web interativa:
+O objetivo deste laboratório é apresentar três abordagens de pilotagem radicalmente distintas e consagradas nos jogos de corrida antigravitacional, permitindo que o jogador/designer teste, compare e calibre os parâmetros em tempo real antes de aprovar uma física definitiva para o **G-MINUS**.
 
-1. **Os 3 Perfis de Direção do GDD [21]:**
-   * **Perfil A (Direto / Preciso - F-Zero GX):** Resposta imediata, sem rampa de atraso, tração firme nos trilhos.
-   * **Perfil B (Progressivo / Suave - Filtro Dinâmico):** Rampa exponencial de aceleração angular para toques curtos vs longos.
-   * **Perfil C (Inercial / Drift - F-Zero X):** Grande inércia lateral e transferência de massa, exigindo contra-esterço deliberado em curvas fechadas.
-2. **Ambientes e Pistas:**
-   * **Circuito 3D Neo-Tokyo:** Curvas fechadas, elevações e declives em alta velocidade.
-   * **Reta de Ensaio Slalom:** Pista reta de 2600m com cones de referência para avaliar tempo de resposta isolado.
-   * **Tubo Zero-G (Cilíndrico):** Pista tubular fechada em 360° para testar condução invertida e giros de câmera.
-3. **Mecânicas de Combate Físico e Manobras:**
-   * **Side-Attack (<kbd>Q</kbd> / <kbd>E</kbd>):** Deslocamento lateral explosivo para arremessar oponentes contra guardrails.
-   * **Spin Attack (<kbd>Z</kbd> / <kbd>SHIFT</kbd>):** Rotação radial em 360° que repele múltiplos adversários ao redor.
-   * **Clash Duel [GDD 45]:** Disputa de colisão mashing entre duas naves em alta velocidade com indicador visual de equilíbrio de força.
-4. **Sistema de Grid & IA Configurável:**
-   * Slider de 0 a 29 rivais simultâneos na pista.
-   * Colisões físicas entre veículos, perda de escudo e contagem de K.O.s.
-5. **Boost, Escudo & Elementos de Pista:**
-   * Super Boost (<kbd>ESPAÇO</kbd>) com consumo de blindagem.
-   * Dash Plates (placas amarelas de aceleração instantânea).
-   * Pit Recharge Strips (faixas de recarga de escudo neon verde).
-6. **Múltiplas Perspectivas de Câmera (<kbd>C</kbd>):**
-   * Câmera de Perseguição Dinâmica (Chase Cam com FOV proporcional à velocidade).
-   * Câmera Cockpit / Primeira Pessoa.
-   * Câmera Orbital 360° para inspeção estética das naves e peças.
-7. **Áudio Procedural Web Audio API:**
-   * Síntese de motor em tempo real com pitch por velocidade, sons de impacto, boost e recarga.
-8. **Controle de Tempo e Telemetria Completa:**
-   * Slider de Time Scale (0.1x Slow-Mo a 2.0x Fast-Forward) e Pausa (<kbd>P</kbd>).
-   * Importação e Exportação de Configurações em JSON com cópia em 1 clique.
+O laboratório permanece útil para comparação, mas a decisão vigente escolhe o Perfil C calibrado pelo usuário. As tabelas históricas abaixo descrevem a intenção original dos três perfis; quando houver divergência numérica, prevalecem o export aprovado e `src/game/PhysicsCalibration.ts`.
+
+```mermaid
+flowchart TD
+    subgraph P_A["PERFIL A: F-Zero GX"]
+        A1["Tração Magnética Máxima (Grip 98%)"]
+        A2["Resposta de Esterço Instantânea"]
+        A3["Airbrakes L/R: Quick-Turn Cortante"]
+        A4["Derrapagem Mínima / Precisão Cirúrgica"]
+    end
+
+    subgraph P_B["PERFIL B: F-Zero X (G-Diffuser)"]
+        B1["Física Inercial de Repulsor Flutuante"]
+        B2["Slip Angle Dinâmico (Nariz vs Velocidade)"]
+        B3["Drift / Slide Turn Deliberado"]
+        B4["Exigência de Contra-Esterço para Saída"]
+    end
+
+    subgraph P_C["PERFIL C: Redout"]
+        C1["Duplo Vetor: Giro (Steer) + Strafe Lateral"]
+        C2["Massa Elevada & Força Centrífuga Forte"]
+        C3["Strafe Obrigatório em Curvas Fechadas"]
+        C4["Suspensão Magnética Elástica (Ground Effect)"]
+    end
+```
 
 ---
 
-## 2. Parâmetros e Intervalos de Calibração
+## 2. Detalhamento dos Três Perfis de Direção
 
-| Parâmetro | Tipo / Range | Default (A) | Descrição |
-| :--- | :---: | :---: | :--- |
-| `steerRate` | 20 a 120 | 65 | Força base de esterço lateral. |
-| `progressivity` | 1.0 a 3.5 | 1.0 | Expoente da curva de resposta temporal ao segurar a direção. |
-| `inertia` | 5 a 80 | 18 | Massa inercial da nave durante mudanças de direção. |
-| `grip` | 30% a 100% | 92% | Aderência dos repulsores da nave contra derrapagem. |
-| `recenter` | 1.0 a 25.0 | 14.0 | Velocidade de auto-estabilização ao soltar os controles. |
-| `speedInstability` | 0.0 a 1.0 | 0.15 | Taxa de perda de aderência quando a velocidade supera a marca base. |
-| `sideAttackForce` | 80 a 350 | 190 | Impulso lateral gerado pelo golpe de Side-Attack (<kbd>Q</kbd>/<kbd>E</kbd>). |
+### 2.1. Perfil A — F-Zero GX (Magnetic Grip & Snappy Quick-Turn)
+* **Inspiração:** *F-Zero GX* (Nintendo GameCube / SEGA Amusement Vision).
+* **Conceito:** Tração magnética absoluta nos trilhos repulsores. O veículo não desliza lateralmente de forma passiva; as mudanças de direção são agressivas, precisas e instantâneas.
+* **Mecânica de Curva & Airbrakes:**
+  * Esterço linear sem rampa de atraso perceptual ($\text{Progressivity} = 1.0$).
+  * Aderência lateral máxima ($\mu_{\text{grip}} = 98\%$).
+  * **Quick-Turn com Airbrakes (<kbd>Z</kbd>/<kbd>C</kbd>):** Acionar o freio aerodinâmico para o mesmo lado da curva corta o raio de giro instantaneamente sem perda de velocidade ou perda de aderência.
+  * **Auto-Estabilização:** Ao soltar os direcionais, a nave recentraliza imediatamente com alta rigidez de amortecimento.
+* **Comportamento da Câmera:** Câmera de perseguição firme, com rastreamento angular rápido e leve inclinação de roll.
 
 ---
 
-## 3. Tabela Completa de Comandos
+### 2.2. Perfil B — F-Zero X (Inertial Slide & Counter-Steer Drift)
+* **Inspiração:** *F-Zero X* (Nintendo 64) e o projeto de descompilação de referência [`G-Diffuser`](https://github.com/Zorkats/G-Diffuser).
+* **Conceito:** A nave flutua sobre uma almofada de energia com alta inércia lateral e baixo atrito de repulsor. O vetor de momento linear tem peso dominante.
+* **Mecânica de Curva, Drift & Contra-Esterço:**
+  * Ao esterçar em alta velocidade, o nariz da nave aponta rapidamente na direção (<kbd>Yaw</kbd>), mas a massa continua deslizando na direção tangencial anterior, abrindo um ângulo de escorregamento (**Slip Angle** $\beta$).
+  * **Mecânica de Slide / Drift:**
+    * Fazer curva em alta velocidade e soltar brevemente o acelerador ou acionar o freio induz o estado de **Slide Turn / Drift**, gerando faíscas nas pontas das asas.
+    * Durante o drift, o ângulo de guinada aumenta para o ápice da curva, enquanto a velocidade linear perde tração lateral ($\mu_{\text{grip}}$ reduz para 40%).
+    * **Contra-Esterço Obrigatório:** Para sair da curva na trajetória ideal sem colidir com a barreira externa, o piloto **deve virar o volante no sentido oposto ao da curva** (contra-esterço), forçando o vetor de velocidade a se realinhar com a frente da nave.
+* **Comportamento da Câmera:** Atraso inercial angular pronunciado; a câmera se abre lateralmente durante o drift para exibir o ângulo de ataque da nave em relação à pista.
 
-| Tecla / Atalho | Ação no Protótipo |
-| :--- | :--- |
-| <kbd>W</kbd> / <kbd>↑</kbd> | Acelerar nave |
-| <kbd>S</kbd> / <kbd>↓</kbd> | Frear nave |
-| <kbd>A</kbd> / <kbd>←</kbd> | Esterço para a Esquerda |
-| <kbd>D</kbd> / <kbd>→</kbd> | Esterço para a Direita |
-| <kbd>Q</kbd> | Side-Attack / Airbrake para a Esquerda |
-| <kbd>E</kbd> | Side-Attack / Airbrake para a Direita |
-| <kbd>Z</kbd> / <kbd>SHIFT</kbd> | Spin Attack 360° em área |
-| <kbd>ESPAÇO</kbd> | Super Boost (consome escudo) |
-| <kbd>C</kbd> | Alternar perspectiva de câmera (Perseguição / Cockpit / Órbita) |
-| <kbd>R</kbd> | Reposicionar / Resetar posição na pista |
-| <kbd>P</kbd> | Pausar / Despausar simulação |
+---
+
+### 2.3. Perfil C — Redout (Dual-Vector / Strafe Hovercraft & Ground Effect)
+* **Inspiração:** *Redout* (34BigThings).
+* **Conceito:** Física de hovercraft de **Duplo Vetor**. O controle da nave é desacoplado entre **Rotação de Nariz (Steer)** e **Propulsão Lateral Aerodinâmica (Strafe)**, com forte atração gravitacional/magnética ("Ground Effect").
+* **Mecânica de Curva & Strafe Duplo:**
+  * O esterço do volante (<kbd>←</kbd>/<kbd>→</kbd>) apenas gira a orientação frontal da nave. Devido à alta massa e aceleração centrífuga, virar apenas o volante não segura a linha e faz a nave bater na parede externa.
+  * **Strafe Lateral (<kbd>Z</kbd>/<kbd>C</kbd>):** O piloto precisa acionar ativamente os jatos de strafe lateral em conjunto com o volante para vencer a força centrífuga e puxar a nave para a linha interna da curva.
+  * **Fórmula Vetorial:** $\vec{v}_{\text{total}} = \vec{v}_{\text{longitudinal}} + \vec{v}_{\text{strafe}} + \vec{v}_{\text{centrífuga}}$.
+  * **Efeito Solo (Ground Effect):** Suspensão magnética pesada com amortecimento elástico vertical que absorve oscilações da pista.
+* **Comportamento da Câmera:** Câmera cinematográfica com suspensão inercial elástica (*spring-damper* com atraso translacional suave e recuo na aceleração).
+
+---
+
+## 3. Tabela Comparativa de Parâmetros e Defaults
+
+| Parâmetro | Range do Slider | Perfil A (F-Zero GX) | Perfil B (F-Zero X) | Perfil C (Redout) | Descrição Física |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| `steerRate` | 20 a 120 | **85** | **65** | **50** | Taxa de rotação angular de guinada (*Yaw Rate*). |
+| `progressivity` | 1.0 a 3.5 | **1.0** (Linear) | **1.4** (Suave) | **2.0** (Progressivo) | Expoente temporal da rampa de entrada do esterço. |
+| `inertia` | 5 a 80 | **12** (Baixa) | **58** (Alta) | **44** (Pesada) | Inércia de massa e conservação de momento lateral. |
+| `grip` | 30% a 100% | **98%** (Trilho) | **68%** (Solto/Drift) | **82%** (Amortecido) | Coeficiente de aderência lateral do repulsor ($\mu_{\text{grip}}$). |
+| `airbrakeForce` | 20 a 200 | **95** (Quick-Turn) | **60** (Auxiliar) | **140** (Strafe Essencial) | Força dos freios aerodinâmicos / propulsores de strafe. |
+| `recenter` | 1.0 a 30.0 | **22.0** (Instantâneo) | **7.0** (Flutuante) | **12.0** (Elástico) | Velocidade de auto-estabilização e alinhamento do repulsor. |
+| `speedInstability` | 0.0 a 1.0 | **0.05** (Estável) | **0.35** (Solta em alta vel.) | **0.20** (Moderada) | Fator de perda de aderência ao superar a velocidade base. |
+| `camStiffness` | 2.0 a 25.0 | **18.0** (Firme) | **8.0** (Lag de Drift) | **12.0** (Mola Elástica) | Rigidez da mola da câmera de perseguição. |
+
+---
+
+## 4. Tabela Completa de Comandos e Controles
+
+| Comando | Teclas Alternativas | Ação Física no Laboratório |
+| :--- | :--- | :--- |
+| **Acelerar** | <kbd>X</kbd> ou <kbd>W</kbd> / <kbd>↑</kbd> | Aplica propulsão longitudinal vetorial nos motores traseiros. |
+| **Frear / Drift** | <kbd>ESPAÇO</kbd> ou <kbd>S</kbd> / <kbd>↓</kbd> | Reduz velocidade longitudinal; quando combinado com esterço em alta velocidade, inicia Drift no Perfil B. |
+| **Esterço Esquerda / Direita** | <kbd>←</kbd> / <kbd>→</kbd> ou <kbd>A</kbd> / <kbd>D</kbd> | Gira a orientação de guinada (<kbd>Yaw</kbd>) e aplica torque lateral. |
+| **Airbrake / Strafe Esquerda** | <kbd>Z</kbd> ou <kbd>Q</kbd> | Ativa freio aerodinâmico esquerdo (Quick-Turn no GX) ou Strafe Lateral esquerdo (Redout). Double-tap: Side-Attack. |
+| **Airbrake / Strafe Direita** | <kbd>C</kbd> ou <kbd>E</kbd> | Ativa freio aerodinâmico direito (Quick-Turn no GX) ou Strafe Lateral direito (Redout). Double-tap: Side-Attack. |
+| **Spin Attack 360°** | <kbd>Z</kbd> + <kbd>C</kbd> simultâneo ou <kbd>SHIFT</kbd> | Rotação giroscópica de 360° para repelir adversários ao redor. |
+| **Super Boost** | <kbd>A</kbd> | Consome 15% de energia de escudo para aceleração extrema temporária. |
+| **Câmera** | <kbd>V</kbd> | Alterna entre Perseguição Dinâmica, Cockpit e Inspeção Orbital 360°. |
+| **Reset / Posição** | <kbd>R</kbd> | Reposiciona a nave na pista com reset completo de forças e inputs. |
+| **Pausa** | <kbd>P</kbd> | Congela a simulação física sem perda de estado. |
+
+---
+
+## 5. Ambientes de Teste do Laboratório
+
+1. **Circuito 3D Neo-Tokyo:** Circuito completo com retas de velocidade extrema, curvas fechadas de alta elevação, chicanes e declives acentuados.
+2. **Reta de Slalom com Cones:** Reta de 2.600 metros equipada com cones de tráfego para testar tempo de resposta, contra-esterço e ziguezague rápido em alta velocidade.
+3. **Pista Elevada em Espiral:** Fita elevada de raio constante em subida contínua para calibrar sustentação de drift e forças centrífugas prolongadas.
+
+---
+
+## 6. Formato de Serialização e Exportação JSON
+
+O laboratório permite a cópia e colagem de configurações completas em JSON estruturado com validação atômica de tipos e limites numéricos:
+
+```json
+{
+  "profile": "A",
+  "name": "F-Zero GX Setup",
+  "steerRate": 85,
+  "progressivity": 1.0,
+  "inertia": 12,
+  "grip": 98,
+  "airbrakeForce": 95,
+  "recenter": 22.0,
+  "speedInstability": 0.05,
+  "camStiffness": 18.0
+}
+```

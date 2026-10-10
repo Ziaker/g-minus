@@ -130,7 +130,7 @@ Distribuído sob a licença MIT. Consulte o arquivo `LICENSE` para mais detalhes
 
 ## 📘 Game Design Document e processo de prototipação
 
-**Revisão de 09/10/2026:** [novidades verificadas, bugs corrigidos e limites](docs/audits/2026-10-09-fixes.md). O menu tem dez modelos; a corrida principal usa oito participantes. Os quatro grupos visuais das naves ainda não constituem um editor de peças intercambiáveis. O laboratório HTML é independente do jogo.
+**Revisão de 10/10/2026:** o [Protótipo 01 foi aprovado para física e dinâmica](docs/decisions/2026-10-10-prototype-01-physics-approval.md), usando o Perfil C — Inercial / Drift como baseline. A aprovação não inclui visual, VFX, áudio ou pistas. Consulte também as [novidades verificadas, bugs corrigidos e limites](docs/audits/2026-10-09-fixes.md).
 
 Validação: `npm test` executa regressões de input, geometria, combate, pads, chegada e laboratórios; `npm run build` verifica TypeScript antes do Vite. Os laboratórios de prototipação (`/prototypes/01_steering_profiles.html`, `/prototypes/02_craft_visuals.html`, `/prototypes/03_neo_metropolis_visual.html` e `/prototypes/04_craft_vfx.html`) rodam de forma independente e podem ser abertos diretamente no navegador.
 
@@ -138,7 +138,7 @@ As decisões atuais de gameplay, visual e processo de desenvolvimento estão reg
 
 **Regra de desenvolvimento:** toda feature passa por protótipo HTML com **3 alternativas distintas**, sliders independentes e configuração copiável/colável, acompanhada de especificação completa e aprovação **antes** de ser integrada ao jogo. A integração deve ser fiel à versão aprovada. Novas mudanças exigem consulta ao repositório atualizado, atualização documental, telemetria/debug e atualização do README.
 
-- **Protótipo 01 — Física, Combate e Direção:** [abrir laboratório](prototypes/01_steering_profiles.html) · [especificação](docs/specs/01_steering_profiles_spec.md)
+- **Protótipo 01 — Física, Combate e Direção (Perfil C aprovado):** [abrir laboratório](prototypes/01_steering_profiles.html) · [especificação](docs/specs/01_steering_profiles_spec.md) · [decisão](docs/decisions/2026-10-10-prototype-01-physics-approval.md)
 - **Protótipo 02 — Modelos & Silhuetas de Naves:** [abrir laboratório](prototypes/02_craft_visuals.html) · [especificação](docs/specs/02_craft_visual_spec.md)
 - **Protótipo 03 — Ambiente Neo Metropolis:** [abrir laboratório](prototypes/03_neo_metropolis_visual.html) · [especificação](docs/specs/03_neo_metropolis_visual_spec.md)
 - **Protótipo 04 — Efeitos Visuais das Naves (VFX Lab):** [abrir laboratório](prototypes/04_craft_vfx.html) · [especificação](docs/specs/04_craft_vfx_spec.md)

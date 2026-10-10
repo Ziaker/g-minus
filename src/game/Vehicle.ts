@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { Track } from './Track';
 import { CombatSystem } from './Combat';
 import { AudioManager } from './Audio';
+import { APPROVED_PHYSICS, APPROVED_PHYSICS_PROFILE } from './PhysicsCalibration';
 
 export type StatGrade = 'A' | 'B' | 'C' | 'D' | 'E';
 
@@ -24,6 +25,62 @@ export type MachineModel =
   | 'blood_hawk'
   | 'generic';
 
+export type SteeringProfileType = 'A' | 'B' | 'C';
+
+export interface SteeringProfileParams {
+  name: string;
+  steerRate: number;        // Base steering turning rate
+  progressivity: number;    // Steering ramp exponent
+  grip: number;             // Traction factor
+  inertia: number;          // Lateral mass inertia
+  recenter: number;         // Natural stabilization centering rate
+  tiltInfluence: number;    // Multiplier for tilt effect on cornering sharpness
+  driftTiltBonus: number;   // Cornering speed & sharpness bonus when tilting into drift
+  speedInstability?: number;
+  speedInstabilityThreshold?: number;
+  highSpeedSteerDropoff?: number;
+  lowSpeedSteerMultiplier?: number;
+  counterSteerBoost?: number;
+}
+
+export const STEERING_PROFILES: Record<SteeringProfileType, SteeringProfileParams> = {
+  A: {
+    name: 'Perfil A (Direto / Preciso)',
+    steerRate: 75,
+    progressivity: 1.0,
+    grip: 0.035, // High grip (low slip)
+    inertia: 20,
+    recenter: 14,
+    tiltInfluence: 0.95,
+    driftTiltBonus: 1.25,
+  },
+  B: {
+    name: 'Perfil B (Progressivo / Suave)',
+    steerRate: 68,
+    progressivity: 2.2,
+    grip: 0.065, // Medium grip
+    inertia: 32,
+    recenter: 9,
+    tiltInfluence: 1.15,
+    driftTiltBonus: 1.40,
+  },
+  C: {
+    name: 'Perfil C (Inercial / Drift)',
+    steerRate: APPROVED_PHYSICS.steering.steerRate,
+    progressivity: APPROVED_PHYSICS.steering.progressivity,
+    grip: APPROVED_PHYSICS.steering.grip,
+    inertia: APPROVED_PHYSICS.steering.inertia,
+    recenter: APPROVED_PHYSICS.steering.recenter,
+    tiltInfluence: APPROVED_PHYSICS.banking.tiltSteerBoost,
+    driftTiltBonus: APPROVED_PHYSICS.drift.slideTurnBoost,
+    speedInstability: APPROVED_PHYSICS.steering.speedInstability,
+    speedInstabilityThreshold: APPROVED_PHYSICS.steering.speedInstabilityThreshold,
+    highSpeedSteerDropoff: APPROVED_PHYSICS.steering.highSpeedSteerDropoff,
+    lowSpeedSteerMultiplier: APPROVED_PHYSICS.steering.lowSpeedSteerMultiplier,
+    counterSteerBoost: APPROVED_PHYSICS.steering.counterSteerBoost,
+  }
+};
+
 export interface VehicleConfig {
   id: string;
   name: string;
@@ -38,6 +95,7 @@ export interface VehicleConfig {
   handling: number;
   boostMultiplier: number;
   engineBalance?: number; // -1 (Max Accel) to +1 (Max Top Speed), default 0
+  steeringProfile?: SteeringProfileType; // 'A' | 'B' | 'C'
 }
 
 export class Vehicle {
@@ -62,6 +120,10 @@ export class Vehicle {
   public maxShield = 100;
   public isDestroyed = false;
   public respawnTimer = 0;
+  public steeringProfile: SteeringProfileType = APPROVED_PHYSICS_PROFILE;
+  public steerHoldTime = 0;
+  private boostCooldownRemaining = 0;
+  private hoverTime = 0;
 
   // Boost
   public isBoosting = false;
@@ -89,6 +151,7 @@ export class Vehicle {
 
   // Computed stat multipliers
   public effectiveMaxSpeed: number;
+  public effectiveBoostMaxSpeed: number;
   public effectiveAcceleration: number;
   public bodyArmorFactor: number;
   public gripFactor: number;
@@ -104,6 +167,7 @@ export class Vehicle {
     this.track = track;
     this.combat = combat;
     this.audio = audio;
+    this.steeringProfile = config.steeringProfile ?? APPROVED_PHYSICS_PROFILE;
 
     // Apply Engine Balance & Stat Grades
     const balance = config.engineBalance ?? 0; // -1..+1
@@ -118,8 +182,18 @@ export class Vehicle {
       accelMult += Math.abs(balance) * 0.28;
     }
 
-    this.effectiveMaxSpeed = config.maxSpeed * speedMult;
-    this.effectiveAcceleration = config.acceleration * accelMult;
+    const usesApprovedPhysics = this.steeringProfile === APPROVED_PHYSICS_PROFILE;
+    const speedScale = config.maxSpeed / 172;
+    const accelerationScale = config.acceleration / 84;
+    const baseTopSpeed = usesApprovedPhysics ? APPROVED_PHYSICS.propulsion.topSpeed * speedScale : config.maxSpeed;
+    const baseAcceleration = usesApprovedPhysics ? APPROVED_PHYSICS.propulsion.acceleration * accelerationScale : config.acceleration;
+    this.effectiveMaxSpeed = baseTopSpeed * speedMult;
+    this.effectiveAcceleration = baseAcceleration * accelMult;
+    const approvedBoostRatio = APPROVED_PHYSICS.propulsion.boostTopSpeed / APPROVED_PHYSICS.propulsion.topSpeed;
+    const machineBoostScale = config.boostMultiplier / 1.55;
+    this.effectiveBoostMaxSpeed = usesApprovedPhysics
+      ? this.effectiveMaxSpeed * approvedBoostRatio * machineBoostScale
+      : this.effectiveMaxSpeed * config.boostMultiplier;
 
     // Body grade multipliers (A is tank, E is paper)
     const bodyGradeMap: Record<StatGrade, number> = { A: 0.65, B: 0.85, C: 1.0, D: 1.25, E: 1.5 };
@@ -684,9 +758,11 @@ export class Vehicle {
     if (this.config.isAI) {
       this.updateAI(dt, input);
     }
+    this.boostCooldownRemaining = Math.max(0, this.boostCooldownRemaining - dt);
+    this.hoverTime += dt;
 
     // Boost Handling (A button - Requires Lap 2+)
-    if (input.boost && !this.isBoosting) {
+    if (input.boost && !this.isBoosting && this.boostCooldownRemaining <= 0) {
       if (this.canBoost()) {
         if (this.shield > 15) {
           this.triggerBoost();
@@ -697,21 +773,24 @@ export class Vehicle {
     if (this.isBoosting) {
       this.boostDurationRemaining -= dt;
       // Boost consumes shield continuously
-      this.takeDamage(14 * dt, false);
+      this.takeDamage(APPROVED_PHYSICS.propulsion.boostEnergyDrainRate * dt, false);
 
       if (this.boostDurationRemaining <= 0 || this.shield <= 5) {
         this.isBoosting = false;
+        this.boostCooldownRemaining = APPROVED_PHYSICS.propulsion.boostCooldown;
       }
+    } else if (!this.isBoosting) {
+      this.shield = Math.min(this.maxShield, this.shield + APPROVED_PHYSICS.propulsion.passiveRegenRate * dt);
     }
 
-    // Side Attack Handling (Double-tap Z / C)
+    // Side Attack Handling (Double-tap Z / C) - Wider, sweeping lateral tackle
     if (input.sideAttack !== 0 && !this.isSideAttacking && !this.isSpinAttacking) {
       this.triggerSideAttack(input.sideAttack);
     }
 
     if (this.isSideAttacking) {
       this.sideAttackTimer -= dt;
-      this.lateralVelocity += this.sideAttackDir * 190 * dt;
+      this.lateralVelocity += this.sideAttackDir * APPROVED_PHYSICS.combat.sideAttackForce * dt;
       if (this.sideAttackTimer <= 0) {
         this.isSideAttacking = false;
       }
@@ -731,65 +810,105 @@ export class Vehicle {
       }
     }
 
-    // Acceleration & Braking (X held accelerates, Space brakes / drifts)
-    const maxSpeedCurrent = this.isBoosting
-      ? this.effectiveMaxSpeed * this.config.boostMultiplier
-      : this.effectiveMaxSpeed;
-
-    const isBrakingOrDrifting = !!(input.backward || input.drift);
-
-    if (isBrakingOrDrifting) {
-      this.speed = Math.max(this.speed - this.effectiveAcceleration * 2.2 * dt, 0);
-    } else if (input.forward) {
-      const accel = this.isBoosting ? this.effectiveAcceleration * 1.85 : this.effectiveAcceleration;
-      this.speed = this.speed > maxSpeedCurrent
-        ? Math.max(maxSpeedCurrent, this.speed - 24 * dt)
-        : Math.min(this.speed + accel * dt, maxSpeedCurrent);
-    } else {
-      // Atmospheric drag when X is not held
-      this.speed = Math.max(this.speed - 24 * dt, 0);
-    }
-
     // 1. Steering from Arrow Keys (Apenas as setas movem a nave)
     let steerDir = 0;
-    if (input.left) steerDir -= 1;
-    if (input.right) steerDir += 1;
+    if (input.left) steerDir -= 1; // Left is -1
+    if (input.right) steerDir += 1; // Right is +1
 
     // 2. Leaning / Strafing from Z and C keys
     let tiltDir = 0;
     if (!this.isSideAttacking && !this.isSpinAttacking) {
-      if (input.tiltLeft) tiltDir -= 1;
-      if (input.tiltRight) tiltDir += 1;
+      if (input.tiltLeft) tiltDir -= 1; // Left is -1 (KeyZ)
+      if (input.tiltRight) tiltDir += 1; // Right is +1 (KeyC)
     }
 
-    // Drift Detection (Space held + steering)
-    const isDrifting = isBrakingOrDrifting && steerDir !== 0;
+    if (steerDir !== 0) this.steerHoldTime += dt;
+    else this.steerHoldTime = Math.max(0, this.steerHoldTime - dt * 2.5);
 
-    // Lateral Force calculation
-    const steerForce = steerDir * this.config.handling * (0.38 + (this.speed / this.effectiveMaxSpeed) * 0.62);
-    const tiltForce = tiltDir * this.config.handling * 0.85;
-    this.lateralVelocity += (steerForce + tiltForce) * dt;
+    const isBrakingOrDrifting = !!(input.backward || input.drift);
+    const isDrifting = isBrakingOrDrifting
+      && steerDir !== 0
+      && this.speed >= APPROVED_PHYSICS.drift.threshold;
+
+    // Acceleration & Braking (X held accelerates, Space brakes / drifts)
+    const maxSpeedCurrent = this.isBoosting
+      ? this.effectiveBoostMaxSpeed
+      : this.effectiveMaxSpeed;
+
+    if (isBrakingOrDrifting) {
+      const brakeForce = isDrifting
+        ? APPROVED_PHYSICS.drift.brakeDeceleration
+        : APPROVED_PHYSICS.propulsion.brakeForce;
+      this.speed = Math.max(this.speed - brakeForce * dt, 0);
+    } else if (input.forward) {
+      const accel = this.isBoosting ? APPROVED_PHYSICS.propulsion.boostAcceleration : this.effectiveAcceleration;
+      this.speed = this.speed > maxSpeedCurrent
+        ? Math.max(maxSpeedCurrent, this.speed - APPROVED_PHYSICS.propulsion.coastDeceleration * dt)
+        : Math.min(this.speed + accel * dt, maxSpeedCurrent);
+    } else {
+      // Atmospheric drag when X is not held
+      this.speed = Math.max(this.speed - APPROVED_PHYSICS.propulsion.coastDeceleration * dt, 0);
+    }
+
+    // Profile parameters
+    const profile = STEERING_PROFILES[this.steeringProfile] || STEERING_PROFILES.A;
+    const progressMult = Math.pow(Math.min(this.steerHoldTime * 2.2, 1.0), profile.progressivity - 1.0);
+    const effectiveSteerMultiplier = 1.0 + (profile.progressivity > 1.0 ? progressMult * 0.75 : 0);
+
+    // 3. Tilting Influences Turn Speed in both normal steering and drift:
+    let tiltBoost = 1.0;
+    if (steerDir !== 0 && Math.sign(tiltDir) === steerDir) {
+      // Banking into the corner boosts turning sharpness & angular yaw velocity
+      tiltBoost = 1.0 + Math.abs(tiltDir) * profile.tiltInfluence * 0.50;
+    }
+    if (isDrifting && Math.sign(tiltDir) === steerDir) {
+      // Drift-turn with matching tilt carves sharp lines at high speed
+      tiltBoost *= profile.driftTiltBonus;
+    }
+
+    const speedRatio = Math.min(this.speed / this.effectiveMaxSpeed, 1.5);
+    const instabilityThreshold = profile.speedInstabilityThreshold ?? 1;
+    const instability = Math.max(0, speedRatio - instabilityThreshold) * (profile.speedInstability ?? 0);
+    const highSpeedDropoff = Math.max(0.4, 1 - instability * (profile.highSpeedSteerDropoff ?? 0));
+    const lowSpeedBoost = speedRatio < 0.35 ? (profile.lowSpeedSteerMultiplier ?? 1) : 1;
+    const counterSteer = isDrifting && Math.sign(this.lateralVelocity) !== steerDir
+      ? (profile.counterSteerBoost ?? 1)
+      : 1;
+    const speedHandlingFactor = (0.38 + speedRatio * 0.62) * highSpeedDropoff * lowSpeedBoost * counterSteer;
+    const driftYawBoost = isDrifting ? APPROVED_PHYSICS.drift.yawBoost : 1;
+    const steerForce = steerDir * this.config.handling * (profile.steerRate / 70)
+      * effectiveSteerMultiplier * tiltBoost * speedHandlingFactor * driftYawBoost;
+    const tiltForce = this.steeringProfile === APPROVED_PHYSICS_PROFILE
+      ? tiltDir * APPROVED_PHYSICS.banking.strafeThrust
+      : tiltDir * this.config.handling * 0.85 * profile.tiltInfluence;
+    const inertiaMass = Math.max(profile.inertia / 25, 0.3);
+
+    this.lateralVelocity += ((steerForce + tiltForce) / inertiaMass) * dt;
 
     // Lateral friction / Grip (Drift reduces grip to allow power-sliding)
+    let effectiveGrip = Math.max(0.005, this.gripFactor * (profile.grip / 0.68));
     if (isDrifting) {
-      const driftGrip = Math.max(this.gripFactor * 0.35, 0.008);
-      this.lateralVelocity *= Math.pow(driftGrip, dt);
+      effectiveGrip = Math.max(effectiveGrip * APPROVED_PHYSICS.drift.gripMultiplier, 0.005);
       if (this.speed > 50) {
         this.combat.spawnSparks(this.group.position, 2, 0x00f0ff);
       }
     } else {
-      this.lateralVelocity *= Math.pow(this.gripFactor, dt);
+      if (steerDir === 0 && tiltDir === 0) {
+        this.lateralVelocity = THREE.MathUtils.lerp(this.lateralVelocity, 0, Math.min(dt * (profile.recenter / 8.0) * 4.0, 1.0));
+      }
     }
+    this.lateralVelocity *= Math.pow(effectiveGrip, dt);
 
     this.lateralOffset += this.lateralVelocity * dt;
 
-    // Track boundary guardrail collision
-    const halfWidth = this.track.trackWidth / 2 - 1.2;
+    // Track boundary guardrail collision (Dynamic local track width)
+    const localTrackWidth = this.track.getTrackWidthAt ? this.track.getTrackWidthAt(this.progressT) : this.track.trackWidth;
+    const halfWidth = localTrackWidth / 2 - 1.4;
     if (Math.abs(this.lateralOffset) > halfWidth) {
       this.lateralOffset = Math.sign(this.lateralOffset) * halfWidth;
       this.lateralVelocity = -this.lateralVelocity * 0.45;
-      this.speed = Math.max(this.speed - 120 * dt, 0);
-      this.takeDamage(18 * dt, false);
+      this.speed = Math.max(this.speed - 110 * dt, 0);
+      this.takeDamage(16 * dt, false);
       if (this.isDestroyed) return;
       this.combat.spawnSparks(this.group.position, 12, 0x00f0ff);
       if (!this.config.isAI) {
@@ -863,20 +982,33 @@ export class Vehicle {
   public updateTransform(dt: number, steerDir: number, tiltDir = 0, isDrifting = false): void {
     const info = this.track.getTrackInfoAt(this.progressT);
 
-    const hoverHeight = 1.35;
+    const hoverHeight = this.steeringProfile === APPROVED_PHYSICS_PROFILE
+      ? APPROVED_PHYSICS.hover.height
+        + Math.sin(this.hoverTime * APPROVED_PHYSICS.hover.wakeFrequency) * APPROVED_PHYSICS.hover.wakeAmplitude
+      : 1.35;
     const pos = info.position.clone()
-      // Local +X in a +Z-forward model is screen-left from the chase camera.
       .add(info.binormal.clone().multiplyScalar(-this.lateralOffset))
       .add(info.normal.clone().multiplyScalar(hoverHeight));
 
     this.group.position.copy(pos);
 
-    // Roll banking based on turning (Arrows) and tilting (Z/C) or side attack
-    let targetRoll = steerDir * 0.42 + tiltDir * 0.52;
+    // Roll banking:
+    // Steer/Tilt Left (negative dir) -> Left wing dips down -> positive roll
+    // Steer/Tilt Right (positive dir) -> Right wing dips down -> negative roll
+    const maxRoll = THREE.MathUtils.degToRad(APPROVED_PHYSICS.banking.maxRollDegrees);
+    let targetRoll = THREE.MathUtils.clamp(
+      -steerDir * 0.42 - tiltDir * 0.50 - (this.lateralVelocity / 70.0) * 0.20,
+      -maxRoll,
+      maxRoll
+    );
     if (this.isSideAttacking) {
-      targetRoll = this.sideAttackDir * 0.65;
+      targetRoll = -this.sideAttackDir * 0.75;
     }
-    this.currentRoll = THREE.MathUtils.lerp(this.currentRoll, targetRoll, Math.min(dt * 12, 1));
+    this.currentRoll = THREE.MathUtils.lerp(
+      this.currentRoll,
+      targetRoll,
+      Math.min(dt * APPROVED_PHYSICS.banking.rollResponse, 1)
+    );
 
     // Align ship with track surface Frenet frame
     const rotMatrix = new THREE.Matrix4().makeBasis(info.binormal, info.normal, info.tangent);
@@ -887,10 +1019,11 @@ export class Vehicle {
     if (this.isSpinAttacking) {
       this.craftMesh.rotation.y = this.spinAttackRotation;
     } else if (isDrifting) {
-      // Deeper drift yaw slip angle
-      this.craftMesh.rotation.y = -steerDir * 0.38;
+      const targetYaw = steerDir * 0.42;
+      this.craftMesh.rotation.y = THREE.MathUtils.lerp(this.craftMesh.rotation.y, targetYaw, Math.min(dt * 14, 1));
     } else {
-      this.craftMesh.rotation.y = -steerDir * 0.16 - tiltDir * 0.08;
+      const targetYaw = steerDir * 0.20 + tiltDir * 0.10;
+      this.craftMesh.rotation.y = THREE.MathUtils.lerp(this.craftMesh.rotation.y, targetYaw, Math.min(dt * 14, 1));
     }
 
     // Thruster scale FX
@@ -903,9 +1036,9 @@ export class Vehicle {
 
   public triggerBoost(): void {
     this.isBoosting = true;
-    this.boostDurationRemaining = 2.4;
+    this.boostDurationRemaining = APPROVED_PHYSICS.propulsion.boostDuration;
     this.speed = Math.max(this.speed, this.effectiveMaxSpeed * 1.15);
-    this.takeDamage(10, false); // Body reduction is applied once by takeDamage.
+    this.spendShield(APPROVED_PHYSICS.combat.boostCost);
     this.combat.spawnSparks(this.group.position, 28, this.config.accentColor);
     if (!this.config.isAI) {
       this.audio.playBoost();
@@ -919,11 +1052,14 @@ export class Vehicle {
 
   public triggerSideAttack(dir: -1 | 1): void {
     if (this.isDestroyed || this.isSideAttacking || this.isSpinAttacking) return;
+    if (this.shield <= APPROVED_PHYSICS.combat.sideAttackCost) return;
     this.attackSerial++;
     this.isSideAttacking = true;
     this.sideAttackDir = dir;
-    this.sideAttackTimer = 0.35;
-    this.combat.spawnSparks(this.group.position, 22, 0xff0055);
+    this.sideAttackTimer = APPROVED_PHYSICS.combat.sideAttackDuration;
+    this.lateralVelocity += dir * APPROVED_PHYSICS.banking.quickStrafeImpulse;
+    this.spendShield(APPROVED_PHYSICS.combat.sideAttackCost);
+    this.combat.spawnSparks(this.group.position, 26, 0xff0055);
     if (!this.config.isAI) {
       this.audio.playImpact();
     }
@@ -931,10 +1067,12 @@ export class Vehicle {
 
   public triggerSpinAttack(): void {
     if (this.isDestroyed || this.isSideAttacking || this.isSpinAttacking) return;
+    if (this.shield <= APPROVED_PHYSICS.combat.spinAttackCost) return;
     this.attackSerial++;
     this.isSpinAttacking = true;
-    this.spinAttackTimer = 0.48;
+    this.spinAttackTimer = APPROVED_PHYSICS.combat.spinAttackDuration;
     this.spinAttackRotation = 0;
+    this.spendShield(APPROVED_PHYSICS.combat.spinAttackCost);
     this.combat.spawnSparks(this.group.position, 36, 0x00f0ff);
     if (!this.config.isAI) {
       this.audio.playSpinAttack();
@@ -957,6 +1095,12 @@ export class Vehicle {
     if (this.shield <= 0 && !this.isDestroyed) {
       this.destroy();
     }
+  }
+
+  private spendShield(amount: number): void {
+    if (this.isDestroyed) return;
+    this.shield = Math.max(this.shield - amount, 0);
+    if (this.shield <= 0) this.destroy();
   }
 
   public destroy(): void {
@@ -995,9 +1139,10 @@ export class Vehicle {
     }
   ): void {
     const now = performance.now();
+    const localWidth = this.track.getTrackWidthAt ? this.track.getTrackWidthAt(this.progressT) : this.track.trackWidth;
     if (now > this.aiNextDecision) {
       this.aiNextDecision = now + 900 + Math.random() * 1200;
-      this.aiTargetOffset = (Math.random() - 0.5) * (this.track.trackWidth - 8);
+      this.aiTargetOffset = (Math.random() - 0.5) * (localWidth - 12);
     }
 
     inputState.forward = true;

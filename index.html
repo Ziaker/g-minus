@@ -336,7 +336,62 @@
       font-size: 12px;
       color: #ffde59;
       font-family: 'Orbitron', monospace;
-      margin-top: 4px;
+    }
+    .profiles-panel {
+      background: rgba(12, 18, 38, 0.85);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      border-radius: 8px;
+      padding: 12px 20px;
+      width: 100%;
+      max-width: 680px;
+      margin-bottom: 16px;
+    }
+    .profiles-header {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      color: #00f0ff;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      letter-spacing: 1px;
+    }
+    .profile-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .profile-card {
+      background: rgba(8, 14, 30, 0.8);
+      border: 2px solid rgba(0, 240, 255, 0.25);
+      border-radius: 6px;
+      padding: 10px 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+    .profile-card:hover {
+      border-color: #00f0ff;
+      transform: translateY(-2px);
+    }
+    .profile-card.selected {
+      border-color: #00ff88;
+      background: rgba(18, 36, 60, 0.95);
+      box-shadow: 0 0 16px rgba(0, 255, 136, 0.4);
+    }
+    .profile-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 12px;
+      font-weight: 900;
+      color: #00f0ff;
+      margin-bottom: 4px;
+    }
+    .profile-card.selected .profile-name {
+      color: #00ff88;
+    }
+    .profile-sub {
+      font-size: 11px;
+      color: #88a0c0;
+      line-height: 1.35;
     }
 
     .controls-panel {
@@ -523,6 +578,28 @@
         <div class="stat-row"><span>BODY</span><span class="stat-grade grade-B">B</span></div>
         <div class="stat-row"><span>BOOST</span><span class="stat-grade grade-A">A</span></div>
         <div class="stat-row"><span>GRIP</span><span class="stat-grade grade-E">E</span></div>
+      </div>
+    </div>
+
+    <!-- 01 / Steering Profiles Selection -->
+    <div class="profiles-panel">
+      <div class="profiles-header">
+        <span>PERFIL DE PILOTAGEM</span>
+        <span id="profile-desc-label" style="color:#ffaa00;">C — INERCIAL / DRIFT (APROVADO)</span>
+      </div>
+      <div class="profile-cards-grid" id="profile-grid">
+        <div class="profile-card" data-profile="A">
+          <div class="profile-name">A — DIRETO / PRECISO</div>
+          <div class="profile-sub">Resposta imediata, alta aderência e corte de curvas afiado.</div>
+        </div>
+        <div class="profile-card" data-profile="B">
+          <div class="profile-name">B — PROGRESSIVO</div>
+          <div class="profile-sub">Rampa gradual, esterço suave e microajustes refinados.</div>
+        </div>
+        <div class="profile-card selected" data-profile="C">
+          <div class="profile-name">C — INERCIAL / DRIFT</div>
+          <div class="profile-sub">Maior slip, transferência de momento e contra-esterço.</div>
+        </div>
       </div>
     </div>
 

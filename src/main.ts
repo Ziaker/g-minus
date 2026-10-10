@@ -14,12 +14,36 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   let selectedMachine = 'falcon';
+  let selectedProfile: 'A' | 'B' | 'C' = 'C';
+
+  const profileCards = document.querySelectorAll<HTMLElement>('.profile-card');
+  const profileDescLabel = document.getElementById('profile-desc-label');
 
   cards.forEach(card => {
     card.addEventListener('click', () => {
       cards.forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       selectedMachine = card.dataset.id || 'falcon';
+    });
+  });
+
+  profileCards.forEach(card => {
+    card.addEventListener('click', () => {
+      profileCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedProfile = (card.dataset.profile as 'A' | 'B' | 'C') || 'A';
+      if (profileDescLabel) {
+        if (selectedProfile === 'A') {
+          profileDescLabel.textContent = 'A — DIRETO / PRECISO';
+          profileDescLabel.style.color = '#00ff88';
+        } else if (selectedProfile === 'B') {
+          profileDescLabel.textContent = 'B — PROGRESSIVO';
+          profileDescLabel.style.color = '#00f0ff';
+        } else {
+          profileDescLabel.textContent = 'C — INERCIAL / DRIFT';
+          profileDescLabel.style.color = '#ffaa00';
+        }
+      }
     });
   });
 
@@ -42,6 +66,6 @@ window.addEventListener('DOMContentLoaded', () => {
   playBtn?.addEventListener('click', () => {
     overlay.style.display = 'none';
     const rawBalance = slider ? parseInt(slider.value, 10) / 100 : 0;
-    game.start(selectedMachine, rawBalance);
+    game.start(selectedMachine, rawBalance, selectedProfile);
   });
 });

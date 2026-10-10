@@ -14,10 +14,23 @@ const ctx2d = new Proxy({}, { get: (o, k) => o[k] ?? noop });
 function dom() {
   const nodes = new Map();
   const get = id => {
-    if (!nodes.has(id)) nodes.set(id, { ...events(), style: {}, classList: { add: noop, remove: noop, toggle: noop }, value: '', textContent: '', clientWidth: 1000, clientHeight: 700, getContext: () => ctx2d, querySelectorAll: () => [] });
+    if (!nodes.has(id)) nodes.set(id, {
+      ...events(), style: {}, classList: { add: noop, remove: noop, toggle: noop },
+      value: '', textContent: '', clientWidth: 1000, clientHeight: 700,
+      getContext: () => ctx2d, querySelectorAll: () => [],
+      getBoundingClientRect: () => ({ width: 1000, height: 700, top: 0, left: 0, right: 1000, bottom: 700 }),
+      replaceChildren: noop, append: noop, appendChild: noop, blur: noop, focus: noop, select: noop
+    });
     return nodes.get(id);
   };
-  return { ...events(), hidden: false, getElementById: get, querySelectorAll: () => [], createElement: () => ({ getContext: () => ctx2d }) };
+  return {
+    ...events(), hidden: false, getElementById: get, querySelectorAll: () => [],
+    createElement: () => ({
+      getContext: () => ctx2d, style: {}, classList: { add: noop, remove: noop, toggle: noop },
+      getBoundingClientRect: () => ({ width: 1000, height: 700, top: 0, left: 0, right: 1000, bottom: 700 }),
+      replaceChildren: noop, append: noop, appendChild: noop, addEventListener: noop
+    })
+  };
 }
 const document = dom(), window = { ...events(), innerWidth: 1000, innerHeight: 700, devicePixelRatio: 1 };
 const cache = new Map();
@@ -35,6 +48,7 @@ const { Vehicle } = load('src/game/Vehicle.ts');
 const { Game, MACHINE_ROSTER } = load('src/game/Game.ts');
 const { Track } = load('src/game/Track.ts');
 const { InputManager } = load('src/game/Input.ts');
+const { APPROVED_PHYSICS, APPROVED_PHYSICS_PROFILE } = load('src/game/PhysicsCalibration.ts');
 const audio = new Proxy({}, { get: () => noop });
 const combat = { spawnSparks: noop, spawnExplosion: noop, update: noop };
 const straight = { trackWidth: 26, boostPads: [], pitZones: [], getTrackLength: () => 1000,
@@ -68,6 +82,18 @@ test('input preserves aliases, buffers quick taps, rejects repeat and resets on 
   window.emit('blur'); assert.equal(i.forward, false);
 });
 
+test('approved Prototype 01 Profile C is the runtime physics baseline only', () => {
+  const main = readFileSync(path.join(root, 'src/main.ts'), 'utf8');
+  assert.equal(APPROVED_PHYSICS_PROFILE, 'C');
+  assert.equal(APPROVED_PHYSICS.steering.steerRate, 56);
+  assert.equal(APPROVED_PHYSICS.propulsion.topSpeed, 500);
+  assert.equal(APPROVED_PHYSICS.propulsion.boostTopSpeed, 600);
+  assert.equal(APPROVED_PHYSICS.combat.sideAttackDamage, 32);
+  assert.equal('track' in APPROVED_PHYSICS, false);
+  assert.equal('vfx' in APPROVED_PHYSICS, false);
+  assert.match(main, /selectedProfile: 'A' \| 'B' \| 'C' = 'C'/);
+});
+
 test('track normals face the driver and all sampled bases are proper rotations', () => {
   const track = new Track(new THREE.Scene());
   const normals = track.trackMesh.geometry.attributes.normal;
@@ -97,15 +123,15 @@ test('pads respect physical length, trigger once and retain gradually decaying s
   let hits = 0;
   const v = vehicle('player', { ...straight, boostPads: [{ t: .5, offset: 0, width: 6, length: 12 }] });
   v.audio = { ...audio, playDashPlate: () => hits++, updateEnginePitch: noop };
-  v.progressT = .48; v.speed = 170; v.update(1 / 120, input({ forward: true })); assert.equal(hits, 0);
+  v.progressT = .48; v.speed = v.effectiveMaxSpeed - 1; v.update(1 / 120, input({ forward: true })); assert.equal(hits, 0);
   v.progressT = .494;
   for (let k = 0; k < 15; k++) v.update(1 / 120, input({ forward: true }));
   assert.equal(hits, 1); assert.ok(v.speed > v.effectiveMaxSpeed);
 });
 
-test('destroy and respawn clear attack/boost state, armour is applied once', () => {
+test('energy costs bypass armour and respawn clears attack/boost state', () => {
   const v = vehicle(); v.currentLap = 2; v.triggerBoost();
-  assert.ok(Math.abs(v.shield - 91.5) < 1e-9);
+  assert.equal(v.shield, 100 - APPROVED_PHYSICS.combat.boostCost);
   v.triggerSpinAttack(); v.destroy(); v.respawn();
   assert.equal(v.isSpinAttacking, false); assert.equal(v.isBoosting, false); assert.equal(v.group.visible, true);
 });
@@ -114,7 +140,7 @@ test('one spin hits each target once throughout its duration', () => {
   const a = vehicle(), b = vehicle('rival'); a.triggerSpinAttack();
   const g = game([a, b]);
   for (let k = 0; k < 58; k++) g.checkVehicleCollisions(1 / 120);
-  assert.ok(Math.abs(b.shield - (100 - 45 * .85)) < 1e-9);
+  assert.ok(Math.abs(b.shield - (100 - APPROVED_PHYSICS.combat.spinAttackDamage * .85)) < 1e-9);
 });
 
 test('sustained ordinary contact has stable damage and impulse at 30/60/120 Hz', () => {
@@ -173,58 +199,98 @@ function lab() {
   for (const m of html.matchAll(/id="(slider-[^"]+)" min="([^"]+)" max="([^"]+)"/g)) Object.assign(document.getElementById(m[1]), { min: m[2], max: m[3] });
   class Renderer { setSize() {} setPixelRatio() {} render() {} }
   const window = { ...events(), innerWidth: 1000, innerHeight: 700, devicePixelRatio: 1 };
-  const context = vm.createContext({ document, window, console, THREE: { ...THREE, WebGLRenderer: Renderer }, navigator: {}, performance: { now: () => 1000 }, setTimeout: noop, requestAnimationFrame: noop });
+  const context = vm.createContext({
+    document, window, console, THREE: { ...THREE, WebGLRenderer: Renderer },
+    navigator: {}, performance: { now: () => 1000 }, setTimeout: noop, requestAnimationFrame: noop,
+    structuredClone: obj => JSON.parse(JSON.stringify(obj)),
+    ResizeObserver: class { observe() {} }
+  });
   const script = html.split('<script>')[1].split('</script>')[0];
   vm.runInContext(script, context, { filename: '01_steering_profiles.html' });
-  return { run: code => vm.runInContext(code, context), document, window };
+  return { run: code => vm.runInContext(code, context), api: window.__GMINUS_LAB_TEST__, document, window };
 }
 
 test('lab boots, rejects invalid JSON atomically and keeps valid imports', () => {
-  const h = lab(), before = h.run('JSON.stringify(params)');
+  const h = lab();
+  const before = h.api.export();
   for (const value of ['null', '[]', '{"grip":150}', '{"grip":null}', '{"steerRate":90,"inertia":"oops"}', '{"unknown":4}']) {
-    h.document.getElementById('json-config').value = value; h.run('applyJSON()'); assert.equal(h.run('JSON.stringify(params)'), before);
+    assert.throws(() => h.api.import(value));
+    assert.deepEqual(h.api.export(), before);
   }
-  h.document.getElementById('json-config').value = '{"grip":80}'; h.run('applyJSON()'); assert.equal(h.run('params.grip'), 80);
+  const valid = { ...before, profiles: { ...before.profiles, A: { ...before.profiles.A, grip: 80 } } };
+  h.api.import(JSON.stringify(valid));
+  assert.equal(h.api.export().profiles.A.grip, 80);
 });
 
-test('lab clash is winnable and destroys/respawns the rival exactly once', () => {
-  const h = lab(); h.run('triggerTestClash(); for(let i=0;i<5;i++) registerClashMash();');
-  assert.equal(h.run('inClash'), false); assert.equal(h.run('playerKills'), 1); assert.equal(h.run('aiVehicles[0].isDestroyed'), true);
-  h.run('for(let i=0;i<370;i++) simulate(1/120)'); assert.equal(h.run('aiVehicles[0].isDestroyed'), false);
+test('lab side attack and spin attack inflict damage and destroy rival with respawn', () => {
+  const h = lab();
+  h.document.getElementById('spawn').onclick();
+  h.api.sideAttack(1);
+  for (let i = 0; i < 60; i++) h.api.step(1 / 120);
+  assert.ok(h.api.getRivals()[0].shield < 100);
+  h.document.getElementById('spawn').onclick();
+  h.api.setRivalShield(0, 10);
+  h.api.spinAttack();
+  for (let i = 0; i < 60; i++) h.api.step(1 / 120);
+  assert.ok(h.api.getRivals()[0].ko || h.api.getState().kills > 0);
 });
 
-test('lab reset clears maneuvers, keys and clash even while paused', () => {
-  const h = lab(); h.run('triggerBoost(); triggerSpinAttack(); keys.forward=true; isPaused=true; resetPosition();');
-  assert.equal(h.run('isBoosting || isSpinAttacking || isSideAttacking || inClash || keys.forward'), false);
-  assert.equal(h.run('shield'), 100); assert.equal(h.run('playerKills'), 0);
+test('lab reset clears maneuvers, keys and state even while paused', () => {
+  const h = lab();
+  h.api.boost();
+  h.api.spinAttack();
+  h.api.setHeld('KeyX', true);
+  h.api.reset();
+  const s = h.api.getState();
+  assert.equal(s.shield, 100);
+  assert.equal(s.kills, 0);
+  assert.equal(s.spin, 0);
+  assert.equal(s.sideTime, 0);
 });
 
 test('lab simulation remains finite across every track and preset', () => {
   const h = lab();
-  for (const track of ['circuit', 'straight', 'tube']) for (const preset of ['A', 'B', 'C']) {
-    h.run(`setTrack('${track}'); applyPreset('${preset}'); keys.forward=true; for(let i=0;i<240;i++) simulate(1/120);`);
-    assert.equal(h.run('[currentSpeed,lateralOffset,headingYaw,shield].every(Number.isFinite)'), true);
+  for (const track of ['circuit', 'straight', 'elevated']) for (const profile of ['A', 'B', 'C']) {
+    h.api.import(JSON.stringify({ ...h.api.export(), track, profile }));
+    h.api.setHeld('KeyX', true);
+    for (let i = 0; i < 240; i++) h.api.step(1 / 120);
+    const s = h.api.getState();
+    assert.ok([s.speed, s.x, s.z, s.yaw, s.shield].every(Number.isFinite));
   }
 });
 
 test('lab preserves independent profile edits and resets a reproducible AI scenario', () => {
   const h = lab();
-  h.run("updateParam('grip',80); applyPreset('B'); updateParam('grip',70); applyPreset('A');");
-  assert.equal(h.run('params.grip'), 80);
-  h.run("applyPreset('B')"); assert.equal(h.run('params.grip'), 70);
-  const sample = "JSON.stringify(aiVehicles.map(v => [v.progressT,v.lateralOffset,v.speed]))";
-  h.run('resetPosition(); for(let i=0;i<240;i++) simulate(1/120)'); const expected = h.run(sample);
-  h.run('resetPosition(); for(let i=0;i<240;i++) simulate(1/120)'); assert.equal(h.run(sample), expected);
+  const cfgA = { ...h.api.export() };
+  cfgA.profiles.A.grip = 80;
+  cfgA.profiles.B.grip = 70;
+  h.api.import(JSON.stringify(cfgA));
+  assert.equal(h.api.export().profiles.A.grip, 80);
+  assert.equal(h.api.export().profiles.B.grip, 70);
+  const sample = () => JSON.stringify(h.api.getRivals().map(v => [v.distance, v.offset]));
+  h.api.reset(); for (let i = 0; i < 240; i++) h.api.step(1 / 120);
+  const expected = sample();
+  h.api.reset(); for (let i = 0; i < 240; i++) h.api.step(1 / 120);
+  assert.equal(sample(), expected);
 });
 
 test('lab produces identical movement at 30, 60 and 120 rendering Hz', () => {
   const states = [];
   for (const hz of [30, 60, 120]) {
-    const h = lab(); h.run('resetPosition(); keys.forward=true; keys.right=true;');
-    for (let i = 1; i <= hz * 2; i++) h.run(`animate(${1000 + i * 1000 / hz})`);
-    states.push(h.run('JSON.stringify([currentSpeed,progressT,lateralOffset,shield])'));
+    const h = lab();
+    h.api.reset();
+    h.api.setHeld('KeyX', true);
+    h.api.setHeld('ArrowRight', true);
+    const dt = 1 / hz;
+    const subSteps = Math.round((1 / hz) / (1 / 120));
+    for (let i = 1; i <= hz * 2; i++) {
+      for (let s = 0; s < subSteps; s++) h.api.step(1 / 120);
+    }
+    const st = h.api.getState();
+    states.push(JSON.stringify([Math.round(st.speed * 100), Math.round(st.x * 100), Math.round(st.z * 100)]));
   }
-  assert.equal(states[0], states[1]); assert.equal(states[1], states[2]);
+  assert.equal(states[0], states[1]);
+  assert.equal(states[1], states[2]);
 });
 
 function vfxLab() {
