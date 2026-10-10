@@ -257,10 +257,28 @@ test('sem WebGL: falha exibida e pintura/JSON continuam operando', () => {
   assert.equal(JSON.parse(nogl.api.exportJSON()).liveries.B.falcon.roles.accent, '#ff0000');
 });
 
-test('direção D preservada, nenhum sistema declarado aprovado e laboratório fora do jogo', () => {
+test('direção D preservada, somente o Sistema B declarado aprovado e laboratório fora do jogo', () => {
   for (const needle of ['INK_T=.032', 'D_WIRE=[1,.22,.61]', 'mod(gl_FragCoord.xy,vec2(5.0))', 'floor((.25+.78*nd)*3.2)/3.0', 'D_PINK=[.96,.37,.68]', "paintApproval:'none'"])
     assert.ok(script.includes(needle), `ausente: ${needle}`);
-  assert.ok(!/sistema [ABC][^.]{0,40}aprovad[oa](?! *—)/i.test(html.replace(/não aprovad[oa]|nenhum sistema de personalização aprovado|baseline aprovada|modelos aprovados|geometrias aprovadas|Modelo aprovado/gi, '')), 'texto sugere aprovação de sistema');
+  assert.ok(html.includes("APPROVED_SYSTEM='B'"), 'Sistema B deve ser o único aprovado');
+  assert.ok(!/APPROVED_SYSTEM='[AC]'/.test(html));
+  assert.match(html, /sistemas? A e C não (foram )?escolhidos/i);
   for (const f of ['src/main.ts', 'src/game/Game.ts', 'src/game/Vehicle.ts', 'index.html'])
     assert.ok(!readFileSync(path.join(root, f), 'utf8').includes('06_craft_paint_lab'), `${f} referencia o laboratório`);
+});
+
+test('aprovação de 10/10/2026: selo distingue B no padrão, B com pipeline alterado e A/C não escolhidos', () => {
+  api.resetAll();
+  api.selectSystem('B'); assert.match(api.uiSnapshot().badge, /SISTEMA B APROVADO/);
+  api.setColor('role', 'accent', '#00ff66'); assert.match(api.uiSnapshot().badge, /SISTEMA B APROVADO/, 'cores são livres no sistema aprovado');
+  api.setLiveryValue('pinkMix', .2); assert.match(api.uiSnapshot().badge, /AJUSTE DE PIPELINE NÃO APROVADO/);
+  api.resetLivery(); assert.match(api.uiSnapshot().badge, /SISTEMA B APROVADO/);
+  for (const s of ['A', 'C']) { api.selectSystem(s); assert.match(api.uiSnapshot().badge, new RegExp(`SISTEMA ${s} · NÃO APROVADO`)); }
+  const decision = readFileSync(path.join(root, 'docs/decisions/2026-10-10-prototype-06-paint-system-approval.md'), 'utf8');
+  assert.match(decision, /Sistema B/); assert.match(decision, /pinkMix[^|]*\|\s*\*\*0,55\*\*/);
+  // a baseline aprovada do B (padrões) reproduz exatamente a paleta D da v6
+  for (const ship of SHIPS) {
+    const t = api.resolveLivery('B', ship, api.defaultLivery('B', ship)), id = hexRgb(IDENTITY[ship]);
+    for (const p of PARTS) assert.ok(near(t[p][0], mix(id, [.96, .37, .68], .55)));
+  }
 });

@@ -172,6 +172,8 @@ Cada solicitação de protótipo deve entregar:
 
 **Decisão vigente — Protótipo 05 (10/10/2026):** aprovadas as nove geometrias das três primeiras naves (Blue Falcon, Golden Fox e Wild Goose × A/B/C), com os valores padrão do laboratório como baseline. **Regra obrigatória:** todo protótipo futuro que envolva essas naves deve usar esses modelos, embutindo sem alterações o bloco geométrico canônico do laboratório 05. Cores por peça e uma opção de cores aleatórias ficam registradas como diretriz para protótipo próprio. Peças definitivas, atributos e integração no jogo continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-05-craft-geometry-approval.md`](decisions/2026-10-10-prototype-05-craft-geometry-approval.md).
 
+**Decisão vigente — Protótipo 06 (10/10/2026):** aprovado o **Sistema B — personalização de cor por função de material**: sete papéis (pintura, secundária, acento, estrutura, vidro, energia, marcação) aplicados à nave inteira dentro do pipeline D, com cores livres e controles de pipeline na baseline padrão do laboratório (mistura D 0,55, igual à v6). Os sistemas A (por grupo) e C (sorteio por semente) não foram escolhidos. Cores aleatórias, relação com as cores por peça [72, 78], escopo da pintura e integração continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-06-paint-system-approval.md`](decisions/2026-10-10-prototype-06-paint-system-approval.md).
+
 ### 11.2 Telemetria e depuração [102]
 
 Deve existir um sistema de telemetria e debug que facilite o teste do jogador e de todos os comportamentos de IA, inclusive situações difíceis de reproduzir. Requisitos explícitos:

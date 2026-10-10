@@ -1,6 +1,6 @@
 # Especificação Técnica — Protótipo 06: Pintura e Personalização das Naves
 
-**Status:** laboratório de prototipação — **EM AVALIAÇÃO; NENHUM SISTEMA DE PERSONALIZAÇÃO APROVADO** (não integrado ao jogo).
+**Status:** **SISTEMA B APROVADO em 10/10/2026** (A e C não escolhidos) — [registro de decisão](../decisions/2026-10-10-prototype-06-paint-system-approval.md). Não integrado ao jogo.
 **Data:** 2026-10-10
 **Arquivo:** [`prototypes/06_craft_paint_lab.html`](../../prototypes/06_craft_paint_lab.html) — HTML autônomo, WebGL 1 nativo, sem dependências externas.
 **Testes:** [`tests/craft_paint_lab.test.mjs`](../../tests/craft_paint_lab.test.mjs).
@@ -175,7 +175,7 @@ Cada sistema guarda **uma pintura por nave** (`liveries[sistema][nave]`), válid
 
 ## 8. Testes e resultados (2026-10-10)
 
-`npm test`: **51/51** — 20 regressões de jogo + 17 do Protótipo 05 + **14 novas** do Protótipo 06:
+`npm test`: **51/51** na avaliação — 20 regressões de jogo + 17 do Protótipo 05 + **14** do Protótipo 06. Com a aprovação do Sistema B foi adicionado o teste 15 (selo de aprovação, baseline do B igual à v6, registro de decisão): **52/52**.
 
 1. as nove impressões aprovadas; sem parâmetros geométricos no JSON; `geometryBaseline` obrigatória;
 2. A e B nos padrões = paleta D da v6 exata;
@@ -195,7 +195,7 @@ Cada sistema guarda **uma pintura por nave** (`liveries[sistema][nave]`), válid
 **Outras verificações**
 - **Regra do Protótipo 05:** o teste de obrigatoriedade reconhece `06_craft_paint_lab.html` como protótipo de naves e confirma o bloco canônico idêntico.
 - **Build:** `npm run build` concluído sem erros; o laboratório é emitido em `dist/prototypes/06_craft_paint_lab.html`.
-- **Navegador real (WebGL efetivo):** Edge headless via DevTools Protocol, `WebGL 1.0 (OpenGL ES 2.0 Chromium)`, 1600 × 1000. Comparação A·B·C nos padrões e com exemplos, galerias A, B e C (sementes 1 e 4242), painéis B e C e efeito da mistura D em 0,2.
+- **Navegador real (WebGL efetivo):** Edge headless via DevTools Protocol, `WebGL 1.0 (OpenGL ES 2.0 Chromium)`, 1600 × 1000. Comparação A·B·C nos padrões e com exemplos, galerias A, B e C (sementes 1 e 4242), painéis B e C e efeito da mistura D em 0,2. As capturas são da avaliação, anteriores à aprovação do Sistema B: por isso mostram o selo “personalização em avaliação · não aprovada”. Os cálculos de cor não mudaram.
 - **Navegador do aplicativo:** carregamento sem erros de console e impressão `902a3acf` exibida no diagnóstico.
 
 ## 9. Observação de avaliação importante
@@ -216,17 +216,23 @@ Com a mistura D padrão (**0,55** de rosa, como na v6), todas as escolhas de cor
 - Os exemplos de demonstração são arbitrários e não representam cores oficiais.
 - Pinturas por modelo (em vez de por nave) e pinturas por peça definitiva dependem de decisões futuras.
 
-## 12. DECISÕES PENDENTES DE APROVAÇÃO
+## 12. Decisões de aprovação
 
-- [ ] Sistema **A** — por grupo visual: aprovar / modificar / rejeitar
-- [ ] Sistema **B** — por função de material: aprovar / modificar / rejeitar
-- [ ] Sistema **C** — híbrido com sorteio reproduzível: aprovar / modificar / rejeitar
-- [ ] Combinação entre sistemas (por exemplo, A + papéis de B + sorteio de C)
-- [ ] Valor da mistura D (rosa) para a personalização (0,55 da v6 ou outro)
-- [ ] Papéis que o jogador pode recolorir (estrutura e vidro estão fixos em C)
-- [ ] Regras do sorteio: harmonias, faixas, alvos de contraste, semente visível ao jogador, telemetria [102]
-- [ ] Escopo da pintura: por nave, por modelo ou por peça definitiva
-- **Fora deste escopo:** peças intercambiáveis definitivas [72, 78]; integração no jogo; VFX; física.
+**Atualização de 10/10/2026 — Sistema B APROVADO** ("Aprovo a opção B") — [registro de decisão](../decisions/2026-10-10-prototype-06-paint-system-approval.md).
+
+- [ ] Sistema **A** — por grupo visual: **não escolhido** (mantido para comparação)
+- [x] Sistema **B** — por função de material: **aprovado**. Mecanismo aprovado; cores livres; controles de pipeline na baseline padrão (`pinkMix` 0,55, `shadeMix` 0,68, `hierarchy` 0, `saturation` 0, `glow` 1)
+- [ ] Sistema **C** — híbrido com sorteio reproduzível: **não escolhido** (mantido para comparação)
+
+**Ainda pendentes:**
+- cores aleatórias dentro do Sistema B (diretriz do responsável ainda sem forma definida);
+- relação entre a cor por papel e as cores por peça do GDD [72, 78];
+- escopo da pintura (por nave, por modelo ou por peça);
+- valores de pipeline diferentes da baseline (incluindo a mistura D);
+- interface de personalização no jogo;
+- telemetria [102];
+- integração.
+- **Fora deste escopo:** peças intercambiáveis definitivas; VFX; física.
 
 ## 13. Como abrir
 

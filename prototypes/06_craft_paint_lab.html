@@ -98,7 +98,7 @@ kbd{font-family:ui-monospace,monospace;font-size:9.5px;border:1px solid #3a4b66;
  <div class="eyebrow">Protótipo 06 · pintura e personalização</div>
  <div class="brand">G<span>–</span>MINUS <span style="font-size:12px;color:#8ebedc">/ PAINT LAB</span></div>
  <div class="caption">Três sistemas de personalização de cor (A/B/C) aplicados aos <b>nove modelos aprovados</b> do Protótipo 05, sempre na direção <b>D — Toon Vector Flux</b>. A geometria não muda.</div>
- <div class="pending eval" role="note"><b>Em avaliação — nenhum sistema de personalização aprovado.</b> Os quatro grupos visuais continuam provisórios e não são as peças intercambiáveis definitivas.</div>
+ <div class="pending approved" role="note"><b>Sistema B (por função de material) aprovado em 10/10/2026.</b> Os sistemas A e C não foram escolhidos e ficam apenas para comparação. Os quatro grupos visuais continuam provisórios e não são as peças intercambiáveis definitivas.</div>
 
  <section class="section" aria-labelledby="h-sys"><h2 id="h-sys">Sistema de personalização <small><kbd>A</kbd><kbd>B</kbd><kbd>C</kbd></small></h2><div class="seg" id="systemList" role="group" aria-label="Sistema de personalização"></div><div class="card" id="systemCard"></div></section>
  <section class="section" aria-labelledby="h-ship"><h2 id="h-ship">Nave <small><kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd></small></h2><div class="seg" id="shipList" role="group" aria-label="Selecionar nave"></div></section>
@@ -127,7 +127,7 @@ kbd{font-family:ui-monospace,monospace;font-size:9.5px;border:1px solid #3a4b66;
 </aside>
 <main class="stage" id="stage" data-mode="single">
  <canvas id="view" tabindex="0" aria-label="Visualização 3D das naves pintadas. Arraste para orbitar, use a roda para zoom."></canvas>
- <div class="hud" id="hud"><div class="eyebrow" id="hudEyebrow">D · TOON VECTOR FLUX</div><h1 id="hudTitle">—</h1><p id="hudSub"></p><span class="badge eval">PERSONALIZAÇÃO EM AVALIAÇÃO · NÃO APROVADA</span></div>
+ <div class="hud" id="hud"><div class="eyebrow" id="hudEyebrow">D · TOON VECTOR FLUX</div><h1 id="hudTitle">—</h1><p id="hudSub"></p><span class="badge eval" id="approvalBadge">—</span></div>
  <div class="labels" id="labels" aria-hidden="true"></div>
  <details class="diag" id="diagBox" open><summary>Diagnóstico técnico</summary><dl id="diag"></dl></details>
  <div class="modal" id="failure" hidden><div class="inner"><h2>Renderização WebGL indisponível</h2><p id="failureText" class="tiny"></p><p class="tiny">Os controles de cor e o JSON continuam funcionando; apenas a imagem 3D não pode ser exibida.</p></div></div>
@@ -139,7 +139,8 @@ kbd{font-family:ui-monospace,monospace;font-size:9.5px;border:1px solid #3a4b66;
    G-MINUS · Protótipo 06 — Pintura e personalização das naves
    Usa OBRIGATORIAMENTE as nove geometrias aprovadas do Protótipo 05 (bloco canônico abaixo,
    copiado sem alterações) e o passe de renderização D — Toon Vector Flux.
-   Nenhum sistema de personalização deste arquivo está aprovado.
+   Sistema B aprovado em 10/10/2026 (docs/decisions/2026-10-10-prototype-06-paint-system-approval.md);
+   sistemas A e C não escolhidos. Controles de pipeline do B fora do padrão não estão aprovados.
    ========================================================================== */
 const LAB_SCHEMA='gminus.craft-paint-lab', SCHEMA_VERSION=1, ART_DIRECTION='D-TOON-VECTOR-FLUX', GEOMETRY_BASELINE='prototype05-v1';
 /* @gminus-approved-craft-geometry:begin v1 */
@@ -823,9 +824,9 @@ function meshReport(mesh){
 /* @gminus-approved-craft-geometry:end v1 */
 
 /* ==========================================================================
-   SISTEMAS DE PERSONALIZAÇÃO (propostas, não aprovadas)
+   SISTEMAS DE PERSONALIZAÇÃO (B aprovado em 10/10/2026; A e C não escolhidos)
    ========================================================================== */
-const SYSTEMS=['A','B','C'];
+const SYSTEMS=['A','B','C'],APPROVED_SYSTEM='B';
 const SYSTEM_META={
  A:{name:'Por grupo visual',tag:'uma cor-base para cada grupo provisório',
   intent:'Cada grupo visual (Proa, Cabine, Asas, Motores) recebe uma cor-base própria. A pintura e a secundária de cada grupo derivam dela pela fórmula D da v6. Acento, estrutura, vidro, energia e marcação continuam sendo os valores D globais.'},
@@ -1313,7 +1314,7 @@ function syncUI(){
  const I=state.insp,ship=SHIP_MAP[state.ship],m=activeModel(),sys=state.system,meta=SYSTEM_META[sys];
  setActive(ui.system,sys);setActive(ui.ship,state.ship);setActive(ui.model,m);setActive(ui.mode,I.mode);setActive(ui.view,I.view);setActive(ui.focus,I.focus);setActive(ui.bg,I.background);
  for(const c of VARIANT_CODES)ui.model[c].innerHTML=`${c}<span class="small">${VARIANTS[state.ship][c].name}</span>`;
- $('systemCard').innerHTML=`<strong>Sistema ${sys} — ${meta.name}</strong><p><i>${meta.tag}.</i> ${meta.intent}</p><p>Proposta em avaliação — não aprovada.</p>`;
+ $('systemCard').innerHTML=`<strong>Sistema ${sys} — ${meta.name}</strong><p><i>${meta.tag}.</i> ${meta.intent}</p><p>${sys===APPROVED_SYSTEM?'Aprovado em 10/10/2026 — controles de pipeline no padrão; as cores são escolha do jogador.':'Não escolhido — mantido só para comparação (não aprovado).'}</p>`;
  $('paintScope').textContent=`sistema ${sys} · ${ship.name}`;
  $('btnRotate').textContent=I.autoRotate?'Pausar rotação':'Rotação automática';$('btnRotate').setAttribute('aria-pressed',I.autoRotate?'true':'false');
  rebuildPanel();syncPanel();syncContrast();
@@ -1322,7 +1323,7 @@ function syncUI(){
  if(I.mode==='single'){t.textContent=`${ship.name} ${m} · Sistema ${sys}`;s.textContent=`${VARIANTS[state.ship][m].name} — ${meta.name}: ${meta.tag}. Geometria: baseline aprovada do Protótipo 05.`;}
  else if(I.mode==='compare'){t.textContent=`${ship.name} ${m} · Sistemas A / B / C`;s.textContent='Mesmo modelo, mesma luz e mesmo enquadramento; muda apenas o sistema de pintura.';}
  else{t.textContent=`Nove modelos · Sistema ${sys}`;s.textContent='Linhas: Falcon, Fox, Goose · colunas: modelos A, B, C · pintura do sistema ativo.';}
- updateLabels();refreshJSON(false);
+ updateLabels();refreshJSON(false);updateBadge();
 }
 function updateLabels(){
  const box=$('labels'),cw=canvas.clientWidth||1,ch=canvas.clientHeight||1,items=layoutItems(cw,ch);
@@ -1331,7 +1332,17 @@ function updateLabels(){
   const s=el('span');s.innerHTML=state.insp.mode==='gallery'?`<b>${SHIP_MAP[it.ship].name.split(' ')[1]} ${it.variant}</b> · ${VARIANTS[it.ship][it.variant].name}`:`<b>Sistema ${it.system}</b> · ${SYSTEM_META[it.system].name}`;d.append(s);return d;}));
 }
 function refreshJSON(force){if(force)draftDirty=false;if(draftDirty)return;$('jsonBox').value=JSON.stringify(exportConfig(),null,1);$('jsonState').textContent='sincronizado';}
-function afterChange(full=true){if(full)syncUI();else{syncPanel();syncContrast();refreshJSON(false);}requestRender();}
+function pipelineAtDefault(sys,ship){const L=state.liveries[sys][ship];return SLIDERS[sys].every(d=>Math.abs(L[d.id]-d.def)<1e-9);}
+function updateBadge(){
+ const b=$('approvalBadge'),sys=state.system,ships=state.insp.mode==='gallery'?SHIPS.map(s=>s.id):[state.ship];
+ let text,cls;
+ if(state.insp.mode==='compare'){text='COMPARAÇÃO · SÓ O SISTEMA B ESTÁ APROVADO';cls='base';}
+ else if(sys!==APPROVED_SYSTEM){text=`SISTEMA ${sys} · NÃO APROVADO (SÓ COMPARAÇÃO)`;cls='eval';}
+ else if(ships.every(s=>pipelineAtDefault('B',s))){text='SISTEMA B APROVADO · CORES LIVRES';cls='base';}
+ else{text='SISTEMA B · AJUSTE DE PIPELINE NÃO APROVADO';cls='explore';}
+ b.textContent=text;for(const c of ['base','eval','explore'])b.classList.toggle(c,c===cls);
+}
+function afterChange(full=true){if(full)syncUI();else{syncPanel();syncContrast();refreshJSON(false);updateBadge();}requestRender();}
 
 /* ---- ações ---- */
 function selectSystem(s){if(!SYSTEMS.includes(s))throw new Error('Sistema deve ser A, B ou C.');state.system=s;afterChange();}
@@ -1463,7 +1474,7 @@ window.__GMINUS_PAINT_LAB__={
  uiSnapshot:()=>({system:Object.keys(ui.system).find(k=>ui.system[k].getAttribute('aria-pressed')==='true'),ship:Object.keys(ui.ship).find(k=>ui.ship[k].getAttribute('aria-pressed')==='true'),
   model:Object.keys(ui.model).find(k=>ui.model[k].getAttribute('aria-pressed')==='true'),panelKey:ui.panelKey,
   sliders:Object.fromEntries(Object.entries(ui.sliders).map(([k,s])=>[k,Number(s.input.value)])),pickers:Object.fromEntries(Object.entries(ui.pickers).map(([k,p])=>[k,p.input.value])),
-  seed:ui.seed?ui.seed.value:null,json:$('jsonBox').value}),
+  seed:ui.seed?ui.seed.value:null,json:$('jsonBox').value,badge:$('approvalBadge').textContent}),
  renderNow:()=>{if(GLR.ok&&!GLR.lost){drawScene();return true;}return false;},
  renderer:()=>({ok:GLR.ok,lost:GLR.lost,reason:GLR.reason,liveBuffers:GLR.live,cachedModels:cache.size,draws:GLR.frame.draws,tris:GLR.frame.tris,version:GLR.version})
 };
