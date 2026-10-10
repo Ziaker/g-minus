@@ -318,3 +318,116 @@ test('VFX lab boots, switches machine rosters, applies presets and updates simul
   assert.equal(v.run("typeof currentSpeed"), 'number');
 });
 
+function markedBlock(text) {
+  const begin = '/* @gminus-approved-craft-geometry:begin v1 */';
+  const end = '/* @gminus-approved-craft-geometry:end v1 */';
+  const a = text.indexOf(begin), b = text.indexOf(end);
+  assert.ok(a >= 0 && b > a, 'canonical geometry markers must exist');
+  return text.slice(a, b + end.length);
+}
+
+function vfxV2Lab() {
+  const html = readFileSync(path.join(root, 'prototypes/04_craft_vfx_v2.html'), 'utf8');
+  const script = html.split('<script>')[1].split('</script>')[0];
+  const canvas = { ...events(), clientWidth: 1200, clientHeight: 720, setPointerCapture: noop };
+  const document = { getElementById: () => canvas, querySelectorAll: () => [], createElement: () => ({}) };
+  const window = { ...events(), __GMINUS_HEADLESS__: true };
+  const context = vm.createContext({
+    window, document, console, structuredClone: obj => JSON.parse(JSON.stringify(obj)),
+    performance: { now: () => 1000 }, setTimeout: noop, clearTimeout: noop,
+    requestAnimationFrame: noop, cancelAnimationFrame: noop, addEventListener: noop
+  });
+  vm.runInContext(script, context, { filename: '04_craft_vfx_v2.html' });
+  return { api: window.__GMINUS_VFX_V2__, run: code => vm.runInContext(code, context), html };
+}
+
+test('VFX V2 preserves Prototype 05 canonical geometry byte for byte', () => {
+  const p05 = readFileSync(path.join(root, 'prototypes/05_craft_geometry_lab.html'), 'utf8');
+  const v2 = readFileSync(path.join(root, 'prototypes/04_craft_vfx_v2.html'), 'utf8');
+  assert.equal(markedBlock(v2), markedBlock(p05));
+});
+
+test('VFX V2 exposes ten categories with five distinct alternatives each', () => {
+  const { api } = vfxV2Lab();
+  assert.equal(api.CAT_DEFS.length, 10);
+  for (const category of api.CAT_DEFS) {
+    assert.equal(Array.from(category.alts, a => a[0]).join(','), 'A,B,C,D,E');
+    assert.equal(new Set(category.alts.map(a => a[2])).size, 5);
+  }
+});
+
+test('VFX V2 keeps Toon Vector Flux D and approved Paint System B fixed', () => {
+  const { api } = vfxV2Lab();
+  const cfg = JSON.parse(api.exportConfig());
+  assert.equal(cfg.dependencies.visualStyle, 'D / Toon Vector Flux');
+  assert.equal(cfg.dependencies.paintSystem, 'B');
+  assert.equal(cfg.approval, 'EM AVALIAÇÃO');
+  assert.equal(Array.from(api.PAINT_SYSTEM.roles).join(','), 'paint,secondary,accent,structure,glass,energy,marking');
+  assert.equal(api.PAINT_SYSTEM.defaults.pinkMix, .55);
+  assert.equal(api.PAINT_SYSTEM.defaults.shadeMix, .68);
+});
+
+test('VFX V2 strict JSON import is atomic and cannot claim approval', () => {
+  const { api } = vfxV2Lab();
+  const before = api.exportConfig();
+  const mutations = [
+    o => { o.approval = 'APROVADO'; },
+    o => { o.dependencies.geometry = 'prototype-05/v2'; },
+    o => { o.params.boost.A.intensity = null; },
+    o => { o.selection.ship = 'invented-ship'; },
+    o => { o.unknown = true; }
+  ];
+  for (const mutate of mutations) {
+    const o = JSON.parse(before); mutate(o);
+    assert.throws(() => api.importJSON(JSON.stringify(o)));
+    assert.equal(api.exportConfig(), before);
+  }
+});
+
+test('VFX V2 slider parameters and resets remain independent per alternative', () => {
+  const { api } = vfxV2Lab();
+  api.setParam('boost', 'A', 'intensity', 1.71);
+  api.setParam('boost', 'B', 'intensity', .42);
+  let s = api.getState();
+  assert.equal(s.params.boost.A.intensity, 1.71);
+  assert.equal(s.params.boost.B.intensity, .42);
+  api.resetAlternative('boost', 'A');
+  s = api.getState();
+  assert.equal(s.params.boost.A.intensity, 1);
+  assert.equal(s.params.boost.B.intensity, .42);
+});
+
+test('all fifty VFX generators are finite, non-empty and deterministic', () => {
+  const first = vfxV2Lab(), second = vfxV2Lab();
+  const signatures = new Set();
+  for (const category of first.api.CAT_DEFS) for (const alt of first.api.ALT_CODES) {
+    const a = first.api.effectGeometry(category.id, alt);
+    const b = second.api.effectGeometry(category.id, alt);
+    const flat = [...a.L, ...a.T, ...a.Q];
+    assert.ok(flat.length > 0, `${category.id}/${alt} must generate geometry`);
+    assert.ok(flat.every(Number.isFinite), `${category.id}/${alt} must remain finite`);
+    assert.equal(JSON.stringify(a), JSON.stringify(b), `${category.id}/${alt} must be deterministic`);
+    signatures.add(`${a.L.length}:${a.T.length}:${a.Q.length}:${flat.slice(0, 18).map(n => n.toFixed(3)).join(',')}`);
+  }
+  assert.ok(signatures.size >= 45, 'alternatives should be materially distinct');
+});
+
+test('VFX V2 builds all nine approved craft geometries reproducibly', () => {
+  const a = vfxV2Lab().api.geometryFingerprints();
+  const b = vfxV2Lab().api.geometryFingerprints();
+  assert.equal(JSON.stringify(a), JSON.stringify(b));
+  assert.equal(Object.keys(a).length, 3);
+  for (const ship of Object.values(a)) assert.equal(Object.keys(ship).join(','), 'A,B,C');
+});
+
+test('VFX V2 retains resource lifecycle, telemetry and simulated-state labels', () => {
+  const { html } = vfxV2Lab();
+  assert.match(html, /webglcontextlost/);
+  assert.match(html, /webglcontextrestored/);
+  assert.match(html, /deleteBuffer/);
+  assert.match(html, /disposeGL/);
+  assert.match(html, /Stress ×18/);
+  assert.match(html, /estado físico rotulado \(sem alterar gameplay\)/);
+  assert.match(html, /pool dinâmico: 3 buffers/);
+});
+

@@ -174,6 +174,8 @@ Cada solicitação de protótipo deve entregar:
 
 **Decisão vigente — Protótipo 06 (10/10/2026):** aprovado o **Sistema B — personalização de cor por função de material**: sete papéis (pintura, secundária, acento, estrutura, vidro, energia, marcação) aplicados à nave inteira dentro do pipeline D, com cores livres e controles de pipeline na baseline padrão do laboratório (mistura D 0,55, igual à v6). Os sistemas A (por grupo) e C (sorteio por semente) não foram escolhidos. Cores aleatórias, relação com as cores por peça [72, 78], escopo da pintura e integração continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-06-paint-system-approval.md`](decisions/2026-10-10-prototype-06-paint-system-approval.md).
 
+**Estado de avaliação — Protótipo 04 V2 (10/10/2026):** o laboratório de VFX foi reconstruído sobre as dependências aprovadas dos Protótipos 02/D, 05 e 06/B. Ele apresenta dez categorias e cinco alternativas A–E por categoria, com comparação simultânea, calibração independente, seed, telemetria e stress. As condições de voo, impacto, drift e ataque são simulações visuais rotuladas e não mudam a física ou o gameplay. **Todas as 50 alternativas continuam EM AVALIAÇÃO; nenhuma foi aprovada nem integrada ao jogo.** Ver [`docs/specs/04_craft_vfx_v2_spec.md`](specs/04_craft_vfx_v2_spec.md).
+
 ### 11.2 Telemetria e depuração [102]
 
 Deve existir um sistema de telemetria e debug que facilite o teste do jogador e de todos os comportamentos de IA, inclusive situações difíceis de reproduzir. Requisitos explícitos:

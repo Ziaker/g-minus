@@ -15,6 +15,7 @@ export default defineConfig({
         prototype01: resolve(__dirname, 'prototypes/01_steering_profiles.html'),
         prototype03: resolve(__dirname, 'prototypes/03_neo_metropolis_visual.html'),
         prototype04: resolve(__dirname, 'prototypes/04_craft_vfx.html'),
+        prototype04V2: resolve(__dirname, 'prototypes/04_craft_vfx_v2.html'),
         prototype05: resolve(__dirname, 'prototypes/05_craft_geometry_lab.html'),
         prototype06: resolve(__dirname, 'prototypes/06_craft_paint_lab.html')
       },
