@@ -1,0 +1,2633 @@
+{
+  "schema": "gminus.prototype01-profile-export",
+  "schemaVersion": 1,
+  "source": "docs/decisions/2026-10-10-prototype-01-profile-c-export-original.txt",
+  "conversion": "Parse mecânico linha a linha do texto original. value = número exibido; nenhuma conversão de unidade. O formato de texto do laboratório 01 (fmtParam) exibe 1 casa decimal para controles com passo 0,05 e 0 casas para passo inteiro: exportedText pode não ser o valor exato. gridCandidates = todos os valores do slider que produzem exatamente o mesmo texto; precisionAmbiguous=true quando há mais de um.",
+  "profile": "C (Inercial / Drift)",
+  "track": "OBSTACLE_SPRINT",
+  "total": 207,
+  "sections": [
+    {
+      "id": "01",
+      "name": "Direção & Resposta Angular",
+      "keys": [
+        "steerRate",
+        "progressivity",
+        "inertia",
+        "grip",
+        "recenter",
+        "speedInstability",
+        "yawAccel",
+        "counterSteerBoost",
+        "steerInputFilter",
+        "speedInstabilityThreshold",
+        "massScale",
+        "steerDeadzone",
+        "highSpeedSteerDropoff",
+        "lowSpeedSteerMultiplier",
+        "analogSteerGamma"
+      ]
+    },
+    {
+      "id": "02",
+      "name": "Inclinação & Banking (Z/C)",
+      "keys": [
+        "rollResponse",
+        "maxRoll",
+        "tiltSteerBoost",
+        "bankTurnForce",
+        "bankDrag",
+        "strafeThrust",
+        "pitchResponse",
+        "pitchSensitivity",
+        "strafeDecel",
+        "rollDamping",
+        "quickStrafeImpulse",
+        "strafeCooldown",
+        "bankPitchCoupling",
+        "rollReturnSpeed",
+        "tiltSlideAssistance"
+      ]
+    },
+    {
+      "id": "03",
+      "name": "Derrapagem & Drift (Espaço / Q+E)",
+      "keys": [
+        "driftYawBoost",
+        "driftGripMultiplier",
+        "driftTiltBonus",
+        "driftBrakeDecel",
+        "slideTurnBoost",
+        "slideDampingRatio",
+        "driftThreshold",
+        "driftDecelCurve",
+        "driftCounterSteerAuthority",
+        "driftParticleRate",
+        "driftEntrySlipKick",
+        "driftMaxAngle",
+        "driftAngularDamping",
+        "driftSparksIntensity",
+        "airbrakeDragMultiplier"
+      ]
+    },
+    {
+      "id": "04",
+      "name": "Propulsão, Boost & Freios",
+      "keys": [
+        "topSpeed",
+        "boostTopSpeed",
+        "acceleration",
+        "boostAccel",
+        "boostDuration",
+        "coastDecel",
+        "brakeForce",
+        "reverseMaxSpeed",
+        "boostEnergyDrainRate",
+        "passiveRegenRate",
+        "throttleResponse",
+        "superBoostThreshold",
+        "boostCooldown",
+        "draftingSpeedBonus",
+        "draftingDistance",
+        "engineBrakingFactor"
+      ]
+    },
+    {
+      "id": "05",
+      "name": "Combate & Ataques Físicos",
+      "keys": [
+        "sideAttackForce",
+        "sideAttackDuration",
+        "sideAttackDamage",
+        "spinAttackDuration",
+        "spinAttackDamage",
+        "spinAttackForce",
+        "boostCost",
+        "sideAttackCost",
+        "spinAttackCost",
+        "wallDamageScale",
+        "sideAttackReach",
+        "spinAttackRadius",
+        "sideAttackCooldown",
+        "spinAttackCooldown",
+        "sideAttackLift",
+        "rivalHitKnockbackScale",
+        "impactParticleCount",
+        "sideAttackInvulnerability",
+        "spinAttackDeflectBonus",
+        "bodySlamImpactMultiplier"
+      ]
+    },
+    {
+      "id": "06",
+      "name": "Suspensão Magnética, Altura & Colisão de Pista (Hitbox)",
+      "keys": [
+        "hoverHeight",
+        "springStiffness",
+        "springDamping",
+        "wakeAmplitude",
+        "wakeFrequency",
+        "fallGravity",
+        "airborneGravity",
+        "hoverDampingRatio",
+        "slopePitchMultiplier",
+        "maxVerticalVelocity",
+        "trackThickness",
+        "trackUndersideBounce",
+        "trackUndersideFriction",
+        "trackSurfaceFriction",
+        "groundCompressionLimit",
+        "hoverRepulsionForce",
+        "magneticGripStrength",
+        "suspensionRelaxRate"
+      ]
+    },
+    {
+      "id": "07",
+      "name": "Controle Aéreo, Voo & Mecânica de Pouso (Estilo F-Zero X/GX)",
+      "keys": [
+        "airPitchControlRate",
+        "airRollControlRate",
+        "airSteerAuthority",
+        "airGlideLift",
+        "airGlideDrag",
+        "airDiveAccel",
+        "airDiveMaxSpeed",
+        "airDrag",
+        "airborneThreshold",
+        "landingBoostEfficiency",
+        "landingBoostMax",
+        "landingImpactThreshold",
+        "landingPenaltyDamage",
+        "landingPenaltyDecel",
+        "landingSparksCount",
+        "jumpRampLaunchForce",
+        "airStrafeThrust",
+        "airPitchStability"
+      ]
+    },
+    {
+      "id": "08",
+      "name": "Inteligência Artificial & Rivais Avançados",
+      "keys": [
+        "aiBaseSpeed",
+        "aiAggressiveness",
+        "aiRubberbanding",
+        "aiLaneChangeSpeed",
+        "aiRespawnDelay",
+        "aiAttackRange",
+        "aiAvoidanceForce",
+        "aiSpeedVariance",
+        "aiTopSpeedCap",
+        "aiBoostFrequency",
+        "aiBoostTopSpeed",
+        "aiBoostAccel",
+        "aiDashPlateAffinity",
+        "aiSlipstreamUsage",
+        "aiCorneringGrip",
+        "aiBrakingTendency",
+        "aiAirPitchControl",
+        "aiDiveBoostSkill",
+        "aiSideAttackSkill",
+        "aiCatchupAcceleration"
+      ]
+    },
+    {
+      "id": "09",
+      "name": "Câmera & Sensação de Velocidade",
+      "keys": [
+        "cameraDistance",
+        "cameraHeight",
+        "cameraFOV",
+        "cameraSpeedFOV",
+        "cameraLag",
+        "cameraShakeScale",
+        "cameraLookahead",
+        "cameraCockpitOffset",
+        "cameraOrbitSpeed",
+        "cameraVerticalFollow",
+        "cameraShakeDecay",
+        "cameraAirbornePitchLag",
+        "cameraLandingDip",
+        "cameraRollFollow",
+        "cameraBoostFOVPulse",
+        "cameraDriftSwing",
+        "cameraCockpitShakeMultiplier",
+        "cameraSpeedVignette"
+      ]
+    },
+    {
+      "id": "10",
+      "name": "Pistas, Barreiras, Zonas & Relevo",
+      "keys": [
+        "trackWidthScale",
+        "dashPlateBoost",
+        "dashPlateRadius",
+        "pitRechargeRate",
+        "barrierBounce",
+        "barrierFriction",
+        "straightTrackLength",
+        "dashPlateCooldown",
+        "buildingDensity",
+        "shadowOpacity",
+        "barrierDamageScale",
+        "pitLaneLength",
+        "elevatedTrackElevation",
+        "trackBankCurvature",
+        "dashPlateEnergyBonus",
+        "wallRepulsionAngle",
+        "trackCrestJumpBoost",
+        "sceneryDistance"
+      ]
+    },
+    {
+      "id": "11",
+      "name": "Efeitos Visuais, Partículas & Pós-Processamento",
+      "keys": [
+        "particleDensity",
+        "particleLifespan",
+        "speedLinesDensity",
+        "engineTrailLength",
+        "hitFlashIntensity",
+        "engineGlowSize",
+        "speedLinesThreshold",
+        "starfieldDensity",
+        "buildingWindowGlow",
+        "landingShockwaveRadius",
+        "airborneTrailOpacity",
+        "sonicBoomRingSize",
+        "diveTrailColorShift",
+        "chassisReflectivity",
+        "shadowSoftness",
+        "hudGlitchIntensity",
+        "plasmaGlowHue",
+        "speedLineSpeedScale"
+      ]
+    },
+    {
+      "id": "12",
+      "name": "Áudio & Sintetizador de Som",
+      "keys": [
+        "engineBasePitch",
+        "enginePitchRange",
+        "masterVolume",
+        "boostSoundPitch",
+        "engineFilterFreq",
+        "impactSoundPitch",
+        "sideAttackSoundPitch",
+        "airWhooshVolume",
+        "diveSoundPitch",
+        "landingImpactSoundPitch",
+        "dashPlateSoundPitch",
+        "sonicBoomSoundPitch",
+        "pitStopHumPitch",
+        "airbrakeSoundVolume",
+        "shieldWarningPitch",
+        "collisionCrunchBass"
+      ]
+    }
+  ],
+  "params": {
+    "steerRate": {
+      "value": 89,
+      "unit": "°/s",
+      "label": "Taxa base de esterço",
+      "section": "01",
+      "exportedText": "89 °/s",
+      "gridCandidates": [
+        89
+      ],
+      "precisionAmbiguous": false
+    },
+    "progressivity": {
+      "value": 1.4,
+      "unit": "×",
+      "label": "Progressividade de esterço",
+      "section": "01",
+      "exportedText": "1.4 ×",
+      "gridCandidates": [
+        1.4
+      ],
+      "precisionAmbiguous": false
+    },
+    "inertia": {
+      "value": 65,
+      "unit": "u",
+      "label": "Inércia de massa lateral",
+      "section": "01",
+      "exportedText": "65 u",
+      "gridCandidates": [
+        65
+      ],
+      "precisionAmbiguous": false
+    },
+    "grip": {
+      "value": 68,
+      "unit": "%",
+      "label": "Aderência / Grip lateral",
+      "section": "01",
+      "exportedText": "68 %",
+      "gridCandidates": [
+        68
+      ],
+      "precisionAmbiguous": false
+    },
+    "recenter": {
+      "value": 4.5,
+      "unit": "u",
+      "label": "Estabilização de guinada",
+      "section": "01",
+      "exportedText": "4.5 u",
+      "gridCandidates": [
+        4.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "speedInstability": {
+      "value": 0.6,
+      "unit": "×",
+      "label": "Instabilidade em alta velocidade",
+      "section": "01",
+      "exportedText": "0.6 ×",
+      "gridCandidates": [
+        0.55,
+        0.6
+      ],
+      "precisionAmbiguous": true
+    },
+    "yawAccel": {
+      "value": 28,
+      "unit": "u",
+      "label": "Aceleração angular (Yaw)",
+      "section": "01",
+      "exportedText": "28 u",
+      "gridCandidates": [
+        28
+      ],
+      "precisionAmbiguous": false
+    },
+    "counterSteerBoost": {
+      "value": 1.8,
+      "unit": "×",
+      "label": "Recuperação em contraesterço",
+      "section": "01",
+      "exportedText": "1.8 ×",
+      "gridCandidates": [
+        1.75,
+        1.8
+      ],
+      "precisionAmbiguous": true
+    },
+    "steerInputFilter": {
+      "value": 1,
+      "unit": "×",
+      "label": "Filtro de entrada de direção",
+      "section": "01",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "speedInstabilityThreshold": {
+      "value": 0.58,
+      "unit": "×",
+      "label": "Limite de velocidade p/ instabilidade",
+      "section": "01",
+      "exportedText": "0.58 ×",
+      "gridCandidates": [
+        0.58
+      ],
+      "precisionAmbiguous": false
+    },
+    "massScale": {
+      "value": 1,
+      "unit": "×",
+      "label": "Escala de massa da nave",
+      "section": "01",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "steerDeadzone": {
+      "value": 0.01,
+      "unit": "u",
+      "label": "Zona morta de esterço",
+      "section": "01",
+      "exportedText": "0.01 u",
+      "gridCandidates": [
+        0.01
+      ],
+      "precisionAmbiguous": false
+    },
+    "highSpeedSteerDropoff": {
+      "value": 0.12,
+      "unit": "×",
+      "label": "Atenuação de curva em alta vel.",
+      "section": "01",
+      "exportedText": "0.12 ×",
+      "gridCandidates": [
+        0.12
+      ],
+      "precisionAmbiguous": false
+    },
+    "lowSpeedSteerMultiplier": {
+      "value": 1.3,
+      "unit": "×",
+      "label": "Multiplicador de esterço em baixa vel.",
+      "section": "01",
+      "exportedText": "1.3 ×",
+      "gridCandidates": [
+        1.25,
+        1.3
+      ],
+      "precisionAmbiguous": true
+    },
+    "analogSteerGamma": {
+      "value": 1.1,
+      "unit": "×",
+      "label": "Exponencial de esterço analógico",
+      "section": "01",
+      "exportedText": "1.1 ×",
+      "gridCandidates": [
+        1.05,
+        1.1,
+        1.15
+      ],
+      "precisionAmbiguous": true
+    },
+    "rollResponse": {
+      "value": 23,
+      "unit": "u",
+      "label": "Velocidade de resposta Roll",
+      "section": "02",
+      "exportedText": "23 u",
+      "gridCandidates": [
+        23
+      ],
+      "precisionAmbiguous": false
+    },
+    "maxRoll": {
+      "value": 34,
+      "unit": "°",
+      "label": "Ângulo máximo de inclinação",
+      "section": "02",
+      "exportedText": "34 °",
+      "gridCandidates": [
+        34
+      ],
+      "precisionAmbiguous": false
+    },
+    "tiltSteerBoost": {
+      "value": 2.5,
+      "unit": "×",
+      "label": "Ganho de curva ao inclinar (Z/C)",
+      "section": "02",
+      "exportedText": "2.5 ×",
+      "gridCandidates": [
+        2.45,
+        2.5,
+        2.55
+      ],
+      "precisionAmbiguous": true
+    },
+    "bankTurnForce": {
+      "value": 62,
+      "unit": "u",
+      "label": "Força centrípeta de banking",
+      "section": "02",
+      "exportedText": "62 u",
+      "gridCandidates": [
+        62
+      ],
+      "precisionAmbiguous": false
+    },
+    "bankDrag": {
+      "value": 5.5,
+      "unit": "u",
+      "label": "Arrasto por inclinação",
+      "section": "02",
+      "exportedText": "5.5 u",
+      "gridCandidates": [
+        5.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "strafeThrust": {
+      "value": 195,
+      "unit": "u",
+      "label": "Força de strafe contínuo (Z/C)",
+      "section": "02",
+      "exportedText": "195 u",
+      "gridCandidates": [
+        195
+      ],
+      "precisionAmbiguous": false
+    },
+    "pitchResponse": {
+      "value": 15.5,
+      "unit": "u",
+      "label": "Velocidade alinhamento pitch",
+      "section": "02",
+      "exportedText": "15.5 u",
+      "gridCandidates": [
+        15.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "pitchSensitivity": {
+      "value": 1,
+      "unit": "×",
+      "label": "Sensibilidade pitch ao acelerar/frear",
+      "section": "02",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "strafeDecel": {
+      "value": 2,
+      "unit": "u",
+      "label": "Arrasto longitudinal no strafe",
+      "section": "02",
+      "exportedText": "2.0 u",
+      "gridCandidates": [
+        2
+      ],
+      "precisionAmbiguous": false
+    },
+    "rollDamping": {
+      "value": 14,
+      "unit": "u",
+      "label": "Amortecimento de roll",
+      "section": "02",
+      "exportedText": "14.0 u",
+      "gridCandidates": [
+        14
+      ],
+      "precisionAmbiguous": false
+    },
+    "quickStrafeImpulse": {
+      "value": 55,
+      "unit": "u",
+      "label": "Impulso inicial do toque de strafe",
+      "section": "02",
+      "exportedText": "55 u",
+      "gridCandidates": [
+        55
+      ],
+      "precisionAmbiguous": false
+    },
+    "strafeCooldown": {
+      "value": 0.04,
+      "unit": "s",
+      "label": "Recarga entre pulsos de strafe",
+      "section": "02",
+      "exportedText": "0.04 s",
+      "gridCandidates": [
+        0.04
+      ],
+      "precisionAmbiguous": false
+    },
+    "bankPitchCoupling": {
+      "value": 0.3,
+      "unit": "×",
+      "label": "Acoplamento de pitch com inclinação",
+      "section": "02",
+      "exportedText": "0.3 ×",
+      "gridCandidates": [
+        0.25,
+        0.3,
+        0.35
+      ],
+      "precisionAmbiguous": true
+    },
+    "rollReturnSpeed": {
+      "value": 18,
+      "unit": "u",
+      "label": "Velocidade de retorno ao neutro",
+      "section": "02",
+      "exportedText": "18.0 u",
+      "gridCandidates": [
+        18
+      ],
+      "precisionAmbiguous": false
+    },
+    "tiltSlideAssistance": {
+      "value": 0.5,
+      "unit": "×",
+      "label": "Assistência de inclinação no slide",
+      "section": "02",
+      "exportedText": "0.5 ×",
+      "gridCandidates": [
+        0.45,
+        0.5
+      ],
+      "precisionAmbiguous": true
+    },
+    "driftYawBoost": {
+      "value": 1.9,
+      "unit": "×",
+      "label": "Multiplicador guinada drift",
+      "section": "03",
+      "exportedText": "1.9 ×",
+      "gridCandidates": [
+        1.85,
+        1.9,
+        1.95
+      ],
+      "precisionAmbiguous": true
+    },
+    "driftGripMultiplier": {
+      "value": 18,
+      "unit": "%",
+      "label": "Retenção de grip em drift",
+      "section": "03",
+      "exportedText": "18 %",
+      "gridCandidates": [
+        18
+      ],
+      "precisionAmbiguous": false
+    },
+    "driftTiltBonus": {
+      "value": 18,
+      "unit": "u",
+      "label": "Bônus veloc. inclinando drift",
+      "section": "03",
+      "exportedText": "18.0 u",
+      "gridCandidates": [
+        18
+      ],
+      "precisionAmbiguous": false
+    },
+    "driftBrakeDecel": {
+      "value": 3.5,
+      "unit": "u",
+      "label": "Desaceleração freio no drift",
+      "section": "03",
+      "exportedText": "3.5 u",
+      "gridCandidates": [
+        3.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "slideTurnBoost": {
+      "value": 1.6,
+      "unit": "×",
+      "label": "Multiplicador guinada slide (Q/E)",
+      "section": "03",
+      "exportedText": "1.6 ×",
+      "gridCandidates": [
+        1.55,
+        1.6,
+        1.65
+      ],
+      "precisionAmbiguous": true
+    },
+    "slideDampingRatio": {
+      "value": 45,
+      "unit": "%",
+      "label": "Retenção tração em slide",
+      "section": "03",
+      "exportedText": "45 %",
+      "gridCandidates": [
+        45
+      ],
+      "precisionAmbiguous": false
+    },
+    "driftThreshold": {
+      "value": 15,
+      "unit": "u",
+      "label": "Velocidade mín. para iniciar drift",
+      "section": "03",
+      "exportedText": "15 u",
+      "gridCandidates": [
+        15
+      ],
+      "precisionAmbiguous": false
+    },
+    "driftDecelCurve": {
+      "value": 2.5,
+      "unit": "×",
+      "label": "Curva de decaimento do drift",
+      "section": "03",
+      "exportedText": "2.5 ×",
+      "gridCandidates": [
+        2.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "driftCounterSteerAuthority": {
+      "value": 1.6,
+      "unit": "×",
+      "label": "Autoridade de contraesterço no drift",
+      "section": "03",
+      "exportedText": "1.6 ×",
+      "gridCandidates": [
+        1.55,
+        1.6,
+        1.65
+      ],
+      "precisionAmbiguous": true
+    },
+    "driftParticleRate": {
+      "value": 2,
+      "unit": "u",
+      "label": "Taxa de faíscas no drift",
+      "section": "03",
+      "exportedText": "2 u",
+      "gridCandidates": [
+        2
+      ],
+      "precisionAmbiguous": false
+    },
+    "driftEntrySlipKick": {
+      "value": 28,
+      "unit": "u",
+      "label": "Impulso lateral na quebra de drift",
+      "section": "03",
+      "exportedText": "28 u",
+      "gridCandidates": [
+        28
+      ],
+      "precisionAmbiguous": false
+    },
+    "driftMaxAngle": {
+      "value": 65,
+      "unit": "°",
+      "label": "Ângulo limite de derrapagem",
+      "section": "03",
+      "exportedText": "65 °",
+      "gridCandidates": [
+        65
+      ],
+      "precisionAmbiguous": false
+    },
+    "driftAngularDamping": {
+      "value": 2.5,
+      "unit": "u",
+      "label": "Amortecimento angular no drift",
+      "section": "03",
+      "exportedText": "2.5 u",
+      "gridCandidates": [
+        2.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "driftSparksIntensity": {
+      "value": 1.6,
+      "unit": "×",
+      "label": "Intensidade de faíscas no drift",
+      "section": "03",
+      "exportedText": "1.6 ×",
+      "gridCandidates": [
+        1.55,
+        1.6,
+        1.65
+      ],
+      "precisionAmbiguous": true
+    },
+    "airbrakeDragMultiplier": {
+      "value": 1.4,
+      "unit": "×",
+      "label": "Arrasto induzido pelos airbrakes (Q/E)",
+      "section": "03",
+      "exportedText": "1.4 ×",
+      "gridCandidates": [
+        1.35,
+        1.4,
+        1.45
+      ],
+      "precisionAmbiguous": true
+    },
+    "topSpeed": {
+      "value": 500,
+      "unit": "u",
+      "label": "Velocidade máxima base",
+      "section": "04",
+      "exportedText": "500 u",
+      "gridCandidates": [
+        500
+      ],
+      "precisionAmbiguous": false
+    },
+    "boostTopSpeed": {
+      "value": 600,
+      "unit": "u",
+      "label": "Velocidade máxima com boost",
+      "section": "04",
+      "exportedText": "600 u",
+      "gridCandidates": [
+        600
+      ],
+      "precisionAmbiguous": false
+    },
+    "acceleration": {
+      "value": 80,
+      "unit": "u",
+      "label": "Aceleração longitudinal",
+      "section": "04",
+      "exportedText": "80 u",
+      "gridCandidates": [
+        80
+      ],
+      "precisionAmbiguous": false
+    },
+    "boostAccel": {
+      "value": 125,
+      "unit": "u",
+      "label": "Aceleração de super boost",
+      "section": "04",
+      "exportedText": "125 u",
+      "gridCandidates": [
+        125
+      ],
+      "precisionAmbiguous": false
+    },
+    "boostDuration": {
+      "value": 2.4,
+      "unit": "s",
+      "label": "Duração ativa do super boost",
+      "section": "04",
+      "exportedText": "2.4 s",
+      "gridCandidates": [
+        2.4
+      ],
+      "precisionAmbiguous": false
+    },
+    "coastDecel": {
+      "value": 4,
+      "unit": "u",
+      "label": "Desaceleração livre / arrasto",
+      "section": "04",
+      "exportedText": "4.0 u",
+      "gridCandidates": [
+        4
+      ],
+      "precisionAmbiguous": false
+    },
+    "brakeForce": {
+      "value": 145,
+      "unit": "u",
+      "label": "Força de frenagem normal",
+      "section": "04",
+      "exportedText": "145 u",
+      "gridCandidates": [
+        145
+      ],
+      "precisionAmbiguous": false
+    },
+    "reverseMaxSpeed": {
+      "value": 20,
+      "unit": "u",
+      "label": "Velocidade máxima em marcha ré",
+      "section": "04",
+      "exportedText": "20 u",
+      "gridCandidates": [
+        20
+      ],
+      "precisionAmbiguous": false
+    },
+    "boostEnergyDrainRate": {
+      "value": 4.5,
+      "unit": "HP/s",
+      "label": "Dreno contínuo de escudo no boost",
+      "section": "04",
+      "exportedText": "4.5 HP/s",
+      "gridCandidates": [
+        4.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "passiveRegenRate": {
+      "value": 6,
+      "unit": "HP/s",
+      "label": "Taxa de regeneração passiva",
+      "section": "04",
+      "exportedText": "6 HP/s",
+      "gridCandidates": [
+        6
+      ],
+      "precisionAmbiguous": false
+    },
+    "throttleResponse": {
+      "value": 120,
+      "unit": "u",
+      "label": "Resposta de empuxo do acelerador",
+      "section": "04",
+      "exportedText": "120 u",
+      "gridCandidates": [
+        120
+      ],
+      "precisionAmbiguous": false
+    },
+    "superBoostThreshold": {
+      "value": 80,
+      "unit": "u",
+      "label": "Velocidade mín. para ativar turbo",
+      "section": "04",
+      "exportedText": "80 u",
+      "gridCandidates": [
+        80
+      ],
+      "precisionAmbiguous": false
+    },
+    "boostCooldown": {
+      "value": 0.3,
+      "unit": "s",
+      "label": "Intervalo de re-ativação do boost",
+      "section": "04",
+      "exportedText": "0.3 s",
+      "gridCandidates": [
+        0.3
+      ],
+      "precisionAmbiguous": false
+    },
+    "draftingSpeedBonus": {
+      "value": 28,
+      "unit": "u",
+      "label": "Bônus de velocidade no vácuo",
+      "section": "04",
+      "exportedText": "28 u",
+      "gridCandidates": [
+        28
+      ],
+      "precisionAmbiguous": false
+    },
+    "draftingDistance": {
+      "value": 54,
+      "unit": "m",
+      "label": "Distância do cone de vácuo",
+      "section": "04",
+      "exportedText": "54 m",
+      "gridCandidates": [
+        54
+      ],
+      "precisionAmbiguous": false
+    },
+    "engineBrakingFactor": {
+      "value": 0.2,
+      "unit": "×",
+      "label": "Freio motor ao soltar acelerador",
+      "section": "04",
+      "exportedText": "0.2 ×",
+      "gridCandidates": [
+        0.2
+      ],
+      "precisionAmbiguous": false
+    },
+    "sideAttackForce": {
+      "value": 500,
+      "unit": "u",
+      "label": "Impulso do side-attack",
+      "section": "05",
+      "exportedText": "500 u",
+      "gridCandidates": [
+        500
+      ],
+      "precisionAmbiguous": false
+    },
+    "sideAttackDuration": {
+      "value": 0.31,
+      "unit": "s",
+      "label": "Duração do side-attack",
+      "section": "05",
+      "exportedText": "0.31 s",
+      "gridCandidates": [
+        0.31
+      ],
+      "precisionAmbiguous": false
+    },
+    "sideAttackDamage": {
+      "value": 32,
+      "unit": "HP",
+      "label": "Dano causado por side-attack",
+      "section": "05",
+      "exportedText": "32 HP",
+      "gridCandidates": [
+        32
+      ],
+      "precisionAmbiguous": false
+    },
+    "spinAttackDuration": {
+      "value": 0.84,
+      "unit": "s",
+      "label": "Duração do spin-attack 360°",
+      "section": "05",
+      "exportedText": "0.84 s",
+      "gridCandidates": [
+        0.84
+      ],
+      "precisionAmbiguous": false
+    },
+    "spinAttackDamage": {
+      "value": 52,
+      "unit": "HP",
+      "label": "Dano causado por spin-attack",
+      "section": "05",
+      "exportedText": "52 HP",
+      "gridCandidates": [
+        52
+      ],
+      "precisionAmbiguous": false
+    },
+    "spinAttackForce": {
+      "value": 200,
+      "unit": "u",
+      "label": "Impulso repulsão spin-attack",
+      "section": "05",
+      "exportedText": "200 u",
+      "gridCandidates": [
+        200
+      ],
+      "precisionAmbiguous": false
+    },
+    "boostCost": {
+      "value": 14,
+      "unit": "HP",
+      "label": "Custo de escudo por boost",
+      "section": "05",
+      "exportedText": "14 HP",
+      "gridCandidates": [
+        14
+      ],
+      "precisionAmbiguous": false
+    },
+    "sideAttackCost": {
+      "value": 3,
+      "unit": "HP",
+      "label": "Custo de escudo por side-attack",
+      "section": "05",
+      "exportedText": "3 HP",
+      "gridCandidates": [
+        3
+      ],
+      "precisionAmbiguous": false
+    },
+    "spinAttackCost": {
+      "value": 6,
+      "unit": "HP",
+      "label": "Custo de escudo por spin-attack",
+      "section": "05",
+      "exportedText": "6 HP",
+      "gridCandidates": [
+        6
+      ],
+      "precisionAmbiguous": false
+    },
+    "wallDamageScale": {
+      "value": 1,
+      "unit": "×",
+      "label": "Escala de dano com parede",
+      "section": "05",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "sideAttackReach": {
+      "value": 4.2,
+      "unit": "m",
+      "label": "Alcance extra do side-attack",
+      "section": "05",
+      "exportedText": "4.2 m",
+      "gridCandidates": [
+        4.2
+      ],
+      "precisionAmbiguous": false
+    },
+    "spinAttackRadius": {
+      "value": 4,
+      "unit": "m",
+      "label": "Raio expandido do spin-attack",
+      "section": "05",
+      "exportedText": "4.0 m",
+      "gridCandidates": [
+        4
+      ],
+      "precisionAmbiguous": false
+    },
+    "sideAttackCooldown": {
+      "value": 0.3,
+      "unit": "s",
+      "label": "Tempo de recarga do side-attack",
+      "section": "05",
+      "exportedText": "0.3 s",
+      "gridCandidates": [
+        0.25,
+        0.3,
+        0.35
+      ],
+      "precisionAmbiguous": true
+    },
+    "spinAttackCooldown": {
+      "value": 0.6,
+      "unit": "s",
+      "label": "Tempo de recarga do spin-attack",
+      "section": "05",
+      "exportedText": "0.6 s",
+      "gridCandidates": [
+        0.55,
+        0.6
+      ],
+      "precisionAmbiguous": true
+    },
+    "sideAttackLift": {
+      "value": 0,
+      "unit": "m",
+      "label": "Elevação vertical no side-attack",
+      "section": "05",
+      "exportedText": "0.0 m",
+      "gridCandidates": [
+        0
+      ],
+      "precisionAmbiguous": false
+    },
+    "rivalHitKnockbackScale": {
+      "value": 1,
+      "unit": "×",
+      "label": "Escala de repulsão recebida de rivais",
+      "section": "05",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "impactParticleCount": {
+      "value": 8,
+      "unit": "u",
+      "label": "Faíscas por impacto de lataria",
+      "section": "05",
+      "exportedText": "8 u",
+      "gridCandidates": [
+        8
+      ],
+      "precisionAmbiguous": false
+    },
+    "sideAttackInvulnerability": {
+      "value": 0.18,
+      "unit": "s",
+      "label": "Invulnerabilidade no side-attack",
+      "section": "05",
+      "exportedText": "0.18 s",
+      "gridCandidates": [
+        0.18
+      ],
+      "precisionAmbiguous": false
+    },
+    "spinAttackDeflectBonus": {
+      "value": 1.5,
+      "unit": "×",
+      "label": "Deflexão de projéteis e naves no spin",
+      "section": "05",
+      "exportedText": "1.5 ×",
+      "gridCandidates": [
+        1.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "bodySlamImpactMultiplier": {
+      "value": 1.3,
+      "unit": "×",
+      "label": "Multiplicador de dano por abalroamento",
+      "section": "05",
+      "exportedText": "1.3 ×",
+      "gridCandidates": [
+        1.25,
+        1.3
+      ],
+      "precisionAmbiguous": true
+    },
+    "hoverHeight": {
+      "value": 2.1,
+      "unit": "m",
+      "label": "Altura base de flutuação",
+      "section": "06",
+      "exportedText": "2.1 m",
+      "gridCandidates": [
+        2.1
+      ],
+      "precisionAmbiguous": false
+    },
+    "springStiffness": {
+      "value": 250,
+      "unit": "u",
+      "label": "Rigidez da mola de suspensão",
+      "section": "06",
+      "exportedText": "250 u",
+      "gridCandidates": [
+        250
+      ],
+      "precisionAmbiguous": false
+    },
+    "springDamping": {
+      "value": 50,
+      "unit": "u",
+      "label": "Amortecimento da suspensão",
+      "section": "06",
+      "exportedText": "50.0 u",
+      "gridCandidates": [
+        50
+      ],
+      "precisionAmbiguous": false
+    },
+    "wakeAmplitude": {
+      "value": 0.12,
+      "unit": "m",
+      "label": "Amplitude de oscilação",
+      "section": "06",
+      "exportedText": "0.12 m",
+      "gridCandidates": [
+        0.12
+      ],
+      "precisionAmbiguous": false
+    },
+    "wakeFrequency": {
+      "value": 4.8,
+      "unit": "Hz",
+      "label": "Frequência de oscilação",
+      "section": "06",
+      "exportedText": "4.8 Hz",
+      "gridCandidates": [
+        4.8
+      ],
+      "precisionAmbiguous": false
+    },
+    "fallGravity": {
+      "value": 90,
+      "unit": "u",
+      "label": "Gravidade de queda fora de pista",
+      "section": "06",
+      "exportedText": "90 u",
+      "gridCandidates": [
+        90
+      ],
+      "precisionAmbiguous": false
+    },
+    "airborneGravity": {
+      "value": 90,
+      "unit": "u",
+      "label": "Gravidade em salto no ar",
+      "section": "06",
+      "exportedText": "90 u",
+      "gridCandidates": [
+        90
+      ],
+      "precisionAmbiguous": false
+    },
+    "hoverDampingRatio": {
+      "value": 1,
+      "unit": "×",
+      "label": "Razão de amortecimento hover",
+      "section": "06",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "slopePitchMultiplier": {
+      "value": 1.5,
+      "unit": "×",
+      "label": "Multiplicador de pitch em aclives",
+      "section": "06",
+      "exportedText": "1.5 ×",
+      "gridCandidates": [
+        1.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "maxVerticalVelocity": {
+      "value": 26,
+      "unit": "u",
+      "label": "Velocidade vertical máxima (Mola)",
+      "section": "06",
+      "exportedText": "26 u",
+      "gridCandidates": [
+        26
+      ],
+      "precisionAmbiguous": false
+    },
+    "trackThickness": {
+      "value": 2.5,
+      "unit": "m",
+      "label": "Espessura física sólida da pista",
+      "section": "06",
+      "exportedText": "2.5 m",
+      "gridCandidates": [
+        2.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "trackUndersideBounce": {
+      "value": 0.4,
+      "unit": "×",
+      "label": "Ricochete sob a pista (Underside)",
+      "section": "06",
+      "exportedText": "0.40 ×",
+      "gridCandidates": [
+        0.4
+      ],
+      "precisionAmbiguous": false
+    },
+    "trackUndersideFriction": {
+      "value": 0.14,
+      "unit": "×",
+      "label": "Atrito ao raspar sob a pista",
+      "section": "06",
+      "exportedText": "0.14 ×",
+      "gridCandidates": [
+        0.14
+      ],
+      "precisionAmbiguous": false
+    },
+    "trackSurfaceFriction": {
+      "value": 0.08,
+      "unit": "×",
+      "label": "Atrito da superfície do asfalto",
+      "section": "06",
+      "exportedText": "0.08 ×",
+      "gridCandidates": [
+        0.08
+      ],
+      "precisionAmbiguous": false
+    },
+    "groundCompressionLimit": {
+      "value": 0.3,
+      "unit": "m",
+      "label": "Limite de compressão no solo",
+      "section": "06",
+      "exportedText": "0.3 m",
+      "gridCandidates": [
+        0.3
+      ],
+      "precisionAmbiguous": false
+    },
+    "hoverRepulsionForce": {
+      "value": 350,
+      "unit": "u",
+      "label": "Força anti-colisão vertical",
+      "section": "06",
+      "exportedText": "350 u",
+      "gridCandidates": [
+        350
+      ],
+      "precisionAmbiguous": false
+    },
+    "magneticGripStrength": {
+      "value": 1.4,
+      "unit": "×",
+      "label": "Retenção magnética de superfície",
+      "section": "06",
+      "exportedText": "1.4 ×",
+      "gridCandidates": [
+        1.35,
+        1.4,
+        1.45
+      ],
+      "precisionAmbiguous": true
+    },
+    "suspensionRelaxRate": {
+      "value": 10,
+      "unit": "u",
+      "label": "Relaxamento da suspensão no ar",
+      "section": "06",
+      "exportedText": "10.0 u",
+      "gridCandidates": [
+        10
+      ],
+      "precisionAmbiguous": false
+    },
+    "airPitchControlRate": {
+      "value": 35,
+      "unit": "°/s",
+      "label": "Taxa controle pitch aéreo (Cima/Baixo)",
+      "section": "07",
+      "exportedText": "35 °/s",
+      "gridCandidates": [
+        35
+      ],
+      "precisionAmbiguous": false
+    },
+    "airRollControlRate": {
+      "value": 42,
+      "unit": "°/s",
+      "label": "Taxa controle roll aéreo (Z/C/Setas)",
+      "section": "07",
+      "exportedText": "42 °/s",
+      "gridCandidates": [
+        42
+      ],
+      "precisionAmbiguous": false
+    },
+    "airSteerAuthority": {
+      "value": 1.1,
+      "unit": "×",
+      "label": "Autoridade de curva em voo",
+      "section": "07",
+      "exportedText": "1.1 ×",
+      "gridCandidates": [
+        1.05,
+        1.1,
+        1.15
+      ],
+      "precisionAmbiguous": true
+    },
+    "airGlideLift": {
+      "value": 40,
+      "unit": "u",
+      "label": "Sustentação de voo (Gliding Lift)",
+      "section": "07",
+      "exportedText": "40 u",
+      "gridCandidates": [
+        40
+      ],
+      "precisionAmbiguous": false
+    },
+    "airGlideDrag": {
+      "value": 5,
+      "unit": "u",
+      "label": "Arrasto induzido no voo planado",
+      "section": "07",
+      "exportedText": "5.0 u",
+      "gridCandidates": [
+        5
+      ],
+      "precisionAmbiguous": false
+    },
+    "airDiveAccel": {
+      "value": 55,
+      "unit": "u",
+      "label": "Aceleração de mergulho (Nose Dive)",
+      "section": "07",
+      "exportedText": "55 u",
+      "gridCandidates": [
+        55
+      ],
+      "precisionAmbiguous": false
+    },
+    "airDiveMaxSpeed": {
+      "value": 85,
+      "unit": "u",
+      "label": "Velocidade limite no mergulho",
+      "section": "07",
+      "exportedText": "85 u",
+      "gridCandidates": [
+        85
+      ],
+      "precisionAmbiguous": false
+    },
+    "airDrag": {
+      "value": 0.7,
+      "unit": "u",
+      "label": "Arrasto aerodinâmico global no ar",
+      "section": "07",
+      "exportedText": "0.7 u",
+      "gridCandidates": [
+        0.65,
+        0.7
+      ],
+      "precisionAmbiguous": true
+    },
+    "airborneThreshold": {
+      "value": 0.5,
+      "unit": "m",
+      "label": "Altura p/ ativar modo voo livre",
+      "section": "07",
+      "exportedText": "0.5 m",
+      "gridCandidates": [
+        0.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "landingBoostEfficiency": {
+      "value": 0.9,
+      "unit": "×",
+      "label": "Conversão de impulso de pouso (Dive Boost)",
+      "section": "07",
+      "exportedText": "0.9 ×",
+      "gridCandidates": [
+        0.9,
+        0.95
+      ],
+      "precisionAmbiguous": true
+    },
+    "landingBoostMax": {
+      "value": 140,
+      "unit": "u",
+      "label": "Bônus máximo de Dive Landing Boost",
+      "section": "07",
+      "exportedText": "140 u",
+      "gridCandidates": [
+        140
+      ],
+      "precisionAmbiguous": false
+    },
+    "landingImpactThreshold": {
+      "value": 0.5,
+      "unit": "rad",
+      "label": "Tolerância angular de pouso suave",
+      "section": "07",
+      "exportedText": "0.5 rad",
+      "gridCandidates": [
+        0.45,
+        0.5
+      ],
+      "precisionAmbiguous": true
+    },
+    "landingPenaltyDamage": {
+      "value": 5,
+      "unit": "HP",
+      "label": "Dano por pouso desajeitado/de cauda",
+      "section": "07",
+      "exportedText": "5 HP",
+      "gridCandidates": [
+        5
+      ],
+      "precisionAmbiguous": false
+    },
+    "landingPenaltyDecel": {
+      "value": 15,
+      "unit": "u",
+      "label": "Perda de velocidade em pouso ruim",
+      "section": "07",
+      "exportedText": "15 u",
+      "gridCandidates": [
+        15
+      ],
+      "precisionAmbiguous": false
+    },
+    "landingSparksCount": {
+      "value": 24,
+      "unit": "u",
+      "label": "Faíscas na aterrissagem",
+      "section": "07",
+      "exportedText": "24 u",
+      "gridCandidates": [
+        24
+      ],
+      "precisionAmbiguous": false
+    },
+    "jumpRampLaunchForce": {
+      "value": 1.3,
+      "unit": "×",
+      "label": "Multiplicador de salto em cristas",
+      "section": "07",
+      "exportedText": "1.3 ×",
+      "gridCandidates": [
+        1.25,
+        1.3
+      ],
+      "precisionAmbiguous": true
+    },
+    "airStrafeThrust": {
+      "value": 110,
+      "unit": "u",
+      "label": "Empuxo de strafe lateral aéreo",
+      "section": "07",
+      "exportedText": "110 u",
+      "gridCandidates": [
+        110
+      ],
+      "precisionAmbiguous": false
+    },
+    "airPitchStability": {
+      "value": 2,
+      "unit": "u",
+      "label": "Estabilização giroscópica no ar",
+      "section": "07",
+      "exportedText": "2.0 u",
+      "gridCandidates": [
+        2
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiBaseSpeed": {
+      "value": 220,
+      "unit": "u",
+      "label": "Velocidade cruzeiro base da IA",
+      "section": "08",
+      "exportedText": "220 u",
+      "gridCandidates": [
+        220
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiAggressiveness": {
+      "value": 1.4,
+      "unit": "×",
+      "label": "Agressividade / Ataque da IA",
+      "section": "08",
+      "exportedText": "1.4 ×",
+      "gridCandidates": [
+        1.4
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiRubberbanding": {
+      "value": 1,
+      "unit": "×",
+      "label": "Recuperação de distância (Catch-up)",
+      "section": "08",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiLaneChangeSpeed": {
+      "value": 1.2,
+      "unit": "u",
+      "label": "Frequência de troca de faixa",
+      "section": "08",
+      "exportedText": "1.2 u",
+      "gridCandidates": [
+        1.2
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiRespawnDelay": {
+      "value": 4,
+      "unit": "s",
+      "label": "Tempo de ressurgimento da IA",
+      "section": "08",
+      "exportedText": "4.0 s",
+      "gridCandidates": [
+        4
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiAttackRange": {
+      "value": 10,
+      "unit": "m",
+      "label": "Alcance de ataque da IA",
+      "section": "08",
+      "exportedText": "10 m",
+      "gridCandidates": [
+        10
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiAvoidanceForce": {
+      "value": 16,
+      "unit": "u",
+      "label": "Força de separação lateral da IA",
+      "section": "08",
+      "exportedText": "16 u",
+      "gridCandidates": [
+        16
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiSpeedVariance": {
+      "value": 35,
+      "unit": "u",
+      "label": "Variação randômica de velocidade da IA",
+      "section": "08",
+      "exportedText": "35 u",
+      "gridCandidates": [
+        35
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiTopSpeedCap": {
+      "value": 450,
+      "unit": "u",
+      "label": "Teto absoluto de velocidade da IA",
+      "section": "08",
+      "exportedText": "450 u",
+      "gridCandidates": [
+        450
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiBoostFrequency": {
+      "value": 0.4,
+      "unit": "×",
+      "label": "Frequência de uso do Turbo pela IA",
+      "section": "08",
+      "exportedText": "0.4 ×",
+      "gridCandidates": [
+        0.4
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiBoostTopSpeed": {
+      "value": 480,
+      "unit": "u",
+      "label": "Velocidade da IA com Turbo",
+      "section": "08",
+      "exportedText": "480 u",
+      "gridCandidates": [
+        480
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiBoostAccel": {
+      "value": 140,
+      "unit": "u",
+      "label": "Aceleração do turbo da IA",
+      "section": "08",
+      "exportedText": "140 u",
+      "gridCandidates": [
+        140
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiDashPlateAffinity": {
+      "value": 0.8,
+      "unit": "×",
+      "label": "Busca por placas Dash pela IA",
+      "section": "08",
+      "exportedText": "0.8 ×",
+      "gridCandidates": [
+        0.75,
+        0.8,
+        0.85
+      ],
+      "precisionAmbiguous": true
+    },
+    "aiSlipstreamUsage": {
+      "value": 1.3,
+      "unit": "×",
+      "label": "Aproveitamento de vácuo pela IA",
+      "section": "08",
+      "exportedText": "1.3 ×",
+      "gridCandidates": [
+        1.25,
+        1.3
+      ],
+      "precisionAmbiguous": true
+    },
+    "aiCorneringGrip": {
+      "value": 1.3,
+      "unit": "×",
+      "label": "Aderência e tração da IA em curvas",
+      "section": "08",
+      "exportedText": "1.3 ×",
+      "gridCandidates": [
+        1.25,
+        1.3
+      ],
+      "precisionAmbiguous": true
+    },
+    "aiBrakingTendency": {
+      "value": 0.3,
+      "unit": "×",
+      "label": "Frenagem preventiva da IA em curvas",
+      "section": "08",
+      "exportedText": "0.3 ×",
+      "gridCandidates": [
+        0.25,
+        0.3,
+        0.35
+      ],
+      "precisionAmbiguous": true
+    },
+    "aiAirPitchControl": {
+      "value": 1.1,
+      "unit": "×",
+      "label": "Habilidade da IA de pitch no ar",
+      "section": "08",
+      "exportedText": "1.1 ×",
+      "gridCandidates": [
+        1.05,
+        1.1,
+        1.15
+      ],
+      "precisionAmbiguous": true
+    },
+    "aiDiveBoostSkill": {
+      "value": 0.6,
+      "unit": "×",
+      "label": "Uso de Dive Landing Boost pela IA",
+      "section": "08",
+      "exportedText": "0.6 ×",
+      "gridCandidates": [
+        0.55,
+        0.6
+      ],
+      "precisionAmbiguous": true
+    },
+    "aiSideAttackSkill": {
+      "value": 1.4,
+      "unit": "×",
+      "label": "Força de impacto dos ataques da IA",
+      "section": "08",
+      "exportedText": "1.4 ×",
+      "gridCandidates": [
+        1.4
+      ],
+      "precisionAmbiguous": false
+    },
+    "aiCatchupAcceleration": {
+      "value": 65,
+      "unit": "u",
+      "label": "Aceleração de recuperação da IA",
+      "section": "08",
+      "exportedText": "65 u",
+      "gridCandidates": [
+        65
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraDistance": {
+      "value": 9.5,
+      "unit": "m",
+      "label": "Distância da câmera traseira",
+      "section": "09",
+      "exportedText": "9.5 m",
+      "gridCandidates": [
+        9.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraHeight": {
+      "value": 7.8,
+      "unit": "m",
+      "label": "Altura da câmera traseira",
+      "section": "09",
+      "exportedText": "7.8 m",
+      "gridCandidates": [
+        7.8
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraFOV": {
+      "value": 0.78,
+      "unit": "×",
+      "label": "Fator de FOV / perspectiva",
+      "section": "09",
+      "exportedText": "0.78 ×",
+      "gridCandidates": [
+        0.78
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraSpeedFOV": {
+      "value": 0.1,
+      "unit": "×",
+      "label": "Expansão de FOV em velocidade",
+      "section": "09",
+      "exportedText": "0.10 ×",
+      "gridCandidates": [
+        0.1
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraLag": {
+      "value": 14,
+      "unit": "u",
+      "label": "Resposta de acompanhamento",
+      "section": "09",
+      "exportedText": "14 u",
+      "gridCandidates": [
+        14
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraShakeScale": {
+      "value": 1,
+      "unit": "×",
+      "label": "Multiplicador de tremor",
+      "section": "09",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraLookahead": {
+      "value": 38,
+      "unit": "m",
+      "label": "Distância de mira à frente",
+      "section": "09",
+      "exportedText": "38 m",
+      "gridCandidates": [
+        38
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraCockpitOffset": {
+      "value": 0.7,
+      "unit": "m",
+      "label": "Avanço de câmera POV (Cockpit)",
+      "section": "09",
+      "exportedText": "0.7 m",
+      "gridCandidates": [
+        0.7
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraOrbitSpeed": {
+      "value": 0.3,
+      "unit": "u",
+      "label": "Velocidade de rotação da órbita",
+      "section": "09",
+      "exportedText": "0.3 u",
+      "gridCandidates": [
+        0.25,
+        0.3,
+        0.35
+      ],
+      "precisionAmbiguous": true
+    },
+    "cameraVerticalFollow": {
+      "value": 18,
+      "unit": "u",
+      "label": "Acompanhamento vertical da câmera",
+      "section": "09",
+      "exportedText": "18 u",
+      "gridCandidates": [
+        18
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraShakeDecay": {
+      "value": 1.7,
+      "unit": "×",
+      "label": "Decaimento do tremor de tela",
+      "section": "09",
+      "exportedText": "1.7 ×",
+      "gridCandidates": [
+        1.7
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraAirbornePitchLag": {
+      "value": 5.5,
+      "unit": "u",
+      "label": "Inércia de pitch de câmera no ar",
+      "section": "09",
+      "exportedText": "5.5 u",
+      "gridCandidates": [
+        5.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraLandingDip": {
+      "value": 1.1,
+      "unit": "m",
+      "label": "Afundamento de câmera no pouso",
+      "section": "09",
+      "exportedText": "1.1 m",
+      "gridCandidates": [
+        1.05,
+        1.1,
+        1.15
+      ],
+      "precisionAmbiguous": true
+    },
+    "cameraRollFollow": {
+      "value": 0.5,
+      "unit": "×",
+      "label": "Inclinação da câmera com a nave",
+      "section": "09",
+      "exportedText": "0.5 ×",
+      "gridCandidates": [
+        0.45,
+        0.5
+      ],
+      "precisionAmbiguous": true
+    },
+    "cameraBoostFOVPulse": {
+      "value": 0.12,
+      "unit": "×",
+      "label": "Pulso de FOV ao disparar Turbo",
+      "section": "09",
+      "exportedText": "0.12 ×",
+      "gridCandidates": [
+        0.12
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraDriftSwing": {
+      "value": 0.6,
+      "unit": "×",
+      "label": "Abertura de câmera no drift",
+      "section": "09",
+      "exportedText": "0.6 ×",
+      "gridCandidates": [
+        0.55,
+        0.6
+      ],
+      "precisionAmbiguous": true
+    },
+    "cameraCockpitShakeMultiplier": {
+      "value": 1.2,
+      "unit": "×",
+      "label": "Tremor na visão em 1ª pessoa",
+      "section": "09",
+      "exportedText": "1.2 ×",
+      "gridCandidates": [
+        1.2
+      ],
+      "precisionAmbiguous": false
+    },
+    "cameraSpeedVignette": {
+      "value": 0.28,
+      "unit": "×",
+      "label": "Vinheta escura de velocidade",
+      "section": "09",
+      "exportedText": "0.28 ×",
+      "gridCandidates": [
+        0.28
+      ],
+      "precisionAmbiguous": false
+    },
+    "trackWidthScale": {
+      "value": 0.8,
+      "unit": "×",
+      "label": "Multiplicador largura da pista",
+      "section": "10",
+      "exportedText": "0.8 ×",
+      "gridCandidates": [
+        0.75,
+        0.8,
+        0.85
+      ],
+      "precisionAmbiguous": true
+    },
+    "dashPlateBoost": {
+      "value": 95,
+      "unit": "u",
+      "label": "Impulso da placa Dash",
+      "section": "10",
+      "exportedText": "95 u",
+      "gridCandidates": [
+        95
+      ],
+      "precisionAmbiguous": false
+    },
+    "dashPlateRadius": {
+      "value": 12,
+      "unit": "m",
+      "label": "Raio de ativação da placa Dash",
+      "section": "10",
+      "exportedText": "12 m",
+      "gridCandidates": [
+        12
+      ],
+      "precisionAmbiguous": false
+    },
+    "pitRechargeRate": {
+      "value": 57,
+      "unit": "HP/s",
+      "label": "Taxa de recarga no Pit",
+      "section": "10",
+      "exportedText": "57 HP/s",
+      "gridCandidates": [
+        57
+      ],
+      "precisionAmbiguous": false
+    },
+    "barrierBounce": {
+      "value": 1.6,
+      "unit": "×",
+      "label": "Elasticidade de ricochete na parede",
+      "section": "10",
+      "exportedText": "1.6 ×",
+      "gridCandidates": [
+        1.55,
+        1.6,
+        1.65
+      ],
+      "precisionAmbiguous": true
+    },
+    "barrierFriction": {
+      "value": 0.12,
+      "unit": "×",
+      "label": "Atrito de desaceleração na parede",
+      "section": "10",
+      "exportedText": "0.12 ×",
+      "gridCandidates": [
+        0.12
+      ],
+      "precisionAmbiguous": false
+    },
+    "straightTrackLength": {
+      "value": 12000,
+      "unit": "m",
+      "label": "Comprimento da reta de ensaio",
+      "section": "10",
+      "exportedText": "12000 m",
+      "gridCandidates": [
+        12000
+      ],
+      "precisionAmbiguous": false
+    },
+    "dashPlateCooldown": {
+      "value": 1,
+      "unit": "s",
+      "label": "Recarga da mesma placa Dash",
+      "section": "10",
+      "exportedText": "1.0 s",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "buildingDensity": {
+      "value": 65,
+      "unit": "u",
+      "label": "Densidade de prédios da paisagem",
+      "section": "10",
+      "exportedText": "65 u",
+      "gridCandidates": [
+        65
+      ],
+      "precisionAmbiguous": false
+    },
+    "shadowOpacity": {
+      "value": 0.68,
+      "unit": "×",
+      "label": "Opacidade da sombra da nave",
+      "section": "10",
+      "exportedText": "0.68 ×",
+      "gridCandidates": [
+        0.68
+      ],
+      "precisionAmbiguous": false
+    },
+    "barrierDamageScale": {
+      "value": 0.9,
+      "unit": "×",
+      "label": "Dano por fricção em barreiras",
+      "section": "10",
+      "exportedText": "0.9 ×",
+      "gridCandidates": [
+        0.9,
+        0.95
+      ],
+      "precisionAmbiguous": true
+    },
+    "pitLaneLength": {
+      "value": 70,
+      "unit": "m",
+      "label": "Extensão longitudinal do Pit Stop",
+      "section": "10",
+      "exportedText": "70 m",
+      "gridCandidates": [
+        70
+      ],
+      "precisionAmbiguous": false
+    },
+    "elevatedTrackElevation": {
+      "value": 75,
+      "unit": "m",
+      "label": "Altitude máxima de relevo",
+      "section": "10",
+      "exportedText": "75 m",
+      "gridCandidates": [
+        75
+      ],
+      "precisionAmbiguous": false
+    },
+    "trackBankCurvature": {
+      "value": 0.7,
+      "unit": "×",
+      "label": "Banking automático da pista",
+      "section": "10",
+      "exportedText": "0.7 ×",
+      "gridCandidates": [
+        0.65,
+        0.7
+      ],
+      "precisionAmbiguous": true
+    },
+    "dashPlateEnergyBonus": {
+      "value": 8,
+      "unit": "HP",
+      "label": "Recarga de energia na placa Dash",
+      "section": "10",
+      "exportedText": "8 HP",
+      "gridCandidates": [
+        8
+      ],
+      "precisionAmbiguous": false
+    },
+    "wallRepulsionAngle": {
+      "value": 0.9,
+      "unit": "×",
+      "label": "Ângulo de deflexão de parede",
+      "section": "10",
+      "exportedText": "0.9 ×",
+      "gridCandidates": [
+        0.9
+      ],
+      "precisionAmbiguous": false
+    },
+    "trackCrestJumpBoost": {
+      "value": 1,
+      "unit": "×",
+      "label": "Multiplicador de salto em aclive",
+      "section": "10",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "sceneryDistance": {
+      "value": 750,
+      "unit": "m",
+      "label": "Distância de renderização do cenário",
+      "section": "10",
+      "exportedText": "750 m",
+      "gridCandidates": [
+        750
+      ],
+      "precisionAmbiguous": false
+    },
+    "particleDensity": {
+      "value": 43,
+      "unit": "u",
+      "label": "Densidade de faíscas/partículas",
+      "section": "11",
+      "exportedText": "43 u",
+      "gridCandidates": [
+        43
+      ],
+      "precisionAmbiguous": false
+    },
+    "particleLifespan": {
+      "value": 1.1,
+      "unit": "s",
+      "label": "Duração de partículas",
+      "section": "11",
+      "exportedText": "1.1 s",
+      "gridCandidates": [
+        1.05,
+        1.1,
+        1.15
+      ],
+      "precisionAmbiguous": true
+    },
+    "speedLinesDensity": {
+      "value": 47,
+      "unit": "u",
+      "label": "Linhas de velocidade (Speedlines)",
+      "section": "11",
+      "exportedText": "47 u",
+      "gridCandidates": [
+        47
+      ],
+      "precisionAmbiguous": false
+    },
+    "engineTrailLength": {
+      "value": 1.3,
+      "unit": "×",
+      "label": "Tamanho do rastro do propulsor",
+      "section": "11",
+      "exportedText": "1.3 ×",
+      "gridCandidates": [
+        1.3
+      ],
+      "precisionAmbiguous": false
+    },
+    "hitFlashIntensity": {
+      "value": 0.22,
+      "unit": "×",
+      "label": "Intensidade de flash vermelho",
+      "section": "11",
+      "exportedText": "0.22 ×",
+      "gridCandidates": [
+        0.22
+      ],
+      "precisionAmbiguous": false
+    },
+    "engineGlowSize": {
+      "value": 1,
+      "unit": "×",
+      "label": "Escala de brilho do propulsor",
+      "section": "11",
+      "exportedText": "1.0 ×",
+      "gridCandidates": [
+        1
+      ],
+      "precisionAmbiguous": false
+    },
+    "speedLinesThreshold": {
+      "value": 120,
+      "unit": "u",
+      "label": "Velocidade p/ ativar speedlines",
+      "section": "11",
+      "exportedText": "120 u",
+      "gridCandidates": [
+        120
+      ],
+      "precisionAmbiguous": false
+    },
+    "starfieldDensity": {
+      "value": 13,
+      "unit": "u",
+      "label": "Densidade de estrelas no céu",
+      "section": "11",
+      "exportedText": "13 u",
+      "gridCandidates": [
+        13
+      ],
+      "precisionAmbiguous": false
+    },
+    "buildingWindowGlow": {
+      "value": 0.8,
+      "unit": "×",
+      "label": "Densidade de janelas iluminadas",
+      "section": "11",
+      "exportedText": "0.8 ×",
+      "gridCandidates": [
+        0.75,
+        0.8,
+        0.85
+      ],
+      "precisionAmbiguous": true
+    },
+    "landingShockwaveRadius": {
+      "value": 8.5,
+      "unit": "m",
+      "label": "Raio da onda de choque no pouso",
+      "section": "11",
+      "exportedText": "8.5 m",
+      "gridCandidates": [
+        8.5
+      ],
+      "precisionAmbiguous": false
+    },
+    "airborneTrailOpacity": {
+      "value": 0.6,
+      "unit": "×",
+      "label": "Opacidade dos vórtices de asa",
+      "section": "11",
+      "exportedText": "0.6 ×",
+      "gridCandidates": [
+        0.55,
+        0.6
+      ],
+      "precisionAmbiguous": true
+    },
+    "sonicBoomRingSize": {
+      "value": 2,
+      "unit": "×",
+      "label": "Tamanho do anel de quebra sônica",
+      "section": "11",
+      "exportedText": "2.0 ×",
+      "gridCandidates": [
+        2
+      ],
+      "precisionAmbiguous": false
+    },
+    "diveTrailColorShift": {
+      "value": 0.5,
+      "unit": "×",
+      "label": "Variação cromática em mergulho",
+      "section": "11",
+      "exportedText": "0.5 ×",
+      "gridCandidates": [
+        0.45,
+        0.5
+      ],
+      "precisionAmbiguous": true
+    },
+    "chassisReflectivity": {
+      "value": 0.8,
+      "unit": "×",
+      "label": "Refletividade da fuselagem",
+      "section": "11",
+      "exportedText": "0.8 ×",
+      "gridCandidates": [
+        0.75,
+        0.8,
+        0.85
+      ],
+      "precisionAmbiguous": true
+    },
+    "shadowSoftness": {
+      "value": 1.8,
+      "unit": "×",
+      "label": "Suavidade da sombra da nave",
+      "section": "11",
+      "exportedText": "1.8 ×",
+      "gridCandidates": [
+        1.8
+      ],
+      "precisionAmbiguous": false
+    },
+    "hudGlitchIntensity": {
+      "value": 0.3,
+      "unit": "×",
+      "label": "Efeito de interferência no HUD",
+      "section": "11",
+      "exportedText": "0.3 ×",
+      "gridCandidates": [
+        0.25,
+        0.3,
+        0.35
+      ],
+      "precisionAmbiguous": true
+    },
+    "plasmaGlowHue": {
+      "value": 200,
+      "unit": "°",
+      "label": "Matiz cromático do plasma",
+      "section": "11",
+      "exportedText": "200 °",
+      "gridCandidates": [
+        200
+      ],
+      "precisionAmbiguous": false
+    },
+    "speedLineSpeedScale": {
+      "value": 1.2,
+      "unit": "×",
+      "label": "Velocidade dos feixes visuais",
+      "section": "11",
+      "exportedText": "1.2 ×",
+      "gridCandidates": [
+        1.2
+      ],
+      "precisionAmbiguous": false
+    },
+    "engineBasePitch": {
+      "value": 65,
+      "unit": "Hz",
+      "label": "Tom base do motor",
+      "section": "12",
+      "exportedText": "65 Hz",
+      "gridCandidates": [
+        65
+      ],
+      "precisionAmbiguous": false
+    },
+    "enginePitchRange": {
+      "value": 90,
+      "unit": "Hz",
+      "label": "Sensibilidade de tom à velocidade",
+      "section": "12",
+      "exportedText": "90 Hz",
+      "gridCandidates": [
+        90
+      ],
+      "precisionAmbiguous": false
+    },
+    "masterVolume": {
+      "value": 0.07,
+      "unit": "u",
+      "label": "Volume mestre de efeitos",
+      "section": "12",
+      "exportedText": "0.07 u",
+      "gridCandidates": [
+        0.07
+      ],
+      "precisionAmbiguous": false
+    },
+    "boostSoundPitch": {
+      "value": 380,
+      "unit": "Hz",
+      "label": "Frequência sonora do boost",
+      "section": "12",
+      "exportedText": "380 Hz",
+      "gridCandidates": [
+        380
+      ],
+      "precisionAmbiguous": false
+    },
+    "engineFilterFreq": {
+      "value": 550,
+      "unit": "Hz",
+      "label": "Filtro passa-baixa do motor",
+      "section": "12",
+      "exportedText": "550 Hz",
+      "gridCandidates": [
+        550
+      ],
+      "precisionAmbiguous": false
+    },
+    "impactSoundPitch": {
+      "value": 105,
+      "unit": "Hz",
+      "label": "Tom sonoro de batida na parede",
+      "section": "12",
+      "exportedText": "105 Hz",
+      "gridCandidates": [
+        105
+      ],
+      "precisionAmbiguous": false
+    },
+    "sideAttackSoundPitch": {
+      "value": 165,
+      "unit": "Hz",
+      "label": "Tom sonoro do side-attack",
+      "section": "12",
+      "exportedText": "165 Hz",
+      "gridCandidates": [
+        165
+      ],
+      "precisionAmbiguous": false
+    },
+    "airWhooshVolume": {
+      "value": 0.12,
+      "unit": "u",
+      "label": "Volume do vento em voo aéreo",
+      "section": "12",
+      "exportedText": "0.12 u",
+      "gridCandidates": [
+        0.12
+      ],
+      "precisionAmbiguous": false
+    },
+    "diveSoundPitch": {
+      "value": 420,
+      "unit": "Hz",
+      "label": "Tom sonoro de mergulho (Dive)",
+      "section": "12",
+      "exportedText": "420 Hz",
+      "gridCandidates": [
+        420
+      ],
+      "precisionAmbiguous": false
+    },
+    "landingImpactSoundPitch": {
+      "value": 140,
+      "unit": "Hz",
+      "label": "Tom sonoro do choque de pouso",
+      "section": "12",
+      "exportedText": "140 Hz",
+      "gridCandidates": [
+        140
+      ],
+      "precisionAmbiguous": false
+    },
+    "dashPlateSoundPitch": {
+      "value": 720,
+      "unit": "Hz",
+      "label": "Frequência sonora da placa Dash",
+      "section": "12",
+      "exportedText": "720 Hz",
+      "gridCandidates": [
+        720
+      ],
+      "precisionAmbiguous": false
+    },
+    "sonicBoomSoundPitch": {
+      "value": 85,
+      "unit": "Hz",
+      "label": "Tom do estrondo de quebra sônica",
+      "section": "12",
+      "exportedText": "85 Hz",
+      "gridCandidates": [
+        85
+      ],
+      "precisionAmbiguous": false
+    },
+    "pitStopHumPitch": {
+      "value": 260,
+      "unit": "Hz",
+      "label": "Zumbido de recarga do Pit Stop",
+      "section": "12",
+      "exportedText": "260 Hz",
+      "gridCandidates": [
+        260
+      ],
+      "precisionAmbiguous": false
+    },
+    "airbrakeSoundVolume": {
+      "value": 0.08,
+      "unit": "u",
+      "label": "Volume de escape dos airbrakes (Q/E)",
+      "section": "12",
+      "exportedText": "0.08 u",
+      "gridCandidates": [
+        0.08
+      ],
+      "precisionAmbiguous": false
+    },
+    "shieldWarningPitch": {
+      "value": 920,
+      "unit": "Hz",
+      "label": "Frequência de aviso de escudo crítico",
+      "section": "12",
+      "exportedText": "920 Hz",
+      "gridCandidates": [
+        920
+      ],
+      "precisionAmbiguous": false
+    },
+    "collisionCrunchBass": {
+      "value": 75,
+      "unit": "Hz",
+      "label": "Subgrave em colisões violentas",
+      "section": "12",
+      "exportedText": "75 Hz",
+      "gridCandidates": [
+        75
+      ],
+      "precisionAmbiguous": false
+    }
+  },
+  "precisionAmbiguousCount": 41
+}

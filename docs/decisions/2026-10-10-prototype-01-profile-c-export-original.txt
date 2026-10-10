@@ -1,0 +1,235 @@
+=== G-MINUS // CALIBRAÇÃO DE FÍSICA & DINÂMICA ===
+Perfil Ativo: C (Inercial / Drift)
+Pista Ativa: OBSTACLE_SPRINT
+Total de Parâmetros: 207
+
+--- 01 / Direção & Resposta Angular ---
+• Taxa base de esterço (steerRate): 89 °/s
+• Progressividade de esterço (progressivity): 1.4 ×
+• Inércia de massa lateral (inertia): 65 u
+• Aderência / Grip lateral (grip): 68 %
+• Estabilização de guinada (recenter): 4.5 u
+• Instabilidade em alta velocidade (speedInstability): 0.6 ×
+• Aceleração angular (Yaw) (yawAccel): 28 u
+• Recuperação em contraesterço (counterSteerBoost): 1.8 ×
+• Filtro de entrada de direção (steerInputFilter): 1.0 ×
+• Limite de velocidade p/ instabilidade (speedInstabilityThreshold): 0.58 ×
+• Escala de massa da nave (massScale): 1.0 ×
+• Zona morta de esterço (steerDeadzone): 0.01 u
+• Atenuação de curva em alta vel. (highSpeedSteerDropoff): 0.12 ×
+• Multiplicador de esterço em baixa vel. (lowSpeedSteerMultiplier): 1.3 ×
+• Exponencial de esterço analógico (analogSteerGamma): 1.1 ×
+
+--- 02 / Inclinação & Banking (Z/C) ---
+• Velocidade de resposta Roll (rollResponse): 23 u
+• Ângulo máximo de inclinação (maxRoll): 34 °
+• Ganho de curva ao inclinar (Z/C) (tiltSteerBoost): 2.5 ×
+• Força centrípeta de banking (bankTurnForce): 62 u
+• Arrasto por inclinação (bankDrag): 5.5 u
+• Força de strafe contínuo (Z/C) (strafeThrust): 195 u
+• Velocidade alinhamento pitch (pitchResponse): 15.5 u
+• Sensibilidade pitch ao acelerar/frear (pitchSensitivity): 1.0 ×
+• Arrasto longitudinal no strafe (strafeDecel): 2.0 u
+• Amortecimento de roll (rollDamping): 14.0 u
+• Impulso inicial do toque de strafe (quickStrafeImpulse): 55 u
+• Recarga entre pulsos de strafe (strafeCooldown): 0.04 s
+• Acoplamento de pitch com inclinação (bankPitchCoupling): 0.3 ×
+• Velocidade de retorno ao neutro (rollReturnSpeed): 18.0 u
+• Assistência de inclinação no slide (tiltSlideAssistance): 0.5 ×
+
+--- 03 / Derrapagem & Drift (Espaço / Q+E) ---
+• Multiplicador guinada drift (driftYawBoost): 1.9 ×
+• Retenção de grip em drift (driftGripMultiplier): 18 %
+• Bônus veloc. inclinando drift (driftTiltBonus): 18.0 u
+• Desaceleração freio no drift (driftBrakeDecel): 3.5 u
+• Multiplicador guinada slide (Q/E) (slideTurnBoost): 1.6 ×
+• Retenção tração em slide (slideDampingRatio): 45 %
+• Velocidade mín. para iniciar drift (driftThreshold): 15 u
+• Curva de decaimento do drift (driftDecelCurve): 2.5 ×
+• Autoridade de contraesterço no drift (driftCounterSteerAuthority): 1.6 ×
+• Taxa de faíscas no drift (driftParticleRate): 2 u
+• Impulso lateral na quebra de drift (driftEntrySlipKick): 28 u
+• Ângulo limite de derrapagem (driftMaxAngle): 65 °
+• Amortecimento angular no drift (driftAngularDamping): 2.5 u
+• Intensidade de faíscas no drift (driftSparksIntensity): 1.6 ×
+• Arrasto induzido pelos airbrakes (Q/E) (airbrakeDragMultiplier): 1.4 ×
+
+--- 04 / Propulsão, Boost & Freios ---
+• Velocidade máxima base (topSpeed): 500 u
+• Velocidade máxima com boost (boostTopSpeed): 600 u
+• Aceleração longitudinal (acceleration): 80 u
+• Aceleração de super boost (boostAccel): 125 u
+• Duração ativa do super boost (boostDuration): 2.4 s
+• Desaceleração livre / arrasto (coastDecel): 4.0 u
+• Força de frenagem normal (brakeForce): 145 u
+• Velocidade máxima em marcha ré (reverseMaxSpeed): 20 u
+• Dreno contínuo de escudo no boost (boostEnergyDrainRate): 4.5 HP/s
+• Taxa de regeneração passiva (passiveRegenRate): 6 HP/s
+• Resposta de empuxo do acelerador (throttleResponse): 120 u
+• Velocidade mín. para ativar turbo (superBoostThreshold): 80 u
+• Intervalo de re-ativação do boost (boostCooldown): 0.3 s
+• Bônus de velocidade no vácuo (draftingSpeedBonus): 28 u
+• Distância do cone de vácuo (draftingDistance): 54 m
+• Freio motor ao soltar acelerador (engineBrakingFactor): 0.2 ×
+
+--- 05 / Combate & Ataques Físicos ---
+• Impulso do side-attack (sideAttackForce): 500 u
+• Duração do side-attack (sideAttackDuration): 0.31 s
+• Dano causado por side-attack (sideAttackDamage): 32 HP
+• Duração do spin-attack 360° (spinAttackDuration): 0.84 s
+• Dano causado por spin-attack (spinAttackDamage): 52 HP
+• Impulso repulsão spin-attack (spinAttackForce): 200 u
+• Custo de escudo por boost (boostCost): 14 HP
+• Custo de escudo por side-attack (sideAttackCost): 3 HP
+• Custo de escudo por spin-attack (spinAttackCost): 6 HP
+• Escala de dano com parede (wallDamageScale): 1.0 ×
+• Alcance extra do side-attack (sideAttackReach): 4.2 m
+• Raio expandido do spin-attack (spinAttackRadius): 4.0 m
+• Tempo de recarga do side-attack (sideAttackCooldown): 0.3 s
+• Tempo de recarga do spin-attack (spinAttackCooldown): 0.6 s
+• Elevação vertical no side-attack (sideAttackLift): 0.0 m
+• Escala de repulsão recebida de rivais (rivalHitKnockbackScale): 1.0 ×
+• Faíscas por impacto de lataria (impactParticleCount): 8 u
+• Invulnerabilidade no side-attack (sideAttackInvulnerability): 0.18 s
+• Deflexão de projéteis e naves no spin (spinAttackDeflectBonus): 1.5 ×
+• Multiplicador de dano por abalroamento (bodySlamImpactMultiplier): 1.3 ×
+
+--- 06 / Suspensão Magnética, Altura & Colisão de Pista (Hitbox) ---
+• Altura base de flutuação (hoverHeight): 2.1 m
+• Rigidez da mola de suspensão (springStiffness): 250 u
+• Amortecimento da suspensão (springDamping): 50.0 u
+• Amplitude de oscilação (wakeAmplitude): 0.12 m
+• Frequência de oscilação (wakeFrequency): 4.8 Hz
+• Gravidade de queda fora de pista (fallGravity): 90 u
+• Gravidade em salto no ar (airborneGravity): 90 u
+• Razão de amortecimento hover (hoverDampingRatio): 1.0 ×
+• Multiplicador de pitch em aclives (slopePitchMultiplier): 1.5 ×
+• Velocidade vertical máxima (Mola) (maxVerticalVelocity): 26 u
+• Espessura física sólida da pista (trackThickness): 2.5 m
+• Ricochete sob a pista (Underside) (trackUndersideBounce): 0.40 ×
+• Atrito ao raspar sob a pista (trackUndersideFriction): 0.14 ×
+• Atrito da superfície do asfalto (trackSurfaceFriction): 0.08 ×
+• Limite de compressão no solo (groundCompressionLimit): 0.3 m
+• Força anti-colisão vertical (hoverRepulsionForce): 350 u
+• Retenção magnética de superfície (magneticGripStrength): 1.4 ×
+• Relaxamento da suspensão no ar (suspensionRelaxRate): 10.0 u
+
+--- 07 / Controle Aéreo, Voo & Mecânica de Pouso (Estilo F-Zero X/GX) ---
+• Taxa controle pitch aéreo (Cima/Baixo) (airPitchControlRate): 35 °/s
+• Taxa controle roll aéreo (Z/C/Setas) (airRollControlRate): 42 °/s
+• Autoridade de curva em voo (airSteerAuthority): 1.1 ×
+• Sustentação de voo (Gliding Lift) (airGlideLift): 40 u
+• Arrasto induzido no voo planado (airGlideDrag): 5.0 u
+• Aceleração de mergulho (Nose Dive) (airDiveAccel): 55 u
+• Velocidade limite no mergulho (airDiveMaxSpeed): 85 u
+• Arrasto aerodinâmico global no ar (airDrag): 0.7 u
+• Altura p/ ativar modo voo livre (airborneThreshold): 0.5 m
+• Conversão de impulso de pouso (Dive Boost) (landingBoostEfficiency): 0.9 ×
+• Bônus máximo de Dive Landing Boost (landingBoostMax): 140 u
+• Tolerância angular de pouso suave (landingImpactThreshold): 0.5 rad
+• Dano por pouso desajeitado/de cauda (landingPenaltyDamage): 5 HP
+• Perda de velocidade em pouso ruim (landingPenaltyDecel): 15 u
+• Faíscas na aterrissagem (landingSparksCount): 24 u
+• Multiplicador de salto em cristas (jumpRampLaunchForce): 1.3 ×
+• Empuxo de strafe lateral aéreo (airStrafeThrust): 110 u
+• Estabilização giroscópica no ar (airPitchStability): 2.0 u
+
+--- 08 / Inteligência Artificial & Rivais Avançados ---
+• Velocidade cruzeiro base da IA (aiBaseSpeed): 220 u
+• Agressividade / Ataque da IA (aiAggressiveness): 1.4 ×
+• Recuperação de distância (Catch-up) (aiRubberbanding): 1.0 ×
+• Frequência de troca de faixa (aiLaneChangeSpeed): 1.2 u
+• Tempo de ressurgimento da IA (aiRespawnDelay): 4.0 s
+• Alcance de ataque da IA (aiAttackRange): 10 m
+• Força de separação lateral da IA (aiAvoidanceForce): 16 u
+• Variação randômica de velocidade da IA (aiSpeedVariance): 35 u
+• Teto absoluto de velocidade da IA (aiTopSpeedCap): 450 u
+• Frequência de uso do Turbo pela IA (aiBoostFrequency): 0.4 ×
+• Velocidade da IA com Turbo (aiBoostTopSpeed): 480 u
+• Aceleração do turbo da IA (aiBoostAccel): 140 u
+• Busca por placas Dash pela IA (aiDashPlateAffinity): 0.8 ×
+• Aproveitamento de vácuo pela IA (aiSlipstreamUsage): 1.3 ×
+• Aderência e tração da IA em curvas (aiCorneringGrip): 1.3 ×
+• Frenagem preventiva da IA em curvas (aiBrakingTendency): 0.3 ×
+• Habilidade da IA de pitch no ar (aiAirPitchControl): 1.1 ×
+• Uso de Dive Landing Boost pela IA (aiDiveBoostSkill): 0.6 ×
+• Força de impacto dos ataques da IA (aiSideAttackSkill): 1.4 ×
+• Aceleração de recuperação da IA (aiCatchupAcceleration): 65 u
+
+--- 09 / Câmera & Sensação de Velocidade ---
+• Distância da câmera traseira (cameraDistance): 9.5 m
+• Altura da câmera traseira (cameraHeight): 7.8 m
+• Fator de FOV / perspectiva (cameraFOV): 0.78 ×
+• Expansão de FOV em velocidade (cameraSpeedFOV): 0.10 ×
+• Resposta de acompanhamento (cameraLag): 14 u
+• Multiplicador de tremor (cameraShakeScale): 1.0 ×
+• Distância de mira à frente (cameraLookahead): 38 m
+• Avanço de câmera POV (Cockpit) (cameraCockpitOffset): 0.7 m
+• Velocidade de rotação da órbita (cameraOrbitSpeed): 0.3 u
+• Acompanhamento vertical da câmera (cameraVerticalFollow): 18 u
+• Decaimento do tremor de tela (cameraShakeDecay): 1.7 ×
+• Inércia de pitch de câmera no ar (cameraAirbornePitchLag): 5.5 u
+• Afundamento de câmera no pouso (cameraLandingDip): 1.1 m
+• Inclinação da câmera com a nave (cameraRollFollow): 0.5 ×
+• Pulso de FOV ao disparar Turbo (cameraBoostFOVPulse): 0.12 ×
+• Abertura de câmera no drift (cameraDriftSwing): 0.6 ×
+• Tremor na visão em 1ª pessoa (cameraCockpitShakeMultiplier): 1.2 ×
+• Vinheta escura de velocidade (cameraSpeedVignette): 0.28 ×
+
+--- 10 / Pistas, Barreiras, Zonas & Relevo ---
+• Multiplicador largura da pista (trackWidthScale): 0.8 ×
+• Impulso da placa Dash (dashPlateBoost): 95 u
+• Raio de ativação da placa Dash (dashPlateRadius): 12 m
+• Taxa de recarga no Pit (pitRechargeRate): 57 HP/s
+• Elasticidade de ricochete na parede (barrierBounce): 1.6 ×
+• Atrito de desaceleração na parede (barrierFriction): 0.12 ×
+• Comprimento da reta de ensaio (straightTrackLength): 12000 m
+• Recarga da mesma placa Dash (dashPlateCooldown): 1.0 s
+• Densidade de prédios da paisagem (buildingDensity): 65 u
+• Opacidade da sombra da nave (shadowOpacity): 0.68 ×
+• Dano por fricção em barreiras (barrierDamageScale): 0.9 ×
+• Extensão longitudinal do Pit Stop (pitLaneLength): 70 m
+• Altitude máxima de relevo (elevatedTrackElevation): 75 m
+• Banking automático da pista (trackBankCurvature): 0.7 ×
+• Recarga de energia na placa Dash (dashPlateEnergyBonus): 8 HP
+• Ângulo de deflexão de parede (wallRepulsionAngle): 0.9 ×
+• Multiplicador de salto em aclive (trackCrestJumpBoost): 1.0 ×
+• Distância de renderização do cenário (sceneryDistance): 750 m
+
+--- 11 / Efeitos Visuais, Partículas & Pós-Processamento ---
+• Densidade de faíscas/partículas (particleDensity): 43 u
+• Duração de partículas (particleLifespan): 1.1 s
+• Linhas de velocidade (Speedlines) (speedLinesDensity): 47 u
+• Tamanho do rastro do propulsor (engineTrailLength): 1.3 ×
+• Intensidade de flash vermelho (hitFlashIntensity): 0.22 ×
+• Escala de brilho do propulsor (engineGlowSize): 1.0 ×
+• Velocidade p/ ativar speedlines (speedLinesThreshold): 120 u
+• Densidade de estrelas no céu (starfieldDensity): 13 u
+• Densidade de janelas iluminadas (buildingWindowGlow): 0.8 ×
+• Raio da onda de choque no pouso (landingShockwaveRadius): 8.5 m
+• Opacidade dos vórtices de asa (airborneTrailOpacity): 0.6 ×
+• Tamanho do anel de quebra sônica (sonicBoomRingSize): 2.0 ×
+• Variação cromática em mergulho (diveTrailColorShift): 0.5 ×
+• Refletividade da fuselagem (chassisReflectivity): 0.8 ×
+• Suavidade da sombra da nave (shadowSoftness): 1.8 ×
+• Efeito de interferência no HUD (hudGlitchIntensity): 0.3 ×
+• Matiz cromático do plasma (plasmaGlowHue): 200 °
+• Velocidade dos feixes visuais (speedLineSpeedScale): 1.2 ×
+
+--- 12 / Áudio & Sintetizador de Som ---
+• Tom base do motor (engineBasePitch): 65 Hz
+• Sensibilidade de tom à velocidade (enginePitchRange): 90 Hz
+• Volume mestre de efeitos (masterVolume): 0.07 u
+• Frequência sonora do boost (boostSoundPitch): 380 Hz
+• Filtro passa-baixa do motor (engineFilterFreq): 550 Hz
+• Tom sonoro de batida na parede (impactSoundPitch): 105 Hz
+• Tom sonoro do side-attack (sideAttackSoundPitch): 165 Hz
+• Volume do vento em voo aéreo (airWhooshVolume): 0.12 u
+• Tom sonoro de mergulho (Dive) (diveSoundPitch): 420 Hz
+• Tom sonoro do choque de pouso (landingImpactSoundPitch): 140 Hz
+• Frequência sonora da placa Dash (dashPlateSoundPitch): 720 Hz
+• Tom do estrondo de quebra sônica (sonicBoomSoundPitch): 85 Hz
+• Zumbido de recarga do Pit Stop (pitStopHumPitch): 260 Hz
+• Volume de escape dos airbrakes (Q/E) (airbrakeSoundVolume): 0.08 u
+• Frequência de aviso de escudo crítico (shieldWarningPitch): 920 Hz
+• Subgrave em colisões violentas (collisionCrunchBass): 75 Hz
