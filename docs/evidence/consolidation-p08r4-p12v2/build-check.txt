@@ -1,0 +1,3 @@
+P01 routines extracted; unresolved exported values: 41
+P08 HTML idêntico às fontes
+OK: HTML corresponde às fontes (347048 bytes)

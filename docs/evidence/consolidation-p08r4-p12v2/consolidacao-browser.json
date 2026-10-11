@@ -1,0 +1,120 @@
+{
+ "p08http": 200,
+ "p08status": "P08 APROVADO — INTEGRAÇÃO PENDENTE",
+ "p08version": 5,
+ "p08air": {
+  "enabled": true,
+  "downToDive": true,
+  "levelRate": 120,
+  "pitchRate": 80,
+  "boostThrust": 260,
+  "boostTurn": 1.6,
+  "maxClimb": 120,
+  "boostControl": 1.3
+ },
+ "p08defaultEqualsBaselineV5": true,
+ "mergulho_baixo_boost": {
+  "vy": -110.5,
+  "y": 210.22,
+  "diveCap": 110.5,
+  "pitch": -1.047,
+  "energy": 82.25,
+  "contact": false
+ },
+ "mergulho_S_boost": {
+  "vy": -110.5,
+  "y": 210.22,
+  "diveCap": 110.5,
+  "pitch": -1.047,
+  "energy": 82.25,
+  "contact": false
+ },
+ "subida_cima_boost": {
+  "vy": 120,
+  "y": 361.27,
+  "diveCap": 110.5,
+  "pitch": 1.309,
+  "energy": 77,
+  "contact": false
+ },
+ "baixo_sem_boost": {
+  "vy": -85,
+  "pitch": -1.047,
+  "diveCap": 85,
+  "airThrust": 0
+ },
+ "importV3": {
+  "parse": {
+   "ok": false,
+   "err": "Chaves inválidas"
+  }
+ },
+ "reta": {
+  "finalZone": 1,
+  "detachments": 0,
+  "landings": 0,
+  "minUpY": 1,
+  "airTicks": 0,
+  "contactDist": [
+   2.1,
+   2.1
+  ],
+  "contact": true
+ },
+ "loop": {
+  "finalZone": 6,
+  "detachments": 0,
+  "landings": 0,
+  "minUpY": -0.999,
+  "airTicks": 0,
+  "contactDist": [
+   2.1,
+   2.1
+  ],
+  "contact": true
+ },
+ "tubo": {
+  "finalZone": 7,
+  "detachments": 0,
+  "landings": 0,
+  "minUpY": 0.981,
+  "airTicks": 0,
+  "contactDist": [
+   2.1,
+   2.1
+  ],
+  "contact": true
+ },
+ "rampaPouso": {
+  "finalZone": 9,
+  "detachments": 1,
+  "landings": 1,
+  "minUpY": 0.949,
+  "airTicks": 390,
+  "contactDist": [
+   2.1,
+   2.1
+  ],
+  "contact": true
+ },
+ "parede90": {
+  "finalZone": 5,
+  "detachments": 1,
+  "landings": 0,
+  "minUpY": 0,
+  "airTicks": 60,
+  "contactDist": [
+   2.1,
+   2.1001
+  ],
+  "contact": false
+ },
+ "p08errors": [],
+ "p08gl": 0,
+ "p12http": 200,
+ "p12defaultEqualsApproved": true,
+ "p12errors": [],
+ "gameHttp": 200,
+ "gameErrors": [],
+ "browser": "141.0.7390.37"
+}

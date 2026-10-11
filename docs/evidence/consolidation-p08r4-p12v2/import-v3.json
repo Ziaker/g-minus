@@ -1,0 +1,21 @@
+{
+ "notice": "JSON validado. Assistência aérea ativada.",
+ "importedVersion": 5,
+ "air": {
+  "enabled": true,
+  "levelRate": 120,
+  "pitchRate": 80,
+  "boostThrust": 260,
+  "boostTurn": 1.6,
+  "maxClimb": 120,
+  "boostControl": 1,
+  "downToDive": false
+ },
+ "v3_baixo_boost": {
+  "vy": 120,
+  "y": 348.89,
+  "pitch": 1.309,
+  "diveCap": 85
+ },
+ "errors": []
+}
