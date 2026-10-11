@@ -32,7 +32,10 @@ Object.freeze(state.params);for(const s of Object.values(state.params)){Object.f
  const own=files.map(f=>`/* ===== ${f} ===== */\n`+fs.readFileSync(path.join(srcDir,f),'utf8'));
  // atalhos locais para globais muito usados (mesmo objeto; acelera a execução em contextos vm dos testes)
  const locals='const Math=globalThis.Math,JSON=globalThis.JSON,Float32Array=globalThis.Float32Array,Float64Array=globalThis.Float64Array,Uint16Array=globalThis.Uint16Array,Int16Array=globalThis.Int16Array,Int32Array=globalThis.Int32Array,Object=globalThis.Object,Array=globalThis.Array,Number=globalThis.Number,String=globalThis.String,Map=globalThis.Map,Set=globalThis.Set,Error=globalThis.Error;';
- const script=["'use strict';","(function(){",locals,geometry,paint,shim,renderer,model,vfx,...own,"})();"].join('\n');
+ // configuração aprovada pelo responsável (11/10/2026): fonte de verdade em docs/decisions, embutida sem alteração
+ const approved=JSON.parse(read('docs/decisions/2026-10-11-prototype-12-v2-approved-baseline.json'));
+ const baseline=`/* ===== CONFIGURAÇÃO APROVADA DO P12 V2 — docs/decisions/2026-10-11-prototype-12-v2-approved-baseline.json ===== */\nconst P12_APPROVED=${JSON.stringify(approved)};`;
+ const script=["'use strict';","(function(){",locals,geometry,paint,shim,renderer,model,vfx,baseline,...own,"})();"].join('\n');
  new vm.Script(script);
  const template=fs.readFileSync(path.join(here,'lab.html'),'utf8');
  return template.replace('/* EMBED */',()=>script);

@@ -152,7 +152,27 @@
 - **Alertas [98]:** priorizar animações para acontecimentos importantes.
 - **VFX [99]:** espetaculares, mas sem comprometer legibilidade e tomada de decisão.
 - **Menus [100]:** interface básica por ora; não fixar linguagem elaborada de HUD/menu sem prototipar.
-- **Protótipo 12 V2 (11/10/2026) — EM AVALIAÇÃO, NÃO APROVADO:** três HUDs e três câmeras independentes em [`prototypes/12_hud_camera_lab_v2.html`](../prototypes/12_hud_camera_lab_v2.html) ([especificação](specs/12_hud_camera_v2_spec.md)). O P12 original foi rejeitado ([auditoria](audits/2026-10-11-prototype-12-audit.md)). Nenhum item de [91–100] fica decidido até a aprovação.
+- **Protótipo 12 V2 (11/10/2026) — APROVADO PELO RESPONSÁVEL:** os **HUDs A (Flux Rush), B (Vector Tactical) e C (Apex Line)** e as **câmeras A (Cinética), B (Tática) e C (Pilotagem)** devem estar **presentes no jogo** como opções selecionáveis e independentes. Todas as opções do laboratório também vão para as configurações do jogo:
+  - tamanho do HUD e tamanho de cada módulo;
+  - módulos visíveis;
+  - espaçamento de texto e fonte;
+  - opções próprias de cada proposta;
+  - 8 cores por função com 7 paletas e aviso de contraste;
+  - os 16 parâmetros de cada câmera.
+
+  O padrão é a configuração JSON enviada pelo responsável (seleção padrão HUD C + câmera B). Detalhes:
+  - [registro e catálogo obrigatório](decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md);
+  - [laboratório](../prototypes/12_hud_camera_lab_v2.html);
+  - [especificação](specs/12_hud_camera_v2_spec.md).
+
+  Decisões que isso resolve:
+  - [91–92] câmeras selecionáveis por botão (três perspectivas em terceira pessoa);
+  - [93–95] movimento, FOV e sensação de velocidade conforme as câmeras aprovadas;
+  - [96] instrumentos dos três HUDs;
+  - [97] minimapa (A) e radar (B, C), desligáveis nas configurações;
+  - [98] alertas pelo diretor de prioridades P0–P3.
+
+  A pista e a corrida de teste do laboratório não aprovam física, IA nem regras. A integração em `src/game` está pendente e precisa de autorização para alterar o jogo principal. O P12 original continua rejeitado ([auditoria](audits/2026-10-11-prototype-12-audit.md)).
 
 ## 11. Política obrigatória de prototipação, telemetria e documentação [101–104]
 
@@ -177,6 +197,15 @@ Cada solicitação de protótipo deve entregar:
 **Decisão vigente — Protótipo 06 (10/10/2026):** aprovado o **Sistema B — personalização de cor por função de material**: sete papéis (pintura, secundária, acento, estrutura, vidro, energia, marcação) aplicados à nave inteira dentro do pipeline D, com cores livres e controles de pipeline na baseline padrão do laboratório (mistura D 0,55, igual à v6). Os sistemas A (por grupo) e C (sorteio por semente) não foram escolhidos. Cores aleatórias, relação com as cores por peça [72, 78], escopo da pintura e integração continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-06-paint-system-approval.md`](decisions/2026-10-10-prototype-06-paint-system-approval.md).
 
 **Decisão vigente — Protótipo 04 V2 / VFX (10/10/2026):** aprovados: Propulsão A; Super Boost B (Corredor vetorial) **obrigatório no jogo** + A, D e E como **toggles in-game cumulativos** (C não aprovado); Spin Attack E com dimensão **desejada (provisória) de 130 % do raio de varredura do giro da nave (+30 %)**: **ainda não implementada**; o laboratório usa hoje raio externo = varredura + 0,35 u; Side Attack E modificado (afterimage mantido, descarga azul removida, speedlines laterais); Escudo D; Drift A/B/C/E selecionáveis com afterimage breve acima de 1300 km/h (D não aprovado); Colisão B/D; Dash E; Voo C/D; Velocidade A. Calibração aprovada = JSON enviado pelo responsável. A integração em `src/game`, o padrão dos toggles e a forma de seleção in-game continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-04-v2-vfx-approval.md`](decisions/2026-10-10-prototype-04-v2-vfx-approval.md).
+
+**Decisão vigente — Protótipo 12 V2 / HUD, câmera e interface (11/10/2026):** aprovados os **HUDs A, B e C**, as **câmeras A, B e C** e **todas as opções**, que devem estar **presentes no jogo**:
+- sliders de tamanho geral e por módulo;
+- visibilidade de módulos;
+- texto e fonte;
+- escolha de cores por função, com paletas e aviso de contraste;
+- parâmetros das câmeras.
+
+A configuração aprovada é o JSON enviado pelo responsável, guardado literalmente e como baseline reproduzível em `docs/decisions/`. A integração em `src/game` está pendente. Registro: [`docs/decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md`](decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md).
 
 **Decisão vigente — naves e peças cosméticas (10/10/2026):** as quatro peças são exclusivamente cosméticas, e não há diferença de atributos entre naves. Isso substitui [72–73] e o aspecto de desempenho de [28] e [74]. Hitboxes, massa, altitude e a aplicação global das configurações do Protótipo 07 estão pendentes. Registro: [`docs/decisions/2026-10-10-craft-parts-cosmetic-only.md`](decisions/2026-10-10-craft-parts-cosmetic-only.md).
 
@@ -241,7 +270,7 @@ Referências examinadas na branch principal em 2026-10-08:
 6. **[17,34,47]** Destino exato após sair da pista ou zerar a energia: K.O., recuperação ou regras condicionais. Também ficam pendentes os efeitos de impacto (leve, forte, fatal), destruição, paredes e queda (Protótipo 10).
 7. **[51–59]** Status da IA, seleção e persistência do rival, equipes e funcionamento do rubber banding.
 8. **[72–74]** Estrutura das quatro peças cosméticas: compatibilidade, montagem, cores por peça × Sistema B. Hitboxes, padronização de massa e altitude, e aplicação global das configurações do Protótipo 07 (os atributos foram superados em 10/10/2026).
-9. **[91–97]** Perspectivas de câmera, instrumentos de navegação e seus comportamentos de alternância (Protótipo 12).
+9. **[91–98]** ~~Perspectivas de câmera, instrumentos de navegação e alternância~~: **decididos pelo Protótipo 12 V2 (11/10/2026)**. Ainda pendentes: integração em `src/game` (requer autorização), câmera e HUD na eliminação (P10) e HUD de equipe [51].
 10. **[101–102]** Formatos específicos da configuração copiável, documentação de protótipos e ferramentas de telemetria/seed.
 11. **[6,76,80]** Progressão/recompensas/desbloqueios: deliberadamente adiados.
 12. **[104]** GitHub Pages: publicação atualmente não confirmada; não afirmar que o endereço previsto permite jogar.

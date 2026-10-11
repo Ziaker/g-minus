@@ -3,7 +3,7 @@
 **Data:** 11/10/2026
 **Objeto auditado:** `12_hud_camera_lab.html` entregue pelo Antigravity e **rejeitado** pelo responsável. Nunca esteve versionado no repositório; para rastreabilidade da auditoria, uma cópia byte a byte foi arquivada em [`archive/2026-10-11-p12-v1-rejeitado/`](../../archive/2026-10-11-p12-v1-rejeitado/README.md) (fora do build e de `prototypes/`).
 **SHA-256 do arquivo auditado:** `917643e155338a828405f4dcdc18a980a1e0ff9067e880f76eb238b64439dbe0` (134 557 bytes, 3 160 linhas).
-**Substituto:** [Protótipo 12 V2](../specs/12_hud_camera_v2_spec.md) — **EM AVALIAÇÃO, NÃO APROVADO**.
+**Substituto:** [Protótipo 12 V2](../specs/12_hud_camera_v2_spec.md). Estava em avaliação quando esta auditoria foi escrita e foi **aprovado pelo responsável em 11/10/2026** ([registro](../decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md)).
 
 ## 1. Método
 

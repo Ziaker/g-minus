@@ -101,7 +101,13 @@ Este documento separa três tipos de conteúdo:
 - **[Recomendação]** As três implementações de mashing devem diferir em entrada, duração, progressão, defesa e consequências. O jogador deve manter a direção durante a disputa. Se nenhuma funcionar, aí há base para revisar o requisito [45].
 
 ### P12 — HUD, câmera e interface
-- **[Registro 11/10/2026]** O responsável pediu a reconstrução do P12 antes da sequência. O P12 original foi rejeitado; o **P12 V2** está em avaliação ([especificação](../specs/12_hud_camera_v2_spec.md)). Ele usa uma pista e uma corrida de teste próprias, sem antecipar P08/P09/P10.
+- **[Registro 11/10/2026]** O responsável pediu a reconstrução do P12 antes da sequência. O P12 original foi rejeitado e o **P12 V2** foi construído ([especificação](../specs/12_hud_camera_v2_spec.md)). Ele usa uma pista e uma corrida de teste próprias, sem antecipar P08/P09/P10.
+- **[Decisão 11/10/2026]** **P12 V2 aprovado:**
+  - HUDs A, B e C, câmeras A, B e C e todas as opções, presentes no jogo;
+  - configuração padrão = JSON do responsável;
+  - [registro e catálogo obrigatório](../decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md).
+
+  A integração em `src/game` está pendente: depende de autorização para alterar o jogo principal e deve conviver com a física do P08.
 - **[Recomendação]** Avaliar com situações reais de corrida e combate (circuito de referência e P10).
 
 ## 3. Questões abertas
@@ -124,6 +130,7 @@ Este documento separa três tipos de conteúdo:
 | Energia [31–40] | escolha entre GX e X quando divergem |
 | Física (Protótipos 01 e 07) | 18 valores ambíguos, 12 divergências (esterço 89 × 56), 11 essenciais, avaliação visual do layout combinado |
 | VFX (04 V2) | padrão dos toggles e forma de seleção no jogo; implementação do Spin E +30 % |
+| HUD e câmera (P12 V2) | integração em `src/game` (autorização pendente); reprodução das câmeras sobre a física do P08; HUD e câmera na eliminação (P10); HUD de equipe [51] |
 
 ## 4. Protótipos futuros, depois do P12 (ordem a definir)
 

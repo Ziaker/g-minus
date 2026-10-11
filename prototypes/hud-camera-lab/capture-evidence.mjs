@@ -16,6 +16,8 @@ async function shot(p,name,setup,arg){await run(p,setup,arg);await run(p,()=>win
 const setCombo=([hud,cam,view,aspect,scen,dt])=>{const A=window.__GMINUS_P12V2__;A.setView(view);A.setAspect(aspect);A.setHud(hud);A.setCamera(cam);A.seek(A.scenarioTime(scen)+dt);};
 // 1) mesmo instante, três HUDs com a mesma câmera; 2) mesma HUD, três câmeras no loop; 3) matriz
 {const {p,errors}=await page(1600,900);
+ // 0) configuração aprovada em 11/10/2026, sem nenhum ajuste (seleção padrão HUD C + câmera B; A e B com a mesma câmera)
+ for(const h of ['C','A','B'])await shot(p,`00-configuracao-aprovada-hud-${h}-cam-B`,([h])=>{const A=window.__GMINUS_P12V2__;A.setView('single');A.setAspect('fill');A.setHud(h);A.setCamera('B');A.seek(A.scenarioTime('traffic')+1.4);},[h]);
  for(const h of ['A','B','C'])await shot(p,`01-mesmo-instante-hud-${h}-cam-A`,setCombo,[h,'A','single','fill','traffic',1.4]);
  for(const c of ['A','B','C'])await shot(p,`02-loop-hud-C-cam-${c}`,setCombo,['C',c,'single','fill','loop',2.6]);
  await shot(p,'03-matriz-3x3-defesa',setCombo,['A','A','matrix','16:9','defense',1.6]);

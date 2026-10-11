@@ -8,7 +8,7 @@ button,select,input{font:inherit;color:inherit}button,select{background:#191726;
 #app{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh}
 header{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--bar);border-bottom:1px solid var(--line);flex-wrap:wrap;min-width:0}
 .brand{font-weight:800;letter-spacing:2.5px;font-size:14px;white-space:nowrap}.brand span{color:var(--pink)}.brand b{color:var(--mint);letter-spacing:1px;margin-left:4px}.brand small{display:block;font-size:9px;letter-spacing:2.4px;color:var(--muted);font-weight:600}
-.status{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gold);border:1px solid #6b5126;border-radius:20px;padding:4px 10px;white-space:nowrap}
+.status{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--mint);border:1px solid #2c7a70;border-radius:20px;padding:4px 10px;white-space:nowrap}
 .grp{display:flex;align-items:center;gap:4px}.grp>label{font-size:9px;letter-spacing:1.6px;color:var(--muted);margin-right:3px;font-weight:700}.grp button{padding:4px 7px;min-width:28px}
 .spacer{flex:1}
 main{position:relative;display:flex;min-height:0}
@@ -53,7 +53,7 @@ textarea{width:100%;height:46vh;background:#08070e;color:#d5d0ee;border:1px soli
 <div id="app">
 <header>
  <div class="brand">G<span>−</span>MINUS<b>12 V2</b><small>HUD · CÂMERA · INTERFACE</small></div>
- <div class="status" id="status">EM AVALIAÇÃO — P12 V2 NÃO APROVADO</div>
+ <div class="status" id="status" title="Aprovado pelo responsável em 11/10/2026 — docs/decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md">P12 V2 APROVADO · 11/10/2026</div>
  <div class="grp" id="hudSel"><label>HUD</label></div>
  <div class="grp" id="camSel"><label>CÂMERA</label></div>
  <div class="grp" id="viewSel"><label>VISTA</label></div>

@@ -1,6 +1,11 @@
 # Especificação — Protótipo 12 V2: HUD, câmeras e interface
 
-**Status: EM AVALIAÇÃO — P12 V2 NÃO APROVADO.** Nada aqui foi integrado ao jogo nem aprova física, IA, energia, combate, pistas ou eliminação.
+**Status: APROVADO PELO RESPONSÁVEL EM 11/10/2026.**
+- **Aprovados:** HUDs A, B e C, câmeras A, B e C e todas as opções, que devem estar presentes no jogo.
+- **Configuração padrão:** o JSON enviado pelo responsável.
+- **Registro e catálogo obrigatório para o jogo:** [`docs/decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md`](../decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md).
+- **Fora da aprovação:** a pista e a corrida de teste não aprovam física, IA, energia, combate, pistas ou eliminação.
+- **Integração em `src/game`:** pendente.
 **Data:** 11/10/2026
 **Laboratório:** [`prototypes/12_hud_camera_lab_v2.html`](../../prototypes/12_hud_camera_lab_v2.html) — HTML autônomo, abre direto do disco.
 **Fontes modulares:** [`prototypes/hud-camera-lab/`](../../prototypes/hud-camera-lab/) — regenerar com `node prototypes/hud-camera-lab/build.mjs` (`--check` só confere).
@@ -167,9 +172,11 @@ Toda animação usa o **tempo da simulação**: com pausa ela congela, e duas co
 
 ## 9. Configuração JSON (schema `gminus.p12v2.hud-camera-lab`, versão 2)
 
-Campos: `schema`, `version`, `status` (fixo, "não concede aprovação"), `geometry` = `prototype-05/v1`, `artDirection` = `D-TOON-VECTOR-FLUX`, `paintSystem` = `B`, `vfxBaseline` = `prototype-04-v2/approved-calibration`, `selection` (hud, camera, view, aspect, left, right), `hud.A|B|C`, `camera.A|B|C`, `vfx` (drift A/B/C/E, collision B/D, flight C/D, boost.A/D/E, speedLines, light), `race` (seed 1–2³¹−1, laps 1–5, ships 12–30), `playback` (scenario, time, rate). A importação exige chaves exatas, tipos, faixas e opções aprovadas (por exemplo, Boost C e Drift D são rejeitados). É **atômica**: qualquer erro rejeita tudo e não altera configuração nem simulação. A interface e a API usam a mesma função. A versão 2 adicionou tamanho por módulo, espaçamento de texto, fonte, cores por função, opacidade dos fundos, contorno e visibilidade por módulo, e renomeou `ladderSize` para `ladderRows`. Arquivos da versão 1 são rejeitados pela regra de chaves exatas.
+Campos: `schema`, `version`, `status` (fixo: registra a aprovação de 11/10/2026; o status de avaliação anterior continua aceito na importação), `geometry` = `prototype-05/v1`, `artDirection` = `D-TOON-VECTOR-FLUX`, `paintSystem` = `B`, `vfxBaseline` = `prototype-04-v2/approved-calibration`, `selection` (hud, camera, view, aspect, left, right), `hud.A|B|C`, `camera.A|B|C`, `vfx` (drift A/B/C/E, collision B/D, flight C/D, boost.A/D/E, speedLines, light), `race` (seed 1–2³¹−1, laps 1–5, ships 12–30), `playback` (scenario, time, rate). A importação exige chaves exatas, tipos, faixas e opções aprovadas (por exemplo, Boost C e Drift D são rejeitados). É **atômica**: qualquer erro rejeita tudo e não altera configuração nem simulação. A interface e a API usam a mesma função. A versão 2 adicionou tamanho por módulo, espaçamento de texto, fonte, cores por função, opacidade dos fundos, contorno e visibilidade por módulo, e renomeou `ladderSize` para `ladderRows`. Arquivos da versão 1 são rejeitados pela regra de chaves exatas.
 
 ### 9.1 Controles dos HUDs
+
+> **Padrão do jogo = configuração aprovada.** A coluna "Padrão" das tabelas abaixo mostra o valor-base de cada slider, que é a referência neutra usada nos testes de legibilidade. O padrão do laboratório e do jogo é o JSON aprovado, listado com destaque no [catálogo do registro de aprovação](../decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md#3-catálogo-obrigatório-para-o-jogo).
 
 No painel, os controles de cada HUD ficam em seções recolhíveis, cada uma com o botão **restaurar**:
 
@@ -363,7 +370,7 @@ O build embute, sem alteração e em escopo próprio, o bloco do P05, o resolved
 
 ## 11. Testes e evidências
 
-`npm test` executa 19 testes do P12 V2: bloco P05 (SHA-256 e impressões), cópias exatas do 06 e do 04 V2, pintura de cada nave pelo `resolveLivery`, saída dos três HUDs e das três câmeras, independência das nove combinações, efeito de todos os sliders, opções, seletores e cores (HUD e câmera), cores isoladas por HUD, paletas com contraste WCAG e módulos ocultos sem mudança de layout, "para cima" contínuo e nave sempre enquadrada no loop, classificação dos 30, coerência de velocidade/distância/voltas/cronômetro, coerência telemetria ↔ VFX ↔ HUD, determinismo e busca, JSON válido/inválido/atômico, prioridades com eventos simultâneos, legibilidade e sobreposição em seis resoluções (16:9, 21:9, 9:16), orçamento de desempenho, ciclo de vida WebGL (contexto simulado: buffers estáveis, perda/restauração, liberação total), alternância rápida e HTML em dia com as fontes. As evidências de navegador real estão em [`docs/evidence/12_hud_camera_lab_v2/`](../evidence/12_hud_camera_lab_v2/README.md).
+`npm test` executa 20 testes do P12 V2: bloco P05 (SHA-256 e impressões), cópias exatas do 06 e do 04 V2, pintura de cada nave pelo `resolveLivery`, saída dos três HUDs e das três câmeras, independência das nove combinações, efeito de todos os sliders, opções, seletores e cores (HUD e câmera), cores isoladas por HUD, paletas com contraste WCAG e módulos ocultos sem mudança de layout, "para cima" contínuo e nave sempre enquadrada no loop, classificação dos 30, coerência de velocidade/distância/voltas/cronômetro, coerência telemetria ↔ VFX ↔ HUD, determinismo e busca, JSON válido/inválido/atômico, prioridades com eventos simultâneos, legibilidade e sobreposição em seis resoluções (16:9, 21:9, 9:16), orçamento de desempenho, ciclo de vida WebGL (contexto simulado: buffers estáveis, perda/restauração, liberação total), alternância rápida, HTML em dia com as fontes e aprovação (baseline = JSON enviado, importação do arquivo enviado, catálogo completo no registro). As evidências de navegador real estão em [`docs/evidence/12_hud_camera_lab_v2/`](../evidence/12_hud_camera_lab_v2/README.md).
 
 ## 12. Limitações verdadeiras
 
@@ -375,11 +382,12 @@ O build embute, sem alteração e em escopo próprio, o bloco do P05, o resolved
 - Em vistas múltiplas pequenas, o HUD é escalado pela altura da célula, como ficaria numa tela daquele tamanho. A legibilidade foi testada só em resoluções reais.
 - IA, elástico e roteiro do jogador são instrumentos de teste, não comportamento proposto.
 
-## 13. Decisões pendentes do responsável
+## 13. Decisões do responsável
 
-1. Escolher o(s) HUD(s) e a(s) câmera(s), ou combinações, para avançar, e registrar a configuração JSON final.
-2. Política de luz das naves em movimento: mundo (padrão atual) × câmera (diagnóstico do 06).
-3. Convenção de escala de mundo (1 u = 1 m) e velocidade exibida, junto com P08/P09.
-4. Estado padrão dos toggles de Boost A/D/E no jogo (pendência do 04 V2).
-5. Se o HUD deve mostrar escudo de adversários (B mostra até 150 m) e janelas de ataque (assistência).
-6. Aplicação do raio de 130 % do Spin E (pendente desde o 04 V2).
+1. ~~Escolher HUDs, câmeras e configuração final~~: **decidido em 11/10/2026**. Ficam HUDs A, B e C, câmeras A, B e C e todas as opções no jogo. A configuração final é o JSON enviado.
+2. Luz das naves em movimento: a configuração aprovada usa **mundo**. "Câmera" continua sendo só um modo de diagnóstico do 06.
+3. Convenção de escala de mundo (1 u = 1 m) e velocidade exibida, junto com P08/P09: **pendente**.
+4. Toggles de Boost A/D/E: a configuração aprovada do P12 os mantém **ligados**. A forma de seleção in-game continua registrada como pendência do 04 V2.
+5. Escudo de adversários e janelas de ataque: **presentes no HUD B**, com o toggle `attackAssist` (ligado na configuração aprovada) e os alcances `bracketRange` e `threatRange` nas configurações.
+6. Aplicação do raio de 130 % do Spin E: **pendente** desde o 04 V2, sem mudança.
+7. Integração em `src/game`: **pendente**. Precisa de autorização para alterar o jogo principal (P08 em desenvolvimento) e deve seguir o critério de aceite do registro.

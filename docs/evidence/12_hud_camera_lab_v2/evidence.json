@@ -1,7 +1,10 @@
 {
-  "date": "2026-10-11T13:07:06.461Z",
+  "date": "2026-10-11T17:18:47.289Z",
   "url": "prototypes/12_hud_camera_lab_v2.html",
   "shots": [
+    "00-configuracao-aprovada-hud-C-cam-B.jpg",
+    "00-configuracao-aprovada-hud-A-cam-B.jpg",
+    "00-configuracao-aprovada-hud-B-cam-B.jpg",
     "01-mesmo-instante-hud-A-cam-A.jpg",
     "01-mesmo-instante-hud-B-cam-A.jpg",
     "01-mesmo-instante-hud-C-cam-A.jpg",
@@ -67,16 +70,16 @@
     },
     "frameCost": {
       "msPerFrameSwiftShader": {
-        "single": 54.3,
-        "matrix": 544
+        "single": 57.3,
+        "matrix": 514.3
       },
       "note": "SwiftShader rasteriza na CPU; não representa GPU real"
     },
     "hudCost": {
       "msPerHud1080p": {
-        "A": 2.07,
-        "B": 2.06,
-        "C": 1.63
+        "A": 3.08,
+        "B": 3.38,
+        "C": 4.23
       }
     },
     "resources": {

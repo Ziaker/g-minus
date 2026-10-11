@@ -8,7 +8,7 @@ button,select,input{font:inherit;color:inherit}button,select{background:#191726;
 #app{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh}
 header{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--bar);border-bottom:1px solid var(--line);flex-wrap:wrap;min-width:0}
 .brand{font-weight:800;letter-spacing:2.5px;font-size:14px;white-space:nowrap}.brand span{color:var(--pink)}.brand b{color:var(--mint);letter-spacing:1px;margin-left:4px}.brand small{display:block;font-size:9px;letter-spacing:2.4px;color:var(--muted);font-weight:600}
-.status{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gold);border:1px solid #6b5126;border-radius:20px;padding:4px 10px;white-space:nowrap}
+.status{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--mint);border:1px solid #2c7a70;border-radius:20px;padding:4px 10px;white-space:nowrap}
 .grp{display:flex;align-items:center;gap:4px}.grp>label{font-size:9px;letter-spacing:1.6px;color:var(--muted);margin-right:3px;font-weight:700}.grp button{padding:4px 7px;min-width:28px}
 .spacer{flex:1}
 main{position:relative;display:flex;min-height:0}
@@ -53,7 +53,7 @@ textarea{width:100%;height:46vh;background:#08070e;color:#d5d0ee;border:1px soli
 <div id="app">
 <header>
  <div class="brand">G<span>−</span>MINUS<b>12 V2</b><small>HUD · CÂMERA · INTERFACE</small></div>
- <div class="status" id="status">EM AVALIAÇÃO — P12 V2 NÃO APROVADO</div>
+ <div class="status" id="status" title="Aprovado pelo responsável em 11/10/2026 — docs/decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md">P12 V2 APROVADO · 11/10/2026</div>
  <div class="grp" id="hudSel"><label>HUD</label></div>
  <div class="grp" id="camSel"><label>CÂMERA</label></div>
  <div class="grp" id="viewSel"><label>VISTA</label></div>
@@ -1242,6 +1242,8 @@ function effectFrame(c,a,p,time,entry,sim=state.sim,side=state.side,seed=state.s
 
 return {CATEGORIES,APPROVAL,APPROVED_PARAMS,SPIN_E_MARGIN,DRIFT_AFTERIMAGE_KMH,vfxDefaults,paramDefsVFX,isApprovedCalibration,eventAt,eventParams,simulatedPose,anchorData,sweepData,effectFrame,Arena,ghosts,FXCOL};
 })();
+/* ===== CONFIGURAÇÃO APROVADA DO P12 V2 — docs/decisions/2026-10-11-prototype-12-v2-approved-baseline.json ===== */
+const P12_APPROVED={"schema":"gminus.p12v2.hud-camera-lab","version":2,"status":"APROVADO PELO RESPONSÁVEL EM 11/10/2026 — P12 V2: HUDs A, B e C, câmeras A, B e C e todas as opções","geometry":"prototype-05/v1","artDirection":"D-TOON-VECTOR-FLUX","paintSystem":"B","vfxBaseline":"prototype-04-v2/approved-calibration","selection":{"hud":"C","camera":"B","view":"single","aspect":"fill","left":{"hud":"A","camera":"A"},"right":{"hud":"C","camera":"C"}},"hud":{"A":{"scale":0.5,"opacity":0.78,"safeArea":5.6,"sizeSpeed":1.08,"sizePosition":1.06,"sizeEnergy":1.13,"sizeMap":1.6,"sizeAlerts":1.09,"sizeBanner":1,"sizeCombat":1,"letterSpacing":0.3,"lineSpacing":1.6,"panelAlpha":0.54,"kinetic":1,"inkWeight":1,"misregistration":1,"focusLines":0.6,"halftone":0.55,"bannerHold":1,"showSpeed":true,"showPosition":true,"showEnergy":true,"showLap":true,"minimap":true,"showCombat":true,"showBanner":true,"showAlerts":true,"showEffects":true,"font":"mono","colPrimary":"#0091ff","colAccent":"#df5858","colWarn":"#ff0000","colDanger":"#ff3d00","colText":"#ffffff","colMuted":"#ffffff","colSpecial":"#ffcf66","colPanel":"#0d0700"},"B":{"scale":0.84,"opacity":0.93,"safeArea":3,"sizeHead":1,"sizeLadder":1,"sizeGauge":1,"sizeRadar":1,"sizeBrackets":1,"sizeAlerts":1,"sizeCombat":1,"letterSpacing":0.2,"lineSpacing":1,"panelAlpha":0.54,"outline":0.88,"threatRange":40,"ringRadius":9.5,"worldOpacity":0.85,"bracketRange":180,"radarRange":330,"ladderRows":4,"damagePersist":1,"showHead":true,"showLadder":true,"showGauge":true,"radar":true,"showBrackets":true,"showThreats":true,"showDamage":true,"showAlerts":true,"attackAssist":true,"radarMode":"local","font":"condensed","colPrimary":"#3587de","colAccent":"#df5858","colWarn":"#ff0000","colDanger":"#ff3d00","colText":"#ffffff","colMuted":"#ffffff","colSpecial":"#ffcf66","colPanel":"#0d0700"},"C":{"scale":0.77,"opacity":1,"safeArea":3,"sizeStrip":1,"sizePos":1.43,"sizeTiming":1.39,"sizeCluster":1.09,"sizeRadar":1.31,"sizeRival":1.13,"sizeAlerts":1.11,"letterSpacing":0.32,"lineSpacing":1.13,"panelAlpha":0.54,"outline":0.88,"forecastSeconds":7.3,"forecastRange":2500,"stripWidth":0.61,"rivalWindow":1.2,"dimLevel":0.44,"showStrip":true,"showPos":true,"showTiming":true,"showCluster":true,"radar":true,"showRival":true,"showAlerts":true,"autoHide":true,"trackMarkers":true,"deltaRef":"best","forecastMode":"time","font":"condensed","colPrimary":"#0091ff","colAccent":"#df5858","colWarn":"#ff0000","colDanger":"#ff3d00","colText":"#ffffff","colMuted":"#ffffff","colSpecial":"#ffcf66","colPanel":"#0d0700"}},"camera":{"A":{"distance":11,"height":2.8,"pitch":6,"fovBase":66,"fovSpeed":16,"lookAhead":40,"smoothing":0.55,"inertia":0.5,"curveFollow":0.5,"roll":0.7,"driftResponse":0.6,"impactResponse":1,"threatFraming":0.4,"invertedFollow":0.8,"pathVisibility":0.4,"boostPull":0.5},"B":{"distance":26,"height":11,"pitch":12,"fovBase":58,"fovSpeed":5,"lookAhead":170,"smoothing":0.7,"inertia":0.75,"curveFollow":0.3,"roll":0.15,"driftResponse":0.1,"impactResponse":0.3,"threatFraming":0.8,"invertedFollow":0.7,"pathVisibility":0.6,"laneCentering":0.6},"C":{"distance":9.5,"height":2.2,"pitch":4,"fovBase":62,"fovSpeed":8,"lookAhead":150,"smoothing":0.25,"inertia":0.3,"curveFollow":0.85,"roll":0.1,"driftResponse":0.2,"impactResponse":0.25,"threatFraming":0.2,"invertedFollow":0.9,"pathVisibility":0.8,"apexBias":0.4}},"vfx":{"drift":"A","collision":"B","flight":"C","boost":{"A":true,"D":true,"E":true},"speedLines":true,"light":"world"},"race":{"seed":20261011,"laps":3,"ships":30},"playback":{"scenario":"start","time":0,"rate":1}};
 /* ===== 00-core.js ===== */
 /* P12 V2 — CORE: vetores, RNG com semente, easing, molas e hash de estado.
    Depende somente de clamp/lerp/TAU do bloco geométrico aprovado do P05 (embutido antes). */
@@ -2431,7 +2433,7 @@ const HUD_C={id:'C',name:'Apex Line',tag:'precisão competitiva · tempo',
  colors:hudColorDefaults(),
  toggles:{showStrip:true,showPos:true,showTiming:true,showCluster:true,radar:true,showRival:true,showAlerts:true,autoHide:true,trackMarkers:true},selects:{deltaRef:['best','last'],forecastMode:['time','distance'],font:['condensed','wide','mono']},
  layout(w,h,cfg){const U=hudUnit(w,h,cfg.scale),u=U.u,sb=safeBox(w,h,cfg.safeArea),st=u*cfg.sizeStrip,pu=u*cfg.sizePos,tu=u*cfg.sizeTiming,cu=u*cfg.sizeCluster,ru=u*cfg.sizeRadar,au=u*cfg.sizeAlerts;
-  const room=U.tall?sb.w:2*Math.min(w/2-(sb.x+290*pu+24*u),(sb.x+sb.w-8*tu-300*tu-24*u)-w/2)-20*st,sw=Math.max(Math.min(.25*w,sb.w-40*u),Math.min(sb.w-40*u,(U.tall?.92:cfg.stripWidth)*w,room)),sy=U.tall?sb.y+190*u:sb.y+26*st,strip={x:w/2-sw/2,y:sy,w:sw,h:54*st};
+  const room=U.tall?sb.w:2*Math.min(w/2-(sb.x+290*pu+24*u),(sb.x+sb.w-8*tu-300*tu-24*u)-w/2)-20*st,sw=Math.max(Math.min(.25*w,sb.w-40*u),Math.min(sb.w-40*u,(U.tall?.92:cfg.stripWidth)*w,room)),ls=cfg.lineSpacing,blocksBottom=Math.max(sb.y+40*tu+(2+122*ls)*tu,sb.y+56*pu+(22+41*ls)*pu),sy=U.tall?Math.max(sb.y+190*u,blocksBottom+40*st):sb.y+26*st,strip={x:w/2-sw/2,y:sy,w:sw,h:54*st};
   const alertsY=Math.max(strip.y+strip.h+70*st,U.tall?sb.y+320*u:0);
   if(!U.tall)return {u,tall:false,sb,strip,pos:{x:sb.x+8*pu,y:sb.y+56*pu},timing:{x:sb.x+sb.w-8*tu,y:sb.y+40*tu},cluster:{x:w/2,y:sb.y+sb.h-20*cu,w:Math.min(560*cu,sb.w*.5)},radar:{x:sb.x+90*ru,y:sb.y+sb.h-90*ru,r:78*ru},rival:{x:sb.x+sb.w-8*u,y:h*.5},alerts:{x:w/2,y:alertsY}};
   return {u,tall:true,sb,strip,pos:{x:sb.x+8*pu,y:sb.y+56*pu},timing:{x:sb.x+sb.w-8*tu,y:sb.y+40*tu},cluster:{x:w/2,y:sb.y+sb.h-20*cu,w:Math.min(sb.w*.9,640*cu)},radar:{x:sb.x+80*ru,y:sb.y+sb.h-180*u-80*ru,r:70*ru},rival:{x:sb.x+sb.w-8*u,y:h*.55},alerts:{x:w/2,y:alertsY}};},
@@ -2572,15 +2574,20 @@ for(const H of Object.values(HUDS)){const d0=H.draw,w0=H.world;H.draw=function(g
 function hexColor(v,where){if(typeof v!=='string'||!/^#[0-9a-fA-F]{6}$/.test(v))throw Error(where+': cor deve ser "#rrggbb"');return v.toLowerCase();}
 const IDS=['A','B','C'];
 const VIEW_MODES=['single','split','hud3','cam3','matrix'],ASPECTS=['fill','16:9','21:9','9:16'],RATES=[.25,.5,1];
-const LAB_STATUS='EM AVALIAÇÃO — P12 V2 NÃO APROVADO · ESTE JSON NÃO CONCEDE APROVAÇÃO';
+// aprovado pelo responsável em 11/10/2026 (docs/decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md);
+// arquivos exportados antes da aprovação, com o status de avaliação, continuam importáveis
+const LAB_STATUS=P12_APPROVED.status,LAB_STATUS_LEGACY='EM AVALIAÇÃO — P12 V2 NÃO APROVADO · ESTE JSON NÃO CONCEDE APROVAÇÃO';
 const VFX_OPTIONS={drift:['A','B','C','E'],collision:['B','D'],flight:['C','D'],light:['world','camera']};
 const RECOMMENDED=[{id:'AA',hud:'A',camera:'A',name:'Arcade épico',why:'Linguagem cinética com câmera de sensação: o HUD reage às mesmas forças que a câmera exagera.'},{id:'BB',hud:'B',camera:'B',name:'Combate tático',why:'Câmera elevada mostra o pelotão que o anel de ameaças e os colchetes descrevem.'},{id:'CC',hud:'C',camera:'C',name:'Competição precisa',why:'A câmera preditiva mostra o ápice que a faixa de previsão anuncia.'}];
-function hudDefaults(id){const H=HUDS[id],o={};for(const p of H.params)o[p.id]=p.def;for(const [k,v] of Object.entries(H.toggles||{}))o[k]=v;for(const [k,v] of Object.entries(H.selects||{}))o[k]=v[0];for(const [k,v] of Object.entries(H.colors||{}))o[k]=v;return o;}
+const camDefaults=id=>({...CAM_DEFAULTS[id],...P12_APPROVED.camera[id]});
+function hudDefaults(id){return {...hudNeutral(id),...P12_APPROVED.hud[id]};}   // padrão do jogo = configuração aprovada
+function hudNeutral(id){const H=HUDS[id],o={};for(const p of H.params)o[p.id]=p.def;for(const [k,v] of Object.entries(H.toggles||{}))o[k]=v;for(const [k,v] of Object.entries(H.selects||{}))o[k]=v[0];for(const [k,v] of Object.entries(H.colors||{}))o[k]=v;return o;}
 function defaultConfig(){return {schema:LAB_SCHEMA,version:LAB_VERSION,status:LAB_STATUS,geometry:'prototype-05/v1',artDirection:'D-TOON-VECTOR-FLUX',paintSystem:'B',vfxBaseline:'prototype-04-v2/approved-calibration',
- selection:{hud:'A',camera:'A',view:'single',aspect:'fill',left:{hud:'A',camera:'A'},right:{hud:'C',camera:'C'}},
- hud:{A:hudDefaults('A'),B:hudDefaults('B'),C:hudDefaults('C')},camera:{A:{...CAM_DEFAULTS.A},B:{...CAM_DEFAULTS.B},C:{...CAM_DEFAULTS.C}},
- vfx:{drift:'A',collision:'B',flight:'C',boost:{A:true,D:true,E:true},speedLines:true,light:'world'},
- race:{seed:20261011,laps:3,ships:30},playback:{scenario:'start',time:0,rate:1}};}
+ selection:JSON.parse(JSON.stringify(P12_APPROVED.selection)),
+ hud:{A:hudDefaults('A'),B:hudDefaults('B'),C:hudDefaults('C')},camera:{A:camDefaults('A'),B:camDefaults('B'),C:camDefaults('C')},
+ vfx:JSON.parse(JSON.stringify(P12_APPROVED.vfx)),race:{...P12_APPROVED.race},playback:{...P12_APPROVED.playback}};}
+// referência neutra (valores-base dos sliders, antes da aprovação): usada nos testes de legibilidade do motor de layout
+function neutralConfig(){const c=defaultConfig();for(const id of IDS){c.hud[id]=hudNeutral(id);c.camera[id]={...CAM_DEFAULTS[id]};}return c;}
 const isObj=o=>o!==null&&typeof o==='object'&&!Array.isArray(o);
 function exact(o,keys,where){if(!isObj(o))throw Error(where+': deve ser um objeto');for(const k of Object.keys(o))if(!keys.includes(k))throw Error(where+': chave desconhecida "'+k+'"');for(const k of keys)if(!(k in o))throw Error(where+': chave obrigatória ausente "'+k+'"');}
 function num(v,min,max,where,int=false){if(typeof v!=='number'||!Number.isFinite(v))throw Error(where+': deve ser número finito');if(v<min||v>max)throw Error(where+': '+v+' fora de ['+min+', '+max+']');if(int&&!Number.isInteger(v))throw Error(where+': deve ser inteiro');return v;}
@@ -2591,7 +2598,7 @@ function parseHud(id,o,where){const H=HUDS[id],keys=[...H.params.map(p=>p.id),..
 function parseCam(id,o,where){const defs=camParamDefs(id);exact(o,defs.map(d=>d.id),where);const out={};for(const d of defs)out[d.id]=num(o[d.id],d.min,d.max,where+'.'+d.id);return out;}
 function parseConfigText(text){let o;try{o=JSON.parse(text);}catch(e){throw Error('JSON sintaticamente inválido — '+e.message);}return parseConfigObject(o);}
 function parseConfigObject(o){const ref=defaultConfig();exact(o,Object.keys(ref),'configuração');
- for(const k of ['schema','version','status','geometry','artDirection','paintSystem','vfxBaseline'])if(o[k]!==ref[k])throw Error(k+': contrato fixo é '+JSON.stringify(ref[k]));
+ for(const k of ['schema','version','status','geometry','artDirection','paintSystem','vfxBaseline'])if(o[k]!==ref[k]&&!(k==='status'&&o[k]===LAB_STATUS_LEGACY))throw Error(k+': contrato fixo é '+JSON.stringify(ref[k]));
  const S=o.selection;exact(S,Object.keys(ref.selection),'selection');const sel={hud:oneOf(S.hud,IDS,'selection.hud'),camera:oneOf(S.camera,IDS,'selection.camera'),view:oneOf(S.view,VIEW_MODES,'selection.view'),aspect:oneOf(S.aspect,ASPECTS,'selection.aspect')};
  for(const side of ['left','right']){exact(S[side],['hud','camera'],'selection.'+side);sel[side]={hud:oneOf(S[side].hud,IDS,'selection.'+side+'.hud'),camera:oneOf(S[side].camera,IDS,'selection.'+side+'.camera')};}
  exact(o.hud,IDS,'hud');exact(o.camera,IDS,'camera');const hud={},camera={};for(const id of IDS){hud[id]=parseHud(id,o.hud[id],'hud.'+id);camera[id]=parseCam(id,o.camera[id],'camera.'+id);}
@@ -2939,6 +2946,7 @@ function colorPanel(d,H,hc){
 function renderTab(){const b=$('tabbody');b.replaceChildren();document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.tab===TAB));const cfg=LAB.cfg;
  const pick=(cur,set)=>{const s=el('div',{className:'seg'});for(const id of IDS){const x=el('button',{textContent:id,on:{click:()=>{set(id);renderTab();}}});x.classList.toggle('on',id===cur);s.append(x);}return s;};
  if(TAB==='hud'){const H=HUDS[EDIT_HUD];b.append(el('p',{className:'eyebrow',textContent:'Editar HUD (independente do selecionado)'}),pick(EDIT_HUD,v=>EDIT_HUD=v),el('div',{className:'card'},el('div',{className:'tag',textContent:'HUD '+H.id+' · '+H.tag}),el('h3',{textContent:H.name}),el('p',{textContent:H.intent})));
+  b.append(el('p',{className:'note',textContent:'Padrão = configuração aprovada em 11/10/2026. "Restaurar" volta a ela; os demais valores são escolhas livres do jogador.'}));
   // seções recolhíveis (estado aberto/fechado fica na sessão), cada uma com "restaurar"
   const hc=cfg.hud[EDIT_HUD],defs=hudDefaults(EDIT_HUD);
   const section=(name,keys,fill)=>{const key=EDIT_HUD+':'+name,d=el('details',{className:'sgrp'});d.open=!GROUP_CLOSED.has(key);d.ontoggle=()=>{d.open?GROUP_CLOSED.delete(key):GROUP_CLOSED.add(key);};
@@ -2957,7 +2965,7 @@ function renderTab(){const b=$('tabbody');b.replaceChildren();document.querySele
   b.append(el('div',{className:'row'},el('button',{textContent:'Restaurar HUD '+EDIT_HUD,on:{click:()=>{cfg.hud[EDIT_HUD]=hudDefaults(EDIT_HUD);renderTab();}}})));}
  else if(TAB==='cam'){const C=CAM_META[EDIT_CAM];b.append(el('p',{className:'eyebrow',textContent:'Editar câmera (independente do HUD)'}),pick(EDIT_CAM,v=>EDIT_CAM=v),el('div',{className:'card'},el('div',{className:'tag',textContent:'Câmera '+EDIT_CAM+' · '+C.tag}),el('h3',{textContent:C.name}),el('p',{textContent:C.intent})));
   b.append(el('p',{className:'eyebrow',textContent:'Sliders próprios (valores experimentais; física P08 pendente)'}));for(const d of camParamDefs(EDIT_CAM))b.append(ctl(d,cfg.camera[EDIT_CAM][d.id],v=>{cfg.camera[EDIT_CAM][d.id]=v;}));
-  b.append(el('div',{className:'row'},el('button',{textContent:'Restaurar câmera '+EDIT_CAM,on:{click:()=>{cfg.camera[EDIT_CAM]={...CAM_DEFAULTS[EDIT_CAM]};renderTab();}}})));}
+  b.append(el('div',{className:'row'},el('button',{textContent:'Restaurar câmera '+EDIT_CAM,on:{click:()=>{cfg.camera[EDIT_CAM]=camDefaults(EDIT_CAM);renderTab();}}})));}
  else if(TAB==='cmp'){b.append(el('p',{className:'eyebrow',textContent:'Combinações recomendadas'}));for(const r of RECOMMENDED)b.append(el('button',{className:'scen',on:{click:()=>{cfg.selection.hud=r.hud;cfg.selection.camera=r.camera;cfg.selection.view='single';LAB.flip=false;syncUI();}}},el('b',{textContent:'HUD '+r.hud+' + Câmera '+r.camera+' · '+r.name}),el('small',{textContent:r.why})));
   b.append(el('p',{className:'eyebrow',textContent:'Comparação lado a lado / sequencial (tecla X)'}));for(const side of ['left','right']){const s=cfg.selection[side];b.append(el('div',{className:'row'},el('span',{textContent:side==='left'?'Esquerda / 1ª':'Direita / 2ª',style:'flex:0 0 30%'}),pick(s.hud,v=>s.hud=v),pick(s.camera,v=>s.camera=v)));}
   b.append(el('p',{className:'note',textContent:'Em vista única, X alterna entre a 1ª e a 2ª combinação no mesmo quadro (pause para comparar o instante exato). HUD×3, CÂM×3 e 3×3 desenham o mesmo instante da simulação em todos os viewports.'}));
@@ -2973,7 +2981,7 @@ function renderTab(){const b=$('tabbody');b.replaceChildren();document.querySele
   const r=cfg.race,draft={...r};b.append(el('p',{className:'eyebrow',textContent:'Corrida (recalcula do zero)'}),ctl({label:'Semente',min:1,max:999999,step:1},draft.seed,x=>draft.seed=x),ctl({label:'Voltas',min:1,max:5,step:1},draft.laps,x=>draft.laps=x),ctl({label:'Competidores',min:12,max:30,step:1},draft.ships,x=>draft.ships=x));
   b.append(el('div',{className:'row'},el('button',{textContent:'Aplicar e recalcular',on:{click:()=>{cfg.race={...draft};newRace();gotoScenario('start');renderTab();}}})));
   b.append(el('p',{className:'note',textContent:'Pista de teste: '+(TRACK.L/1000).toFixed(2)+' km por volta (1 u = 1 m), loop de 115 m de raio, salto de 340 m. Duração, distância, velocidade e cronômetro vêm da mesma integração a 120 Hz. Simulação visual: não aprova física (P08), IA, energia ou eliminação.'}));}
- else{b.append(el('div',{className:'card'},el('h3',{textContent:'Estado'}),el('p',{textContent:'EM AVALIAÇÃO — P12 V2 NÃO APROVADO. Substitui como proposta o P12 rejeitado (preservado em archive/). Nada aqui foi integrado ao jogo.'})),
+ else{b.append(el('div',{className:'card'},el('h3',{textContent:'Estado'}),el('p',{textContent:'APROVADO PELO RESPONSÁVEL EM 11/10/2026: HUDs A, B e C, câmeras A, B e C e todas as opções (sliders, módulos, texto, cores e paletas), que devem estar presentes no jogo. O padrão de cada controle é a configuração enviada pelo responsável. A pista e a corrida de teste são instrumentos: não aprovam física (P08), IA, energia ou eliminação. Registro: docs/decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md. Integração em src/game: pendente.'})),
   el('div',{className:'card'},el('h3',{textContent:'Bases aprovadas usadas sem alteração'}),el('p',{textContent:'Geometria P05 (bloco canônico v1 e nove impressões), pintura Sistema B do P06 (resolveLivery com baseline do pipeline), renderizador D do P06, VFX do 04 V2 com calibração aprovada. Competidores extras reutilizam as nove geometrias como instâncias de demonstração.'})),
   el('div',{className:'card'},el('h3',{textContent:'Teclado'}),el('p',{textContent:'Espaço reproduz/pausa · ←/→ quadro (Shift: 1 s) · Home reinicia · 1/2/3 HUD · Q/W/E câmera · V vista · X alterna comparação · F tela cheia · P painel · D diagnóstico · [ ] cenário'})));}
 }
@@ -3012,7 +3020,7 @@ const API={version:LAB_VERSION,
  tick:()=>LAB.race.state.tick,time:()=>raceTime(LAB.race.state),digest:()=>stateDigest(LAB.race.state),recordAll:()=>{recordUntil(Infinity);return LAB.race.recordedTick;},
  telemetry:()=>telemetry(LAB.race,LAB.race.state,{deltaRef:LAB.cfg.hud.C.deltaRef}),messages:hud=>hudMessages(LAB.race.state.director,hud,raceTime(LAB.race.state)).map(o=>({type:o.m.type,prio:o.m.prio,age:o.age,exit:o.exit,data:o.m.data})),
  cameras:()=>Object.fromEntries(IDS.map(id=>[id,deepClone(camView(LAB.rigs[id]))])),layout:(W,H)=>layoutCells(W,H,LAB.cfg).map(c=>({...c})),
- race:()=>LAB.race,state:()=>LAB.race.state,track:()=>TRACK,sim:SIM,scenarios:SCENARIOS,huds:HUDS,palettes:HUD_PALETTES,colorRoles:HUD_COLOR_ROLES,hudColorsNow:()=>({...HUDC}),contrast:contrastRatio,camMeta:CAM_META,camParams:camParamDefs,
+ race:()=>LAB.race,state:()=>LAB.race.state,track:()=>TRACK,sim:SIM,scenarios:SCENARIOS,huds:HUDS,approved:P12_APPROVED,neutralConfig:()=>JSON.parse(JSON.stringify(neutralConfig())),palettes:HUD_PALETTES,colorRoles:HUD_COLOR_ROLES,hudColorsNow:()=>({...HUDC}),contrast:contrastRatio,camMeta:CAM_META,camParams:camParamDefs,
  // desenha um HUD num contexto 2D fornecido (Canvas real ou simulado) e devolve métricas de legibilidade
  drawHud:(id,g,W,H,camId)=>{const F=buildFrame(LAB.race,LAB.race.state,renderOpts());const tele=telemetry(LAB.race,LAB.race.state,{deltaRef:LAB.cfg.hud.C.deltaRef});LAB.tele=tele;const cell={x:0,y:0,w:W,h:H},mats=camMatrices(camView(LAB.rigs[camId||LAB.cfg.selection.camera]),W/H),MET=metricsSink();HUDS[id].draw(g,W,H,hudModel(id,cell,mats,F),LAB.cfg.hud[id],MET);return MET;},
  hudWorld:(id,camId)=>{const F=buildFrame(LAB.race,LAB.race.state,renderOpts());LAB.tele=telemetry(LAB.race,LAB.race.state,{deltaRef:LAB.cfg.hud.C.deltaRef});const mats=camMatrices(camView(LAB.rigs[camId||'A']),16/9),a=new VFX.Arena(24000);if(HUDS[id].world)HUDS[id].world(a,hudModel(id,{x:0,y:0,w:1600,h:900},mats,F),LAB.cfg.hud[id]);return Array.from(a.data.subarray(0,a.count*7));},

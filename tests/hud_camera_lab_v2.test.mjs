@@ -1,4 +1,4 @@
-// P12 V2 — HUD, câmeras e interface: testes do laboratório reconstruído (EM AVALIAÇÃO, não aprovado).
+// P12 V2 — HUD, câmeras e interface: testes do laboratório (aprovado pelo responsável em 11/10/2026).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -172,14 +172,14 @@ test('09 · busca, pausa e repetição reproduzíveis (determinismo bit a bit da
 
 test('10 · JSON versionado, estrito e atômico (inválidos rejeitados sem mutação parcial)',()=>{
  const A=lab();A.seek(12);const before=A.exportJSON(),digest=A.digest(),cfg0=JSON.parse(before);
- const cases={'distância -100':o=>o.camera.A.distance=-100,'FOV 999':o=>o.camera.B.fovBase=999,'sem câmera B':o=>delete o.camera.B,'sem hud C':o=>delete o.hud.C,'chave extra':o=>o.approved=true,'status alterado':o=>o.status='APROVADO','versão':o=>o.version=1,'schema':o=>o.schema='x','cor inválida':o=>o.hud.A.colPrimary='red','cor ausente':o=>delete o.hud.B.colText,'fonte desconhecida':o=>o.hud.C.font='comic',
+ const cases={'distância -100':o=>o.camera.A.distance=-100,'FOV 999':o=>o.camera.B.fovBase=999,'sem câmera B':o=>delete o.camera.B,'sem hud C':o=>delete o.hud.C,'chave extra':o=>o.approved=true,'status alterado':o=>o.status='APROVADO',"status 'não concede'":o=>o.status='qualquer','versão':o=>o.version=1,'schema':o=>o.schema='x','cor inválida':o=>o.hud.A.colPrimary='red','cor ausente':o=>delete o.hud.B.colText,'fonte desconhecida':o=>o.hud.C.font='comic',
   'geometria':o=>o.geometry='prototype-05/v2','pintura':o=>o.paintSystem='A','string numérica':o=>o.hud.A.scale='1','NaN':o=>o.hud.B.ringRadius=null,'semente não inteira':o=>o.race.seed=2.5,'voltas':o=>o.race.laps=9,'hud inexistente':o=>o.selection.hud='D','vista':o=>o.selection.view='quad',
   'boost C':o=>o.vfx.boost.C=true,'drift D (não aprovado)':o=>o.vfx.drift='D','colisão A':o=>o.vfx.collision='A','toggle não booleano':o=>o.hud.A.minimap=1,'select inválido':o=>o.hud.C.deltaRef='média','cenário':o=>o.playback.scenario='x','taxa':o=>o.playback.rate=3,'parcial válido + inválido':o=>{o.hud.A.scale=1.2;o.camera.C.pitch=99;}};
  for(const [name,mut] of Object.entries(cases)){const o=JSON.parse(before);mut(o);assert.throws(()=>A.importJSON(JSON.stringify(o)),undefined,name);assert.equal(A.exportJSON(),before,name+': configuração intacta');assert.equal(A.digest(),digest,name+': simulação intacta');}
  assert.throws(()=>A.importJSON('{"schema":'));assert.equal(A.exportJSON(),before);
  const ok=JSON.parse(before);ok.hud.A.scale=1.2;ok.camera.C.pitch=9;ok.selection.hud='C';ok.vfx.drift='E';ok.vfx.boost.D=false;A.importJSON(JSON.stringify(ok));const after=JSON.parse(A.exportJSON());assert.deepEqual(after,ok);
  assert.deepEqual(Object.keys(cfg0).sort(),['artDirection','camera','geometry','hud','paintSystem','playback','race','schema','selection','status','version','vfx','vfxBaseline']);
- assert.equal(cfg0.version,2);assert.match(cfg0.status,/NÃO APROVADO/);});
+ assert.equal(cfg0.version,2);assert.match(cfg0.status,/^APROVADO PELO RESPONSÁVEL EM 11\/10\/2026/);});
 
 test('11 · eventos simultâneos: P0 sempre visível, capacidade por HUD respeitada, prioridade e fusão',()=>{
  const I=L.internals;const ships=[{id:0,s:100,lane:0,v:300,crit:true,inRecharge:false,finished:false,rank:5}];for(let i=1;i<30;i++)ships.push({id:i,s:0,lane:0,v:300,crit:false,inRecharge:false,finished:false,rank:i+1});
@@ -198,6 +198,8 @@ test('11 · eventos simultâneos: P0 sempre visível, capacidade por HUD respeit
  for(const t of [9,40,75,96,120,168]){L.seek(t);for(const hud of ['A','B','C']){const m=L.messages(hud);const st=L.state().director;const p0=st.msgs.filter(x=>x.prio===0&&x.t0<=L.time()&&x.t1>L.time());for(const x of p0)assert.ok(m.some(v=>v.type===x.type),'P0 '+x.type+' visível em '+t);assert.ok(m.filter(v=>v.prio>0&&v.exit===0).length<=I.HUD_CHANNELS[hud].cap);}}});
 
 test('12 · legibilidade e composição em 16:9, 21:9, 9:16 e resoluções diferentes',()=>{
+ // mede o motor de layout na referência neutra (valores-base dos sliders); a configuração aprovada é escolha do responsável e é verificada no teste 17
+ const saved=L.exportJSON();L.importJSON(JSON.stringify(L.neutralConfig()));try{
  const res=[[1280,720],[1920,1080],[2560,1080],[3440,1440],[1080,1920],[2560,1440]];const keys={A:['energy','lap','position','speed','map'],B:['head','ladder','gauge','radar'],C:['strip','pos','timing','cluster','radar']};
  const minPx={speed:36,position:30,lap:14,lapTime:14,alert:13,default:9};
  const moments=['lowenergy','defense','edge','finallap'].map(id=>L.scenarioTime(id)+1.4);
@@ -207,7 +209,8 @@ test('12 · legibilidade e composição em 16:9, 21:9, 9:16 e resoluções difer
    for(const [k,b] of boxes){assert.ok(b.x>=-1&&b.y>=-1&&b.x+b.w<=W+1&&b.y+b.h<=H+1,`${h} ${W}x${H}: ${k} fora da tela`);}
    for(let i=0;i<boxes.length;i++)for(let j=i+1;j<boxes.length;j++){const [ka,a]=boxes[i],[kb,b]=boxes[j];const ov=Math.max(0,Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y));assert.ok(ov<.04*Math.min(a.w*a.h,b.w*b.h),`${h} ${W}x${H}: ${ka} sobrepõe ${kb}`);}
    // centro da imagem (nave e pista) livre de módulos persistentes
-   const cx=W/2,cy=H*.55;for(const [k,b] of boxes)assert.ok(!(cx>b.x&&cx<b.x+b.w&&cy>b.y&&cy<b.y+b.h),`${h} ${W}x${H}: ${k} cobre o centro`);}}});
+   const cx=W/2,cy=H*.55;for(const [k,b] of boxes)assert.ok(!(cx>b.x&&cx<b.x+b.w&&cy>b.y&&cy<b.y+b.h),`${h} ${W}x${H}: ${k} cobre o centro`);}}
+ }finally{L.importJSON(saved);}});
 
 test('13 · desempenho com 30 competidores e VFX dentro do orçamento',()=>{
  const t0=performance.now();const A=lab();const n=A.recordAll();const ms=performance.now()-t0;assert.ok(ms/n<.6,'simulação '+(ms/n).toFixed(3)+' ms/passo');
@@ -234,7 +237,23 @@ test('15 · alternância rápida de HUD/câmera/vista/quadro sem regressão',()=
  for(let i=0;i<300;i++){A.setHud(ids[rnd(3)]);A.setCamera(ids[rnd(3)]);A.setView(views[rnd(5)]);A.setAspect(aspects[rnd(4)]);if(i%10===0){A.renderGL(1280,720);const g=mock2d();A.drawHud(ids[rnd(3)],g,1280,720,ids[rnd(3)]);assert.ok(!g.ops.join('').includes('NaN'));}}
  assert.equal(A.digest(),digest);assert.equal(A.tick(),tick);assert.equal(gl.stats().buffers,plateau);for(const c of Object.values(A.cameras()))assert.ok([...c.eye,...c.up,c.fov].every(Number.isFinite));A.dispose();});
 
-test('16 · HTML gerado corresponde às fontes modulares e o status permanece "não aprovado"',async()=>{
+test('16 · HTML gerado corresponde às fontes modulares e exibe o status aprovado',async()=>{
  const {buildLab}=await import(path.join(repo,'prototypes/hud-camera-lab/build.mjs'));assert.equal(buildLab(),html,'rode node prototypes/hud-camera-lab/build.mjs');
- assert.match(html,/EM AVALIAÇÃO — P12 V2 NÃO APROVADO/);assert.ok(!/Math\.random\(/.test(html.split('<script>')[1]),'sem aleatoriedade sem semente');
- const spec=fs.readFileSync(path.join(repo,'docs/specs/12_hud_camera_v2_spec.md'),'utf8');assert.match(spec,/NÃO APROVADO/);assert.match(spec,/130 %/);assert.match(spec,/0,35/);});
+ assert.match(html,/P12 V2 APROVADO · 11\/10\/2026/);assert.ok(!/Math\.random\(/.test(html.split('<script>')[1]),'sem aleatoriedade sem semente');
+ const spec=fs.readFileSync(path.join(repo,'docs/specs/12_hud_camera_v2_spec.md'),'utf8');assert.match(spec,/APROVADO PELO RESPONSÁVEL/);assert.match(spec,/130 %/);assert.match(spec,/0,35/);});
+
+test('17 · aprovação de 11/10/2026: padrão = configuração enviada, registro e catálogo completo de opções do jogo',()=>{
+ const dec=f=>path.join(repo,'docs/decisions',f),submitted=JSON.parse(fs.readFileSync(dec('2026-10-11-prototype-12-v2-config-submitted.json'),'utf8')),approved=JSON.parse(fs.readFileSync(dec('2026-10-11-prototype-12-v2-approved-baseline.json'),'utf8'));
+ // a baseline aprovada é o JSON enviado, só com o status de aprovação e a reprodução no início
+ assert.deepEqual({...approved,status:submitted.status,playback:submitted.playback},submitted);assert.deepEqual(approved.playback,{scenario:'start',time:0,rate:1});
+ // o laboratório abre exatamente na configuração aprovada e a embute sem alteração
+ const A=lab();assert.deepEqual(JSON.parse(A.exportJSON()),approved);assert.deepEqual(json(A.approved),approved);
+ // o arquivo enviado (status de avaliação) continua importável e resulta nos mesmos valores
+ A.importJSON(JSON.stringify(submitted));assert.deepEqual({...JSON.parse(A.exportJSON()),playback:submitted.playback},{...approved,playback:submitted.playback});
+ // registro de decisão: cita o JSON, lista TODAS as opções de A, B e C (sliders, módulos, seletores, cores) e das três câmeras
+ const doc=fs.readFileSync(dec('2026-10-11-prototype-12-v2-hud-camera-approval.md'),'utf8');assert.match(doc,/2026-10-11-prototype-12-v2-config-submitted\.json/);
+ const ids=[];for(const h of ['A','B','C']){const H=A.huds[h];ids.push(...H.params.map(p=>[h,p.id]),...Object.keys(H.toggles).map(k=>[h,k]),...Object.keys(H.selects).map(k=>[h,k]),...Object.keys(H.colors).map(k=>[h,k]));}
+ for(const c of ['A','B','C'])ids.push(...A.camParams(c).map(d=>['câmera '+c,d.id]));
+ const missing=ids.filter(([h,k])=>!doc.includes('`'+k+'`'));assert.deepEqual(missing,[],'opções ausentes do catálogo de integração');
+ for(const P of Object.values(A.palettes))assert.ok(doc.includes(P.name),'paleta '+P.name);
+ const gdd=fs.readFileSync(path.join(repo,'docs/GDD.md'),'utf8');assert.match(gdd,/Protótipo 12 V2[^\n]*APROVADO/);assert.match(gdd,/2026-10-11-prototype-12-v2-hud-camera-approval\.md/);});
