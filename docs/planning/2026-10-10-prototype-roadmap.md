@@ -101,6 +101,7 @@ Este documento separa três tipos de conteúdo:
 - **[Recomendação]** As três implementações de mashing devem diferir em entrada, duração, progressão, defesa e consequências. O jogador deve manter a direção durante a disputa. Se nenhuma funcionar, aí há base para revisar o requisito [45].
 
 ### P12 — HUD, câmera e interface
+- **[Registro 11/10/2026]** O responsável pediu a reconstrução do P12 antes da sequência. O P12 original foi rejeitado; o **P12 V2** está em avaliação ([especificação](../specs/12_hud_camera_v2_spec.md)). Ele usa uma pista e uma corrida de teste próprias, sem antecipar P08/P09/P10.
 - **[Recomendação]** Avaliar com situações reais de corrida e combate (circuito de referência e P10).
 
 ## 3. Questões abertas

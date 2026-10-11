@@ -152,6 +152,7 @@
 - **Alertas [98]:** priorizar animações para acontecimentos importantes.
 - **VFX [99]:** espetaculares, mas sem comprometer legibilidade e tomada de decisão.
 - **Menus [100]:** interface básica por ora; não fixar linguagem elaborada de HUD/menu sem prototipar.
+- **Protótipo 12 V2 (11/10/2026) — EM AVALIAÇÃO, NÃO APROVADO:** três HUDs e três câmeras independentes em [`prototypes/12_hud_camera_lab_v2.html`](../prototypes/12_hud_camera_lab_v2.html) ([especificação](specs/12_hud_camera_v2_spec.md)). O P12 original foi rejeitado ([auditoria](audits/2026-10-11-prototype-12-audit.md)). Nenhum item de [91–100] fica decidido até a aprovação.
 
 ## 11. Política obrigatória de prototipação, telemetria e documentação [101–104]
 
