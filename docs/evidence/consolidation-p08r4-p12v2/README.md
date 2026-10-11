@@ -49,20 +49,34 @@ As cadências e os tempos medidos sem GPU não são benchmark. Os ensaios não s
 
 ## Rastreabilidade dos commits locais do P08
 
-Os registros de aprovação citam commits locais que não estão publicados neste repositório. Os SHAs históricos foram mantidos nesses registros. O Codex comparou os commits locais com os publicados e chegou às correspondências abaixo. A comparação não pode ser reproduzida aqui, porque os commits locais não foram publicados.
+Os registros de aprovação do P08 citam três commits locais que não estão publicados neste repositório: `399e8e5` (revisão 3 aprovada), `cbd9be9` (revisão 4 apresentada para aprovação) e `c4e2e38`. Os SHAs históricos foram mantidos nesses registros, sem substituição.
 
-| Commit local | Commit publicado | Conclusão do Codex |
-| :--- | :--- | :--- |
-| `399e8e5` (revisão 3 aprovada) | `64e3279` | física e pilotagem da revisão 3 preservadas; diferem status e compatibilidade de JSON |
-| `cbd9be9` (revisão 4 apresentada para aprovação) | `c4e2e38`, local, publicado como árvore em `36b5f24` | comportamento aprovado da revisão 4 preservado; diferem status, interface e compatibilidade de JSON |
-| `c4e2e38` | `f3b61f1` | nenhuma diferença funcional; só correção documental posterior |
-| `871cee3` | `f3b61f1` | árvores equivalentes |
+### Comparações feitas pelo Codex
 
-As correspondências são **funcionais**. Os pares `399e8e5`/`64e3279` e `cbd9be9`/`c4e2e38` **não** são idênticos byte a byte. As mensagens de commit declaram que `36b5f24` reproduz a árvore de `c4e2e38` e que `f3b61f1` reproduz a de `871cee3`.
+O Codex localizou esses commits no repositório local dele e comparou as árvores Git com os commits publicados. As comparações **não foram reproduzidas nesta consolidação**, porque os commits locais e o relatório do Codex não estão publicados.
+
+| Commit local | Comparado com | Resultado relatado pelo Codex | Natureza |
+| :--- | :--- | :--- | :--- |
+| `399e8e5` | `64e3279` | física e pilotagem da revisão 3 preservadas; diferem status e compatibilidade de JSON | equivalência funcional, **não** identidade byte a byte |
+| `cbd9be9` | `c4e2e38` | comportamento aprovado da revisão 4 preservado; diferem status, interface e compatibilidade de JSON | equivalência funcional, **não** identidade byte a byte |
+| `c4e2e38` | `f3b61f1` | nenhuma diferença funcional; só correção documental posterior | equivalência funcional, **não** identidade byte a byte |
+| `871cee3` | `f3b61f1` | árvores equivalentes | identidade de árvore, segundo o Codex |
+
+### O que o repositório publicado mostra
+
+- A mensagem do `36b5f24` declara reproduzir a árvore exata de `c4e2e38`, e a do `f3b61f1` declara o mesmo em relação a `871cee3`. São declarações dos commits, não verificações desta consolidação.
+- Verificado nesta consolidação:
+  - os arquivos do P08 na branch são idênticos aos de `f3b61f1`;
+  - o HTML do P08 tem o SHA-256 registrado na validação da revisão 4;
+  - o comportamento da revisão 4 foi confirmado no navegador (seção anterior).
+
+### Conclusão
+
+Pelo relatório do Codex, o código publicado em `f3b61f1`, e consolidado nesta branch, preserva **funcionalmente** a revisão 4 aprovada em `cbd9be9`. O `64e3279` preserva funcionalmente a revisão 3 aprovada em `399e8e5`. As diferenças relatadas são de status, interface e compatibilidade de JSON, não de física nem de pilotagem. Não há identidade byte a byte entre os commits aprovados e os publicados; a única identidade relatada é a de árvore entre `871cee3` e `f3b61f1`. A rastreabilidade funcional fica esclarecida para a decisão de integração na `main`, com base na evidência do Codex.
 
 ## Pendências para a decisão de integração na `main`
 
-1. **Rastreabilidade dos commits locais do P08:** esclarecida pelo Codex (registro abaixo); não é mais uma pendência de comprovação funcional.
+1. **Rastreabilidade dos commits locais do P08:** esclarecida funcionalmente pelo Codex (ver seção acima), sem identidade byte a byte. As comparações não foram reproduzidas aqui; publicar os commits locais ou o relatório do Codex permitiria verificá-las de forma independente.
 2. **Câmera do P12 no voo com os controles aéreos da revisão 4:** é requisito pendente de integração e **não foi validado**. Está registrado na [aprovação do P12 V2](../../decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md), item 7 da seção 6.
 3. **Parede 90° → loop:** o desprendimento sem esterço é previsto pela especificação, mas falta confirmação pilotada.
 4. **Pendências mantidas:**
