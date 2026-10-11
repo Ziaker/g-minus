@@ -18,9 +18,9 @@ Nenhuma pista do P09 foi criada.
 
 | Critério | Resultado |
 | :--- | :--- |
-| 37 testes do P08 verdes | sim: 151/151 na suíte completa (seção 8) |
+| 37 testes do P08 verdes | sim: 154/154 na suíte completa (seção 8) |
 | Equivalência nos cenários equivalentes | sim: malha e física idênticas bit a bit, verificadas pela suíte automatizada nos 13 cenários (seção 1) |
-| Ferramentas reproduzíveis | sim: sementes e passo fixos; 9 testes automatizados |
+| Ferramentas reproduzíveis | sim: sementes e passo fixos; determinismo de agendamento verificado (seção 10); 12 testes automatizados |
 | Autorização para a etapa 1 | **pendente: decisão do responsável** |
 
 ## 1. Compatibilidade com o P08 (§5.1)
@@ -90,8 +90,8 @@ Medido em plataforma plana (mesma malha e contato do P08):
 - Ou seja: **em superfície plana, quem limita a curva é a pilotagem do Perfil C, não o contato.**
 - Correção: a medição preliminar do planejamento (queda de 500 para 270 u/s) foi feita sem acelerador e não vale como envelope.
 - **Contato durante todo o ensaio (revisão técnica):** o envelope registra o contato em todos os passos, da acomodação até a medição, e conta desprendimentos e pousos.
-  - Um ponto só é válido (`validoParaEnvelope`) com contato contínuo.
-  - Os 16 pontos da tabela tiveram contato contínuo.
+  - Um ponto só é válido (`validoParaEnvelope`) com contato contínuo **e** velocidade estabilizada. Pontos inválidos continuam registrados como diagnóstico, com `motivosInvalidade` (`perda_de_contato` e/ou `velocidade_nao_estabilizada`).
+  - Os 16 pontos da tabela tiveram contato contínuo; **10 são válidos**. Os 6 marcados com \* são diagnóstico, todos por velocidade não estabilizada.
   - Regressão: um impulso de diagnóstico no passo 5 faz a nave se soltar e pousar 212 passos depois. Ela termina apoiada, mas o ponto agora é **inválido**; antes era aceito.
 
 ## 4. Classificador de desprendimentos (§8.2)
@@ -102,7 +102,22 @@ A causa física é recalculada pelo instrumento. Ele não depende do texto `s.re
 - `p08-borda-e-lacuna`, seções 2015–2074;
 - começa 8 seções antes da borda da rampa (seção 2023) e vai até o fim da lacuna.
 
-Medido: com qualquer velocidade inicial entre 150 e 500 u/s, a nave se solta nas seções 2025–2027. Cada evento intencional registra o trecho, a posição e a causa física subjacente. Uma saída lateral dentro de um trecho marcado continua sendo saída pela borda. Trechos sem tipo válido ou sem motivo são rejeitados.
+Medido: com qualquer velocidade inicial entre 150 e 500 u/s, a nave se solta nas seções 2025–2027.
+
+**Mecanismo declarado (fechamento da revisão):** estar dentro de um trecho marcado não basta. O evento só é intencional quando a causa física corresponde ao mecanismo de lançamento do tipo do trecho:
+
+| Tipo | Mecanismos aceitos |
+| :--- | :--- |
+| `lacuna` | fim de superfície (`sem_superficie`) |
+| `rampa_lancamento`, `salto` | fim de superfície ou separação balística (`velocidade_afastamento`) |
+
+Qualquer outra causa dentro do trecho mantém a própria classificação. Todo evento registra separadamente:
+- `causaFisica`;
+- o contexto do trecho (`trecho`, com tipo, motivo, seções e mecanismos aceitos);
+- `mecanismoEsperado`;
+- a posição.
+
+**Teste negativo:** num trecho do tubo marcado como `salto` só para o teste, as 15 perdas por limite de reação continuam sendo `limite_reacao` (`mecanismoEsperado: false`), com o contexto do trecho registrado. Saída lateral dentro de trecho marcado continua sendo saída pela borda. Trechos sem tipo válido ou sem motivo são rejeitados.
 
 | Cenário | Causa classificada | Candidatos a injustificado |
 | :--- | :--- | :-: |
@@ -141,23 +156,56 @@ O resultado confirma a auditoria do P08: o trecho é pilotável. Com reação le
 
 Física do P08 na pista técnica, tempo de CPU deste ambiente de nuvem. Não inclui colisão entre naves, que o núcleo do P08 não tem.
 
-| Naves | ms por passo | Fração do orçamento de 120 Hz (8,33 ms) |
-| :-: | :-: | :-: |
-| 1 | 0,62–0,70 | 7–8 % |
-| 8 | 3,7–4,5 | 44–54 % |
-| 16 | 6,6–8,8 | 79–105 % |
-| 30 | 11,3–12,6 | **136–151 %** |
+### 7.1 Validade do benchmark (fechamento da revisão)
 
-Faixas de quatro execuções. **Neste ambiente, 30 naves com a física do P08 a 120 Hz não cabem no orçamento**, mesmo sem renderização e sem colisão entre naves. Nenhuma otimização física foi autorizada; o risco permanece registrado.
+O benchmark agora conta, a cada passo, as naves **ativas, em contato, no ar e paradas**, e atribui o tempo de cada chamada a `P.step` ao estado da nave antes do passo.
+- **Retorno antecipado de `P.step()`:** com `s.stopped` verdadeiro, o passo custa cerca de 35–80 ns e não altera o estado. Não há nave parada em nenhuma medição.
+- **O benchmark anterior não representava uma corrida.** Ele só acelerava, com direção senoidal; com 30 naves, só cerca de 7,7 ficavam em contato e cerca de 22,3 voavam fora da pista.
+- **Custo por estado:**
+  - passo em contato: cerca de 1,1–1,2 ms por nave;
+  - passo no ar: cerca de 0,06–0,09 ms.
+- Por isso foi criado o **modo pilotado**: o piloto de teste mantém cada nave na pista a 400 u/s. Nave parada ou fora de contato por mais de 2 s é recolocada; a recolocação é contada, e seu custo e o do piloto ficam fora do tempo medido.
 
-O hardware de referência é questão aberta da especificação. Mesmo assim, o resultado precisa de decisão antes da corrida completa com 30 naves (etapa 3). Opções, nenhuma decidida:
-- otimizar a consulta de superfície, o que mexe no código do P08 e exige autorização;
+| Naves | Modo | Ativas | Em contato | No ar | Paradas | Recolocações | ms por passo | Orçamento de 120 Hz |
+| :-: | :-- | :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| 1 | pilotado | 1 | 1,0 | 0 | 0 | 0 | 0,82 | 10 % |
+| 8 | pilotado | 8 | 6,8 | 1,2 | 0 | 3 | 8,1 | 97 % |
+| 16 | pilotado | 16 | 13,6 | 2,4 | 0 | 6 | 15,9 | **191 %** |
+| 30 | pilotado | 30 | 25,6 | 4,4 | 0 | 11 | 30,8 | **370 %** |
+| 30 | livre (anterior) | 30 | 7,7 | 22,3 | 0 | 0 | 9,7 | 117 % |
+
+**Conclusão revisada:** com as naves de fato na pista, a física do P08 cabe no orçamento de 120 Hz com cerca de 8 naves neste ambiente. Com 30 naves, usa cerca de 3,7 vezes o orçamento, mesmo sem renderização, sem IA e sem colisão entre naves. Os números anteriores (136–151 %) subestimavam o risco. Nenhuma otimização física foi feita nem autorizada.
+
+### 7.2 Perfilamento por subsistema (fechamento da revisão)
+
+`profile.cjs` usa uma instância isolada do P08 e embrulha em tempo de execução só o que é observável de fora, sem modificar arquivos. Estados com e sem instrumentação: **idênticos**. Custo do embrulho: cerca de 150 ns por chamada, desprezível. Modo pilotado:
+
+| Subsistema | 1 nave | 8 naves | 30 naves | Chamadas por passo de nave |
+| :--- | :-: | :-: | :-: | :-: |
+| Consulta de superfície (`surface`, exclusiva) | 65,3 % | 65,1 % | **65,8 %** | ~2,8 |
+| Restante, interno ao P08 (transporte, restrição de altura, matemática da colisão, voo assistido, integração) | 27,0 % | 26,9 % | 26,6 % | — |
+| Grade espacial chamada pela consulta | 3,5 % | 4,0 % | 3,9 % | ~2,8 |
+| Grade espacial chamada pela colisão | 2,1 % | 1,8 % | 1,8 % | 2 |
+| Pilotagem do Perfil C (`drive`) | 2,0 % | 2,1 % | 1,8 % | 1 |
+| Energia (`tickEnergy`) | 0,1 % | 0,1 % | 0,1 % | 1 |
+
+- A **consulta de superfície** domina: cerca de dois terços do custo, com cerca de 200 µs por chamada.
+- O "restante" não pode ser separado sem alterar o código aprovado do P08.
+- **Não existe nesta etapa**, e portanto não é medido:
+  - colisão entre naves;
+  - IA;
+  - regras de corrida e checkpoints com várias naves;
+  - renderização WebGL, HUD, VFX, câmera e áudio.
+
+As opções de mitigação continuam sem decisão:
+- otimizar a consulta de superfície, o que exige autorização para mexer no P08;
 - física de precisão reduzida para naves distantes;
-- outra frequência para a IA.
+- outra frequência para a IA;
+- hardware de referência.
 
 ## 8. Validação
 
-- `npm test`: **151/151** (142 anteriores, incluindo os 37 do P08, mais 9 testes dos instrumentos), numa cópia isolada da árvore desta entrega.
+- `npm test`: **154/154** (142 anteriores, incluindo os 37 do P08, mais 12 testes dos instrumentos), numa cópia isolada da árvore desta entrega.
 - `build.mjs --check` do P08 e do P12: HTMLs idênticos às fontes.
 - `npm run build`: concluído; os instrumentos não entram na distribuição.
 
@@ -170,9 +218,38 @@ O hardware de referência é questão aberta da especificação. Mesmo assim, o 
 | 3 | Transições parciais de tubo fora da cobertura | 0 < tube < 1 amostrado; normal 3D analítica; cobertura incompleta declarada quando não amostrável | "validador geométrico: cobertura com tubo parcial…" |
 | 4 | 13 cenários só no executor manual | verificação integral na suíte automatizada | "os 13 cenários equivalentes…" |
 
+Fechamento da revisão, aplicado num único commit posterior:
+
+| # | Ajuste | Teste |
+| :-: | :--- | :--- |
+| 5 | Envelope: `validoParaEnvelope` exige contato contínuo e velocidade estabilizada; pontos não estabilizados ficam como diagnóstico | "envelope de curva: velocidade estabilizada…" |
+| 6 | Classificador: intencional só quando a causa física corresponde ao mecanismo do tipo do trecho; causa física e contexto do trecho registrados separadamente | "classificador: intencional só em trecho marcado…" (inclui teste negativo) |
+| 7 | Determinismo com passo fixo de 120 Hz e agendamento de 30, 60, 120 Hz e irregular | "determinismo: passo fixo de 120 Hz…" |
+| 8 | Perfilamento por subsistema e contagem de naves ativas, em contato e paradas | "perfilamento por subsistema…" e "validade do benchmark…" |
+
 Nenhuma correção alterou o comportamento físico: P08, P12, `src/game`, baselines e decisões estão inalterados.
 
-## 10. Próximo passo (requer autorização)
+## 10. Determinismo de agendamento
+
+`determinism.cjs`: **simulação de agendamento, sem navegador.** Cada quadro de renderização avança um acumulador e executa quantos passos fixos de 1/120 s couberem, como o laço do laboratório do P08. As entradas são função do passo físico.
+
+| Cenário | 30 Hz | 60 Hz | 120 Hz | Irregular (4–54 ms, semente) |
+| :--- | :-: | :-: | :-: | :-: |
+| Reta · manobras P01 (720 passos) | idêntico | idêntico | idêntico | idêntico |
+| Parede → loop · direção alternada (600) | idêntico | idêntico | idêntico | idêntico |
+| Tubo · volta com → (600) | idêntico | idêntico | idêntico | idêntico |
+| Rampa · boost e ↑ no ar, revisão 4 (720) | idêntico | idêntico | idêntico | idêntico |
+
+"Idêntico" quer dizer o estado físico completo igual em todos os passos.
+
+**Diagnóstico:** se o teclado for amostrado por quadro, e não por passo, os estados divergem a 30 e 60 Hz. O primeiro passo divergente varia de 2 a 266, conforme o cenário. É efeito de latência de entrada, não de não determinismo da física.
+
+**Fica para a validação em navegador**, numa etapa com laboratório:
+- `requestAnimationFrame` real e variação de quadro;
+- amostragem de teclado;
+- abas em segundo plano.
+
+## 11. Próximo passo (requer autorização)
 
 **Etapa 1:** circuito simples e fechado, sem elementos verticais, montado pela camada 2. Medições previstas:
 - fechamento e cobertura com o validador;
@@ -180,5 +257,5 @@ Nenhuma correção alterou o comportamento físico: P08, P12, `src/game`, baseli
 - calibração da regra de comprimento para 55–65 s.
 
 Antes da etapa 1, recomendo decidir:
-1. como tratar o risco de desempenho (seção 7);
+1. como tratar o risco de desempenho (seção 7): com naves na pista, 30 naves usam cerca de 370 % do orçamento;
 2. se a B-1 (motivo de desprendimento no P08) deve ser aplicada. O classificador já contorna essa pendência.

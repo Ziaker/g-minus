@@ -6,9 +6,12 @@
    Trechos intencionais: só contam os trechos MARCADOS explicitamente pelo chamador, cada um
    com intervalo de seções, tipo e motivo:
      {id, from, to, kind:'rampa_lancamento'|'lacuna'|'salto', motivo}
-   Um desprendimento só é "intencional" se a seção mais próxima estiver dentro de um trecho
-   marcado E a nave estiver dentro da largura da pista (saída lateral continua sendo borda).
-   O evento registra o trecho, a posição e a causa física subjacente.
+   Estar dentro de um trecho marcado NÃO basta. O evento só é "intencional" quando a causa
+   física corresponde ao mecanismo de lançamento declarado pelo tipo (MECHANISM abaixo): fim de
+   superfície ou separação balística. Qualquer outra causa física dentro do trecho (limite de
+   reação, saída pela borda, causa não classificada) mantém a própria causa. A causa física
+   (causaFisica) e o contexto do trecho (trecho) são sempre registrados separadamente, e
+   `mecanismoEsperado` informa se a causa física bate com o tipo do trecho.
 
    Causas:
      intencional             dentro de trecho marcado (ver acima)
@@ -22,7 +25,13 @@
 const {loadP08}=require('./load-p08.cjs');
 
 const UNJUSTIFIED=new Set(['sem_superficie','nao_classificado']);
-const KINDS=new Set(['rampa_lancamento','lacuna','salto']);
+// Mecanismo físico de lançamento esperado para cada tipo de trecho marcado.
+const MECHANISM={
+ lacuna:new Set(['sem_superficie']),                                  // a pista acaba
+ rampa_lancamento:new Set(['sem_superficie','velocidade_afastamento']), // borda ou separação na crista
+ salto:new Set(['sem_superficie','velocidade_afastamento']),
+};
+const KINDS=new Set(Object.keys(MECHANISM));
 
 function checkSegments(segments){
  for(const g of segments){
@@ -47,10 +56,12 @@ function makeClassifier(course,tracker,{intentionalSegments=[],edgeMargin=1.5}={
     need=V.len(V.sub(P.transport(v0,n0,h0.normal),v0))/P.DT;
     if(need>cfg.magnet)physical='limite_reacao';else if(normalSpeed>=limit)physical='velocidade_afastamento';
     else if(offEdge)physical='saida_borda';else physical='nao_classificado';}
-   const seg=physical==='liberacao_teste'||offEdge?null:segs.find(g=>rel0.i>=g.from&&rel0.i<=g.to)||null;
-   const cause=seg?'intencional':physical;
+   const seg=segs.find(g=>rel0.i>=g.from&&rel0.i<=g.to)||null;
+   const matches=!!seg&&!offEdge&&MECHANISM[seg.kind].has(physical);
+   const cause=matches?'intencional':physical;
    events.push({tick:s.tick,time:+s.time.toFixed(4),cause,causaFisica:physical,unjustifiedCandidate:UNJUSTIFIED.has(cause),
-    trecho:seg&&{id:seg.id,tipo:seg.kind,motivo:seg.motivo,secoes:[seg.from,seg.to]},
+    mecanismoEsperado:seg?matches:null,
+    trecho:seg&&{id:seg.id,tipo:seg.kind,motivo:seg.motivo,secoes:[seg.from,seg.to],mecanismosAceitos:[...MECHANISM[seg.kind]]},
     posicao:p0.map(x=>+x.toFixed(3)),zone:rel0.zone,station:rel0.i,lateral:+rel0.lateral.toFixed(3),speed:+V.len(v0).toFixed(2),
     reactionNeeded:need&&+need.toFixed(1),reactionLimit:cfg.magnet,normalSpeed:normalSpeed&&+normalSpeed.toFixed(3),captureLimit:limit&&+limit.toFixed(2),p08Reason:s.reason});
   }
@@ -66,4 +77,4 @@ function p08IntentionalSegments(course){
  return [{id:'p08-borda-e-lacuna',from:lip-8,to:course.zones[9].station-1,kind:'lacuna',
   motivo:'P08: borda da '+ramp.name+' (seção '+lip+') e '+gap.name+' sem superfície (seções '+gap.station+'–'+(course.zones[9].station-1)+')'}];
 }
-module.exports={makeClassifier,p08IntentionalSegments,UNJUSTIFIED,checkSegments};
+module.exports={makeClassifier,p08IntentionalSegments,UNJUSTIFIED,checkSegments,MECHANISM};

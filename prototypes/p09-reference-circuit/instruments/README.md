@@ -13,12 +13,14 @@ Ferramentas de medição do [P09](../../../docs/specs/09_reference_circuit_spec.
 | `timing.cjs` | cronômetro com linha exata e aviso de sentido contrário | §7, GDD [15, 19] |
 | `pilot.cjs` | piloto de teste (← → e acelerador), com atraso de percepção | §8.5 |
 | `envelope.cjs` | envelope de curva com velocidade estabilizada e histórico de contato em todo o ensaio, em plataforma plana | §8.3 |
-| `perf.cjs` | custo da física por passo com 1, 8, 16 e 30 naves | §9 |
+| `perf.cjs` | custo da física com 1, 8, 16 e 30 naves; contagem de naves ativas, em contato, no ar e paradas; modos pilotado e livre | §9 |
+| `profile.cjs` | perfilamento por subsistema observável, em instância isolada, sem alterar o P08 | §9 |
+| `determinism.cjs` | passo fixo de 120 Hz com agendamento de 30, 60, 120 Hz e irregular (simulação, sem navegador) | §10 |
 | `run-etapa0.cjs` | executa tudo e grava `docs/evidence/p09-etapa0/etapa0-results.json` | §11 |
 
 ```
-node prototypes/p09-reference-circuit/instruments/run-etapa0.cjs   # evidências (~1 min)
-node --test tests/p09_instruments.test.cjs                         # testes dos instrumentos (~20 s)
+node prototypes/p09-reference-circuit/instruments/run-etapa0.cjs   # evidências (~2 min)
+node --test tests/p09_instruments.test.cjs                         # testes dos instrumentos (~35 s)
 ```
 
 Relatório da etapa: [`docs/evidence/p09-etapa0/README.md`](../../../docs/evidence/p09-etapa0/README.md).

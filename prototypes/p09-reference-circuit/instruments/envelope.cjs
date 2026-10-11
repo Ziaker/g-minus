@@ -6,8 +6,9 @@
    mantém dentro de ±2 %, o ponto é marcado como não estabilizado (a direção limita a
    velocidade sustentável).
    O contato é registrado em TODOS os passos do ensaio (acomodação e medição). Um ponto só é
-   válido para o envelope com contato contínuo: desprendimento seguido de pouso invalida o
-   ponto, mesmo que a nave termine apoiada. `perturb(k)` permite injetar entradas de teste
+   válido para o envelope com contato contínuo E velocidade estabilizada: desprendimento
+   seguido de pouso invalida o ponto, mesmo que a nave termine apoiada. Pontos não
+   estabilizados continuam registrados como diagnóstico (motivosInvalidade). `perturb(k)` permite injetar entradas de teste
    (por exemplo, o impulso de diagnóstico) para a verificação de regressão. */
 'use strict';
 const {loadP08}=require('./load-p08.cjs');
@@ -40,7 +41,8 @@ function measure(pad,target,duty,{settle=120,window=120,cycle=12,perturb=null}={
  return {alvo:target,kmh:Math.round(target*3.6),direcao:duty,velocidadeMedia:+vMean.toFixed(1),estabilizada:stable,
   omegaGrausS:+(omega*180/Math.PI).toFixed(2),raio:Number.isFinite(R)?+R.toFixed(1):null,aceleracaoLateral:+(vMean*omega).toFixed(0),
   contatoContinuo:continuous,passosSemContato:ticksOff,desprendimentos:detach,pousos:land,eventosContato:contactEvents,
-  emContatoNoFim:s.contact,validoParaEnvelope:continuous,slipMax:+slip.toFixed(2)};
+  emContatoNoFim:s.contact,validoParaEnvelope:continuous&&stable,
+  motivosInvalidade:[...(continuous?[]:['perda_de_contato']),...(stable?[]:['velocidade_nao_estabilizada'])],slipMax:+slip.toFixed(2)};
 }
 
 function curveEnvelope({speeds=[200,300,400,500],duties=[.25,.5,.75,1]}={}){

@@ -10,6 +10,9 @@ const {makeTracker}=require(I+'frame.cjs');
 const {makeClassifier,p08IntentionalSegments}=require(I+'detach.cjs');
 const {runPilot}=require(I+'pilot.cjs');
 const {flatPad,measure}=require(I+'envelope.cjs');
+const {determinism,SCENARIOS}=require(I+'determinism.cjs');
+const {profileSubsystems,profilingIsTransparent}=require(I+'profile.cjs');
+const {benchmark,stoppedStepCost}=require(I+'perf.cjs');
 
 const {P,cfg,profile,air}=loadP08();
 const C=new P.Course();
@@ -61,7 +64,15 @@ test('P09-0 · classificador: intencional só em trecho marcado, nunca pela zona
  const unmarked=classify(7,230,600,()=>({throttle:true}),[]);assert.equal(unmarked.events[0].cause,'sem_superficie');assert.equal(unmarked.events[0].unjustifiedCandidate,true);
  // saída lateral dentro de um trecho marcado continua sendo saída pela borda
  const wide=[{id:'rampa-inteira',from:C.zones[7].station,to:C.zones[9].station-1,kind:'rampa_lancamento',motivo:'teste'}];
- const side=classify(7,230,400,()=>({throttle:true,steer:1}),wide);assert.equal(side.events[0].cause,'saida_borda');assert.equal(side.events[0].trecho,null);
+ const side=classify(7,230,400,()=>({throttle:true,steer:1}),wide);assert.equal(side.events[0].cause,'saida_borda');
+ assert.equal(side.events[0].trecho.id,'rampa-inteira','contexto do trecho registrado');assert.equal(side.events[0].mecanismoEsperado,false);
+ // teste negativo: perda inadequada (limite de reação) dentro de um trecho marcado continua sendo limite de reação
+ const tubeSeg=[{id:'teste-tubo-marcado',from:C.zones[6].station,to:C.zones[7].station-1,kind:'salto',motivo:'teste negativo'}];
+ const tube=classify(6,250,600,(s,k)=>({throttle:true,keys:k>=40&&k<160?['ArrowRight']:[]}),tubeSeg);
+ assert.ok(tube.events.length>0);for(const e of tube.events){assert.equal(e.cause,'limite_reacao');assert.equal(e.causaFisica,'limite_reacao');
+  assert.equal(e.mecanismoEsperado,false);assert.equal(e.trecho.id,'teste-tubo-marcado');}
+ // a decolagem real na borda marcada corresponde ao mecanismo declarado
+ const ramp=classify(7,230,600,()=>({throttle:true}));assert.equal(ramp.events[0].mecanismoEsperado,true);assert.equal(ramp.events[0].causaFisica,'sem_superficie');
  // trechos sem tipo válido ou sem motivo são rejeitados
  assert.throws(()=>makeClassifier(C,makeTracker(C),{intentionalSegments:[{id:'x',from:1,to:2,kind:'zona',motivo:'m'}]}));
  assert.throws(()=>makeClassifier(C,makeTracker(C),{intentionalSegments:[{id:'x',from:1,to:2,kind:'lacuna',motivo:''}]}));});
@@ -74,11 +85,32 @@ test('P09-0 · piloto de teste: parede 90° → loop com atraso de 250 ms; sem d
 test('P09-0 · envelope de curva: velocidade estabilizada e raio decrescente com a direção',()=>{
  const pad=flatPad(),a=measure(pad,500,.25),b=measure(pad,500,.5),c=measure(pad,500,1);
  assert.ok(a.estabilizada&&b.estabilizada);assert.ok(a.raio>b.raio&&b.raio>c.raio);assert.ok(b.raio>400&&b.raio<900,'R '+b.raio);
- assert.ok([a,b,c].every(x=>x.contatoContinuo&&x.validoParaEnvelope&&x.desprendimentos===0));});
+ assert.ok([a,b].every(x=>x.contatoContinuo&&x.validoParaEnvelope&&x.desprendimentos===0));
+ // direção plena a 500 u/s: contato contínuo, mas velocidade não estabilizada → registrado como diagnóstico, inválido
+ assert.equal(c.contatoContinuo,true);assert.equal(c.estabilizada,false);assert.equal(c.validoParaEnvelope,false);
+ assert.deepEqual(c.motivosInvalidade,['velocidade_nao_estabilizada']);assert.ok(Number.isFinite(c.raio));});
 
 test('P09-0 · envelope: desprendimento seguido de pouso invalida o ponto mesmo terminando apoiado',()=>{
  const pad=flatPad(),r=measure(pad,300,.25,{perturb:k=>k===5?{release:true}:{}});
  assert.equal(r.emContatoNoFim,true,'cenário de regressão: termina apoiado');
  assert.equal(r.contatoContinuo,false);assert.equal(r.validoParaEnvelope,false);
  assert.equal(r.desprendimentos,1);assert.equal(r.pousos,1);assert.ok(r.passosSemContato>0);
- assert.deepEqual(r.eventosContato.map(e=>e.evento),['desprendimento','pouso']);});
+ assert.deepEqual(r.eventosContato.map(e=>e.evento),['desprendimento','pouso']);assert.ok(r.motivosInvalidade.includes('perda_de_contato'));});
+
+test('P09-0 · determinismo: passo fixo de 120 Hz com agendamento de 30, 60, 120 Hz e irregular (simulação, sem navegador)',()=>{
+ const r=determinism({scenarios:SCENARIOS.slice(1,3),diagnostic:false});
+ for(const c of r.cenarios)for(const [cad,v] of Object.entries(c.porPasso))assert.equal(v.iguais,true,c.cenario+' '+cad+' passo '+v.primeiroPasso);
+ assert.equal(r.deterministico,true);});
+
+test('P09-0 · perfilamento por subsistema: não altera a simulação e separa a consulta de superfície',()=>{
+ assert.equal(profilingIsTransparent(),true);
+ const p=profileSubsystems({n:2,ticks:60,warmup:10});const names=p.subsistemas.map(x=>x.subsistema);
+ for(const k of ['consultaSuperficie','gradeEspacial_daConsulta','gradeEspacial_daColisao','perfilC_drive'])assert.ok(names.includes(k),k);
+ assert.ok(names.some(n=>n.startsWith('restante')));assert.ok(p.naoExisteNestaEtapa.includes('colisão nave × nave'));
+ assert.equal(p.mediaPorPasso.ativas,2);});
+
+test('P09-0 · validade do benchmark: estados contados e nave parada não conta como ativa',()=>{
+ const st=stoppedStepCost(20000);assert.equal(st.estadoInalterado,true);assert.ok(st.nsPorPasso<5000);
+ const b=benchmark({n:4,mode:'pilotado',ticks:60,warmup:10});const m=b.mediaPorPasso;
+ assert.ok(Math.abs(m.ativas+m.paradas-4)<1e-9);assert.ok(Math.abs(m.emContato+m.noAr-m.ativas)<1e-9);assert.ok(m.emContato>=3,'pilotado deve ficar em contato: '+m.emContato);
+ assert.ok(b.passosPorEstado.contato>0&&b.msPorPassoDeNave.contato>0);});

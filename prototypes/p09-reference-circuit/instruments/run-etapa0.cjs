@@ -13,6 +13,8 @@ const {makeTracker}=require('./frame.cjs');
 const {makeClassifier,p08IntentionalSegments}=require('./detach.cjs');
 const {makeLapTimer}=require('./timing.cjs');
 const {physicsCost}=require('./perf.cjs');
+const {profileSubsystems,profilingIsTransparent}=require('./profile.cjs');
+const {determinism}=require('./determinism.cjs');
 
 
 function classifierCases(C){
@@ -64,7 +66,9 @@ function main(outDir){
   classificador:classifierCases(C),
   cronometro:timerCheck(C),
   pilotoParedeLoop:pilotWallLoop(C),
+  determinismo:determinism(),
   custoFisica:physicsCost({course:C}),
+  perfilamento:{transparente:profilingIsTransparent(),medicoes:[1,8,30].map(n=>profileSubsystems({n}))},
  };
  results.duracaoS=(Date.now()-t0)/1000;
  fs.mkdirSync(outDir,{recursive:true});fs.writeFileSync(path.join(outDir,'etapa0-results.json'),JSON.stringify(results,null,1)+'\n');
@@ -72,4 +76,4 @@ function main(outDir){
 }
 module.exports={main};
 if(require.main===module){const out=process.argv[2]||path.resolve(__dirname,'../../../docs/evidence/p09-etapa0');const r=main(out);
- console.log('equivalência P08:',r.compatibilidade.equivalente,'| cobertura falhas:',r.geometriaPistaP08.cobertura.falhas,'| erro cronômetro:',r.cronometro.erro,'| saída:',out);}
+ console.log('determinismo:',r.determinismo.deterministico,'| equivalência P08:',r.compatibilidade.equivalente,'| cobertura falhas:',r.geometriaPistaP08.cobertura.falhas,'| erro cronômetro:',r.cronometro.erro,'| saída:',out);}
