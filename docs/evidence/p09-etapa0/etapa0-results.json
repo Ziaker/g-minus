@@ -1,0 +1,1594 @@
+{
+ "data": "2026-10-11T22:40:51.695Z",
+ "observacao": "Instrumentos de teste do P09 (etapa 0). Não definem regras de corrida, IA nem pistas.",
+ "compatibilidade": {
+  "malha": {
+   "triangles": [
+    39300,
+    39300
+   ],
+   "different": 0,
+   "first": null
+  },
+  "cenarios": [
+   {
+    "cenario": "área 0 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 1,
+    "pousos": 0
+   },
+   {
+    "cenario": "área 1 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 1,
+    "pousos": 0
+   },
+   {
+    "cenario": "área 2 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 1,
+    "pousos": 0
+   },
+   {
+    "cenario": "área 3 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 1,
+    "pousos": 0
+   },
+   {
+    "cenario": "área 4 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 1,
+    "pousos": 0
+   },
+   {
+    "cenario": "área 5 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 0,
+    "pousos": 0
+   },
+   {
+    "cenario": "área 6 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 1,
+    "pousos": 0
+   },
+   {
+    "cenario": "área 7 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 1,
+    "pousos": 1
+   },
+   {
+    "cenario": "área 8 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 0,
+    "pousos": 1
+   },
+   {
+    "cenario": "área 9 · acelerador",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 0,
+    "pousos": 0
+   },
+   {
+    "cenario": "reta · manobras P01 (scripted)",
+    "passos": 900,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 0,
+    "pousos": 0
+   },
+   {
+    "cenario": "parede · direção alternada",
+    "passos": 500,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 1,
+    "pousos": 0
+   },
+   {
+    "cenario": "rampa · boost no ar ↑",
+    "passos": 600,
+    "identico": true,
+    "primeiraDiferenca": null,
+    "desprendimentos": 1,
+    "pousos": 0
+   }
+  ],
+  "equivalente": true
+ },
+ "geometriaPistaP08": {
+  "fechamento": "pista aberta (não se aplica)",
+  "cobertura": {
+   "completa": true,
+   "amostras": 14889,
+   "falhas": 0,
+   "naoAmostradas": 0,
+   "porCategoria": {
+    "plana": {
+     "secoes": 1271,
+     "amostras": 8897,
+     "falhas": 0
+    },
+    "tuboParcial": {
+     "secoes": 64,
+     "amostras": 448,
+     "falhas": 0
+    },
+    "tuboFechado": {
+     "secoes": 77,
+     "amostras": 5544,
+     "falhas": 0
+    }
+   },
+   "primeirasFalhas": [],
+   "erroNormalMax": {
+    "plana": 0.2508,
+    "tuboParcial": 1.1138,
+    "tuboFechado": 0.4563
+   },
+   "pior": {
+    "plana": {
+     "station": 1948,
+     "u": 0
+    },
+    "tuboParcial": {
+     "station": 1700,
+     "u": 0.9
+    },
+    "tuboFechado": {
+     "station": 1882,
+     "angle": 180
+    }
+   },
+   "tuboParcialDecomposicao": {
+    "erroNoPlanoDaSecao": 0.7571,
+    "inclinacaoLongitudinalMalha": 24.592,
+    "inclinacaoLongitudinalAnalitica": 25.472
+   },
+   "observacao": "plana, tubo parcial (0 < tube < 1) e tubo fechado amostrados"
+  },
+  "transicoes": {
+   "maiores": [
+    {
+     "station": 1665,
+     "zone": 6,
+     "saltoCurvatura": 0.005263,
+     "saltoTorcao": 0.005337,
+     "curvatura": 0,
+     "raioApos": null
+    },
+    {
+     "station": 1164,
+     "zone": 5,
+     "saltoCurvatura": 0.005263,
+     "saltoTorcao": 0.005093,
+     "curvatura": 0.005263195440700472,
+     "raioApos": 190
+    },
+    {
+     "station": 1950,
+     "zone": 7,
+     "saltoCurvatura": 0.002909,
+     "saltoTorcao": 0.002909,
+     "curvatura": 0.0029090909090165287,
+     "raioApos": 343.8
+    },
+    {
+     "station": 1987,
+     "zone": 7,
+     "saltoCurvatura": 0.002909,
+     "saltoTorcao": 0.002909,
+     "curvatura": 0,
+     "raioApos": null
+    },
+    {
+     "station": 897,
+     "zone": 4,
+     "saltoCurvatura": 0,
+     "saltoTorcao": 0.000478,
+     "curvatura": 0,
+     "raioApos": null
+    },
+    {
+     "station": 1162,
+     "zone": 4,
+     "saltoCurvatura": 0,
+     "saltoTorcao": 0.000478,
+     "curvatura": 0,
+     "raioApos": null
+    },
+    {
+     "station": 975,
+     "zone": 4,
+     "saltoCurvatura": 0,
+     "saltoTorcao": 0.0004768,
+     "curvatura": 0,
+     "raioApos": null
+    },
+    {
+     "station": 1084,
+     "zone": 4,
+     "saltoCurvatura": 0,
+     "saltoTorcao": 0.0004768,
+     "curvatura": 0,
+     "raioApos": null
+    }
+   ]
+  }
+ },
+ "envelopeCurva": [
+  {
+   "alvo": 200,
+   "kmh": 720,
+   "direcao": 0.25,
+   "velocidadeMedia": 200.1,
+   "estabilizada": true,
+   "omegaGrausS": 35.58,
+   "raio": 322.3,
+   "aceleracaoLateral": 124,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 17.58
+  },
+  {
+   "alvo": 200,
+   "kmh": 720,
+   "direcao": 0.5,
+   "velocidadeMedia": 200,
+   "estabilizada": true,
+   "omegaGrausS": 56.46,
+   "raio": 203,
+   "aceleracaoLateral": 197,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 24.21
+  },
+  {
+   "alvo": 200,
+   "kmh": 720,
+   "direcao": 0.75,
+   "velocidadeMedia": 199.9,
+   "estabilizada": true,
+   "omegaGrausS": 73.63,
+   "raio": 155.6,
+   "aceleracaoLateral": 257,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 27.28
+  },
+  {
+   "alvo": 200,
+   "kmh": 720,
+   "direcao": 1,
+   "velocidadeMedia": 199.8,
+   "estabilizada": true,
+   "omegaGrausS": 89.22,
+   "raio": 128.3,
+   "aceleracaoLateral": 311,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 28.03
+  },
+  {
+   "alvo": 300,
+   "kmh": 1080,
+   "direcao": 0.25,
+   "velocidadeMedia": 300,
+   "estabilizada": true,
+   "omegaGrausS": 36.58,
+   "raio": 469.9,
+   "aceleracaoLateral": 192,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 36.05
+  },
+  {
+   "alvo": 300,
+   "kmh": 1080,
+   "direcao": 0.5,
+   "velocidadeMedia": 299.7,
+   "estabilizada": true,
+   "omegaGrausS": 58.21,
+   "raio": 295,
+   "aceleracaoLateral": 304,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 49.53
+  },
+  {
+   "alvo": 300,
+   "kmh": 1080,
+   "direcao": 0.75,
+   "velocidadeMedia": 292.3,
+   "estabilizada": false,
+   "omegaGrausS": 76.68,
+   "raio": 218.4,
+   "aceleracaoLateral": 391,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": false,
+   "motivosInvalidade": [
+    "velocidade_nao_estabilizada"
+   ],
+   "slipMax": 56.17
+  },
+  {
+   "alvo": 300,
+   "kmh": 1080,
+   "direcao": 1,
+   "velocidadeMedia": 272.2,
+   "estabilizada": false,
+   "omegaGrausS": 95.01,
+   "raio": 164.2,
+   "aceleracaoLateral": 451,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": false,
+   "motivosInvalidade": [
+    "velocidade_nao_estabilizada"
+   ],
+   "slipMax": 56.51
+  },
+  {
+   "alvo": 400,
+   "kmh": 1440,
+   "direcao": 0.25,
+   "velocidadeMedia": 399.9,
+   "estabilizada": true,
+   "omegaGrausS": 32.03,
+   "raio": 715.4,
+   "aceleracaoLateral": 224,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 43.16
+  },
+  {
+   "alvo": 400,
+   "kmh": 1440,
+   "direcao": 0.5,
+   "velocidadeMedia": 399.7,
+   "estabilizada": true,
+   "omegaGrausS": 50.94,
+   "raio": 449.5,
+   "aceleracaoLateral": 355,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 60.16
+  },
+  {
+   "alvo": 400,
+   "kmh": 1440,
+   "direcao": 0.75,
+   "velocidadeMedia": 384.6,
+   "estabilizada": false,
+   "omegaGrausS": 67.51,
+   "raio": 326.4,
+   "aceleracaoLateral": 453,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": false,
+   "motivosInvalidade": [
+    "velocidade_nao_estabilizada"
+   ],
+   "slipMax": 69.05
+  },
+  {
+   "alvo": 400,
+   "kmh": 1440,
+   "direcao": 1,
+   "velocidadeMedia": 358.2,
+   "estabilizada": false,
+   "omegaGrausS": 84.31,
+   "raio": 243.5,
+   "aceleracaoLateral": 527,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": false,
+   "motivosInvalidade": [
+    "velocidade_nao_estabilizada"
+   ],
+   "slipMax": 71.88
+  },
+  {
+   "alvo": 500,
+   "kmh": 1800,
+   "direcao": 0.25,
+   "velocidadeMedia": 499.9,
+   "estabilizada": true,
+   "omegaGrausS": 27.66,
+   "raio": 1035.7,
+   "aceleracaoLateral": 241,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 46.74
+  },
+  {
+   "alvo": 500,
+   "kmh": 1800,
+   "direcao": 0.5,
+   "velocidadeMedia": 499.6,
+   "estabilizada": true,
+   "omegaGrausS": 44,
+   "raio": 650.7,
+   "aceleracaoLateral": 384,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
+   "motivosInvalidade": [],
+   "slipMax": 65.75
+  },
+  {
+   "alvo": 500,
+   "kmh": 1800,
+   "direcao": 0.75,
+   "velocidadeMedia": 485.9,
+   "estabilizada": false,
+   "omegaGrausS": 58.33,
+   "raio": 477.3,
+   "aceleracaoLateral": 495,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": false,
+   "motivosInvalidade": [
+    "velocidade_nao_estabilizada"
+   ],
+   "slipMax": 75.97
+  },
+  {
+   "alvo": 500,
+   "kmh": 1800,
+   "direcao": 1,
+   "velocidadeMedia": 459.6,
+   "estabilizada": false,
+   "omegaGrausS": 73.14,
+   "raio": 360,
+   "aceleracaoLateral": 587,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": false,
+   "motivosInvalidade": [
+    "velocidade_nao_estabilizada"
+   ],
+   "slipMax": 79.52
+  }
+ ],
+ "envelopeRegressaoContato": {
+  "alvo": 300,
+  "kmh": 1080,
+  "direcao": 0.25,
+  "velocidadeMedia": 310.8,
+  "estabilizada": false,
+  "omegaGrausS": 40.63,
+  "raio": 438.3,
+  "aceleracaoLateral": 220,
+  "contatoContinuo": false,
+  "passosSemContato": 212,
+  "desprendimentos": 1,
+  "pousos": 1,
+  "eventosContato": [
+   {
+    "tick": 6,
+    "evento": "desprendimento"
+   },
+   {
+    "tick": 218,
+    "evento": "pouso"
+   }
+  ],
+  "emContatoNoFim": true,
+  "validoParaEnvelope": false,
+  "motivosInvalidade": [
+   "perda_de_contato",
+   "velocidade_nao_estabilizada"
+  ],
+  "slipMax": 41.73
+ },
+ "trechosIntencionaisP08": [
+  {
+   "id": "p08-borda-e-lacuna",
+   "from": 2015,
+   "to": 2074,
+   "kind": "lacuna",
+   "motivo": "P08: borda da 08 · Rampa / lançamento (seção 2023) e 09 · Voo / queda sem superfície (seções 2024–2074)"
+  }
+ ],
+ "classificador": [
+  {
+   "cenario": "curva aberta sem direção",
+   "total": 1,
+   "porCausa": {
+    "saida_borda": 1
+   },
+   "candidatosInjustificados": 0,
+   "eventos": [
+    {
+     "tick": 169,
+     "time": 1.4083,
+     "cause": "saida_borda",
+     "causaFisica": "saida_borda",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      1.553,
+      2.1,
+      1312.865
+     ],
+     "zone": 1,
+     "station": 435,
+     "lateral": -49.367,
+     "speed": 286.4,
+     "reactionNeeded": null,
+     "reactionLimit": 2500,
+     "normalSpeed": null,
+     "captureLimit": null,
+     "p08Reason": "sem superfície no alcance"
+    }
+   ]
+  },
+  {
+   "cenario": "parede 90° → loop sem direção",
+   "total": 1,
+   "porCausa": {
+    "saida_borda": 1
+   },
+   "candidatosInjustificados": 0,
+   "eventos": [
+    {
+     "tick": 260,
+     "time": 2.1667,
+     "cause": "saida_borda",
+     "causaFisica": "saida_borda",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      547.2,
+      7.809,
+      3394.352
+     ],
+     "zone": 5,
+     "station": 1186,
+     "lateral": 48.908,
+     "speed": 464.03,
+     "reactionNeeded": null,
+     "reactionLimit": 2500,
+     "normalSpeed": null,
+     "captureLimit": null,
+     "p08Reason": "sem superfície no alcance"
+    }
+   ]
+  },
+  {
+   "cenario": "tubo: volta de 360° com → mantida",
+   "total": 15,
+   "porCausa": {
+    "limite_reacao": 15
+   },
+   "candidatosInjustificados": 0,
+   "eventos": [
+    {
+     "tick": 141,
+     "time": 1.175,
+     "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      772.919,
+      47.464,
+      3627.292
+     ],
+     "zone": 6,
+     "station": 1776,
+     "lateral": 10.276,
+     "speed": 284.59,
+     "reactionNeeded": 2527.1,
+     "reactionLimit": 2500,
+     "normalSpeed": -21.038,
+     "captureLimit": 139.65,
+     "p08Reason": "perda de captura/reação"
+    },
+    {
+     "tick": 143,
+     "time": 1.1917,
+     "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      776.827,
+      45.562,
+      3629.03
+     ],
+     "zone": 6,
+     "station": 1777,
+     "lateral": 13.634,
+     "speed": 315,
+     "reactionNeeded": 2857.5,
+     "reactionLimit": 2500,
+     "normalSpeed": -23.789,
+     "captureLimit": 139.67,
+     "p08Reason": "perda de captura/reação"
+    },
+    {
+     "tick": 145,
+     "time": 1.2083,
+     "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      780.591,
+      43.363,
+      3630.917
+     ],
+     "zone": 6,
+     "station": 1778,
+     "lateral": 16.815,
+     "speed": 358.23,
+     "reactionNeeded": 2688,
+     "reactionLimit": 2500,
+     "normalSpeed": -22.385,
+     "captureLimit": 145.25,
+     "p08Reason": "colisão sólida com pista"
+    },
+    {
+     "tick": 148,
+     "time": 1.2333,
+     "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      784.831,
+      39.748,
+      3634.353
+     ],
+     "zone": 6,
+     "station": 1780,
+     "lateral": 20.075,
+     "speed": 320.91,
+     "reactionNeeded": 2524,
+     "reactionLimit": 2500,
+     "normalSpeed": -21.016,
+     "captureLimit": 147.83,
+     "p08Reason": "colisão sólida com pista"
+    },
+    {
+     "tick": 224,
+     "time": 1.8667,
+     "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      779.013,
+      49.123,
+      3669.857
+     ],
+     "zone": 6,
+     "station": 1791,
+     "lateral": 5.668,
+     "speed": 232.05,
+     "reactionNeeded": 2503.7,
+     "reactionLimit": 2500,
+     "normalSpeed": -20.843,
+     "captureLimit": 139.65,
+     "p08Reason": "perda de captura/reação"
+    },
+    {
+     "tick": 226,
+     "time": 1.8833,
+     "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      782.457,
+      47.983,
+      3668.684
+     ],
+     "zone": 6,
+     "station": 1791,
+     "lateral": 9.296,
+     "speed": 262.98,
+     "reactionNeeded": 2785.5,
+     "reactionLimit": 2500,
+     "normalSpeed": -23.19,
+     "captureLimit": 139.67,
+     "p08Reason": "perda de captura/reação"
+    }
+   ]
+  },
+  {
+   "cenario": "rampa e lacuna (trecho intencional marcado)",
+   "total": 1,
+   "porCausa": {
+    "intencional": 1
+   },
+   "candidatosInjustificados": 0,
+   "eventos": [
+    {
+     "tick": 87,
+     "time": 0.725,
+     "cause": "intencional",
+     "causaFisica": "sem_superficie",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": true,
+     "trecho": {
+      "id": "p08-borda-e-lacuna",
+      "tipo": "lacuna",
+      "motivo": "P08: borda da 08 · Rampa / lançamento (seção 2023) e 09 · Voo / queda sem superfície (seções 2024–2074)",
+      "secoes": [
+       2015,
+       2074
+      ],
+      "mecanismosAceitos": [
+       "sem_superficie"
+      ]
+     },
+     "posicao": [
+      942.296,
+      54.736,
+      4333.413
+     ],
+     "zone": 7,
+     "station": 2023,
+     "lateral": 0,
+     "speed": 284.47,
+     "reactionNeeded": null,
+     "reactionLimit": 2500,
+     "normalSpeed": null,
+     "captureLimit": null,
+     "p08Reason": "sem superfície no alcance"
+    }
+   ]
+  },
+  {
+   "cenario": "rampa: saída lateral antes da borda",
+   "total": 1,
+   "porCausa": {
+    "saida_borda": 1
+   },
+   "candidatosInjustificados": 0,
+   "eventos": [
+    {
+     "tick": 83,
+     "time": 0.6917,
+     "cause": "saida_borda",
+     "causaFisica": "saida_borda",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      887.91,
+      45.42,
+      4318.266
+     ],
+     "zone": 7,
+     "station": 2013,
+     "lateral": -48.96,
+     "speed": 249.19,
+     "reactionNeeded": null,
+     "reactionLimit": 2500,
+     "normalSpeed": null,
+     "captureLimit": null,
+     "p08Reason": "sem superfície no alcance"
+    }
+   ]
+  },
+  {
+   "cenario": "impulso de diagnóstico J",
+   "total": 1,
+   "porCausa": {
+    "liberacao_teste": 1
+   },
+   "candidatosInjustificados": 0,
+   "eventos": [
+    {
+     "tick": 31,
+     "time": 0.2583,
+     "cause": "liberacao_teste",
+     "causaFisica": "liberacao_teste",
+     "unjustifiedCandidate": false,
+     "mecanismoEsperado": null,
+     "trecho": null,
+     "posicao": [
+      0,
+      2.1,
+      83.416
+     ],
+     "zone": 0,
+     "station": 28,
+     "lateral": 0,
+     "speed": 199,
+     "reactionNeeded": null,
+     "reactionLimit": 2500,
+     "normalSpeed": null,
+     "captureLimit": null,
+     "p08Reason": "perda de captura/reação"
+    }
+   ]
+  }
+ ],
+ "cronometro": {
+  "analitico": {
+   "velocidade": 600,
+   "instanteExato": 0.10450000000000001,
+   "medido": 0.10450000000000001,
+   "erro": 0
+  },
+  "linhaNaSecao": 200,
+  "velocidade": 500,
+  "passagens": [
+   {
+    "lap": 1,
+    "time": 1.1268138801261798,
+    "lapTime": null
+   }
+  ],
+  "instanteEsperado": 1.1268138801261798,
+  "erro": 0
+ },
+ "pilotoParedeLoop": [
+  {
+   "velocidadeInicial": 180,
+   "atrasoMs": 0,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 12,
+   "desvioMax": 4.52,
+   "fracaoDirecao": 0.0189
+  },
+  {
+   "velocidadeInicial": 180,
+   "atrasoMs": 250,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 44,
+   "desvioMax": 7.58,
+   "fracaoDirecao": 0.0689
+  },
+  {
+   "velocidadeInicial": 180,
+   "atrasoMs": 350,
+   "concluiu": false,
+   "desprendimentos": 1,
+   "toques": 55,
+   "desvioMax": 48.84,
+   "fracaoDirecao": 0.0699
+  },
+  {
+   "velocidadeInicial": 300,
+   "atrasoMs": 0,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 19,
+   "desvioMax": 5.38,
+   "fracaoDirecao": 0.0354
+  },
+  {
+   "velocidadeInicial": 300,
+   "atrasoMs": 250,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 37,
+   "desvioMax": 21.13,
+   "fracaoDirecao": 0.0689
+  },
+  {
+   "velocidadeInicial": 300,
+   "atrasoMs": 350,
+   "concluiu": false,
+   "desprendimentos": 1,
+   "toques": 32,
+   "desvioMax": 191.16,
+   "fracaoDirecao": 0.0675
+  },
+  {
+   "velocidadeInicial": 400,
+   "atrasoMs": 0,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 7,
+   "desvioMax": 6.18,
+   "fracaoDirecao": 0.0143
+  },
+  {
+   "velocidadeInicial": 400,
+   "atrasoMs": 250,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 34,
+   "desvioMax": 15.94,
+   "fracaoDirecao": 0.0697
+  },
+  {
+   "velocidadeInicial": 400,
+   "atrasoMs": 350,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 33,
+   "desvioMax": 23.81,
+   "fracaoDirecao": 0.0676
+  },
+  {
+   "velocidadeInicial": 500,
+   "atrasoMs": 0,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 14,
+   "desvioMax": 12.38,
+   "fracaoDirecao": 0.0297
+  },
+  {
+   "velocidadeInicial": 500,
+   "atrasoMs": 250,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 33,
+   "desvioMax": 8.08,
+   "fracaoDirecao": 0.0699
+  },
+  {
+   "velocidadeInicial": 500,
+   "atrasoMs": 350,
+   "concluiu": true,
+   "desprendimentos": 0,
+   "toques": 33,
+   "desvioMax": 16.66,
+   "fracaoDirecao": 0.0699
+  }
+ ],
+ "determinismo": {
+  "modo": "simulação de agendamento (sem navegador)",
+  "cenarios": [
+   {
+    "cenario": "reta · manobras P01",
+    "passos": 720,
+    "porPasso": {
+     "30 Hz": {
+      "quadros": 180,
+      "iguais": true
+     },
+     "60 Hz": {
+      "quadros": 360,
+      "iguais": true
+     },
+     "120 Hz": {
+      "quadros": 720,
+      "iguais": true
+     },
+     "irregular (semente)": {
+      "quadros": 215,
+      "iguais": true
+     }
+    },
+    "diagnosticoEntradaPorQuadro": {
+     "30 Hz": {
+      "iguais": false,
+      "primeiroPasso": 251
+     },
+     "60 Hz": {
+      "iguais": false,
+      "primeiroPasso": 266
+     },
+     "120 Hz": {
+      "iguais": true
+     }
+    },
+    "deterministico": true
+   },
+   {
+    "cenario": "parede → loop · direção alternada",
+    "passos": 600,
+    "porPasso": {
+     "30 Hz": {
+      "quadros": 150,
+      "iguais": true
+     },
+     "60 Hz": {
+      "quadros": 300,
+      "iguais": true
+     },
+     "120 Hz": {
+      "quadros": 600,
+      "iguais": true
+     },
+     "irregular (semente)": {
+      "quadros": 176,
+      "iguais": true
+     }
+    },
+    "diagnosticoEntradaPorQuadro": {
+     "30 Hz": {
+      "iguais": false,
+      "primeiroPasso": 2
+     },
+     "60 Hz": {
+      "iguais": false,
+      "primeiroPasso": 2
+     },
+     "120 Hz": {
+      "iguais": true
+     }
+    },
+    "deterministico": true
+   },
+   {
+    "cenario": "tubo · volta com →",
+    "passos": 600,
+    "porPasso": {
+     "30 Hz": {
+      "quadros": 150,
+      "iguais": true
+     },
+     "60 Hz": {
+      "quadros": 300,
+      "iguais": true
+     },
+     "120 Hz": {
+      "quadros": 600,
+      "iguais": true
+     },
+     "irregular (semente)": {
+      "quadros": 176,
+      "iguais": true
+     }
+    },
+    "diagnosticoEntradaPorQuadro": {
+     "30 Hz": {
+      "iguais": false,
+      "primeiroPasso": 38
+     },
+     "60 Hz": {
+      "iguais": false,
+      "primeiroPasso": 38
+     },
+     "120 Hz": {
+      "iguais": true
+     }
+    },
+    "deterministico": true
+   },
+   {
+    "cenario": "rampa · boost e ↑ no ar (revisão 4)",
+    "passos": 720,
+    "porPasso": {
+     "30 Hz": {
+      "quadros": 180,
+      "iguais": true
+     },
+     "60 Hz": {
+      "quadros": 360,
+      "iguais": true
+     },
+     "120 Hz": {
+      "quadros": 720,
+      "iguais": true
+     },
+     "irregular (semente)": {
+      "quadros": 215,
+      "iguais": true
+     }
+    },
+    "diagnosticoEntradaPorQuadro": {
+     "30 Hz": {
+      "iguais": false,
+      "primeiroPasso": 98
+     },
+     "60 Hz": {
+      "iguais": false,
+      "primeiroPasso": 98
+     },
+     "120 Hz": {
+      "iguais": true
+     }
+    },
+    "deterministico": true
+   }
+  ],
+  "deterministico": true
+ },
+ "custoFisica": {
+  "triangulos": 39300,
+  "naveParada": {
+   "nsPorPasso": 34.6,
+   "estadoInalterado": true
+  },
+  "pilotado": [
+   {
+    "naves": 1,
+    "modo": "pilotado",
+    "mediaPorPasso": {
+     "ativas": 1,
+     "emContato": 1,
+     "noAr": 0,
+     "paradas": 0
+    },
+    "recolocacoes": 0,
+    "msPorPasso": 0.817,
+    "orcamento120Hz": 9.8,
+    "msPorPassoDeNave": {
+     "contato": 0.8172,
+     "ar": null,
+     "parada": null
+    },
+    "passosPorEstado": {
+     "contato": 600,
+     "ar": 0,
+     "parada": 0
+    }
+   },
+   {
+    "naves": 8,
+    "modo": "pilotado",
+    "mediaPorPasso": {
+     "ativas": 8,
+     "emContato": 6.8,
+     "noAr": 1.2,
+     "paradas": 0
+    },
+    "recolocacoes": 3,
+    "msPorPasso": 8.06,
+    "orcamento120Hz": 96.7,
+    "msPorPassoDeNave": {
+     "contato": 1.169,
+     "ar": 0.0922,
+     "parada": null
+    },
+    "passosPorEstado": {
+     "contato": 4080,
+     "ar": 720,
+     "parada": 0
+    }
+   },
+   {
+    "naves": 16,
+    "modo": "pilotado",
+    "mediaPorPasso": {
+     "ativas": 16,
+     "emContato": 13.6,
+     "noAr": 2.4,
+     "paradas": 0
+    },
+    "recolocacoes": 6,
+    "msPorPasso": 15.91,
+    "orcamento120Hz": 190.9,
+    "msPorPassoDeNave": {
+     "contato": 1.1543,
+     "ar": 0.0883,
+     "parada": null
+    },
+    "passosPorEstado": {
+     "contato": 8160,
+     "ar": 1440,
+     "parada": 0
+    }
+   },
+   {
+    "naves": 30,
+    "modo": "pilotado",
+    "mediaPorPasso": {
+     "ativas": 30,
+     "emContato": 25.6,
+     "noAr": 4.4,
+     "paradas": 0
+    },
+    "recolocacoes": 11,
+    "msPorPasso": 30.79,
+    "orcamento120Hz": 369.5,
+    "msPorPassoDeNave": {
+     "contato": 1.1866,
+     "ar": 0.0938,
+     "parada": null
+    },
+    "passosPorEstado": {
+     "contato": 15360,
+     "ar": 2640,
+     "parada": 0
+    }
+   }
+  ],
+  "livre": [
+   {
+    "naves": 1,
+    "modo": "livre",
+    "mediaPorPasso": {
+     "ativas": 1,
+     "emContato": 1,
+     "noAr": 0,
+     "paradas": 0
+    },
+    "recolocacoes": 0,
+    "msPorPasso": 0.557,
+    "orcamento120Hz": 6.7,
+    "msPorPassoDeNave": {
+     "contato": 0.5573,
+     "ar": null,
+     "parada": null
+    },
+    "passosPorEstado": {
+     "contato": 600,
+     "ar": 0,
+     "parada": 0
+    }
+   },
+   {
+    "naves": 8,
+    "modo": "livre",
+    "mediaPorPasso": {
+     "ativas": 8,
+     "emContato": 2.21,
+     "noAr": 5.79,
+     "paradas": 0
+    },
+    "recolocacoes": 0,
+    "msPorPasso": 2.907,
+    "orcamento120Hz": 34.9,
+    "msPorPassoDeNave": {
+     "contato": 1.1214,
+     "ar": 0.0722,
+     "parada": null
+    },
+    "passosPorEstado": {
+     "contato": 1332,
+     "ar": 3468,
+     "parada": 0
+    }
+   },
+   {
+    "naves": 16,
+    "modo": "livre",
+    "mediaPorPasso": {
+     "ativas": 16,
+     "emContato": 3.61,
+     "noAr": 12.39,
+     "paradas": 0
+    },
+    "recolocacoes": 0,
+    "msPorPasso": 4.897,
+    "orcamento120Hz": 58.8,
+    "msPorPassoDeNave": {
+     "contato": 1.1499,
+     "ar": 0.0583,
+     "parada": null
+    },
+    "passosPorEstado": {
+     "contato": 2179,
+     "ar": 7421,
+     "parada": 0
+    }
+   },
+   {
+    "naves": 30,
+    "modo": "livre",
+    "mediaPorPasso": {
+     "ativas": 30,
+     "emContato": 7.67,
+     "noAr": 22.33,
+     "paradas": 0
+    },
+    "recolocacoes": 0,
+    "msPorPasso": 9.719,
+    "orcamento120Hz": 116.6,
+    "msPorPassoDeNave": {
+     "contato": 1.0937,
+     "ar": 0.0575,
+     "parada": null
+    },
+    "passosPorEstado": {
+     "contato": 4629,
+     "ar": 13371,
+     "parada": 0
+    }
+   }
+  ]
+ },
+ "perfilamento": {
+  "transparente": true,
+  "medicoes": [
+   {
+    "naves": 1,
+    "passos": 300,
+    "msPorPasso": 0.969,
+    "mediaPorPasso": {
+     "ativas": 1,
+     "emContato": 1,
+     "paradas": 0
+    },
+    "subsistemas": [
+     {
+      "subsistema": "consultaSuperficie",
+      "msTotal": 189.65,
+      "chamadasPorPassoDeNave": 3,
+      "usPorChamada": 210.72,
+      "fracao": 65.3
+     },
+     {
+      "subsistema": "restante (interno ao P08: transporte, restrição, colisão, voo, integração)",
+      "msTotal": 78.57,
+      "fracao": 27
+     },
+     {
+      "subsistema": "gradeEspacial_daConsulta",
+      "msTotal": 10.05,
+      "chamadasPorPassoDeNave": 3,
+      "usPorChamada": 11.16,
+      "fracao": 3.5
+     },
+     {
+      "subsistema": "gradeEspacial_daColisao",
+      "msTotal": 6.24,
+      "chamadasPorPassoDeNave": 2,
+      "usPorChamada": 10.4,
+      "fracao": 2.1
+     },
+     {
+      "subsistema": "perfilC_drive",
+      "msTotal": 5.81,
+      "chamadasPorPassoDeNave": 1,
+      "usPorChamada": 19.38,
+      "fracao": 2
+     },
+     {
+      "subsistema": "perfilC_tickEnergy",
+      "msTotal": 0.24,
+      "chamadasPorPassoDeNave": 1,
+      "usPorChamada": 0.82,
+      "fracao": 0.1
+     }
+    ],
+    "custoDoEmbrulhoNsPorChamada": 112.4,
+    "naoExisteNestaEtapa": [
+     "colisão nave × nave",
+     "IA",
+     "regras de corrida e checkpoints com várias naves",
+     "renderização WebGL",
+     "HUD",
+     "VFX",
+     "câmera",
+     "áudio"
+    ]
+   },
+   {
+    "naves": 8,
+    "passos": 300,
+    "msPorPasso": 8.315,
+    "mediaPorPasso": {
+     "ativas": 8,
+     "emContato": 6.69,
+     "paradas": 0
+    },
+    "subsistemas": [
+     {
+      "subsistema": "consultaSuperficie",
+      "msTotal": 1624.29,
+      "chamadasPorPassoDeNave": 2.84,
+      "usPorChamada": 238.66,
+      "fracao": 65.1
+     },
+     {
+      "subsistema": "restante (interno ao P08: transporte, restrição, colisão, voo, integração)",
+      "msTotal": 672.19,
+      "fracao": 26.9
+     },
+     {
+      "subsistema": "gradeEspacial_daConsulta",
+      "msTotal": 99.21,
+      "chamadasPorPassoDeNave": 2.84,
+      "usPorChamada": 14.58,
+      "fracao": 4
+     },
+     {
+      "subsistema": "perfilC_drive",
+      "msTotal": 51.21,
+      "chamadasPorPassoDeNave": 1,
+      "usPorChamada": 21.34,
+      "fracao": 2.1
+     },
+     {
+      "subsistema": "gradeEspacial_daColisao",
+      "msTotal": 45.57,
+      "chamadasPorPassoDeNave": 2,
+      "usPorChamada": 9.49,
+      "fracao": 1.8
+     },
+     {
+      "subsistema": "perfilC_tickEnergy",
+      "msTotal": 2.12,
+      "chamadasPorPassoDeNave": 1,
+      "usPorChamada": 0.88,
+      "fracao": 0.1
+     }
+    ],
+    "custoDoEmbrulhoNsPorChamada": 104.8,
+    "naoExisteNestaEtapa": [
+     "colisão nave × nave",
+     "IA",
+     "regras de corrida e checkpoints com várias naves",
+     "renderização WebGL",
+     "HUD",
+     "VFX",
+     "câmera",
+     "áudio"
+    ]
+   },
+   {
+    "naves": 30,
+    "passos": 300,
+    "msPorPasso": 26.769,
+    "mediaPorPasso": {
+     "ativas": 30,
+     "emContato": 24.91,
+     "paradas": 0
+    },
+    "subsistemas": [
+     {
+      "subsistema": "consultaSuperficie",
+      "msTotal": 5281.57,
+      "chamadasPorPassoDeNave": 2.83,
+      "usPorChamada": 207.34,
+      "fracao": 65.8
+     },
+     {
+      "subsistema": "restante (interno ao P08: transporte, restrição, colisão, voo, integração)",
+      "msTotal": 2138.38,
+      "fracao": 26.6
+     },
+     {
+      "subsistema": "gradeEspacial_daConsulta",
+      "msTotal": 312.79,
+      "chamadasPorPassoDeNave": 2.83,
+      "usPorChamada": 12.28,
+      "fracao": 3.9
+     },
+     {
+      "subsistema": "perfilC_drive",
+      "msTotal": 146.34,
+      "chamadasPorPassoDeNave": 1,
+      "usPorChamada": 16.26,
+      "fracao": 1.8
+     },
+     {
+      "subsistema": "gradeEspacial_daColisao",
+      "msTotal": 145.58,
+      "chamadasPorPassoDeNave": 2,
+      "usPorChamada": 8.09,
+      "fracao": 1.8
+     },
+     {
+      "subsistema": "perfilC_tickEnergy",
+      "msTotal": 5.91,
+      "chamadasPorPassoDeNave": 1,
+      "usPorChamada": 0.66,
+      "fracao": 0.1
+     }
+    ],
+    "custoDoEmbrulhoNsPorChamada": 116.1,
+    "naoExisteNestaEtapa": [
+     "colisão nave × nave",
+     "IA",
+     "regras de corrida e checkpoints com várias naves",
+     "renderização WebGL",
+     "HUD",
+     "VFX",
+     "câmera",
+     "áudio"
+    ]
+   }
+  ]
+ },
+ "duracaoS": 124.737
+}
