@@ -1,0 +1,78 @@
+{
+  "browser": "153.0.8010.0",
+  "results": [
+    {
+      "key": "ArrowLeft",
+      "mode": "A",
+      "screenDisplacement": -0.9413872848672776,
+      "expected": "left"
+    },
+    {
+      "key": "ArrowLeft",
+      "mode": "B",
+      "screenDisplacement": -0.9413872848672776,
+      "expected": "left"
+    },
+    {
+      "key": "ArrowLeft",
+      "mode": "C",
+      "screenDisplacement": -0.9413872848672776,
+      "expected": "left"
+    },
+    {
+      "key": "ArrowRight",
+      "mode": "A",
+      "screenDisplacement": 0.9413872848672776,
+      "expected": "right"
+    },
+    {
+      "key": "ArrowRight",
+      "mode": "B",
+      "screenDisplacement": 0.9413872848672776,
+      "expected": "right"
+    },
+    {
+      "key": "ArrowRight",
+      "mode": "C",
+      "screenDisplacement": 0.9413872848672776,
+      "expected": "right"
+    },
+    {
+      "key": "KeyZ",
+      "mode": "A",
+      "screenDisplacement": -4.302411701886759,
+      "expected": "left"
+    },
+    {
+      "key": "KeyZ",
+      "mode": "B",
+      "screenDisplacement": -4.302411701886759,
+      "expected": "left"
+    },
+    {
+      "key": "KeyZ",
+      "mode": "C",
+      "screenDisplacement": -4.302411701886759,
+      "expected": "left"
+    },
+    {
+      "key": "KeyC",
+      "mode": "A",
+      "screenDisplacement": 4.302411701886759,
+      "expected": "right"
+    },
+    {
+      "key": "KeyC",
+      "mode": "B",
+      "screenDisplacement": 4.302411701886759,
+      "expected": "right"
+    },
+    {
+      "key": "KeyC",
+      "mode": "C",
+      "screenDisplacement": 4.302411701886759,
+      "expected": "right"
+    }
+  ],
+  "errors": []
+}

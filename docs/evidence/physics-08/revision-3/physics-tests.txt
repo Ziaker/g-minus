@@ -1,0 +1,39 @@
+✔ P01 original parity on flat: acceleration (228.683801ms)
+✔ P01 original parity on flat: coast (205.140058ms)
+✔ P01 original parity on flat: brake (256.901927ms)
+✔ P01 original parity on flat: steer (201.987863ms)
+✔ P01 original parity on flat: drift (204.971936ms)
+✔ P01 original parity on flat: strafe (187.787784ms)
+✔ P01 original parity on flat: airbrakes (202.15334ms)
+✔ P01 original parity on flat: boost (232.091418ms)
+✔ geometry has finite real triangles, barriers, ten areas and an actual gap (43.612718ms)
+✔ suspension holds target without periodic bounce (443.099381ms)
+✔ full inverted loop is continuous (571.834804ms)
+✔ continuous wall/tube contact 4 (212.908997ms)
+✔ continuous wall/tube contact 6 (845.967702ms)
+✔ ramp launches, real gravity acts, landing remains above geometry (143.623947ms)
+✔ left/right yaw matches screen direction in contact and flight (50.429066ms)
+✔ 30/60/120 render cadences produce identical 120Hz states (941.455038ms)
+✔ high-speed sphere sweep prevents rail tunneling (0.994513ms)
+✔ v3 strict JSON roundtrip rejects old independent physics and invalid profiles (1.953785ms)
+✔ canonical geometry and full export remain in generated HTML (1.959283ms)
+✔ original P01 airborne parity: KeyX (65.051696ms)
+✔ original P01 airborne parity: KeyW (68.41718ms)
+✔ original P01 airborne parity: KeyS (68.75669ms)
+✔ quick released steering tap survives until the physical step (1.239141ms)
+✔ original P01 landing bonus/penalty parity: pitch 0 (20.744988ms)
+✔ original P01 landing bonus/penalty parity: pitch 1 (20.625308ms)
+✔ air assistance levels inverted and vertical frames continuously (37.786634ms)
+✔ boost and pull-up reverse terminal fall, including W + Down (26.633963ms)
+✔ empty energy does not grant boost recovery (7.540405ms)
+✔ air assistance preserves attached inverted loop and ground steering (1402.878748ms)
+✔ v3 air configuration validates and migrates v2 with old flight retained (1.849317ms)
+✔ assisted recovery is deterministic at 30/60/120 render cadences (52.38478ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7343.630815

@@ -1,0 +1,8 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+(async()=>{const root=path.resolve(__dirname,'../..'),browser=await chromium.launch({executablePath:process.env.CHROMIUM_EXECUTABLE,headless:true,args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});try{const page=await browser.newPage(),errors=[],results=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('file://'+root+'/prototypes/08_3d_physics_lab.html');await page.waitForFunction(()=>window.__P08?.renderer().ok);
+for(const [key,side]of [['ArrowLeft',-1],['ArrowRight',1],['KeyZ',-1],['KeyC',1]]){
+ await page.evaluate(()=>{__P08.setPaused(true);__P08.reset();});await page.locator('#view').focus();await page.keyboard.down(key);await page.keyboard.down('KeyX');await page.evaluate(()=>__P08.step(30));await page.keyboard.up(key);await page.keyboard.up('KeyX');const bodies=await page.evaluate(()=>__P08.getBodies());
+ for(const mode of ['A']){const screenDisplacement=-bodies[mode].p[0];assert.ok(screenDisplacement*side>0,key+' '+mode);results.push({key,mode,screenDisplacement,expected:side<0?'left':'right'});}
+}
+assert.deepEqual(errors,[]);assert.equal(await page.evaluate(()=>__P08.renderer().error),0);fs.writeFileSync(root+'/docs/evidence/physics-08/revision-2/direction-regression.json',JSON.stringify({browser:await browser.version(),results,errors},null,2));console.log('4 keyboard direction checks passed in WebGL');}finally{await browser.close();}})().catch(e=>{console.error(e);process.exit(1)});
