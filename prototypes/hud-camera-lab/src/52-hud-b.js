@@ -47,8 +47,8 @@ const HUD_B={id:'B',name:'Vector Tactical',tag:'interface tática · espaço',
    if(o.threat)vtext(g,'ATK',c.x,c.y+hh+30*u,20*u,{align:'center',color:HUDC.pink});else if(o.shield<30&&o.dist<60)stext(g,'VULNERÁVEL',c.x,c.y+hh+24*u,14*u,{align:'center',color:HUDC.gold,weight:700});
    noteText(MET,'bracket',14*u,c.x,c.y,0);}
   // ---------- ameaças fora da tela: setas na borda com distância
-  for(const o of T.nearby){if(o.dist>cfg.threatRange)continue;if(!(o.threat||o.dist<40))continue;const S=M.ships[o.id],c=M.proj(vec.madd(S.pose.p,S.pose.N,1.2));if(c&&c.inside)continue;
-   const ang=Math.atan2(o.dl,-o.ds)-Math.PI/2,cx=w/2,cy=h*.55,R=Math.min(w,h)*.42,x=clamp(cx+Math.cos(ang)*R*1.6,40*u,w-40*u),y=clamp(cy-Math.sin(-ang)*R,90*u,h-60*u);
+  if(T.phase==='race')for(const o of T.nearby){if(o.dist>cfg.threatRange)continue;if(!(o.threat||o.dist<40))continue;const S=M.ships[o.id],c=M.proj(vec.madd(S.pose.p,S.pose.N,1.2));if(c&&c.inside)continue;
+   const len=Math.hypot(o.dl,o.ds)||1,cx=w/2,cy=h*.55,R=Math.min(w,h)*.42,x=clamp(cx+o.dl/len*R*1.6,40*u,w-40*u),y=clamp(cy-o.ds/len*R,90*u,h-60*u);   // frente = topo, trás = base
    g.save();g.translate(x,y);g.rotate(Math.atan2(y-cy,x-cx));poly(g,[[18*u,0],[-10*u,-12*u],[-4*u,0],[-10*u,12*u]],o.threat?HUDC.pink:HUDC.cyan,HUDC.ink,2.5*u);g.restore();stext(g,Math.round(o.dist)+'M',x,y+26*u,14*u,{align:'center',color:o.threat?HUDC.pink:HUDC.paper});}
   // ---------- indicador direcional de dano (cunha em volta do centro)
   if(T.dmgAge<cfg.damagePersist){const f=1-T.dmgAge/cfg.damagePersist,side=T.dmgSide>=0?1:-1,cx=w/2,cy=h*.52,R=Math.min(w,h)*.33,a0=side>0?-.5:Math.PI-.5,a1=a0+1;
@@ -56,8 +56,9 @@ const HUD_B={id:'B',name:'Vector Tactical',tag:'interface tática · espaço',
    stext(g,'-'+Math.round(Math.max(0,T.shieldFrom-T.shield))+' '+(T.dmgKind==='barrier'?'BARREIRA':T.dmgKind==='side'?'LATERAL':T.dmgKind==='spin'?'GIRO':'COLISÃO'),cx+side*(R+12*u),cy+6*u,16*u,{align:side>0?'left':'right',color:HUDC.pink,weight:700,alpha:f});}
   // ---------- ataque iminente: tempo até o contato (da fase real do atacante)
   for(const o of T.nearby.filter(o=>o.threat)){const rem=o.threatPhase===1?SIM.SIDE_WIND-o.threatT:Math.max(0,SIM.SIDE_LUNGE-o.threatT),side=o.dl>=0?1:-1,x=w/2+side*Math.min(w*.28,330*u),y=h*.42;
-   poly(g,side>0?[[x-80*u,y-30*u],[x+90*u,y-30*u],[x+110*u,y],[x+90*u,y+30*u],[x-80*u,y+30*u]]:[[x+80*u,y-30*u],[x-90*u,y-30*u],[x-110*u,y],[x-90*u,y+30*u],[x+80*u,y+30*u]],'rgba(7,6,15,.85)',HUDC.pink,3*u);
-   vtext(g,'ATAQUE '+(side>0?'▶':'◀')+' '+rem.toFixed(2)+'S',x+side*10*u,y+11*u,24*u,{align:'center',color:HUDC.pink});noteText(MET,'threat',24*u,x,y,0);}
+   const txt='ATAQUE '+(side>0?'▶':'◀')+' '+rem.toFixed(2)+'S',tw=vtextWidth(txt,24*u)+50*u,x0=side>0?x-tw/2:x+tw/2,x1=side>0?x+tw/2:x-tw/2;
+   poly(g,[[x0,y-30*u],[x1,y-30*u],[x1+side*22*u,y],[x1,y+30*u],[x0,y+30*u]],'rgba(7,6,15,.85)',HUDC.pink,3*u);
+   vtext(g,txt,x,y+11*u,24*u,{align:'center',color:HUDC.pink});noteText(MET,'threat',24*u,x,y,0);}
   // ---------- cabeçalho: posição, volta, tempo
   {const H=L.head;chamfer(g,H.x-12*u,H.y-66*u,372*u,136*u,16*u,'rgba(67,240,222,.55)','rgba(7,6,15,.55)',1.5*u);vtext(g,'P'+ordinal(T.rank),H.x,H.y,58*u,{color:T.rank<=3?HUDC.gold:HUDC.paper,skew:-.12});const pw=vtextWidth('P'+ordinal(T.rank),58*u);stext(g,'/'+T.total,H.x+pw+8*u,H.y,20*u,{color:HUDC.mute});
    vtext(g,'VOLTA '+T.lap+'/'+T.laps,H.x,H.y+36*u,22*u,{color:HUDC.cyan,skew:-.12});vtext(g,fmtLap(T.lapTime),H.x+196*u,H.y+36*u,22*u,{color:HUDC.paper,skew:-.12});

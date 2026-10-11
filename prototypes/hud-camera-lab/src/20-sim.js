@@ -40,7 +40,7 @@ function createRace(opt={}){
    boostT:0,boostCool:0,boosts:0,dashT:0,drifting:false,slip:0,driftT:0,
    side:0,sideT:0,sideDir:0,sideTarget:-1,sideCool:2+rngNext(rng)*4,sideHit:false,spinT:0,spinCool:6+rngNext(rng)*6,spinHits:0,stunT:0,spinOutT:0,
    air:false,airS0:0,airGap:0,airH:0,alt:0,lap:0,lapStartT:SIM.GO,lastLap:null,bestLap:null,bestLapIdx:-1,laps:[],sector:0,sectorStartT:SIM.GO,sectors:[null,null,null],lastSectors:[null,null,null],bestSectors:[null,null,null],
-   finished:false,finishT:null,place:0,rank:slot+1,acc:0,vCap:1e9,scriptAct:null,boostT0:-99,spinT0:-99,sideT0:-99,collT0:-99,collSide:0,collDmg:0,dashT0:-99,takeoffT0:-99,landT0:-99,takeoffS:0,inRecharge:false,crit:false,crossK:0,barrierCool:0,offEdge:0});
+   crossK0:true,finished:false,finishT:null,place:0,rank:slot+1,acc:0,vCap:1e9,scriptAct:null,boostT0:-99,spinT0:-99,sideT0:-99,collT0:-99,collSide:0,collDmg:0,dashT0:-99,takeoffT0:-99,landT0:-99,takeoffS:0,inRecharge:false,crit:false,crossK:0,barrierCool:0,offEdge:0});
  }
  const M=Math.ceil((laps*TRACK.L-SIM.CROSS_ORIGIN+800)/SIM.CROSS_STEP);
  const race={seed,laps,count,rivalId,playerSlot,statics,
@@ -191,7 +191,8 @@ function raceStep(race,st=race.state){
   if(!sh.crit&&sh.shield<SIM.CRIT_ENTER){sh.crit=true;emit(race,'shieldCritical',sh.id,-1,{on:true,shield:sh.shield});}
   if(sh.crit&&sh.shield>SIM.CRIT_EXIT){sh.crit=false;emit(race,'shieldCritical',sh.id,-1,{on:false,shield:sh.shield});}
   // registro de passagem (intervalos reais entre naves)
-  const log=race.cross[sh.id];while(sh.crossK<log.length&&DIST_MAX_KEYS(sh.crossK)<=sh.s){const d=DIST_MAX_KEYS(sh.crossK);log[sh.crossK]=t+dt*((d-s0)/Math.max(1e-9,sh.s-s0));sh.crossK++;}
+  const log=race.cross[sh.id];if(sh.crossK0){sh.crossK0=false;while(sh.crossK<log.length&&DIST_MAX_KEYS(sh.crossK)<=s0)sh.crossK++;}   // posições do grid não geram passagens
+  while(sh.crossK<log.length&&DIST_MAX_KEYS(sh.crossK)<=sh.s){const d=DIST_MAX_KEYS(sh.crossK);log[sh.crossK]=t+dt*((d-s0)/Math.max(1e-9,sh.s-s0));sh.crossK++;}
   // setores e voltas
   if(!sh.finished&&sh.s>=0){const third=L/3,sec=Math.floor(sh.s/third),old=Math.floor(Math.max(0,s0)/third);
    if(s0<0&&sh.s>=0){sh.lapStartT=t+dt*((0-s0)/(sh.s-s0));sh.sectorStartT=sh.lapStartT;emit(race,'lapStart',sh.id,-1,{lap:1});}

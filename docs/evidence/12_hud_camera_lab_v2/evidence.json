@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-11T06:21:05.811Z",
+  "url": "prototypes/12_hud_camera_lab_v2.html",
+  "shots": [
+    "01-mesmo-instante-hud-A-cam-A.jpg",
+    "01-mesmo-instante-hud-B-cam-A.jpg",
+    "01-mesmo-instante-hud-C-cam-A.jpg",
+    "02-loop-hud-C-cam-A.jpg",
+    "02-loop-hud-C-cam-B.jpg",
+    "02-loop-hud-C-cam-C.jpg",
+    "03-matriz-3x3-defesa.jpg",
+    "04-tres-huds-camera-B-impulso.jpg",
+    "05-largada-hud-A-cam-A.jpg",
+    "05-largada-hud-B-cam-A.jpg",
+    "05-largada-hud-C-cam-A.jpg",
+    "06-impulso-hud-A-cam-A.jpg",
+    "06-impulso-hud-B-cam-A.jpg",
+    "06-impulso-hud-C-cam-A.jpg",
+    "07-energia-critica-hud-A-cam-B.jpg",
+    "07-energia-critica-hud-B-cam-B.jpg",
+    "07-energia-critica-hud-C-cam-B.jpg",
+    "08-impacto-barreira-hud-A-cam-C.jpg",
+    "08-impacto-barreira-hud-B-cam-C.jpg",
+    "08-impacto-barreira-hud-C-cam-C.jpg",
+    "09-salto-hud-A-cam-B.jpg",
+    "09-salto-hud-B-cam-B.jpg",
+    "09-salto-hud-C-cam-B.jpg",
+    "10-borda-aberta-hud-A-cam-A.jpg",
+    "10-borda-aberta-hud-B-cam-A.jpg",
+    "10-borda-aberta-hud-C-cam-A.jpg",
+    "11-ataque-iminente-hud-A-cam-B.jpg",
+    "11-ataque-iminente-hud-B-cam-B.jpg",
+    "11-ataque-iminente-hud-C-cam-B.jpg",
+    "12-disputa-rival-hud-A-cam-C.jpg",
+    "12-disputa-rival-hud-B-cam-C.jpg",
+    "12-disputa-rival-hud-C-cam-C.jpg",
+    "13-volta-final-hud-A-cam-A.jpg",
+    "13-volta-final-hud-B-cam-A.jpg",
+    "13-volta-final-hud-C-cam-A.jpg",
+    "14-chegada-hud-A-cam-C.jpg",
+    "14-chegada-hud-B-cam-C.jpg",
+    "14-chegada-hud-C-cam-C.jpg",
+    "15-laboratorio-painel.jpg",
+    "16-21x9-hud-A.jpg",
+    "16-21x9-hud-B.jpg",
+    "16-21x9-hud-C.jpg",
+    "16-9x16-hud-A.jpg",
+    "16-9x16-hud-B.jpg",
+    "16-9x16-hud-C.jpg"
+  ],
+  "checks": {
+    "webgl": {
+      "version": "WebGL 1.0 (OpenGL ES 2.0 Chromium)",
+      "renderer": "WebKit WebGL"
+    },
+    "determinism": {
+      "continuous": "aa5602dd",
+      "seek": "aa5602dd",
+      "equal": true
+    },
+    "frameCost": {
+      "msPerFrameSwiftShader": {
+        "single": 81.8,
+        "matrix": 546.5
+      },
+      "note": "SwiftShader rasteriza na CPU; não representa GPU real"
+    },
+    "hudCost": {
+      "msPerHud1080p": {
+        "A": 2,
+        "B": 2.28,
+        "C": 1.71
+      }
+    },
+    "resources": {
+      "before": {
+        "ship": 179,
+        "world": 280,
+        "fx": 1,
+        "restores": 0,
+        "ok": true,
+        "lost": false
+      },
+      "after": {
+        "ship": 179,
+        "world": 280,
+        "fx": 1,
+        "restores": 0,
+        "ok": true,
+        "lost": false
+      }
+    },
+    "jsonInvalid": {
+      "rejected": true,
+      "error": "hud: chave obrigatória ausente \"C\"",
+      "unchanged": true
+    },
+    "contextLoss": {
+      "ship": 179,
+      "world": 280,
+      "fx": 1,
+      "restores": 1,
+      "ok": true,
+      "lost": false
+    },
+    "uiSmoke": {
+      "steps": 10,
+      "validImport": "Importado integralmente; laboratório sincronizado.",
+      "invalidImport": "Rejeitado sem alterações: camera.A.distance: -100 fora de [4, 50]",
+      "configAfter": 50
+    },
+    "pageErrors": [],
+    "pageErrors_21x9": [],
+    "pageErrors_9x16": []
+  }
+}

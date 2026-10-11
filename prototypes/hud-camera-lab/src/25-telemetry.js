@@ -2,7 +2,7 @@
    estado da simulação e dos registros de passagem (nenhum número fixo ou inventado). */
 function crossTime(race,id,d){const k=(d-SIM.CROSS_ORIGIN)/SIM.CROSS_STEP,i=Math.floor(k),f=k-i,log=race.cross[id];if(i<0||i+1>=log.length)return NaN;const a=log[i],b=log[i+1];if(Number.isNaN(a))return NaN;if(Number.isNaN(b))return f<1e-9?a:NaN;return lerp(a,b,f);}
 // intervalo real: tempo entre a passagem das duas naves pelo mesmo ponto (a nave de trás é 'behind')
-function intervalBetween(race,st,front,behind){const t=raceTime(st);const tf=crossTime(race,front.id,behind.s);return Number.isNaN(tf)?NaN:Math.max(0,t-tf);}
+function intervalBetween(race,st,front,behind){const t=raceTime(st);if(t<SIM.GO)return NaN;const tf=crossTime(race,front.id,behind.s);return Number.isNaN(tf)?NaN:Math.max(0,t-tf);}
 function lapDistance(sh){return Math.max(0,sh.s-sh.lap*TRACK.L);}
 // delta ao vivo contra a melhor volta anterior (ou a última), no mesmo ponto da volta
 function liveDelta(race,st,sh,ref='best'){if(!sh.laps.length||sh.finished)return null;const idx=ref==='last'?sh.laps.length-1:sh.bestLapIdx;if(idx<0)return null;

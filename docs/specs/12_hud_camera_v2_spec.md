@@ -245,7 +245,7 @@ O build embute, sem alteração e em escopo próprio, o bloco do P05, o resolved
 
 ## 12. Limitações verdadeiras
 
-- **Desempenho em GPU real não medido.** As medições de navegador usaram Chromium headless com SwiftShader, que rasteriza na CPU: 82 ms/quadro em vista única e 488 ms na matriz 3×3, sem valor de referência para GPU. HUDs: 1,3–2,2 ms por quadro a 1080p.
+- **Desempenho em GPU real não medido.** As medições de navegador usaram Chromium headless com SwiftShader, que rasteriza na CPU: 56–82 ms/quadro em vista única e 474–547 ms na matriz 3×3 (varia entre execuções), sem valor de referência para GPU. HUDs: 1,3–2,6 ms por quadro a 1080p (Canvas 2D).
 - A **sensação de movimento** das câmeras foi verificada por testes numéricos e capturas paradas, não por avaliação humana em tempo real.
 - Fontes do sistema (Bahnschrift e equivalentes) variam por plataforma. Os numerais e títulos usam a fonte vetorial própria e não dependem disso.
 - Com as camadas de Boost A/D/E ligadas (padrão do 04 V2), os ecos do Boost D ocupam a parte inferior da tela nas câmeras próximas. Os toggles estão no painel.

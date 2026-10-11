@@ -1484,7 +1484,7 @@ function createRace(opt={}){
    boostT:0,boostCool:0,boosts:0,dashT:0,drifting:false,slip:0,driftT:0,
    side:0,sideT:0,sideDir:0,sideTarget:-1,sideCool:2+rngNext(rng)*4,sideHit:false,spinT:0,spinCool:6+rngNext(rng)*6,spinHits:0,stunT:0,spinOutT:0,
    air:false,airS0:0,airGap:0,airH:0,alt:0,lap:0,lapStartT:SIM.GO,lastLap:null,bestLap:null,bestLapIdx:-1,laps:[],sector:0,sectorStartT:SIM.GO,sectors:[null,null,null],lastSectors:[null,null,null],bestSectors:[null,null,null],
-   finished:false,finishT:null,place:0,rank:slot+1,acc:0,vCap:1e9,scriptAct:null,boostT0:-99,spinT0:-99,sideT0:-99,collT0:-99,collSide:0,collDmg:0,dashT0:-99,takeoffT0:-99,landT0:-99,takeoffS:0,inRecharge:false,crit:false,crossK:0,barrierCool:0,offEdge:0});
+   crossK0:true,finished:false,finishT:null,place:0,rank:slot+1,acc:0,vCap:1e9,scriptAct:null,boostT0:-99,spinT0:-99,sideT0:-99,collT0:-99,collSide:0,collDmg:0,dashT0:-99,takeoffT0:-99,landT0:-99,takeoffS:0,inRecharge:false,crit:false,crossK:0,barrierCool:0,offEdge:0});
  }
  const M=Math.ceil((laps*TRACK.L-SIM.CROSS_ORIGIN+800)/SIM.CROSS_STEP);
  const race={seed,laps,count,rivalId,playerSlot,statics,
@@ -1635,7 +1635,8 @@ function raceStep(race,st=race.state){
   if(!sh.crit&&sh.shield<SIM.CRIT_ENTER){sh.crit=true;emit(race,'shieldCritical',sh.id,-1,{on:true,shield:sh.shield});}
   if(sh.crit&&sh.shield>SIM.CRIT_EXIT){sh.crit=false;emit(race,'shieldCritical',sh.id,-1,{on:false,shield:sh.shield});}
   // registro de passagem (intervalos reais entre naves)
-  const log=race.cross[sh.id];while(sh.crossK<log.length&&DIST_MAX_KEYS(sh.crossK)<=sh.s){const d=DIST_MAX_KEYS(sh.crossK);log[sh.crossK]=t+dt*((d-s0)/Math.max(1e-9,sh.s-s0));sh.crossK++;}
+  const log=race.cross[sh.id];if(sh.crossK0){sh.crossK0=false;while(sh.crossK<log.length&&DIST_MAX_KEYS(sh.crossK)<=s0)sh.crossK++;}   // posições do grid não geram passagens
+  while(sh.crossK<log.length&&DIST_MAX_KEYS(sh.crossK)<=sh.s){const d=DIST_MAX_KEYS(sh.crossK);log[sh.crossK]=t+dt*((d-s0)/Math.max(1e-9,sh.s-s0));sh.crossK++;}
   // setores e voltas
   if(!sh.finished&&sh.s>=0){const third=L/3,sec=Math.floor(sh.s/third),old=Math.floor(Math.max(0,s0)/third);
    if(s0<0&&sh.s>=0){sh.lapStartT=t+dt*((0-s0)/(sh.s-s0));sh.sectorStartT=sh.lapStartT;emit(race,'lapStart',sh.id,-1,{lap:1});}
@@ -1709,7 +1710,7 @@ function crossT(r,id,d){const k=(d-SIM.CROSS_ORIGIN)/SIM.CROSS_STEP,i=Math.floor
    estado da simulação e dos registros de passagem (nenhum número fixo ou inventado). */
 function crossTime(race,id,d){const k=(d-SIM.CROSS_ORIGIN)/SIM.CROSS_STEP,i=Math.floor(k),f=k-i,log=race.cross[id];if(i<0||i+1>=log.length)return NaN;const a=log[i],b=log[i+1];if(Number.isNaN(a))return NaN;if(Number.isNaN(b))return f<1e-9?a:NaN;return lerp(a,b,f);}
 // intervalo real: tempo entre a passagem das duas naves pelo mesmo ponto (a nave de trás é 'behind')
-function intervalBetween(race,st,front,behind){const t=raceTime(st);const tf=crossTime(race,front.id,behind.s);return Number.isNaN(tf)?NaN:Math.max(0,t-tf);}
+function intervalBetween(race,st,front,behind){const t=raceTime(st);if(t<SIM.GO)return NaN;const tf=crossTime(race,front.id,behind.s);return Number.isNaN(tf)?NaN:Math.max(0,t-tf);}
 function lapDistance(sh){return Math.max(0,sh.s-sh.lap*TRACK.L);}
 // delta ao vivo contra a melhor volta anterior (ou a última), no mesmo ponto da volta
 function liveDelta(race,st,sh,ref='best'){if(!sh.laps.length||sh.finished)return null;const idx=ref==='last'?sh.laps.length-1:sh.bestLapIdx;if(idx<0)return null;
@@ -2129,7 +2130,7 @@ const HUD_A={id:'A',name:'Flux Rush',tag:'arcade maximalista · emoção',
    if(pm&&pm.age<.32){const f=1-pm.age/.32;g.save();g.strokeStyle=dir>0?HUDC.cyan:HUDC.pink;g.lineWidth=5*u;g.globalAlpha*=f;for(let i=0;i<12;i++){const an=i/12*TAU,r0=110*u,r1=(150+70*K*(1-f))*u;g.beginPath();g.moveTo(80*u+Math.cos(an)*r0,-80*u+Math.sin(an)*r0);g.lineTo(80*u+Math.cos(an)*r1,-80*u+Math.sin(an)*r1);g.stroke();}g.restore();}
    const wnum=vtext(g,txt,0,0,big,{align:al,color:T.rank<=3?HUDC.gold:HUDC.paper,inkW:ink*1.3,chroma:chroma(sc>1.01?5:1.2),skew:-.24});
    vtext(g,'/'+T.total,P.right?-wnum-8*u:wnum+14*u,-8*u,40*u,{align:P.right?'right':'left',color:HUDC.mute,inkW:ink});g.restore();
-   if(pm&&pm.m.data.from!==pm.m.data.to){const d=pm.m.data.from-pm.m.data.to,a=pm.age,f=a<1.2?1:1-clamp((a-1.2)/.3,0,1);const sx=P.right?P.x-330*u:P.x+330*u,sy=P.y-120*u+(1-ease.outCubic(clamp(a/.2,0,1)))*30*u*K;
+   if(pm&&pm.m.data.from!==pm.m.data.to){const d=pm.m.data.from-pm.m.data.to,a=pm.age,f=a<1.2?1:1-clamp((a-1.2)/.3,0,1);const sx=P.right?P.x-370*u:P.x+370*u,sy=P.y-130*u+(1-ease.outCubic(clamp(a/.2,0,1)))*30*u*K;
     g.save();g.globalAlpha*=f;poly(g,para(sx-10*u,sy-46*u,150*u,58*u,14*u),d>0?HUDC.cyan:HUDC.pink,HUDC.ink,4*u*Math.max(.5,ink));g.restore();vtext(g,(d>0?'▲+':'▼-')+Math.abs(d),sx+65*u,sy,40*u,{align:'center',color:HUDC.ink,ink:false,alpha:f});}
    noteText(MET,'position',big,P.x,P.y,0);noteBox(MET,'position',P.right?P.x-360*u:P.x,P.y-big*1.1,360*u,big*1.15);}
   // ---------- velocidade: lâmina em arco + numerais
@@ -2170,7 +2171,7 @@ const HUD_A={id:'A',name:'Flux Rush',tag:'arcade maximalista · emoção',
    const y=h*.26,bh=120*u,sk=60*u,x0=lerp(-w,0,p);g.save();g.globalAlpha*=clamp(p,0,1);poly(g,[[x0-sk,y+bh],[x0+w+sk,y+bh],[x0+w+sk*2,y],[x0,y]],'rgba(7,6,15,.78)');poly(g,[[x0-sk,y+bh],[x0+w+sk,y+bh],[x0+w+sk,y+bh-8*u],[x0-sk,y+bh-8*u]],col);
    const pat=halftonePattern(g,col,Math.max(4,Math.round(6*u)));if(pat){g.fillStyle=pat;g.globalAlpha*=.35*cfg.halftone+.1;g.fillRect(0,y,w,bh-8*u);}g.restore();
    vtext(g,big,w/2-(1-p)*w*.3,y+bh*.72,84*u,{align:'center',color:col,inkW:ink*1.3,chroma:chroma(2.5),alpha:clamp(p,0,1)});if(sub)stext(g,sub,w/2,y+bh+30*u,24*u,{align:'center',color:HUDC.paper,alpha:clamp(p,0,1)});noteText(MET,'banner',84*u,w/2,y,0);};
-  const lapM=find('lap');if(lapM&&T.phase!=='finished'&&lapM.m.data.lap<T.laps)banner(lapM,'VOLTA '+(lapM.m.data.lap+1)+'/'+T.laps,'VOLTA '+lapM.m.data.lap+' · '+fmtLap(lapM.m.data.time)+(lapM.m.data.delta!==null?'   Δ '+fmtGap(lapM.m.data.delta):'')+(lapM.m.data.best&&lapM.m.data.lap>1?'   MELHOR VOLTA':''),HUDC.cyan);
+  const lapM=find('lap');if(lapM&&T.phase!=='finished'&&lapM.m.data.lap<T.laps)banner(lapM,(lapM.m.data.lap+1===T.laps?'VOLTA FINAL ':'VOLTA ')+(lapM.m.data.lap+1)+'/'+T.laps,'VOLTA '+lapM.m.data.lap+' · '+fmtLap(lapM.m.data.time)+(lapM.m.data.delta!==null?'   Δ '+fmtGap(lapM.m.data.delta):'')+(lapM.m.data.best&&lapM.m.data.lap>1?'   MELHOR VOLTA':''),lapM.m.data.lap+1===T.laps?HUDC.pink:HUDC.cyan);
   const fl=find('finalLap');if(fl&&!lapM)banner(fl,'VOLTA FINAL',null,HUDC.pink);
   const cd=find('countdown');if(cd){const a=cd.age,sc=lerp(1.8,1,ease.outBack(clamp(a/.22,0,1),2.2)),f=1-clamp((a-.75)/.2,0,1);vtext(g,String(cd.m.data.n),w/2,h*.42,240*u*sc,{align:'center',color:HUDC.paper,inkW:ink*1.5,chroma:chroma(4),alpha:f});noteText(MET,'countdown',240*u,w/2,h*.42,0);}
   const go=find('go');if(go){const a=go.age,sc=lerp(.6,1,ease.outBack(clamp(a/.2,0,1),3)),f=1-clamp((a-.9)/.3,0,1);g.save();g.globalAlpha*=f;g.strokeStyle=HUDC.gold;g.lineWidth=6*u;for(let i=0;i<16;i++){const an=i/16*TAU,r0=160*u,r1=(220+200*a)*u*K;g.beginPath();g.moveTo(w/2+Math.cos(an)*r0,h*.36+Math.sin(an)*r0);g.lineTo(w/2+Math.cos(an)*r1,h*.36+Math.sin(an)*r1);g.stroke();}g.restore();vtext(g,'GO!',w/2,h*.42,280*u*sc,{align:'center',color:HUDC.pink,inkW:ink*1.5,chroma:chroma(6),alpha:f});}
@@ -2237,8 +2238,8 @@ const HUD_B={id:'B',name:'Vector Tactical',tag:'interface tática · espaço',
    if(o.threat)vtext(g,'ATK',c.x,c.y+hh+30*u,20*u,{align:'center',color:HUDC.pink});else if(o.shield<30&&o.dist<60)stext(g,'VULNERÁVEL',c.x,c.y+hh+24*u,14*u,{align:'center',color:HUDC.gold,weight:700});
    noteText(MET,'bracket',14*u,c.x,c.y,0);}
   // ---------- ameaças fora da tela: setas na borda com distância
-  for(const o of T.nearby){if(o.dist>cfg.threatRange)continue;if(!(o.threat||o.dist<40))continue;const S=M.ships[o.id],c=M.proj(vec.madd(S.pose.p,S.pose.N,1.2));if(c&&c.inside)continue;
-   const ang=Math.atan2(o.dl,-o.ds)-Math.PI/2,cx=w/2,cy=h*.55,R=Math.min(w,h)*.42,x=clamp(cx+Math.cos(ang)*R*1.6,40*u,w-40*u),y=clamp(cy-Math.sin(-ang)*R,90*u,h-60*u);
+  if(T.phase==='race')for(const o of T.nearby){if(o.dist>cfg.threatRange)continue;if(!(o.threat||o.dist<40))continue;const S=M.ships[o.id],c=M.proj(vec.madd(S.pose.p,S.pose.N,1.2));if(c&&c.inside)continue;
+   const len=Math.hypot(o.dl,o.ds)||1,cx=w/2,cy=h*.55,R=Math.min(w,h)*.42,x=clamp(cx+o.dl/len*R*1.6,40*u,w-40*u),y=clamp(cy-o.ds/len*R,90*u,h-60*u);   // frente = topo, trás = base
    g.save();g.translate(x,y);g.rotate(Math.atan2(y-cy,x-cx));poly(g,[[18*u,0],[-10*u,-12*u],[-4*u,0],[-10*u,12*u]],o.threat?HUDC.pink:HUDC.cyan,HUDC.ink,2.5*u);g.restore();stext(g,Math.round(o.dist)+'M',x,y+26*u,14*u,{align:'center',color:o.threat?HUDC.pink:HUDC.paper});}
   // ---------- indicador direcional de dano (cunha em volta do centro)
   if(T.dmgAge<cfg.damagePersist){const f=1-T.dmgAge/cfg.damagePersist,side=T.dmgSide>=0?1:-1,cx=w/2,cy=h*.52,R=Math.min(w,h)*.33,a0=side>0?-.5:Math.PI-.5,a1=a0+1;
@@ -2246,8 +2247,9 @@ const HUD_B={id:'B',name:'Vector Tactical',tag:'interface tática · espaço',
    stext(g,'-'+Math.round(Math.max(0,T.shieldFrom-T.shield))+' '+(T.dmgKind==='barrier'?'BARREIRA':T.dmgKind==='side'?'LATERAL':T.dmgKind==='spin'?'GIRO':'COLISÃO'),cx+side*(R+12*u),cy+6*u,16*u,{align:side>0?'left':'right',color:HUDC.pink,weight:700,alpha:f});}
   // ---------- ataque iminente: tempo até o contato (da fase real do atacante)
   for(const o of T.nearby.filter(o=>o.threat)){const rem=o.threatPhase===1?SIM.SIDE_WIND-o.threatT:Math.max(0,SIM.SIDE_LUNGE-o.threatT),side=o.dl>=0?1:-1,x=w/2+side*Math.min(w*.28,330*u),y=h*.42;
-   poly(g,side>0?[[x-80*u,y-30*u],[x+90*u,y-30*u],[x+110*u,y],[x+90*u,y+30*u],[x-80*u,y+30*u]]:[[x+80*u,y-30*u],[x-90*u,y-30*u],[x-110*u,y],[x-90*u,y+30*u],[x+80*u,y+30*u]],'rgba(7,6,15,.85)',HUDC.pink,3*u);
-   vtext(g,'ATAQUE '+(side>0?'▶':'◀')+' '+rem.toFixed(2)+'S',x+side*10*u,y+11*u,24*u,{align:'center',color:HUDC.pink});noteText(MET,'threat',24*u,x,y,0);}
+   const txt='ATAQUE '+(side>0?'▶':'◀')+' '+rem.toFixed(2)+'S',tw=vtextWidth(txt,24*u)+50*u,x0=side>0?x-tw/2:x+tw/2,x1=side>0?x+tw/2:x-tw/2;
+   poly(g,[[x0,y-30*u],[x1,y-30*u],[x1+side*22*u,y],[x1,y+30*u],[x0,y+30*u]],'rgba(7,6,15,.85)',HUDC.pink,3*u);
+   vtext(g,txt,x,y+11*u,24*u,{align:'center',color:HUDC.pink});noteText(MET,'threat',24*u,x,y,0);}
   // ---------- cabeçalho: posição, volta, tempo
   {const H=L.head;chamfer(g,H.x-12*u,H.y-66*u,372*u,136*u,16*u,'rgba(67,240,222,.55)','rgba(7,6,15,.55)',1.5*u);vtext(g,'P'+ordinal(T.rank),H.x,H.y,58*u,{color:T.rank<=3?HUDC.gold:HUDC.paper,skew:-.12});const pw=vtextWidth('P'+ordinal(T.rank),58*u);stext(g,'/'+T.total,H.x+pw+8*u,H.y,20*u,{color:HUDC.mute});
    vtext(g,'VOLTA '+T.lap+'/'+T.laps,H.x,H.y+36*u,22*u,{color:HUDC.cyan,skew:-.12});vtext(g,fmtLap(T.lapTime),H.x+196*u,H.y+36*u,22*u,{color:HUDC.paper,skew:-.12});
