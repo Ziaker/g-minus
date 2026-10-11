@@ -386,8 +386,8 @@ O build embute, sem alteração e em escopo próprio, o bloco do P05, o resolved
 
 1. ~~Escolher HUDs, câmeras e configuração final~~: **decidido em 11/10/2026**. Ficam HUDs A, B e C, câmeras A, B e C e todas as opções no jogo. A configuração final é o JSON enviado.
 2. Luz das naves em movimento: a configuração aprovada usa **mundo**. "Câmera" continua sendo só um modo de diagnóstico do 06.
-3. Convenção de escala de mundo (1 u = 1 m) e velocidade exibida, junto com P08/P09: **pendente**.
+3. Convenção de escala de mundo e velocidade exibida: **pendente**. O fator 3,6 dos laboratórios P08 e P12 só converte m/s em km/h e não comprova que o jogo use 1 u = 1 m. A escala deve ser definida antes de exibir km/h no jogo.
 4. Toggles de Boost A/D/E: a configuração aprovada do P12 os mantém **ligados**. A forma de seleção in-game continua registrada como pendência do 04 V2.
 5. Escudo de adversários e janelas de ataque: **presentes no HUD B**, com o toggle `attackAssist` (ligado na configuração aprovada) e os alcances `bracketRange` e `threatRange` nas configurações.
 6. Aplicação do raio de 130 % do Spin E: **pendente** desde o 04 V2, sem mudança.
-7. Integração em `src/game`: **pendente**. Precisa de autorização para alterar o jogo principal (P08 em desenvolvimento) e deve seguir o critério de aceite do registro.
+7. Integração em `src/game`: **pendente**. Exige pedido explícito, vem depois da física do P08 (aprovado em 11/10/2026, integração também pendente) e segue o critério de aceite do registro, que inclui definir a escala física antes de exibir km/h e validar a câmera no voo com o referencial estabilizado do P08.

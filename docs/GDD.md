@@ -172,7 +172,7 @@
   - [97] minimapa (A) e radar (B, C), desligáveis nas configurações;
   - [98] alertas pelo diretor de prioridades P0–P3.
 
-  A pista e a corrida de teste do laboratório não aprovam física, IA nem regras. A integração em `src/game` está pendente e precisa de autorização para alterar o jogo principal. O P12 original continua rejeitado ([auditoria](audits/2026-10-11-prototype-12-audit.md)).
+  A pista e a corrida de teste do laboratório não aprovam física, IA nem regras. A integração em `src/game` está pendente: exige pedido explícito, vem depois da física do P08, define antes a escala física (o fator 3,6 dos laboratórios não comprova 1 u = 1 m) e valida a câmera no voo com o referencial estabilizado do P08. O P12 original continua rejeitado ([auditoria](audits/2026-10-11-prototype-12-audit.md)).
 
 ## 11. Política obrigatória de prototipação, telemetria e documentação [101–104]
 
