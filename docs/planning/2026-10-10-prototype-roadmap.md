@@ -57,6 +57,9 @@ Este documento separa três tipos de conteúdo:
 ## 2. Recomendações técnicas por protótipo (sem aprovação)
 
 ### P08 — Física 3D, contato, voo e pouso
+
+**[Decisão — 11/10/2026] Concluído e aprovado no laboratório, revisão 4:** Perfil C + contato A, recuperação aérea e descida com ↓/S + boost (controle +30%). O responsável confirmou a redução de escopo para extensão do P01; as recomendações de comparação abaixo ficam como histórico, não obrigação vigente de reconstruir três pilotagens. [Aprovação vigente, baseline e limites](../decisions/2026-10-11-prototype-08-air-control-approval.md). Integração pendente; o próximo item da sequência permanece P09, sem início automático nesta entrega.
+
 - **[Recomendação]** Comparar as alternativas pelo que o jogador sente, não pela arquitetura. Escolher pela sensação, não pela sofisticação técnica: se o híbrido for melhor que um corpo totalmente livre, ele vence.
 - **[Recomendação]** Três alternativas:
   1. o comportamento original do Perfil C, sem modificação, como referência;
@@ -101,6 +104,13 @@ Este documento separa três tipos de conteúdo:
 - **[Recomendação]** As três implementações de mashing devem diferir em entrada, duração, progressão, defesa e consequências. O jogador deve manter a direção durante a disputa. Se nenhuma funcionar, aí há base para revisar o requisito [45].
 
 ### P12 — HUD, câmera e interface
+- **[Registro 11/10/2026]** O responsável pediu a reconstrução do P12 antes da sequência. O P12 original foi rejeitado e o **P12 V2** foi construído ([especificação](../specs/12_hud_camera_v2_spec.md)). Ele usa uma pista e uma corrida de teste próprias, sem antecipar P08/P09/P10.
+- **[Decisão 11/10/2026]** **P12 V2 aprovado:**
+  - HUDs A, B e C, câmeras A, B e C e todas as opções, presentes no jogo;
+  - configuração padrão = JSON do responsável;
+  - [registro e catálogo obrigatório](../decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md).
+
+  A integração em `src/game` está pendente: exige pedido explícito, vem depois da física do P08 (aprovada em 11/10/2026) e depende da validação da câmera no voo. A escala física foi decidida em 11/10/2026: 1 u = 1 m.
 - **[Recomendação]** Avaliar com situações reais de corrida e combate (circuito de referência e P10).
 
 ## 3. Questões abertas
@@ -112,7 +122,7 @@ Este documento separa três tipos de conteúdo:
 | Peças | nomes, funções, compatibilidade, montagem; cores por peça × Sistema B; cores aleatórias |
 | Spin E | o raio visual (varredura +30 %, provisório) depende da nave; o raio de jogo é igual para todas |
 | Balanço do motor | manter ou não o ajuste pré-corrida de aceleração × velocidade |
-| Nova suspensão (P08) | valores finais; substituição do quique só com aprovação expressa |
+| Contato e voo (P08) | Contato A sem quique e controle aéreo da revisão 4 aprovados em 11/10/2026; integração pendente. Ambiguidades do Perfil C e hitboxes competitivas permanecem abertas. |
 | Eliminação e recuperação [17, 34, 47] | energia zero, saída da pista, reaparecimento × eliminação, colocação dos eliminados, convivência com [20] |
 | Impactos (P10) | limites entre leve, forte e fatal; câmera e HUD na eliminação; Colisão B/D vale para paredes? |
 | Clash [45] | entrada, desempate, duração, direção do lançamento, interação com Side e Spin, IA, fogo amigo em equipes |
@@ -123,6 +133,7 @@ Este documento separa três tipos de conteúdo:
 | Energia [31–40] | escolha entre GX e X quando divergem |
 | Física (Protótipos 01 e 07) | 18 valores ambíguos, 12 divergências (esterço 89 × 56), 11 essenciais, avaliação visual do layout combinado |
 | VFX (04 V2) | padrão dos toggles e forma de seleção no jogo; implementação do Spin E +30 % |
+| HUD e câmera (P12 V2) | integração em `src/game` (pedido explícito, depois da física do P08); escala já decidida (1 u = 1 m, [decisão](../decisions/2026-10-11-world-scale-1u-1m.md)); câmera no voo com o referencial estabilizado do P08 e transição pista ↔ voo validada, usando os controles aéreos da revisão 4 (validação pendente); HUD e câmera na eliminação (P10); HUD de equipe [51] |
 
 ## 4. Protótipos futuros, depois do P12 (ordem a definir)
 
@@ -138,6 +149,7 @@ Este documento separa três tipos de conteúdo:
 | Sistema | Registro |
 | :--- | :--- |
 | Toon Vector Flux D | [aprovação](../specs/02_toon_vector_flux_approval.md) |
+| P08 revisão 4: contato A, subida e descida com boost (integração pendente) | [decisão](../decisions/2026-10-11-prototype-08-air-control-approval.md) |
 | Física Perfil C (baseline; reconciliação numérica pendente) | [decisão](../decisions/2026-10-10-prototype-01-physics-approval.md) |
 | Nove geometrias do Protótipo 05 e bloco canônico (uso obrigatório) | [decisão](../decisions/2026-10-10-prototype-05-craft-geometry-approval.md) |
 | Sistema B de pintura | [decisão](../decisions/2026-10-10-prototype-06-paint-system-approval.md) |

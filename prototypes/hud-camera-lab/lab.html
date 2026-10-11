@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G-MINUS · 12 V2 · HUD & Câmera Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#08070d;--bar:#0e0d16;--panel:#111019;--line:#24223a;--line2:#33304f;--text:#eeeaf6;--muted:#8a86a6;--mint:#43f0de;--pink:#ff4794;--gold:#ffa636;--danger:#ff2a4f;--chrome:'Bahnschrift','DIN Alternate','Barlow Semi Condensed','Roboto Condensed','Segoe UI',system-ui,sans-serif;--mono:ui-monospace,'Cascadia Mono','JetBrains Mono',Menlo,monospace}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:13px/1.35 var(--chrome);overflow:hidden}
+button,select,input{font:inherit;color:inherit}button,select{background:#191726;border:1px solid var(--line2);border-radius:5px;padding:5px 9px;cursor:pointer;white-space:nowrap}button:hover,select:hover{border-color:#5b5680}button.on{background:#1d3534;border-color:var(--mint);color:var(--mint)}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+#app{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100dvh}
+header{display:flex;align-items:center;gap:10px;padding:6px 10px;background:var(--bar);border-bottom:1px solid var(--line);flex-wrap:wrap;min-width:0}
+.brand{font-weight:800;letter-spacing:2.5px;font-size:14px;white-space:nowrap}.brand span{color:var(--pink)}.brand b{color:var(--mint);letter-spacing:1px;margin-left:4px}.brand small{display:block;font-size:9px;letter-spacing:2.4px;color:var(--muted);font-weight:600}
+.status{font-size:10px;font-weight:700;letter-spacing:1px;color:var(--mint);border:1px solid #2c7a70;border-radius:20px;padding:4px 10px;white-space:nowrap}
+.grp{display:flex;align-items:center;gap:4px}.grp>label{font-size:9px;letter-spacing:1.6px;color:var(--muted);margin-right:3px;font-weight:700}.grp button{padding:4px 7px;min-width:28px}
+.spacer{flex:1}
+main{position:relative;display:flex;min-height:0}
+#stage{position:relative;flex:1;min-width:0;background:#040308;overflow:hidden}
+#frame{position:absolute;inset:0;margin:auto}
+#view,#hud{position:absolute;inset:0;width:100%;height:100%;display:block}
+#hud{pointer-events:none}
+#labels{position:absolute;inset:0;pointer-events:none}
+.cell{position:absolute;border:1px solid #ffffff14}.cell span{position:absolute;left:6px;bottom:6px;font:600 10px/1 var(--mono);color:#d7d3ea;background:#08070dcc;border:1px solid #ffffff22;padding:3px 6px;border-radius:3px;letter-spacing:.4px}
+#diag{position:absolute;right:8px;bottom:8px;font:10px/1.45 var(--mono);color:#b9f5ec;background:#05040acc;border:1px solid #43f0de55;border-radius:4px;padding:7px 9px;pointer-events:none;white-space:pre;max-width:46%}
+#diag::before{content:'DIAGNÓSTICO · NÃO FAZ PARTE DO HUD';display:block;color:var(--gold);font-weight:700;margin-bottom:3px;letter-spacing:.6px}
+#loading{position:absolute;left:8px;top:8px;font:10px var(--mono);color:var(--muted);background:#05040acc;padding:4px 7px;border-radius:3px;pointer-events:none}
+#failure{position:absolute;inset:20px;background:#22121e;border:1px solid #6a2a44;padding:24px;z-index:5;border-radius:8px}#failure[hidden]{display:none}
+aside#panel{width:340px;flex:none;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;transition:margin .18s ease-out}
+body.nopanel aside#panel{margin-right:-340px}
+@media(max-width:1250px){aside#panel{position:absolute;right:0;top:0;bottom:0;z-index:4;box-shadow:-12px 0 30px #000a}}
+.tabs{display:flex;border-bottom:1px solid var(--line);flex:none}.tabs button{flex:1;border:0;border-radius:0;background:transparent;padding:9px 4px;font-size:11px;color:var(--muted);border-bottom:2px solid transparent}.tabs button.on{color:var(--mint);border-bottom-color:var(--mint);background:transparent}
+.tabbody{overflow-y:auto;padding:12px 14px 30px;flex:1;min-height:0}
+.card{border:1px solid var(--line);border-radius:7px;padding:10px 11px;margin:0 0 12px;background:#0d0c15}.card h3{margin:0 0 3px;font-size:15px;letter-spacing:.5px}.card .tag{font-size:10px;color:var(--pink);letter-spacing:1px;text-transform:uppercase;font-weight:700}.card p{margin:6px 0 0;color:#bdb8d6;font-size:11.5px}
+.eyebrow{font-size:9.5px;letter-spacing:1.8px;color:var(--muted);text-transform:uppercase;font-weight:700;margin:14px 0 6px}
+details.sgrp{margin:8px 0;border:1px solid #ffffff12;border-radius:6px;padding:0 10px 4px;background:#ffffff04}details.sgrp>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 0 6px;font-size:10px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:var(--muted)}details.sgrp>summary::-webkit-details-marker{display:none}details.sgrp>summary>span::before{content:'▸ ';color:var(--mint)}details.sgrp[open]>summary>span::before{content:'▾ '}button.mini{font-size:9.5px;padding:2px 7px;letter-spacing:.5px;text-transform:none}
+.palettes{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:4px 0 8px}.pal{display:flex;flex-direction:column;align-items:stretch;gap:3px;padding:5px 6px;text-align:left}.pal b{font-size:10px;font-weight:600}.sw{display:flex;height:8px;border-radius:2px;overflow:hidden}.sw i{flex:1}
+.colrow{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #ffffff08}.colrow input[type=color]{width:34px;height:24px;padding:0;border:1px solid var(--line2);border-radius:4px;background:none;flex:none;cursor:pointer}.colrow span{flex:1;min-width:0}.colrow b{display:block;font-size:11.5px;font-weight:600;color:#d4d0e6}.colrow small{display:block;font-size:10px;color:var(--muted)}.colrow code{font:10px var(--mono);color:var(--mint)}
+.contrast{display:flex;flex-wrap:wrap;gap:4px;margin:4px 0}.contrast span{font:10px var(--mono);padding:2px 6px;border-radius:3px;background:#ffffff08}.contrast .ok{color:var(--mint)}.contrast .bad{color:var(--gold);background:#ffa63618}
+.ctl{padding:6px 0;border-bottom:1px solid #ffffff08}.ctl label{display:flex;justify-content:space-between;gap:6px;font-size:11.5px;color:#d4d0e6}.ctl output{font:10px var(--mono);color:var(--mint)}.ctl small{display:block;color:var(--muted);font-size:10px;margin-top:1px}
+input[type=range]{width:100%;accent-color:var(--mint);height:16px;margin:4px 0 0}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0}.row>*{flex:1}
+.chk{display:flex;align-items:center;gap:7px;font-size:11.5px;color:#d4d0e6;padding:5px 0}
+.seg{display:flex;gap:3px}.seg button{flex:1}
+.scen{display:block;width:100%;text-align:left;margin:4px 0;padding:7px 9px}.scen b{display:block;font-size:12px}.scen small{color:var(--muted);font-size:10.5px}
+.note{font-size:10.5px;color:var(--muted);margin:6px 0}
+footer{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bar);border-top:1px solid var(--line);min-width:0}
+footer .t{font:11px var(--mono);color:#cfcbe4;white-space:nowrap;min-width:150px;text-align:right}
+#timeline{position:relative;flex:1;height:30px;min-width:120px;cursor:pointer;touch-action:none}
+#timeline canvas{position:absolute;inset:0;width:100%;height:100%}
+#playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--mint);left:0;pointer-events:none;box-shadow:0 0 0 1px #000}
+dialog{background:#13121d;color:inherit;border:1px solid #47425f;border-radius:10px;width:min(760px,95vw);padding:18px}dialog::backdrop{background:#000b}
+textarea{width:100%;height:46vh;background:#08070e;color:#d5d0ee;border:1px solid #39345a;border-radius:6px;padding:10px;font:11px var(--mono)}
+#jsonNotice{font-size:11.5px;min-height:18px;margin:6px 0 0}
+@media(max-width:760px){header{gap:8px;padding:6px 8px}.status{font-size:9px}footer{flex-wrap:wrap}footer .t{min-width:0}.grp>label{display:none}aside#panel{width:100%}body.nopanel aside#panel{margin-right:-100%}}
+</style></head><body class="nopanel">
+<div id="app">
+<header>
+ <div class="brand">G<span>−</span>MINUS<b>12 V2</b><small>HUD · CÂMERA · INTERFACE</small></div>
+ <div class="status" id="status" title="Aprovado pelo responsável em 11/10/2026 — docs/decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md">P12 V2 APROVADO · 11/10/2026</div>
+ <div class="grp" id="hudSel"><label>HUD</label></div>
+ <div class="grp" id="camSel"><label>CÂMERA</label></div>
+ <div class="grp" id="viewSel"><label>VISTA</label></div>
+ <div class="grp" id="aspectSel"><label>QUADRO</label></div>
+ <div class="spacer"></div>
+ <div class="grp"><button id="jsonOpen" title="Configuração JSON">JSON</button><button id="panelBtn" title="Painel de calibração (P)">Painel</button><button id="fsBtn" title="Tela cheia (F)">⛶</button></div>
+</header>
+<main>
+ <section id="stage"><div id="frame"><canvas id="view" aria-label="Corrida de teste em WebGL"></canvas><canvas id="hud" aria-hidden="true"></canvas><div id="labels"></div><div id="loading"></div><div id="diag" hidden></div><div id="failure" hidden><h2>Visualização indisponível</h2><p id="failureText"></p></div></div></section>
+ <aside id="panel"><div class="tabs" id="tabs"></div><div class="tabbody" id="tabbody"></div></aside>
+</main>
+<footer>
+ <button id="restart" title="Reiniciar cenário (Home)">⏮</button><button id="back" title="−1 quadro (←)">◀</button><button id="play" title="Reproduzir/pausar (Espaço)">Ⅱ</button><button id="fwd" title="+1 quadro (→)">▶</button>
+ <select id="scenario" aria-label="Cenário"></select><select id="rate" aria-label="Velocidade de reprodução"><option value="1">1×</option><option value="0.5">0,5×</option><option value="0.25">0,25×</option></select>
+ <div id="timeline" aria-label="Linha do tempo"><canvas id="tlc"></canvas><div id="playhead"></div></div>
+ <span class="t" id="time">0:00.000</span>
+</footer>
+</div>
+<dialog id="jsonDialog"><h2 style="margin:0 0 4px">Configuração reproduzível (schema v1)</h2><p class="note">Mesmo contrato da API interna. Importação estrita e atômica: qualquer erro rejeita tudo e nada muda. Nenhum JSON concede aprovação.</p><textarea id="jsonText" spellcheck="false" aria-label="JSON"></textarea><div class="row"><button id="jsonExport">Atualizar exportação</button><button id="jsonCopy">Copiar</button><button id="jsonImport" class="on">Importar</button><button id="jsonClose">Fechar</button></div><p id="jsonNotice" role="status"></p></dialog>
+<script>/* EMBED */</script></body></html>

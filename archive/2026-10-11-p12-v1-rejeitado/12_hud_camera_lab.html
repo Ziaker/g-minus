@@ -1,0 +1,3160 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G-MINUS · Protótipo 12 — HUD, Câmeras e Interface de Corrida</title>
+<style>
+:root{
+  color-scheme: dark;
+  --bg: #06080e;
+  --panel: #0a0e17;
+  --panel-card: #101623;
+  --line: #1c2637;
+  --line-active: #3b5070;
+  --text: #f0f4fc;
+  --muted: #7e8ea6;
+  --cyan: #64d2ff;
+  --cyan-glow: rgba(100,210,255,0.45);
+  --mag: #ff6ea7;
+  --mag-glow: rgba(255,110,167,0.45);
+  --mint: #7cf0bd;
+  --mint-glow: rgba(124,240,189,0.4);
+  --amber: #ffcb6b;
+  --err: #ff6b8b;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;padding:0}
+body{
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.4 Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+
+/* Layout Grid */
+.app{
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  height: 100dvh;
+  width: 100vw;
+}
+
+/* Sidebar */
+.sidebar{
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  padding: 16px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  scrollbar-width: thin;
+  scrollbar-color: #2b394e transparent;
+}
+.sidebar::-webkit-scrollbar{width:6px}
+.sidebar::-webkit-scrollbar-thumb{background:#2b394e;border-radius:3px}
+
+.brand-header .eyebrow{
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .2em;
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+.brand-header .title{
+  font-size: 21px;
+  font-weight: 950;
+  letter-spacing: .05em;
+  margin: 3px 0 2px;
+}
+.brand-header .title span{color:var(--cyan)}
+.brand-header .caption{
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.status-badge{
+  background: rgba(255,110,167,0.1);
+  border-left: 3px solid var(--mag);
+  padding: 8px 10px;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: #f7d2e1;
+  border-radius: 0 6px 6px 0;
+}
+.status-badge strong{color:#fff;display:block;margin-bottom:2px}
+
+/* Section Styling */
+.section{
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.section-title{
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0;
+}
+.section-title small{color:var(--cyan);font-family:var(--font-mono);font-size:9.5px;letter-spacing:0}
+
+/* Button Groups */
+.seg{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 5px;
+}
+.seg.c2{grid-template-columns:repeat(2, minmax(0,1fr))}
+
+.btn{
+  background: #121824;
+  border: 1px solid var(--line);
+  color: #c9d5e8;
+  padding: 7px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  transition: all .15s ease;
+}
+.btn:hover{background:#1a2436;border-color:var(--line-active);color:#fff}
+.btn.active{
+  background: rgba(100,210,255,0.15);
+  border-color: var(--cyan);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px var(--cyan), 0 0 12px var(--cyan-glow);
+}
+.btn .sub{font-size:9px;color:var(--muted);font-weight:600}
+.btn.active .sub{color:var(--cyan)}
+
+/* Card Information */
+.card{
+  background: var(--panel-card);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 9px 11px;
+  font-size: 11px;
+}
+.card strong{color:#fff;display:block;margin-bottom:4px;font-size:11.5px}
+.card p{margin:0;color:var(--muted);line-height:1.45}
+
+/* Sliders */
+.control-row{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 3px 0;
+}
+.control-row header{
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #cad6ea;
+}
+.control-row header output{
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  font-weight: 700;
+}
+.control-row input[type=range]{
+  width: 100%;
+  accent-color: var(--cyan);
+  background: #182232;
+  height: 5px;
+  border-radius: 3px;
+  margin: 3px 0;
+  cursor: pointer;
+}
+
+/* Event Grid */
+.event-grid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+}
+.event-btn{
+  background: #101624;
+  border: 1px solid var(--line);
+  color: #a8b8d0;
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all .12s;
+}
+.event-btn:hover{background:#182335;border-color:var(--cyan);color:#fff}
+.event-btn.active{background:rgba(255,110,167,0.2);border-color:var(--mag);color:#fff;box-shadow:0 0 10px var(--mag-glow)}
+
+/* JSON Box */
+textarea.json-area{
+  width: 100%;
+  height: 90px;
+  background: #080b12;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: #7ce8ff;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+/* Main Workspace */
+.main-stage{
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: #04060a;
+  overflow: hidden;
+  height: 100dvh;
+}
+
+/* Viewport Area */
+.viewport-wrapper{
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.aspect-container{
+  position: relative;
+  box-shadow: 0 12px 48px rgba(0,0,0,0.85);
+  border: 1px solid #1a2538;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #020306;
+  max-width: 100%;
+  max-height: 100%;
+  transition: width .2s ease, height .2s ease;
+}
+.aspect-container[data-aspect="16:9"]{
+  aspect-ratio: 16 / 9;
+  width: min(100%, calc((100vh - 90px) * 16 / 9));
+  height: auto;
+}
+.aspect-container[data-aspect="21:9"]{
+  aspect-ratio: 21 / 9;
+  width: min(100%, calc((100vh - 90px) * 21 / 9));
+  height: auto;
+}
+.aspect-container[data-aspect="mobile"]{
+  aspect-ratio: 9 / 16;
+  height: calc(100vh - 90px);
+  width: auto;
+  max-width: 100%;
+}
+
+#canvas3d{
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+}
+
+/* HUD Overlay Layer */
+.hud-layer{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Compare Mode Grid Overlay */
+.compare-grid{
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  pointer-events: none;
+}
+.compare-col{
+  position: relative;
+  border-right: 1px dashed rgba(100,210,255,0.3);
+  overflow: hidden;
+}
+.compare-col:last-child{border-right:none}
+.compare-header{
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,16,26,0.85);
+  border: 1px solid var(--line-active);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  color: var(--cyan);
+  backdrop-filter: blur(6px);
+  z-index: 10;
+  white-space: nowrap;
+}
+
+/* Diagnostic Box */
+.diag-panel{
+  position: absolute;
+  top: 16px;
+  right: 180px;
+  background: rgba(8,12,20,0.88);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 10px;
+  color: var(--muted);
+  backdrop-filter: blur(8px);
+  z-index: 20;
+  max-width: 220px;
+}
+.diag-panel summary{
+  cursor: pointer;
+  font-weight: 800;
+  letter-spacing: .1em;
+  color: #cad6ea;
+  text-transform: uppercase;
+  font-size: 9px;
+}
+.diag-panel dl{
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 3px 12px;
+  margin: 6px 0 0;
+}
+.diag-panel dt{color:#7687a1}
+.diag-panel dd{margin:0;font-family:var(--font-mono);color:#fff;text-align:right}
+
+/* Transport Bar */
+.transport-bar{
+  height: 64px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  gap: 16px;
+  z-index: 30;
+}
+.transport-controls{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.timeline-box{
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 700px;
+}
+.timeline-box time{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cyan);
+  min-width: 65px;
+}
+.timeline-slider{
+  flex: 1;
+  accent-color: var(--cyan);
+  height: 6px;
+  background: #1a2538;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.telemetry-pills{
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.telemetry-pill{
+  background: #121a28;
+  border: 1px solid var(--line);
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: #fff;
+  display: flex;
+  gap: 6px;
+}
+.telemetry-pill span{color:var(--muted);font-family:Inter,sans-serif;font-size:10px}
+
+/* ==========================================================================
+   HUD A — DIEGÉTICO / CINEMATOGRÁFICO
+   Projeções holográficas espaciais 3D integradas à nave e à pista.
+   ========================================================================== */
+.hud-alt-a{position:absolute;inset:0}
+
+/* Coroa holográfica flutuante sobre a nave */
+.hud-alt-a .diegetic-crown{
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 260px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .05s linear;
+}
+.hud-alt-a .diegetic-crown svg{
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 10px var(--cyan-glow));
+}
+.hud-alt-a .crown-readout{
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+.hud-alt-a .crown-speed{
+  font-size: 32px;
+  font-weight: 950;
+  font-family: var(--font-mono);
+  color: #fff;
+  letter-spacing: -.04em;
+  line-height: 1;
+  text-shadow: 0 0 12px var(--cyan-glow);
+}
+.hud-alt-a .crown-unit{
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: .2em;
+  color: var(--cyan);
+}
+.hud-alt-a .crown-subshield{
+  font-size: 9px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  color: var(--mint);
+  margin-top: 2px;
+}
+
+/* Badges de manobra embutidos na coroa */
+.hud-alt-a .crown-tactical{
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+}
+.hud-alt-a .crown-badge{
+  background: rgba(8,16,28,0.85);
+  border: 1px solid #233752;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  color: var(--cyan);
+}
+.hud-alt-a .crown-badge.active{
+  border-color: var(--amber);
+  color: var(--amber);
+  box-shadow: 0 0 8px rgba(255,203,107,0.5);
+}
+
+/* Retícula 3D sobre o Rival Wild Goose */
+.hud-alt-a .target-tag{
+  position: absolute;
+  transform: translate(-50%, -100%);
+  background: rgba(12,16,26,0.9);
+  border: 1px solid var(--mag);
+  box-shadow: 0 0 16px var(--mag-glow);
+  border-radius: 4px;
+  padding: 5px 9px;
+  font-size: 10px;
+  font-weight: 900;
+  color: #fff;
+  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  transition: opacity .15s ease;
+}
+.hud-alt-a .target-tag-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.hud-alt-a .target-tag .nm{color:#fff;letter-spacing:.05em}
+.hud-alt-a .target-tag .dist{color:var(--cyan);font-family:var(--font-mono);font-size:9.5px}
+.hud-alt-a .target-tag-bar{
+  width: 100%;
+  height: 3px;
+  background: #182232;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.hud-alt-a .target-tag-bar-fill{
+  height: 100%;
+  background: var(--mag);
+  width: 78%;
+}
+
+/* Radar Orbital de Piso */
+.hud-alt-a .diegetic-radar{
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 100px;
+  pointer-events: none;
+}
+.hud-alt-a .diegetic-radar svg{width:100%;height:100%}
+
+/* Placa holográfica de corrida (inferior esquerda) */
+.hud-alt-a .diegetic-bottom-left{
+  position: absolute;
+  bottom: 22px;
+  left: 22px;
+  background: rgba(8,14,24,0.85);
+  border: 1px solid #23364f;
+  border-left: 3px solid var(--cyan);
+  padding: 8px 14px;
+  border-radius: 0 6px 6px 0;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+}
+.hud-alt-a .diegetic-pos{
+  font-size: 32px;
+  font-weight: 950;
+  line-height: 1;
+  color: #fff;
+  letter-spacing: -.03em;
+}
+.hud-alt-a .diegetic-pos span{font-size:14px;color:var(--muted);font-weight:700}
+.hud-alt-a .diegetic-meta{
+  font-size: 10.5px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  color: var(--cyan);
+  font-family: var(--font-mono);
+}
+
+/* Placa de cronometragem holográfica (superior direita) */
+.hud-alt-a .diegetic-time-plate{
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(8,14,24,0.85);
+  border: 1px solid #23364f;
+  padding: 6px 12px;
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #cad6ea;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.hud-alt-a .diegetic-time-plate b{color:var(--cyan);font-weight:800}
+
+/* ==========================================================================
+   HUD B — COMPETITIVO / INSTRUMENTAL
+   Interface cirúrgica, alta legibilidade (>1000 km/h) F-Zero GX / Wipeout.
+   ========================================================================== */
+.hud-alt-b{position:absolute;inset:0;padding:18px}
+
+/* Leaderboard e Timing Tower (superior esquerda) */
+.hud-alt-b .leaderboard{
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 235px;
+  background: rgba(8,12,20,0.92);
+  border: 1px solid #243750;
+  border-radius: 6px;
+  padding: 8px 10px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+}
+.hud-alt-b .leaderboard header{
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .15em;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+.hud-alt-b .leader-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10.5px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.hud-alt-b .leader-row.player{
+  color: #fff;
+  font-weight: 850;
+  background: rgba(100,210,255,0.16);
+  padding: 3px 5px;
+  border-radius: 3px;
+  border-left: 2px solid var(--cyan);
+}
+.hud-alt-b .leader-row.rival{color:var(--mag);font-weight:850}
+.hud-alt-b .leader-row .rk{width:22px;font-family:var(--font-mono);font-weight:900}
+.hud-alt-b .leader-row .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hud-alt-b .leader-row .gap{font-family:var(--font-mono);font-size:9.5px}
+
+/* Minimapa do circuito completo (superior direita) */
+.hud-alt-b .minimap-panel{
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 145px;
+  height: 145px;
+  background: rgba(8,12,20,0.92);
+  border: 1px solid #243750;
+  border-radius: 6px;
+  padding: 8px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+}
+.hud-alt-b .minimap-panel svg{width:100%;height:100%}
+.hud-alt-b .minimap-label{
+  position: absolute;
+  bottom: 4px;
+  right: 8px;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+
+/* Header central de voltas e split */
+.hud-alt-b .race-timing-header{
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8,12,20,0.92);
+  border: 1px solid #243750;
+  border-radius: 20px;
+  padding: 6px 18px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-mono);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+}
+.hud-alt-b .race-timing-header .lap-badge{
+  font-size: 13px;
+  font-weight: 950;
+  color: #fff;
+  letter-spacing: -.02em;
+}
+.hud-alt-b .race-timing-header .time-val{
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--cyan);
+}
+.hud-alt-b .race-timing-header .split-val{
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--mint);
+}
+
+/* Cluster de combate (inferior esquerda) */
+.hud-alt-b .combat-cluster{position:absolute;bottom:18px;left:18px;display:flex;gap:7px}
+.hud-alt-b .combat-tile{
+  background: rgba(8,12,20,0.92);
+  border: 1px solid #243750;
+  padding: 7px 11px;
+  border-radius: 5px;
+  font-size: 9.5px;
+  font-weight: 800;
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 82px;
+}
+.hud-alt-b .combat-tile.ready{border-color:var(--mint);color:#fff}
+.hud-alt-b .combat-tile.active{border-color:var(--amber);color:var(--amber);box-shadow:0 0 10px rgba(255,203,107,0.45)}
+.hud-alt-b .combat-tile .lbl{font-size:7.5px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+/* Painel de instrumentos e velocidade (inferior direita) */
+.hud-alt-b .instrument-cluster{position:absolute;bottom:18px;right:18px;display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.hud-alt-b .speedo-panel{
+  background: rgba(8,12,20,0.92);
+  border: 1px solid #283e5c;
+  border-radius: 8px;
+  padding: 10px 18px;
+  text-align: right;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+  min-width: 220px;
+}
+.hud-alt-b .speedo-val{
+  font-size: 52px;
+  font-weight: 950;
+  font-family: var(--font-mono);
+  line-height: 1;
+  color: #fff;
+  letter-spacing: -.05em;
+  text-shadow: 0 0 16px var(--cyan-glow);
+}
+.hud-alt-b .speedo-unit{font-size:10px;font-weight:900;letter-spacing:.18em;color:var(--cyan);margin-top:2px}
+.hud-alt-b .shield-bar-wrapper{
+  width: 260px;
+  height: 16px;
+  background: #090e18;
+  border: 1px solid #283e5c;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.hud-alt-b .shield-bar-fill{height:100%;background:linear-gradient(90deg, #64d2ff, #7cf0bd);transition:width .1s ease}
+.hud-alt-b .shield-bar-fill.critical{background:linear-gradient(90deg, #ff6ea7, #ff6b8b);animation:pulseBar .4s infinite alternate}
+@keyframes pulseBar{from{opacity:.8}to{opacity:1}}
+.hud-alt-b .shield-bar-text{
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  font-size: 8.5px;
+  font-weight: 900;
+  font-family: var(--font-mono);
+  color: #fff;
+  text-shadow: 0 1px 3px #000;
+}
+
+/* ==========================================================================
+   HUD C — CONTEXTUAL / MINIMALISTA
+   Interface adaptativa inteligente que preserva o campo visual.
+   ========================================================================== */
+.hud-alt-c{position:absolute;inset:0}
+
+/* Arcos de Ameaça Periféricos (pulsam nas bordas com aproximação do rival) */
+.hud-alt-c .threat-arc{
+  position: absolute;
+  top: 50%;
+  width: 90px;
+  height: 180px;
+  transform: translateY(-50%);
+  border: 3.5px solid transparent;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity .2s ease, transform .2s ease;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hud-alt-c .threat-arc.left{left:16px;border-left-color:var(--mag);box-shadow:-10px 0 24px var(--mag-glow)}
+.hud-alt-c .threat-arc.right{right:16px;border-right-color:var(--mag);box-shadow:10px 0 24px var(--mag-glow)}
+.hud-alt-c .threat-arc.active{opacity:1;animation:pulseThreat .6s infinite alternate}
+@keyframes pulseThreat{from{transform:translateY(-50%) scale(0.96)}to{transform:translateY(-50%) scale(1.08)}}
+.hud-alt-c .threat-arc-label{
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  color: var(--mag);
+  text-shadow: 0 0 8px var(--mag-glow);
+  transform: rotate(-90deg);
+  white-space: nowrap;
+}
+
+/* Fita de Status Minimalista (Topo Central) */
+.hud-alt-c .minimal-topbar{
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8,12,20,0.75);
+  border: 1px solid rgba(100,210,255,0.25);
+  border-radius: 20px;
+  padding: 5px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+.hud-alt-c .minimal-topbar b{color:var(--cyan);font-weight:900}
+.hud-alt-c .minimal-topbar .lap{color:var(--mint)}
+
+/* Arcos de Cruzeiro na Base (Discretos e Completos) */
+.hud-alt-c .cruise-cluster{
+  position: absolute;
+  bottom: 22px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 32px;
+  pointer-events: none;
+}
+.hud-alt-c .cruise-gauge{
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: rgba(8,12,20,0.7);
+  border: 1px solid #1c2a3c;
+  padding: 8px 14px;
+  border-radius: 6px;
+  backdrop-filter: blur(6px);
+}
+.hud-alt-c .cruise-gauge.speed{align-items:flex-end}
+.hud-alt-c .cruise-val{
+  font-size: 38px;
+  font-weight: 950;
+  font-family: var(--font-mono);
+  line-height: 1;
+  color: #fff;
+  letter-spacing: -.04em;
+}
+.hud-alt-c .cruise-lbl{
+  font-size: 8.5px;
+  font-weight: 850;
+  letter-spacing: .15em;
+  color: var(--cyan);
+}
+.hud-alt-c .cruise-shield-bar{
+  width: 140px;
+  height: 6px;
+  background: #141c2a;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+.hud-alt-c .cruise-shield-fill{
+  height: 100%;
+  background: var(--mint);
+  transition: width .1s linear;
+}
+
+/* Medidor de Drift e Slip Lateral */
+.hud-alt-c .drift-gauge{
+  position: absolute;
+  bottom: 85px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8,12,20,0.85);
+  border: 1px solid var(--mint);
+  box-shadow: 0 0 16px var(--mint-glow);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  color: #fff;
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+}
+.hud-alt-c .drift-gauge.active{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Faixa de Eventos Contextuais */
+.hud-alt-c .event-banner{
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10,14,24,0.92);
+  border: 1px solid var(--cyan);
+  box-shadow: 0 0 25px var(--cyan-glow);
+  padding: 6px 20px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  color: #fff;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity .2s, transform .2s;
+  pointer-events: none;
+}
+.hud-alt-c .event-banner.visible{opacity:1}
+.hud-alt-c .event-banner.danger{border-color:var(--err);box-shadow:0 0 25px rgba(255,107,139,0.55);color:#ffd6df}
+
+/* Alarme Geral de Sentido Contrário / Fora de Pista */
+.toast-alarm{
+  position: absolute;
+  top: 24%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(18,6,10,0.94);
+  border: 2px solid var(--err);
+  box-shadow: 0 0 35px rgba(255,107,139,0.7);
+  padding: 8px 24px;
+  border-radius: 30px;
+  font-size: 13.5px;
+  font-weight: 950;
+  letter-spacing: .12em;
+  color: #fff;
+  animation: pulseAlarm .5s infinite alternate;
+  z-index: 50;
+}
+@keyframes pulseAlarm{from{transform:translateX(-50%) scale(0.96)}to{transform:translateX(-50%) scale(1.04)}}
+
+/* ==========================================================================
+   ESCALAS RESPONSIVAS PARA O MODO COMPARAR (GRID 3 COLUNAS)
+   ========================================================================== */
+.compare-col .hud-alt-a .diegetic-crown{transform:translate(-50%,-50%) scale(0.78)}
+.compare-col .hud-alt-a .diegetic-radar{transform:translateX(-50%) scale(0.75);bottom:4px}
+.compare-col .hud-alt-a .diegetic-bottom-left{transform:scale(0.8);transform-origin:bottom left}
+.compare-col .hud-alt-a .diegetic-time-plate{transform:scale(0.75);transform-origin:top right;top:38px;right:10px}
+
+.compare-col .hud-alt-b .leaderboard{width:175px;transform:scale(0.8);transform-origin:top left}
+.compare-col .hud-alt-b .minimap-panel{width:105px;height:105px;top:10px;right:10px}
+.compare-col .hud-alt-b .race-timing-header{transform:translateX(-50%) scale(0.75);top:38px}
+.compare-col .hud-alt-b .speedo-panel{padding:6px 10px;transform:scale(0.82);transform-origin:bottom right;min-width:160px}
+.compare-col .hud-alt-b .speedo-val{font-size:38px}
+.compare-col .hud-alt-b .shield-bar-wrapper{width:160px;transform:scale(0.82);transform-origin:bottom right}
+.compare-col .hud-alt-b .combat-cluster{transform:scale(0.8);transform-origin:bottom left}
+
+.compare-col .hud-alt-c .cruise-cluster{padding:0 12px;transform:scale(0.85);transform-origin:bottom center}
+.compare-col .hud-alt-c .minimal-topbar{transform:translateX(-50%) scale(0.75);top:38px}
+
+.compare-grid:not([style*="none"]) ~ #diagPanel{display:none}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar" aria-label="Painel de Controle do Laboratório de HUD e Câmeras">
+    <div class="brand-header">
+      <div class="eyebrow">Protótipo 12 · Corrida</div>
+      <div class="title">G<span>–</span>MINUS <span style="font-size:12px;color:var(--muted)">/ HUD LAB</span></div>
+      <div class="caption">Laboratório visual e funcional para avaliação de três propostas de HUD, enquadramentos de câmera e telemetria na estética aprovada <b>D — Toon Vector Flux</b>.</div>
+    </div>
+
+    <div class="status-badge">
+      <strong>Status: EM AVALIAÇÃO</strong>
+      HUD e Câmeras não aprovados. Geometria canônica P05 e Pintura B (P06) integradas sem alterações.
+    </div>
+
+    <section class="section" aria-labelledby="h-alt">
+      <h2 class="section-title" id="h-alt">Proposta de HUD <small><kbd>A</kbd> <kbd>B</kbd> <kbd>C</kbd></small></h2>
+      <div class="seg" id="altGroup" role="group">
+        <button class="btn active" type="button" data-alt="A">A · Diegético<span class="sub">Imersão 3D</span></button>
+        <button class="btn" type="button" data-alt="B">B · Competitivo<span class="sub">Instrumental</span></button>
+        <button class="btn" type="button" data-alt="C">C · Contextual<span class="sub">Minimalista</span></button>
+      </div>
+      <div class="card" id="altCard">
+        <strong id="altTitle">A — HUD Diegético / Cinematográfico</strong>
+        <p id="altDesc">Informações projetadas no espaço 3D ao redor da nave, radar orbital no piso, retículas espaciais e câmera cinematográfica. Prioridade: espetáculo e percepção da corrida.</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-mode">
+      <h2 class="section-title" id="h-mode">Modo de Exibição <small><kbd>M</kbd></small></h2>
+      <div class="seg c2" id="modeGroup" role="group">
+        <button class="btn active" type="button" data-mode="single">Ampliado (Individual)</button>
+        <button class="btn" type="button" data-mode="compare">Comparar A / B / C</button>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-aspect">
+      <h2 class="section-title" id="h-aspect">Proporção de Tela <small>Resolução</small></h2>
+      <div class="seg" id="aspectGroup" role="group">
+        <button class="btn active" type="button" data-aspect="16:9">16:9<span class="sub">Padrão</span></button>
+        <button class="btn" type="button" data-aspect="21:9">21:9<span class="sub">Ultrawide</span></button>
+        <button class="btn" type="button" data-aspect="mobile">Mobile<span class="sub">9:16</span></button>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-events">
+      <h2 class="section-title" id="h-events">Cenários de Teste <small><kbd>1</kbd>–<kbd>9</kbd></small></h2>
+      <div class="event-grid">
+        <button class="event-btn" type="button" data-event="normal"><span>Velocidade Normal</span><small>1020 km/h</small></button>
+        <button class="event-btn" type="button" data-event="extreme"><span>Veloc. Extrema</span><small>1480 km/h</small></button>
+        <button class="event-btn" type="button" data-event="boost"><span>Super Boost</span><small>Consumo</small></button>
+        <button class="event-btn" type="button" data-event="drift"><span>Drift Extremo</span><small>Slip lateral</small></button>
+        <button class="event-btn" type="button" data-event="side"><span>Side Attack</span><small>Lateral</small></button>
+        <button class="event-btn" type="button" data-event="spin"><span>Spin Attack</span><small>Giro 360°</small></button>
+        <button class="event-btn" type="button" data-event="collision"><span>Colisão / Impacto</span><small>Tremor</small></button>
+        <button class="event-btn" type="button" data-event="lowshield"><span>Escudo Baixo</span><small>&lt; 20%</small></button>
+        <button class="event-btn" type="button" data-event="curve"><span>Aprox. Curva</span><small>Apex</small></button>
+        <button class="event-btn" type="button" data-event="loop"><span>Rampa / Loop 3D</span><small>Vertical</small></button>
+        <button class="event-btn" type="button" data-event="offtrack"><span>Saída de Pista</span><small>Alerta</small></button>
+        <button class="event-btn" type="button" data-event="wrongway"><span>Sentido Contrário</span><small>Perigo</small></button>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-cam">
+      <h2 class="section-title" id="h-cam">Calibração de Câmera <small id="camActiveLabel">Alt A</small></h2>
+      <div id="camSliders"></div>
+      <div class="seg" style="margin-top:4px">
+        <button class="btn" type="button" id="btnPresetChase">Perseguição</button>
+        <button class="btn" type="button" id="btnPresetCinematic">Cinema</button>
+        <button class="btn" type="button" id="btnPresetTrack">Foco Pista</button>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-hud">
+      <h2 class="section-title" id="h-hud">Calibração de HUD <small id="hudActiveLabel">Alt A</small></h2>
+      <div id="hudSliders"></div>
+      <div class="seg c2" style="margin-top:4px">
+        <button class="btn" type="button" id="btnResetCurrent">Reset Alternativa</button>
+        <button class="btn" type="button" id="btnResetGlobal">Reset Geral</button>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="h-json">
+      <h2 class="section-title" id="h-json">Configuração JSON <small>Schema v1</small></h2>
+      <textarea class="json-area" id="jsonArea" spellcheck="false" aria-label="Configuração JSON"></textarea>
+      <div class="seg c2">
+        <button class="btn" type="button" id="btnCopyJson">Copiar JSON</button>
+        <button class="btn" type="button" id="btnApplyJson">Aplicar JSON</button>
+      </div>
+      <div class="seg c2">
+        <button class="btn" type="button" id="btnExportJson">Atualizar</button>
+        <button class="btn" type="button" id="btnDownloadJson">Baixar .json</button>
+      </div>
+      <div id="jsonNotice" style="font-size:10.5px;color:var(--mint);min-height:14px"></div>
+    </section>
+  </aside>
+
+  <main class="main-stage">
+    <div class="viewport-wrapper">
+      <div class="aspect-container" id="aspectBox" data-aspect="16:9">
+        <canvas id="canvas3d" tabindex="0" aria-label="Visualização 3D da corrida do G-MINUS"></canvas>
+        <div class="hud-layer" id="hudOverlay"></div>
+        <div class="compare-grid" id="compareGrid" style="display:none">
+          <div class="compare-col" id="colA">
+            <div class="compare-header">A · DIEGÉTICO</div>
+            <div class="hud-layer" id="hudColA"></div>
+          </div>
+          <div class="compare-col" id="colB">
+            <div class="compare-header">B · COMPETITIVO</div>
+            <div class="hud-layer" id="hudColB"></div>
+          </div>
+          <div class="compare-col" id="colC">
+            <div class="compare-header">C · CONTEXTUAL</div>
+            <div class="hud-layer" id="hudColC"></div>
+          </div>
+        </div>
+
+        <details class="diag-panel" id="diagPanel">
+          <summary>Diagnóstico Técnico</summary>
+          <dl id="diagList"></dl>
+        </details>
+      </div>
+    </div>
+
+    <footer class="transport-bar">
+      <div class="transport-controls">
+        <button class="btn" type="button" id="btnPlayPause" style="min-width:90px">Ⅱ Pausar</button>
+        <button class="btn" type="button" id="btnStepFrame">+1 Quadro</button>
+        <button class="btn" type="button" id="btnRestart">↺ Reiniciar</button>
+      </div>
+      <div class="timeline-box">
+        <time id="timeDisplay">00:00.00</time>
+        <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="180" step="0.05" value="0" aria-label="Linha do tempo da corrida">
+        <div class="telemetry-pill"><span id="lapDisplay">Volta 1/3</span></div>
+      </div>
+      <div class="telemetry-pills">
+        <div class="telemetry-pill"><span>VEL:</span> <b id="barSpeed">1040</b> km/h</div>
+        <div class="telemetry-pill"><span>POS:</span> <b id="barPos">P01</b> / 30</div>
+        <div class="telemetry-pill"><span>RIVAL:</span> <b id="barRival">-14m</b></div>
+      </div>
+    </footer>
+  </main>
+</div>
+
+<script>
+'use strict';
+/* ==========================================================================
+   G-MINUS · Protótipo 12 — Laboratório de HUD, Câmeras e Interface de Corrida
+   Direção artística: D — Toon Vector Flux
+   Naves P05 e Pintura B (P06) integradas.
+   ========================================================================== */
+
+const LAB_SCHEMA = 'gminus.hud-camera-lab', SCHEMA_VERSION = 1;
+
+/* @gminus-approved-craft-geometry:begin v1 */
+const D2R=Math.PI/180, TAU=Math.PI*2;
+const PARTS=['nose','cockpit','wings','engines'];
+const PART_LABEL={nose:'Proa',cockpit:'Cabine',wings:'Asas',engines:'Motores'};
+const ROLES={paint:0,secondary:1,accent:2,structure:3,glass:4,energy:5,marking:6};
+
+/* ---------- matemática ---------- */
+const m4={
+ I:()=>[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+ mul(a,b){const o=new Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;},
+ T:(x,y,z)=>[1,0,0,0,0,1,0,0,0,0,1,0,x,y,z,1],
+ S:(x,y,z)=>[x,0,0,0,0,y,0,0,0,0,z,0,0,0,0,1],
+ RX(a){const c=Math.cos(a),s=Math.sin(a);return [1,0,0,0,0,c,s,0,0,-s,c,0,0,0,0,1];},
+ RY(a){const c=Math.cos(a),s=Math.sin(a);return [c,0,-s,0,0,1,0,0,s,0,c,0,0,0,0,1];},
+ RZ(a){const c=Math.cos(a),s=Math.sin(a);return [c,s,0,0,-s,c,0,0,0,0,1,0,0,0,0,1];}
+};
+// M(a,b,c): aplica a, depois b, depois c.
+const M=(...ops)=>ops.reduce((acc,op)=>m4.mul(op,acc),m4.I());
+const ap=(m,v)=>[m[0]*v[0]+m[4]*v[1]+m[8]*v[2]+m[12],m[1]*v[0]+m[5]*v[1]+m[9]*v[2]+m[13],m[2]*v[0]+m[6]*v[1]+m[10]*v[2]+m[14]];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+function triNormal(a,b,c){const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx,l=Math.hypot(nx,ny,nz);return l>0?[nx/l,ny/l,nz/l,l]:[0,1,0,0];}
+function signedArea2(p){let a=0;for(let i=0;i<p.length;i++){const q=p[(i+1)%p.length];a+=p[i][0]*q[1]-q[0]*p[i][1];}return a/2;}
+function earclip(pts){
+ const n=pts.length;if(n<3)return [];
+ const sg=signedArea2(pts)>=0?1:-1,idx=[...Array(n).keys()],out=[];
+ const cr=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+ const inside=(p,a,b,c)=>cr(a,b,p)*sg>1e-12&&cr(b,c,p)*sg>1e-12&&cr(c,a,p)*sg>1e-12;
+ let guard=0;
+ while(idx.length>3&&guard++<800){
+  let clipped=false;
+  for(let k=0;k<idx.length;k++){
+   const a=idx[(k+idx.length-1)%idx.length],b=idx[k],c=idx[(k+1)%idx.length];
+   if(cr(pts[a],pts[b],pts[c])*sg<=1e-12)continue;
+   let bad=false;for(const m of idx){if(m===a||m===b||m===c)continue;if(inside(pts[m],pts[a],pts[b],pts[c])){bad=true;break;}}
+   if(bad)continue;out.push([a,b,c]);idx.splice(k,1);clipped=true;break;
+  }
+  if(!clipped)break;
+ }
+ if(idx.length===3)out.push([idx[0],idx[1],idx[2]]);
+ else for(let k=1;k<idx.length-1;k++)out.push([idx[0],idx[k],idx[k+1]]);
+ return out;
+}
+function insetToward(p,c,d){const dx=p[0]-c[0],dy=p[1]-c[1],l=Math.hypot(dx,dy);if(l<1e-9)return [p[0],p[1]];const k=Math.max(.25,1-d/l);return [c[0]+dx*k,c[1]+dy*k];}
+function centroid2(p){return [p.reduce((s,v)=>s+v[0],0)/p.length,p.reduce((s,v)=>s+v[1],0)/p.length];}
+
+/* ---------- construtor de malhas (todas fechadas, faces planas, orientação corrigida por volume) ---------- */
+class Builder{
+ constructor(){this.shapes=[];this.stack=[m4.I()];}
+ get xf(){return this.stack[this.stack.length-1];}
+ with(m,fn){this.stack.push(m4.mul(this.xf,m));try{return fn();}finally{this.stack.pop();}}
+ sym(fn){fn(1);this.with(m4.S(-1,1,1),()=>fn(-1));}
+ add(part,role,tris,kind,closed=true){
+  const m=this.xf,T=[];
+  for(const t of tris){const a=ap(m,t[0]),b=ap(m,t[1]),c=ap(m,t[2]);if(triNormal(a,b,c)[3]<1e-9)continue;T.push([a,b,c]);}
+  if(!T.length)return null;
+  let vol=0;for(const [a,b,c] of T)vol+=a[0]*(b[1]*c[2]-b[2]*c[1])-a[1]*(b[0]*c[2]-b[2]*c[0])+a[2]*(b[0]*c[1]-b[1]*c[0]);vol/=6;
+  if(closed&&vol<0){for(const t of T){const s=t[1];t[1]=t[2];t[2]=s;}vol=-vol;}
+  const nV=T.length*3,pos=new Float32Array(nV*3),nor=new Float32Array(nV*3),onr=new Float32Array(nV*3);
+  let o=0;for(const [a,b,c] of T){const n=triNormal(a,b,c);for(const v of [a,b,c]){pos[o]=v[0];pos[o+1]=v[1];pos[o+2]=v[2];nor[o]=n[0];nor[o+1]=n[1];nor[o+2]=n[2];o+=3;}}
+  const key=i=>Math.round(pos[i]*1e4)+','+Math.round(pos[i+1]*1e4)+','+Math.round(pos[i+2]*1e4),acc=new Map();
+  for(let i=0;i<nV*3;i+=3){const k=key(i),s=acc.get(k)||[0,0,0];s[0]+=nor[i];s[1]+=nor[i+1];s[2]+=nor[i+2];acc.set(k,s);}
+  for(let i=0;i<nV*3;i+=3){const s=acc.get(key(i)),l=Math.hypot(s[0],s[1],s[2])||1;onr[i]=s[0]/l;onr[i+1]=s[1]/l;onr[i+2]=s[2]/l;}
+  const shape={part,role:ROLES[role],roleName:role,kind,closed,positions:pos,normals:nor,onormals:onr,volume:vol};
+  this.shapes.push(shape);return shape;
+ }
+ // anel superelíptico: w/h semi-eixos, hb semi-eixo inferior, n expoente (2=elipse, <2 quinado, >2 quadrado), pinch estreita o topo.
+ ring(r,seg,phase){
+  const pts=[],e=2/(r.n||2);
+  for(let i=0;i<seg;i++){
+   const th=phase+TAU*i/seg,c=Math.cos(th),s=Math.sin(th);
+   let x=Math.sign(c)*Math.pow(Math.abs(c),e)*r.w;
+   const hh=s>=0?r.h:(r.hb??r.h);
+   const y=Math.sign(s)*Math.pow(Math.abs(s),e)*hh;
+   if(r.pinch&&y>0)x*=1-r.pinch*(y/r.h);
+   if(r.flare&&y<0)x*=1+r.flare*(-y/hh);
+   pts.push([(r.x||0)+x,(r.y||0)+y,r.z]);
+  }
+  return pts;
+ }
+ loft(part,role,rings,{seg=10,phase=0}={}){
+  const rows=rings.map(r=>r.point?{pt:[r.x||0,r.y||0,r.z]}:{pts:this.ring(r,seg,phase),c:[r.x||0,r.y||0,r.z]}),tris=[];
+  for(let k=0;k<rows.length-1;k++){
+   const A=rows[k],B=rows[k+1];
+   for(let i=0;i<seg;i++){const j=(i+1)%seg;
+    if(A.pt&&B.pts)tris.push([A.pt,B.pts[j],B.pts[i]]);
+    else if(A.pts&&B.pt)tris.push([A.pts[i],A.pts[j],B.pt]);
+    else if(A.pts&&B.pts)tris.push([A.pts[i],A.pts[j],B.pts[j]],[A.pts[i],B.pts[j],B.pts[i]]);}
+  }
+  const f=rows[0],l=rows[rows.length-1];
+  if(f.pts)for(let i=0;i<seg;i++){const j=(i+1)%seg;tris.push([f.c,f.pts[j],f.pts[i]]);}
+  if(l.pts)for(let i=0;i<seg;i++){const j=(i+1)%seg;tris.push([l.c,l.pts[i],l.pts[j]]);}
+  this.add(part,role,tris,'loft');
+  return {rows,seg,phase};
+ }
+ // faixa gráfica sobre as facetas de um loft (sem contorno, sem arestas vetoriais)
+ loftStripe(part,role,lo,theta,half,k0,k1,lift=.014){
+  const at=(row,th)=>{
+   let t=((th-lo.phase)/TAU)*lo.seg;t=((t%lo.seg)+lo.seg)%lo.seg;
+   const i=Math.floor(t)%lo.seg,f=t-Math.floor(t),j=(i+1)%lo.seg,a=row.pts[i],b=row.pts[j];
+   const p=[lerp(a[0],b[0],f),lerp(a[1],b[1],f),a[2]];
+   let nx=b[1]-a[1],ny=-(b[0]-a[0]);const nl=Math.hypot(nx,ny)||1;nx/=nl;ny/=nl;
+   if(nx*(p[0]-row.c[0])+ny*(p[1]-row.c[1])<0){nx=-nx;ny=-ny;}
+   return [p[0]+nx*lift,p[1]+ny*lift,p[2]];
+  };
+  const ths=[theta-half,theta,theta+half],tris=[];
+  for(let k=k0;k<k1;k++){
+   const A=lo.rows[k],B=lo.rows[k+1];if(!A.pts||!B.pts)continue;
+   const a=ths.map(t=>at(A,t)),b=ths.map(t=>at(B,t));
+   for(let s=0;s<2;s++)tris.push([a[s],a[s+1],b[s+1]],[a[s],b[s+1],b[s]]);
+  }
+  this.add(part,role,tris,'stripe',false);
+ }
+ // varredura genérica de um perfil 2D ao longo de um eixo; estações {a,du,dv,s}
+ sweep(part,role,prof,stations,axis='x',kind='prism'){
+  const c=centroid2(prof);
+  const mk=(u,v,a)=>axis==='x'?[a,v,u]:axis==='z'?[u,v,a]:[u,a,v];
+  const rows=stations.map(st=>prof.map(p=>{const q=st.ins?insetToward(p,c,st.ins):p;return mk(q[0]+(st.du||0),q[1]+(st.dv||0),st.a);}));
+  const tris=[],n=prof.length;
+  for(let k=0;k<rows.length-1;k++)for(let i=0;i<n;i++){const j=(i+1)%n,A=rows[k],B=rows[k+1];tris.push([A[i],A[j],B[j]],[A[i],B[j],B[i]]);}
+  const cap=earclip(prof),f=rows[0],l=rows[rows.length-1];
+  for(const [a,b,cc] of cap){tris.push([f[cc],f[b],f[a]]);tris.push([l[a],l[b],l[cc]]);}
+  this.add(part,role,tris,kind);
+ }
+ prism(part,role,prof,{axis='x',a0,a1,bevel=0,ins}={}){
+  const span=Math.abs(a1-a0),b=Math.min(bevel,span*.3),sg=a1>=a0?1:-1,d=ins??b*1.6;
+  const st=b>0?[{a:a0,ins:d},{a:a0+sg*b},{a:a1-sg*b},{a:a1,ins:d}]:[{a:a0},{a:a1}];
+  this.sweep(part,role,prof,st,axis);
+ }
+ // placa horizontal com chanfro superior (técnica 'poly' da v6); vértices [x,z,espessura?]
+ slab(part,role,poly,{y=0,t=.1,bevel=.06}={}){
+  const P=poly.map(p=>[p[0],p[1]]),c=centroid2(P),th=poly.map(p=>p[2]??t);
+  const top=P.map((p,i)=>{const q=insetToward(p,c,bevel);return [q[0],y+th[i]*.5,q[1]];});
+  const rim=P.map((p,i)=>[p[0],y+th[i]*.29,p[1]]),bot=P.map((p,i)=>[p[0],y-th[i]*.5,p[1]]);
+  const tris=[],n=P.length;
+  for(const [a,b,cc] of earclip(P)){tris.push([top[a],top[b],top[cc]]);tris.push([bot[cc],bot[b],bot[a]]);}
+  for(let i=0;i<n;i++){const j=(i+1)%n;tris.push([top[i],rim[i],rim[j]],[top[i],rim[j],top[j]],[rim[i],bot[i],bot[j]],[rim[i],bot[j],rim[j]]);}
+  this.add(part,role,tris,'plate');
+ }
+ // revolução de um perfil fechado [r,z] (r>0) em torno do eixo z local → anel/toroide fechado
+ lathe(part,role,prof,{seg=16,phase=0,cx=0,cy=0}={}){
+  const rows=prof.map(([r,z])=>{const out=[];for(let i=0;i<seg;i++){const th=phase+TAU*i/seg;out.push([cx+r*Math.cos(th),cy+r*Math.sin(th),z]);}return out;}),tris=[],n=rows.length;
+  for(let k=0;k<n;k++){const A=rows[k],B=rows[(k+1)%n];for(let i=0;i<seg;i++){const j=(i+1)%seg;tris.push([A[i],A[j],B[j]],[A[i],B[j],B[i]]);}}
+  this.add(part,role,tris,'lathe');
+ }
+ // faixa plana (ribbon da v6) seguindo uma polilinha [x,y,z]
+ ribbon(part,role,pts,width){
+  const h=width/2,tris=[];
+  for(let i=0;i<pts.length-1;i++){
+   const [x,y,z]=pts[i],[xx,yy,zz]=pts[i+1],dx=xx-x,dz=zz-z,l=Math.hypot(dx,dz)||1,nx=-dz/l*h,nz=dx/l*h;
+   tris.push([[x+nx,y,z+nz],[x-nx,y,z-nz],[xx-nx,yy,zz-nz]],[[x+nx,y,z+nz],[xx-nx,yy,zz-nz],[xx+nx,yy,zz+nz]]);
+  }
+  this.add(part,role,tris,'stripe',false);
+ }
+ // bocal: carenagem + garganta escura + núcleo de energia (rosto do bocal ligeiramente saliente)
+ nozzle(part,{x=0,y=0,z,r,w,h,len=1,n=2,seg=12,phase=0,role='secondary',lip=true}){
+  const W=w??r,H=h??r;
+  this.loft(part,role,[{z:z+len,x,y,w:W*.8,h:H*.8,n},{z:z+len*.5,x,y,w:W,h:H,n},{z:z+.12,x,y,w:W*1.03,h:H*1.03,n},{z,x,y,w:W*1.1,h:H*1.1,n}],{seg,phase});
+  this.loft(part,'structure',[{z:z+.03,x,y,w:W*.88,h:H*.88,n},{z:z-.035,x,y,w:W*.84,h:H*.84,n}],{seg,phase});
+  this.loft(part,'energy',[{z:z-.02,x,y,w:W*.6,h:H*.6,n},{z:z-.075,x,y,w:W*.5,h:H*.5,n}],{seg,phase});
+  if(lip&&n===2)this.lathe(part,'accent',[[W*1.1,z+.2],[W*1.19,z+.15],[W*1.19,z+.03],[W*1.12,z-.005]],{seg:Math.max(seg,14),cx:x,cy:y});
+ }
+ canopy(part,{z,y,len,w,h,seg=10,phase=Math.PI/10,n=2,front=.55,frame=true}){
+  const lo=this.loft(part,'glass',[
+   {z:z+len*front,y:y-.02,point:true},
+   {z:z+len*front*.55,y:y+h*.08,w:w*.62,h:h*.62,hb:.07,n},
+   {z,y,w,h,hb:.09,n},
+   {z:z-len*(1-front)*.62,y:y-.01,w:w*.82,h:h*.72,hb:.09,n},
+   {z:z-len*(1-front),y:y-.05,point:true}],{seg,phase});
+  if(frame)this.loftStripe(part,'marking',lo,Math.PI/2,.07,1,3,.012);
+  return lo;
+ }
+}
+// interpolação de perfil de casco a partir dos anéis (para posicionar peças sobre a superfície)
+function hullProfile(rings){
+ const R=rings.filter(r=>!r.point).slice().sort((a,b)=>b.z-a.z);
+ const f=(z,fn)=>{if(z>=R[0].z)return fn(R[0]);for(let i=0;i<R.length-1;i++){const a=R[i],b=R[i+1];if(z<=a.z&&z>=b.z){const t=(a.z-z)/((a.z-b.z)||1);return lerp(fn(a),fn(b),t);}}return fn(R[R.length-1]);};
+ return {top:z=>f(z,r=>(r.y||0)+r.h),bot:z=>f(z,r=>(r.y||0)-(r.hb??r.h)),half:z=>f(z,r=>r.w),mid:z=>f(z,r=>r.y||0)};
+}
+
+/* ==========================================================================
+   NAVES E ALTERNATIVAS — construtores geométricos (aprovados em 10/10/2026 — baseline = padrões)
+   Convenção: +Z = proa, +Y = topo, X = lateral. Unidades do laboratório v6.
+   ========================================================================== */
+const ALL=PARTS;
+const P=(id,label,min,max,def,o={})=>({id,label,min,max,def,step:o.step??.01,unit:o.unit??'×',affects:o.affects??ALL});
+const PI=Math.PI;
+
+/* ---- BLUE FALCON ---- */
+function falconA(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.engineSize;
+ const zN=2.0*L,tip=zN+1.55*NL;
+ const rg=[
+  {z:tip,y:-.03,point:true},
+  {z:zN+.8*NL,y:-.02,w:.25*W,h:.12*H,hb:.09*H,n:1.25},
+  {z:zN,y:0,w:.5*W,h:.24*H,hb:.18*H,n:1.5},
+  {z:.85*L,y:.01,w:.68*W,h:.33*H,hb:.24*H,n:1.85},
+  {z:-.75*L,y:.02,w:.76*W,h:.36*H,hb:.27*H,n:2.3},
+  {z:-1.95*L,y:.02,w:.74*W,h:.33*H,hb:.28*H,n:2.8},
+  {z:-2.8*L,y:.02,w:.6*W,h:.26*H,hb:.24*H,n:3.2}];
+ const hp=hullProfile(rg),o={seg:8,phase:0};
+ const nose=S.loft('nose','paint',rg.slice(0,4),o);
+ S.loft('cockpit','paint',rg.slice(3,6),o);
+ S.loft('engines','secondary',rg.slice(5),o);
+ S.loftStripe('nose','accent',nose,0,.09,1,3);S.loftStripe('nose','accent',nose,PI,.09,1,3);
+ S.loftStripe('nose','marking',nose,PI/2,.07,1,3);
+ // tomadas de ar laterais sob a raiz da asa
+ S.sym(()=>S.prism('nose','structure',[[.95*L,-.17*H],[.95*L,.09*H],[.1*L,.12*H],[-.2*L,-.2*H]],{axis:'x',a0:.48*W,a1:.86*W,bevel:.03}));
+ // espinha dorsal
+ S.loft('cockpit','secondary',[
+  {z:.1*L,y:hp.top(.1*L)-.05,point:true},
+  {z:-.5*L,y:hp.top(-.5*L)-.03,w:.12*W,h:.13*H,hb:.08,n:1.5},
+  {z:-1.9*L,y:hp.top(-1.9*L)-.03,w:.14*W,h:.12*H,hb:.08,n:1.5},
+  {z:-2.7*L,y:hp.top(-2.7*L)-.05,w:.08*W,h:.06*H,hb:.06,n:1.5}],{seg:6,phase:PI/2});
+ const cs=p.cockpitSize,zc=.55*L+p.cockpitPos;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.06,len:1.35*cs,w:.25*cs*Math.sqrt(W),h:.25*cs});
+ // asa delta com quebra (strake + painel externo)
+ const s=p.span,sw=p.sweep*D2R,cx=.75*s,tx=2.2*s,crz=-.15*L,tle=crz-(tx-cx)*Math.tan(sw);
+ S.sym(()=>S.with(M(m4.RZ(p.dihedral*D2R),m4.T(.5*W,-.06*H,0)),()=>{
+  S.slab('wings','paint',[[0,.9*L,.17*H],[cx,crz,.14*H],[tx,tle,.05],[tx+.06,tle-.55,.05],[0,-2.2*L,.17*H]],{bevel:.06});
+  S.ribbon('wings','accent',[[cx*.95,.07*H+.02,crz-.32],[tx-.1,.045,tle-.2]],.07);
+  S.slab('wings','secondary',[[tx-.06,tle+.1,.08],[tx+.16,tle-.12,.08],[tx+.18,tle-.64,.08],[tx-.03,tle-.62,.08]],{bevel:.025});
+  const fx=cx+.45*(tx-cx),fz=lerp(crz,tle,.45);
+  S.with(m4.T(fx,0,0),()=>S.prism('wings','secondary',[[fz+.05,0],[fz-.75,0],[fz-.85,.13],[fz-.12,.11]],{axis:'x',a0:-.018,a1:.018,bevel:.006}));
+ }));
+ S.sym(()=>S.prism('cockpit','structure',[[-.35*L,hp.top(-.35*L)-.06],[-.35*L,hp.top(-.35*L)+.035],[-1.05*L,hp.top(-1.05*L)+.01],[-1.15*L,hp.top(-1.15*L)-.06]],{axis:'x',a0:.24*W,a1:.36*W,bevel:.012}));
+ // estabilizadores gêmeos inclinados
+ const fh=p.finHeight,fc=p.finCant*D2R,zf=-2.2*L;
+ S.sym(()=>S.with(M(m4.RZ(-fc),m4.T(.4*W,hp.top(zf)-.14*H,0)),()=>{
+  S.prism('wings','paint',[[-1.4*L,0],[-2.3*L,.95*fh],[-2.85*L,.95*fh],[-2.8*L,0]],{axis:'x',a0:-.045,a1:.045,bevel:.015});
+  S.prism('wings','accent',[[-2.17*L,.8*fh],[-2.3*L,.98*fh],[-2.87*L,.98*fh],[-2.84*L,.8*fh]],{axis:'x',a0:-.058,a1:.058,bevel:.012});
+ }));
+ // propulsão dupla + quilhas ventrais + placa inferior
+ S.sym(()=>S.nozzle('engines',{x:Math.max(.36*W,.3*E),y:0,z:-2.95*L,r:.25*E,len:1.25,seg:12}));
+ S.sym(()=>S.with(M(m4.RZ(.45),m4.T(.3*W,hp.bot(-2.3*L)+.06,0)),()=>S.prism('engines','structure',[[-1.8*L,0],[-2.75*L,0],[-2.95*L,-.34],[-2.45*L,-.3]],{axis:'x',a0:-.035,a1:.035,bevel:.01})));
+ S.slab('cockpit','structure',[[-.42*W,.6*L],[.42*W,.6*L],[.5*W,-1.6*L],[-.5*W,-1.6*L]],{y:hp.bot(-.5*L)+.03,t:.09,bevel:.04});
+}
+function falconB(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,G=p.boomGap,BL=p.boomLength,E=p.engineSize,th=p.tailHeight;
+ const rg=[
+  {z:1.9*L+1.3*NL,y:-.06,point:true},
+  {z:1.9*L+.55*NL,y:-.04,w:.2*W,h:.14*H,hb:.12*H,n:2},
+  {z:1.9*L,y:-.02,w:.36*W,h:.25*H,hb:.2*H,n:2.2},
+  {z:.4*L,y:0,w:.5*W,h:.36*H,hb:.26*H,n:2.4},
+  {z:-.9*L,y:0,w:.46*W,h:.33*H,hb:.25*H,n:2.4},
+  {z:-1.7*L,y:0,w:.28*W,h:.22*H,hb:.18*H,n:2.2}];
+ const hp=hullProfile(rg),o={seg:12,phase:0};
+ const nose=S.loft('nose','paint',rg.slice(0,3),o);
+ S.loft('cockpit','paint',rg.slice(2),o);
+ S.loftStripe('nose','marking',nose,PI/2,.12,1,2);
+ S.prism('nose','structure',[[1.75*L,hp.bot(1.75*L)+.05],[1.75*L,hp.bot(1.75*L)-.09],[.6*L,hp.bot(.6*L)-.08],[.4*L,hp.bot(.4*L)+.05]],{axis:'x',a0:-.17*W,a1:.17*W,bevel:.03});
+ const cs=p.cockpitSize,zc=.75*L+p.cockpitPos;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.07,len:1.5*cs,w:.3*cs,h:.3*cs,front:.6});
+ S.nozzle('engines',{x:0,y:0,z:-1.78*L,r:.13*E,len:.6,seg:12});
+ // vigas laterais (booms) com motores
+ const boom=[
+  {z:2.45*L*BL,x:G,y:-.05,point:true},
+  {z:1.85*L*BL,x:G,y:-.04,w:.16,h:.14*H,hb:.12*H,n:1.8},
+  {z:.85*L*BL,x:G,y:-.02,w:.29,h:.26*H,hb:.22*H,n:2.6},
+  {z:-1.0*L,x:G,y:0,w:.32,h:.29*H,hb:.25*H,n:3},
+  {z:-2.6*L*BL,x:G,y:0,w:.32,h:.28*H,hb:.25*H,n:3},
+  {z:-2.95*L*BL,x:G,y:0,w:.28,h:.25*H,hb:.23*H,n:3}];
+ const bp=hullProfile(boom),fz=bp.top(-2.4*L*BL)-.08,ft=12*D2R;
+ S.sym(()=>{
+  const bf=S.loft('wings','paint',boom.slice(0,4),{seg:10,phase:PI/10});
+  S.loft('engines','secondary',boom.slice(3),{seg:10,phase:PI/10});
+  S.loftStripe('wings','accent',bf,PI/2,.1,1,3);
+  S.nozzle('engines',{x:G,y:0,z:-3.02*L*BL,r:.22*E,len:1.1,seg:12});
+  S.with(M(m4.RZ(ft),m4.T(G,fz,0)),()=>S.prism('wings','paint',[[-1.85*L*BL,0],[-2.45*L*BL,.85*th],[-2.98*L*BL,.85*th],[-2.95*L*BL,0]],{axis:'x',a0:-.05,a1:.05,bevel:.015}));
+  // asa externa + ponta caída
+  const s=p.span,sw=p.sweep*D2R,ox=1.35*s,tle=-.05*L-ox*Math.tan(sw);
+  S.with(m4.T(G+.18,-.05,0),()=>{
+   S.slab('wings','paint',[[-.25,.15*L,.13*H],[ox,tle,.05],[ox+.02,tle-.5,.05],[-.25,-1.15*L,.13*H]],{bevel:.05});
+   S.with(M(m4.RZ(-70*D2R),m4.T(ox,0,0)),()=>S.slab('wings','accent',[[0,tle+.05,.05],[.42,tle-.15,.04],[.42,tle-.5,.04],[0,tle-.52,.05]],{bevel:.03}));
+  });
+ });
+ // ponte central e empenagem horizontal ligando as vigas
+ S.slab('wings','paint',[[-G,.2*L],[0,.55*L],[G,.2*L],[G,-1.3*L],[0,-1.05*L],[-G,-1.3*L]],{y:-.04,t:.15*H,bevel:.05});
+ const fx=G-Math.sin(ft)*.85*th,fy=fz+.85*th*Math.cos(ft);
+ S.slab('wings','secondary',[[-fx-.22,-2.4*L*BL],[fx+.22,-2.4*L*BL],[fx+.28,-2.98*L*BL],[-fx-.28,-2.98*L*BL]],{y:fy-.03,t:.09,bevel:.04});
+}
+function falconC(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.engineSize,BW=p.bankWidth;
+ const rg=[
+  {z:2.4*L+1.1*NL,y:-.03,point:true},
+  {z:2.4*L+.45*NL,y:-.02,w:.2*W,h:.07*H,hb:.045*H,n:1.3},
+  {z:2.4*L,y:-.01,w:.42*W,h:.12*H,hb:.07*H,n:1.35},
+  {z:.9*L,y:0,w:.95*W,h:.27*H,hb:.13*H,n:1.45},
+  {z:-.6*L,y:0,w:1.15*W,h:.31*H,hb:.15*H,n:1.55},
+  {z:-2.0*L,y:0,w:1.05*W,h:.27*H,hb:.15*H,n:1.8},
+  {z:-2.6*L,y:0,w:.95*W,h:.22*H,hb:.14*H,n:2.2}];
+ const hp=hullProfile(rg),o={seg:12,phase:0};
+ const nose=S.loft('nose','paint',rg.slice(0,4),o);
+ S.loft('cockpit','paint',rg.slice(3,5),o);
+ S.loft('engines','secondary',rg.slice(4),o);
+ S.loftStripe('nose','marking',nose,PI/2,.1,1,3);
+ S.loftStripe('nose','accent',nose,0,.06,2,3);S.loftStripe('nose','accent',nose,PI,.06,2,3);
+ // braços em chevron (corpo sustentador)
+ const s=p.span,sw=p.sweep*D2R,rx=.5*W,X=2.0*s,rle=1.5*L,tle=rle-X*Math.tan(sw),tn=Math.tan(sw);
+ S.sym(()=>S.with(m4.T(rx,-.01,0),()=>{
+  S.slab('wings','paint',[[0,rle,.2*H],[X,tle,.06],[X+.05,tle-.7,.06],[0,-1.3*L,.2*H]],{bevel:.06});
+  const yt=x=>lerp(.2*H,.06,x/X)*.5+.012;
+  S.ribbon('wings','accent',[[.2*X,yt(.2*X),rle-.2*X*tn-.2],[.85*X,yt(.85*X),rle-.85*X*tn-.2]],.08);
+  S.with(M(m4.RZ(-p.tipDroop*D2R),m4.T(X+.02,0,0)),()=>S.slab('wings','accent',[[0,tle+.02,.06],[.5,tle-.25,.045],[.5,tle-.72,.045],[0,tle-.72,.06]],{bevel:.03}));
+ }));
+ const cs=p.cockpitSize,zc=.95*L+p.cockpitPos;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.05,len:1.55*cs,w:.33*cs,h:.17*cs,seg:6,phase:PI/6,n:1.6,front:.6});
+ const df=p.dorsalFin;
+ S.with(m4.T(0,hp.top(-1.4*L)-.06,0),()=>S.prism('wings','secondary',[[-.7*L,0],[-1.7*L,.62*df],[-2.25*L,.62*df],[-2.3*L,0]],{axis:'x',a0:-.05,a1:.05,bevel:.015}));
+ // banco de motores com três bocais retangulares
+ const bw=.78*W*BW,bh=.17*H+.05;
+ S.prism('engines','structure',[[-bw,-.13*H],[bw,-.13*H],[bw+.06,bh],[-bw-.06,bh]],{axis:'z',a0:-1.7*L,a1:-2.85*L,bevel:.05});
+ for(const k of [-1,0,1])S.nozzle('engines',{x:k*.62*bw,y:.02,z:-2.95*L,w:.2*bw*E,h:.11*E,n:4.5,len:.9,seg:12,lip:false});
+ S.slab('cockpit','structure',[[-.35*W,1.6*L],[.35*W,1.6*L],[.45*W,-1.9*L],[-.45*W,-1.9*L]],{y:hp.bot(0)+.02,t:.08,bevel:.03});
+}
+
+/* ---- GOLDEN FOX ---- */
+function foxA(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.engineSize;
+ const zN=1.8*L,tip=zN+2.3*NL;
+ const rg=[
+  {z:tip,y:0,point:true},
+  {z:zN+1.45*NL,y:0,w:.075*W,h:.07*H,hb:.065*H,n:2},
+  {z:zN+.55*NL,y:0,w:.16*W,h:.15*H,hb:.12*H,n:2},
+  {z:zN,y:0,w:.23*W,h:.2*H,hb:.16*H,n:2},
+  {z:0,y:.01,w:.33*W,h:.26*H,hb:.2*H,n:2.1},
+  {z:-1.25*L,y:.02,w:.39*W,h:.29*H,hb:.22*H,n:2.2},
+  {z:-2.6*L,y:.02,w:.41*W,h:.29*H,hb:.24*H,n:2.3},
+  {z:-3.05*L,y:.02,w:.36*W,h:.26*H,hb:.22*H,n:2.3}];
+ const hp=hullProfile(rg),o={seg:12,phase:0};
+ const nose=S.loft('nose','paint',rg.slice(0,4),o);
+ const mid=S.loft('cockpit','paint',rg.slice(3,6),o);
+ S.loft('engines','secondary',rg.slice(5),o);
+ S.loftStripe('nose','marking',nose,PI/2,.11,1,3);
+ S.loftStripe('cockpit','marking',mid,PI/2,.09,0,1);
+ for(const t of [0,PI])S.loftStripe('cockpit','accent',mid,t,.07,0,2);
+ // canards
+ const cn=p.canard,zcn=zN+.45*NL;
+ S.sym(()=>S.with(M(m4.RZ(8*D2R),m4.T(.07*W,-.02,zcn)),()=>S.slab('nose','accent',[[0,.3*cn+.05,.05],[.62*cn,-.02,.03],[.66*cn,-.2,.03],[0,-.28,.05]],{bevel:.03})));
+ // delta traseira pequena + winglets
+ const s=p.span,sw=p.sweep*D2R,tx=1.25*s,rle=-.9*L,tle=rle-tx*Math.tan(sw),rte=-2.75*L,wl=p.winglet;
+ S.sym(()=>S.with(M(m4.RZ(-4*D2R),m4.T(.22*W,-.06*H,0)),()=>{
+  S.slab('wings','paint',[[0,rle,.12*H],[tx,tle,.04],[tx,tle-.36,.04],[0,rte,.12*H]],{bevel:.05});
+  S.with(M(m4.RZ(-10*D2R),m4.T(tx-.02,0,0)),()=>S.prism('wings','accent',[[tle+.02,0],[tle-.2,.5*wl],[tle-.4,.54*wl],[tle-.38,0]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+ }));
+ // motor axial dominante + boosters
+ S.nozzle('engines',{x:0,y:.02,z:-3.15*L,r:.3*E,len:1.2,seg:14});
+ const B=p.booster;
+ S.sym(()=>S.nozzle('engines',{x:.47*W,y:.04,z:-2.9*L,r:.13*B,len:1.15,seg:10,lip:false}));
+ // cabine recuada estilo dragster + tomada dorsal
+ const cs=p.cockpitSize,zc=-.55*L+p.cockpitPos,a=zc-.45*cs;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.05,len:1.05*cs,w:.2*cs,h:.21*cs,front:.6});
+ S.with(m4.T(0,hp.top(a-.5)-.05,0),()=>S.prism('cockpit','structure',[[a,0],[a-.12,.15],[a-.95,.12],[a-1.15,0]],{axis:'x',a0:-.1,a1:.1,bevel:.02}));
+ S.with(m4.T(0,hp.bot(-2.5*L)+.05,0),()=>S.prism('engines','structure',[[-2.0*L,0],[-2.95*L,0],[-3.15*L,-.36],[-2.6*L,-.34]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+}
+function foxB(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.podSize,sp=p.sidepod,pg=p.podGap;
+ const rg=[
+  {z:2.6*L+.95*NL,y:-.1,point:true},
+  {z:2.6*L+.35*NL,y:-.08,w:.13*W,h:.09*H,hb:.08*H,n:2.6},
+  {z:2.2*L,y:-.05,w:.19*W,h:.14*H,hb:.12*H,n:2.8},
+  {z:.55*L,y:0,w:.29*W,h:.22*H,hb:.17*H,n:3},
+  {z:-1.25*L,y:0,w:.31*W,h:.24*H,hb:.18*H,n:3},
+  {z:-2.55*L,y:.01,w:.23*W,h:.19*H,hb:.16*H,n:2.6},
+  {z:-3.0*L,y:.01,w:.15*W,h:.13*H,hb:.12*H,n:2.4}];
+ const hp=hullProfile(rg),o={seg:8,phase:PI/8};
+ const nose=S.loft('nose','paint',rg.slice(0,3),o);
+ const tub=S.loft('cockpit','paint',rg.slice(2,5),o);
+ S.loft('engines','secondary',rg.slice(4),o);
+ S.loftStripe('nose','marking',nose,PI/2,.18,1,2);
+ S.loftStripe('cockpit','marking',tub,PI/2,.16,0,1);
+ // aerofólio dianteiro em chevron com placas e pilones
+ const fs=p.foilSpan,zf=2.45*L+.3*NL,yf=-.3;
+ S.slab('nose','secondary',[[-1.7*fs,zf-.05],[0,zf+.3],[1.7*fs,zf-.05],[1.75*fs,zf-.42],[0,zf-.2],[-1.75*fs,zf-.42]],{y:yf,t:.08,bevel:.04});
+ S.ribbon('nose','accent',[[-1.5*fs,yf+.055,zf-.2],[0,yf+.055,zf+.08],[1.5*fs,yf+.055,zf-.2]],.06);
+ S.sym(()=>{
+  S.with(m4.T(1.73*fs,yf,0),()=>S.prism('nose','paint',[[zf+.06,.17],[zf-.5,.15],[zf-.56,-.13],[zf-.02,-.11]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+  S.prism('nose','structure',[[zf+.06,yf],[zf-.24,yf],[zf-.3,hp.bot(zf)+.05],[zf-.02,hp.bot(zf)+.05]],{axis:'x',a0:.04,a1:.1,bevel:.01});
+ });
+ // sidepods com bocas de entrada
+ S.sym(()=>{
+  const x=.27*W+.2*sp;
+  const pod=S.loft('wings','paint',[
+   {z:.55*L,x,y:-.04,w:.14*sp,h:.1*sp,hb:.1*sp,n:3},
+   {z:.35*L,x,y:-.03,w:.22*sp,h:.16*sp,hb:.14*sp,n:3.2},
+   {z:-.9*L,x,y:-.03,w:.23*sp,h:.17*sp,hb:.15*sp,n:3.2},
+   {z:-1.9*L,x:x*.8,y:-.02,w:.12*sp,h:.09*sp,hb:.1*sp,n:3}],{seg:8,phase:PI/8});
+  S.loft('wings','structure',[{z:.6*L,x,y:-.04,w:.105*sp,h:.07*sp,n:3},{z:.5*L,x,y:-.04,w:.105*sp,h:.07*sp,n:3}],{seg:8,phase:PI/8});
+  S.loftStripe('wings','accent',pod,PI/2,.14,1,2);
+ });
+ // pods de propulsão externos ligados por vigas
+ S.sym(()=>{
+  const pod=S.loft('engines','paint',[
+   {z:-1.1*L,x:pg,y:0,point:true},
+   {z:-1.45*L,x:pg,y:0,w:.17*E,h:.17*E,n:2},
+   {z:-2.2*L,x:pg,y:0,w:.26*E,h:.26*E,n:2},
+   {z:-2.95*L,x:pg,y:0,w:.25*E,h:.25*E,n:2}],{seg:12,phase:0});
+  S.loftStripe('engines','accent',pod,PI/2,.12,1,3);
+  S.nozzle('engines',{x:pg,y:0,z:-3.05*L,r:.21*E,len:.8,seg:12});
+  S.slab('wings','secondary',[[.18*W,-1.55*L],[pg,-1.95*L],[pg,-2.5*L],[.18*W,-2.3*L]],{y:0,t:.09,bevel:.03});
+ });
+ // asa traseira elevada (dois elementos) sobre pilone pescoço-de-cisne
+ const rh=p.rearWingHeight,rs=p.rearWingSpan,yw=hp.top(-2.6*L)+.2+.55*rh,half=(pg+.18)*rs;
+ S.slab('wings','paint',[[-half,-2.55*L],[half,-2.55*L],[half,-3.02*L],[-half,-3.02*L]],{y:yw,t:.09,bevel:.04});
+ S.slab('wings','accent',[[-half,-2.95*L],[half,-2.95*L],[half,-3.28*L],[-half,-3.28*L]],{y:yw+.065,t:.05,bevel:.03});
+ S.sym(()=>S.with(m4.T(half,0,0),()=>S.prism('wings','secondary',[[-2.45*L,yw+.24],[-3.35*L,yw+.27],[-3.35*L,yw-.22],[-2.5*L,yw-.18]],{axis:'x',a0:-.03,a1:.03,bevel:.01})));
+ S.prism('wings','structure',[[-2.2*L,hp.top(-2.2*L)-.05],[-2.62*L,yw+.02],[-2.9*L,yw+.02],[-2.6*L,hp.top(-2.6*L)-.05]],{axis:'x',a0:-.035,a1:.035,bevel:.01});
+ // cockpit aberto com santantônio
+ const cs=p.cockpitSize,zc=.3*L+p.cockpitPos,zh=zc-.55*cs,yh=hp.top(zh)-.03;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.04,len:.95*cs,w:.19*cs,h:.17*cs,front:.6});
+ const U=[[-.2,0],[-.2,.26],[-.1,.36],[.1,.36],[.2,.26],[.2,0],[.12,0],[.12,.22],[.07,.28],[-.07,.28],[-.12,.22],[-.12,0]];
+ S.prism('cockpit','structure',U.map(([x,y])=>[x*cs,yh+y*cs]),{axis:'z',a0:zh,a1:zh-.12,bevel:.02});
+ const fy=Math.min(hp.bot(-.5*L),-.03-.15*sp)+.03;
+ S.slab('cockpit','structure',[[-.27*W-.38*sp,.35*L],[.27*W+.38*sp,.35*L],[.22*W+.3*sp,-1.8*L],[-.22*W-.3*sp,-1.8*L]],{y:fy,t:.06,bevel:.03});
+}
+function foxC(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,Rg=p.ringSize,RL=p.ringLength;
+ const rg=[
+  {z:2.0*L+.95*NL,y:-.05,point:true},
+  {z:2.0*L+.4*NL,y:-.03,w:.2*W,h:.15*H,hb:.11*H,n:1.8},
+  {z:2.0*L,y:-.01,w:.36*W,h:.27*H,hb:.2*H,n:2},
+  {z:.7*L,y:.02,w:.6*W,h:.42*H,hb:.3*H,n:2.3},
+  {z:-.6*L,y:.02,w:.62*W,h:.42*H,hb:.31*H,n:2.4},
+  {z:-1.8*L,y:.02,w:.48*W,h:.34*H,hb:.27*H,n:2.4},
+  {z:-2.45*L,y:.02,w:.34*W,h:.25*H,hb:.21*H,n:2.2}];
+ const hp=hullProfile(rg),o={seg:10,phase:PI/10};
+ const nose=S.loft('nose','paint',rg.slice(0,3),o);
+ const mid=S.loft('cockpit','paint',rg.slice(2,5),o);
+ S.loft('engines','secondary',rg.slice(4),o);
+ S.loftStripe('nose','marking',nose,PI/2,.12,1,2);
+ for(const t of [PI*.1,PI*.9])S.loftStripe('cockpit','accent',mid,t,.06,0,2);
+ S.prism('nose','structure',[[1.85*L,hp.bot(1.85*L)+.05],[1.85*L,hp.bot(1.85*L)-.08],[.8*L,hp.bot(.8*L)-.07],[.6*L,hp.bot(.6*L)+.05]],{axis:'x',a0:-.17*W,a1:.17*W,bevel:.03});
+ // asas de enflechamento negativo com aletas de ponta
+ const s=p.span,fsw=p.forwardSweep*D2R,tx=2.05*s,rLE=-.45*L,rTE=-1.95*L,tLE=rLE+tx*Math.tan(fsw),tTE=tLE-.5;
+ S.sym(()=>S.with(M(m4.RZ(5*D2R),m4.T(.4*W,-.1*H,0)),()=>{
+  S.slab('wings','paint',[[0,rLE,.15*H],[tx,tLE,.05],[tx,tTE,.05],[0,rTE,.15*H]],{bevel:.06});
+  S.ribbon('wings','accent',[[.15*tx,.07*H+.02,lerp(rLE,tLE,.15)-.12],[.9*tx,.045,lerp(rLE,tLE,.9)-.12]],.07);
+  S.with(m4.T(tx-.03,0,0),()=>S.prism('wings','accent',[[tLE+.05,0],[tLE-.15,.42],[tTE+.02,.45],[tTE-.02,0]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+ }));
+ // "orelhas": barbatanas dorsais inclinadas atrás da cabine
+ const eh=p.earHeight,ec=p.earCant*D2R,ze=-.15*L;
+ S.sym(()=>S.with(M(m4.RZ(-ec),m4.T(.2*W,hp.top(ze)-.08,0)),()=>{
+  S.prism('cockpit','paint',[[ze+.15,0],[ze-.35,.9*eh],[ze-.55,.86*eh],[ze-1.15*L,0]],{axis:'x',a0:-.05,a1:.05,bevel:.02});
+  S.prism('cockpit','accent',[[ze,.08],[ze-.33,.68*eh],[ze-.45,.65*eh],[ze-.9*L,.08]],{axis:'x',a0:-.065,a1:.065,bevel:.015});
+ }));
+ const cs=p.cockpitSize,zc=.95*L+p.cockpitPos;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.07,len:1.2*cs,w:.3*cs,h:.28*cs,front:.58});
+ // motor único em duto anelar (ducted ring) com três suportes
+ const ze2=-2.25*L,ri=Math.max(.5*Rg,.42*W+.06),ro=ri+.12*Rg+.05,z1=ze2-.95*RL;
+ S.nozzle('engines',{x:0,y:.02,z:ze2-.5,r:.27*Rg,len:1.1,seg:12});
+ S.lathe('engines','paint',[[ri,ze2],[ro,ze2-.12],[ro+.02,z1+.16],[ri+.03,z1]],{seg:16,cy:.02});
+ S.lathe('engines','accent',[[ro-.01,ze2-.2],[ro+.035,ze2-.25],[ro+.035,ze2-.42],[ro-.01,ze2-.46]],{seg:16,cy:.02});
+ for(const a of [PI/2,PI/2+TAU/3,PI/2+2*TAU/3])S.with(M(m4.RZ(a),m4.T(0,.02,0)),()=>S.slab('engines','structure',[[.22*Rg,ze2-.02],[ri+.04,ze2-.06],[ri+.04,ze2-.42],[.22*Rg,ze2-.5]],{t:.06,bevel:.015}));
+ S.with(m4.T(0,hp.bot(-1.4*L)+.05,0),()=>S.prism('engines','structure',[[-.8*L,0],[-1.7*L,0],[-1.95*L,-.3],[-1.3*L,-.28]],{axis:'x',a0:-.03,a1:.03,bevel:.01}));
+}
+
+/* ---- WILD GOOSE ---- */
+function gooseA(p,S){
+ const L=p.length,W=p.width,H=p.height,A=p.armor,E=p.engineSize,Rr=p.rearScale,pin=.15;
+ const rg=[
+  {z:1.95*L,y:-.02,w:.92*W,h:.34*H,hb:.32*H,n:3,pinch:pin},
+  {z:1.25*L,y:0,w:1.05*W,h:.47*H,hb:.36*H,n:3.4,pinch:pin},
+  {z:-.6*L,y:0,w:1.12*W,h:.5*H,hb:.38*H,n:3.6,pinch:pin},
+  {z:-1.75*L,y:0,w:1.12*W,h:.48*H,hb:.38*H,n:3.6,pinch:pin},
+  {z:-2.45*L,y:0,w:1.05*W*Rr,h:.46*H,hb:.38*H,n:3.8,pinch:.12},
+  {z:-2.75*L,y:0,w:.95*W*Rr,h:.4*H,hb:.34*H,n:3.8,pinch:.1}];
+ const hp=hullProfile(rg),o={seg:8,phase:PI/8};
+ S.loft('nose','paint',rg.slice(0,2),o);
+ const mid=S.loft('cockpit','paint',rg.slice(1,4),o);
+ S.loft('engines','secondary',rg.slice(3),o);
+ S.loftStripe('cockpit','marking',mid,PI/2,.2,0,2);
+ // aríete em V: perfil lateral inclinado varrido ao longo de X com cisalhamento
+ const RW=p.ramWidth,rs=p.ramSweep*D2R,rr=p.ramRake*D2R;
+ const zt=1.95*L+.1,yT=hp.top(1.95*L)+.08,yB=hp.bot(1.95*L)-.12,lip=zt+(yT-yB)*Math.tan(rr),tr=.16*A+.08,half=1.38*W*RW;
+ const sh=x=>-Math.abs(x)*Math.tan(rs);
+ S.sweep('nose','structure',[[zt,yT],[lip,yB],[lip-.16-tr,yB],[zt-tr,yT-.05]],[{a:-half,du:sh(half),ins:.05},{a:-half+.05,du:sh(half-.05)},{a:0},{a:half-.05,du:sh(half-.05)},{a:half,du:sh(half),ins:.05}],'x');
+ for(const u of [.3,.62]){
+  const dz=lip-zt,dy=yB-yT,dl=Math.hypot(dz,dy),nz=-dy/dl,ny=dz/dl,tz=dz/dl*.06,ty=dy/dl*.06,e=.05;
+  const c=[lerp(zt,lip,u)+nz*.03,lerp(yT,yB,u)+ny*.03],hb=half-.12;
+  const bar=[[c[0]-tz-nz*e,c[1]-ty-ny*e],[c[0]+tz-nz*e,c[1]+ty-ny*e],[c[0]+tz+nz*e,c[1]+ty+ny*e],[c[0]-tz+nz*e,c[1]-ty+ny*e]];
+  S.sweep('nose','accent',bar,[{a:-hb,du:sh(hb)},{a:0},{a:hb,du:sh(hb)}],'x');
+ }
+ S.sym(()=>S.prism('nose','marking',[[-.32*W,.12*H],[-.66*W,.12*H],[-.7*W,.2*H],[-.36*W,.21*H]],{axis:'z',a0:1.6*L,a1:1.95*L+.035,bevel:.012}));
+ // saias blindadas + placa superior + friso
+ const SD=p.skirtDepth,hx=1.08*W,yb=-.42*H-.22*SD;
+ S.sym(()=>{
+  S.prism('wings','secondary',[[1.45*L,.16*H],[1.62*L,-.18*H],[1.3*L,yb],[-2.25*L,yb],[-2.6*L,-.2*H],[-2.42*L,.16*H]],{axis:'x',a0:hx-.08,a1:hx+.14*A,bevel:.03});
+  S.prism('wings','paint',[[1.2*L,.36*H],[1.32*L,.04],[-2.0*L,.04],[-2.12*L,.36*H]],{axis:'x',a0:hx-.04,a1:hx+.22*A,bevel:.03});
+  S.prism('wings','accent',[[1.25*L,yb+.14],[1.32*L,yb+.06],[-2.1*L,yb+.06],[-2.16*L,yb+.14]],{axis:'x',a0:hx+.1*A,a1:hx+.16*A,bevel:.01});
+ });
+ // cabine em fenda sob capô blindado
+ const cs=p.cockpitSize,zc=.7*L+p.cockpitPos,yc=hp.top(zc)-.05;
+ S.canopy('cockpit',{z:zc,y:yc,len:1.05*cs,w:.44*cs,h:.15*cs,seg:8,phase:PI/8,n:3,front:.55,frame:false});
+ S.prism('cockpit','secondary',[[zc+.08*cs,yc+.19*cs],[zc-.62*cs,yc+.25*cs],[zc-.8*cs-.3,yc-.02],[zc-.05,yc-.02]],{axis:'x',a0:-.5*cs,a1:.5*cs,bevel:.04});
+ // bloco de propulsão 2×2 com gaiola traseira
+ const ex=Math.max(.45*W,.27*E+.02),ey=Math.max(.17*H,.26*E),ez=-2.88*L,ro=.21*E*1.19;
+ for(const sx of [-1,1])for(const sy of [-1,1])S.nozzle('engines',{x:sx*ex,y:sy*ey,z:ez,r:.21*E,len:1.0,seg:12});
+ const fxo=ex+ro+.12,fyo=ey+ro+.1,z0=-2.55*L,z1=-2.86*L;
+ S.prism('engines','structure',[[-fxo,ey+ro],[fxo,ey+ro],[fxo,fyo],[-fxo,fyo]],{axis:'z',a0:z0,a1:z1,bevel:.02});
+ S.prism('engines','structure',[[-fxo,-fyo],[fxo,-fyo],[fxo,-ey-ro],[-fxo,-ey-ro]],{axis:'z',a0:z0,a1:z1,bevel:.02});
+ S.sym(()=>S.prism('engines','structure',[[ex+ro,-fyo+.01],[fxo,-fyo+.01],[fxo,fyo-.01],[ex+ro,fyo-.01]],{axis:'z',a0:z0,a1:z1,bevel:.02}));
+}
+function gooseB(p,S){
+ const L=p.length,W=p.width,H=p.height,SP=p.sponsonSize,SG=p.sponsonGap,SL=p.sponsonLength,A=p.armor,T=p.turretSize,E=p.engineSize;
+ const rg=[
+  {z:2.3*L,y:-.12,w:.6*W,h:.12*H,hb:.16*H,n:2.6},
+  {z:1.55*L,y:0,w:.75*W,h:.34*H,hb:.26*H,n:3},
+  {z:-1.0*L,y:0,w:.8*W,h:.38*H,hb:.28*H,n:3.2},
+  {z:-2.4*L,y:0,w:.78*W,h:.36*H,hb:.28*H,n:3.2},
+  {z:-2.8*L,y:0,w:.68*W,h:.3*H,hb:.25*H,n:3}];
+ const hp=hullProfile(rg),o={seg:8,phase:PI/8};
+ S.loft('nose','paint',rg.slice(0,2),o);
+ S.loft('cockpit','paint',rg.slice(1,3),o);
+ S.loft('engines','secondary',rg.slice(2),o);
+ // sponsons (flutuadores laterais de comprimento total)
+ const xs=.8*W+SG+.44*SP,sy=-.08,bu=p.bumper;
+ const spon=[
+  {z:2.55*L*SL,x:xs,y:sy-.04,w:.32*SP,h:.2*SP,hb:.3*SP,n:3.6},
+  {z:2.25*L*SL,x:xs,y:sy,w:.44*SP,h:.34*SP,hb:.38*SP,n:4},
+  {z:-1.0*L,x:xs,y:sy,w:.44*SP,h:.34*SP,hb:.38*SP,n:4},
+  {z:-2.55*L*SL,x:xs,y:sy,w:.44*SP,h:.34*SP,hb:.38*SP,n:4},
+  {z:-2.85*L*SL,x:xs,y:sy,w:.38*SP,h:.29*SP,hb:.33*SP,n:3.8}];
+ S.sym(()=>{
+  const f=S.loft('wings','paint',spon.slice(0,3),o);
+  S.loft('engines','secondary',spon.slice(2),o);
+  S.loftStripe('wings','accent',f,PI/2,.2,1,2);
+  S.prism('nose','structure',[[xs-.47*SP,sy-.42*SP],[xs+.47*SP,sy-.42*SP],[xs+.5*SP,sy+.22*SP],[xs-.5*SP,sy+.22*SP]],{axis:'z',a0:2.3*L*SL,a1:2.62*L*SL+.32*bu,bevel:.06});
+  S.prism('nose','accent',[[xs-.4*SP,sy-.05],[xs+.4*SP,sy-.05],[xs+.4*SP,sy+.04],[xs-.4*SP,sy+.04]],{axis:'z',a0:2.4*L*SL,a1:2.62*L*SL+.32*bu+.025,bevel:.01});
+  S.slab('wings','secondary',[[.6*W,.9*L],[xs,.7*L],[xs,-1.7*L],[.6*W,-1.9*L]],{y:.02,t:.24*A,bevel:.05});
+  S.nozzle('engines',{x:xs,y:sy,z:-2.95*L*SL,r:.25*E,len:1.0,seg:12});
+ });
+ S.slab('nose','secondary',[[-xs,2.35*L*SL],[xs,2.35*L*SL],[xs,1.5*L],[-xs,1.5*L]],{y:sy-.3*SP,t:.1,bevel:.04});
+ S.slab('engines','secondary',[[-.56*W,-1.1*L],[.56*W,-1.1*L],[.5*W,-2.35*L],[-.5*W,-2.35*L]],{y:hp.top(-1.7*L)-.02,t:.1*A+.04,bevel:.05});
+ // torre/cúpula blindada com visor em fenda e escotilha
+ const zt=.35*L+p.turretPos,yb=hp.top(zt)-.07;
+ S.loft('cockpit','paint',[
+  {z:zt+.78*T,y:yb,point:true},
+  {z:zt+.58*T,y:yb+.05,w:.42*T,h:.22*T,hb:.06,n:2.2},
+  {z:zt+.1*T,y:yb+.04,w:.64*T,h:.38*T,hb:.08,n:2.2},
+  {z:zt-.5*T,y:yb+.02,w:.6*T,h:.33*T,hb:.08,n:2.2},
+  {z:zt-.82*T,y:yb,w:.38*T,h:.16*T,hb:.06,n:2.2}],{seg:8,phase:PI/8});
+ S.loft('cockpit','glass',[
+  {z:zt+.8*T,y:yb+.15*T,point:true},
+  {z:zt+.7*T,y:yb+.16*T,w:.4*T,h:.06*T,n:3},
+  {z:zt+.48*T,y:yb+.17*T,w:.58*T,h:.07*T,n:3},
+  {z:zt+.22*T,y:yb+.17*T,point:true}],{seg:8,phase:PI/8});
+ S.with(M(m4.RX(-PI/2),m4.T(0,yb+.04+.33*T,zt-.15*T)),()=>S.lathe('cockpit','structure',[[.1*T,0],[.17*T,0],[.17*T,.06],[.1*T,.07]],{seg:12}));
+ S.with(m4.T(-.36*T,yb+.04,zt-.55*T),()=>S.prism('cockpit','structure',[[.04,0],[-.06,0],[-.2,.62*T+.25],[-.16,.62*T+.25]],{axis:'x',a0:-.018,a1:.018,bevel:.006}));
+ S.nozzle('engines',{x:0,y:0,z:-2.95*L,r:.36*p.mainEngine,len:1.1,seg:14});
+}
+function gooseC(p,S){
+ const L=p.length,W=p.width,H=p.height,NL=p.noseLength,E=p.engineSize,Rr=p.rearScale;
+ const rg=[
+  {z:2.2*L+.9*NL,y:-.12,w:.24*W,h:.1*H,hb:.13*H,n:2.4,pinch:.1},
+  {z:2.2*L+.5*NL,y:-.08,w:.4*W,h:.22*H,hb:.22*H,n:2.4,pinch:.18},
+  {z:1.4*L,y:-.02,w:.62*W,h:.4*H,hb:.3*H,n:2.5,pinch:.24},
+  {z:.3*L,y:.02,w:.82*W,h:.56*H,hb:.34*H,n:2.6,pinch:.28},
+  {z:-.7*L,y:.04,w:.92*W,h:.63*H,hb:.36*H,n:2.8,pinch:.3},
+  {z:-2.0*L,y:.02,w:.8*W*Rr,h:.48*H,hb:.34*H,n:2.8,pinch:.25},
+  {z:-2.7*L,y:0,w:.6*W*Rr,h:.36*H,hb:.3*H,n:2.6,pinch:.2}];
+ const hp=hullProfile(rg),o={seg:8,phase:0};
+ S.loft('nose','paint',rg.slice(0,3),o);
+ const mid=S.loft('cockpit','paint',rg.slice(2,5),o);
+ S.loft('engines','secondary',rg.slice(4),o);
+ for(const t of [PI*.25,PI*.75])S.loftStripe('cockpit','accent',mid,t,.07,0,2);
+ // ombreiras de impacto (ponto mais largo da nave)
+ const sh=p.shoulderSize,sc=p.shoulderCant*D2R,zs=-.45*L+p.shoulderPos,xh=hp.half(zs)*.72;
+ S.sym(()=>S.with(M(m4.RZ(-sc),m4.T(xh,.04,zs)),()=>{
+  S.prism('wings','secondary',[[0,-.3],[.6*sh,-.27],[.8*sh,.06],[.62*sh,.38*sh+.06],[0,.36]],{axis:'z',a0:1.05*sh,a1:-1.3*sh,bevel:.1});
+  S.prism('wings','paint',[[.42*sh,-.3],[.86*sh,-.22],[.98*sh,.1],[.74*sh,.46*sh+.06],[.4*sh,.42*sh+.05]],{axis:'z',a0:1.2*sh,a1:-1.42*sh,bevel:.13});
+  S.prism('wings','accent',[[.84*sh,-.17],[.96*sh,-.15],[1.0*sh,.08],[.9*sh,.07]],{axis:'z',a0:1.0*sh,a1:-1.2*sh,bevel:.02});
+  for(const zz of [.55*sh,-.15*sh,-.85*sh])S.loft('wings','structure',[{z:zz+.11,x:.62*sh,y:.4*sh+.02,w:.07,h:.04,n:1.4},{z:zz,x:.62*sh,y:.4*sh+.1,point:true}],{seg:4,phase:PI/4});
+ }));
+ // presas inferiores de abalroamento
+ const tl=p.tuskLength,zf=2.2*L+.9*NL;
+ S.sym(()=>S.slab('nose','structure',[[.12*W,1.3*L,.2],[.34*W,1.45*L,.2],[.3*W,zf+.55*tl,.06],[.2*W,zf+.35*tl,.08]],{y:hp.bot(1.8*L)+.08,bevel:.04}));
+ // capô frontal (cowl) e cabine corcunda atrás dele
+ const CH=p.cowlHeight;
+ S.prism('cockpit','secondary',[[1.65*L,hp.top(1.65*L)-.12],[1.0*L,hp.top(1.0*L)+.16*CH],[.45*L,hp.top(.45*L)+.13*CH],[.35*L,hp.top(.35*L)-.12]],{axis:'x',a0:-.36*W,a1:.36*W,bevel:.05});
+ const cs=p.cockpitSize,zc=-.05*L;
+ S.canopy('cockpit',{z:zc,y:hp.top(zc)-.08,len:.95*cs,w:.3*cs,h:.2*cs,seg:8,phase:PI/8,n:2.4,front:.6});
+ S.prism('engines','secondary',[[-.75*L,hp.top(-.75*L)-.06],[-1.0*L,hp.top(-1.0*L)+.13],[-2.25*L,hp.top(-2.25*L)+.09],[-2.55*L,hp.top(-2.55*L)-.06]],{axis:'x',a0:-.045,a1:.045,bevel:.015});
+ // trio de bocais em triângulo
+ const rho=Math.max(.36*W,.38*E),ez=-2.85*L;
+ for(const a of [PI/2,PI/2+TAU/3,PI/2+2*TAU/3])S.nozzle('engines',{x:Math.cos(a)*rho,y:.02+Math.sin(a)*rho*.85,z:ez,r:.24*E,len:1.0,seg:12});
+ S.slab('cockpit','structure',[[-.5*W,1.0*L],[.5*W,1.0*L],[.6*W,-1.8*L],[-.6*W,-1.8*L]],{y:hp.bot(-.4*L)+.04,t:.1,bevel:.04});
+}
+
+/* ---- registro: naves, alternativas, intenções e parâmetros ---- */
+const SHIPS=[
+ {id:'falcon',name:'BLUE FALCON',paint:'#2468f6',accent:'#58e9ff',roster:'B · C · B',identity:'Corrida aerodinâmica, equilibrada e versátil.'},
+ {id:'fox',name:'GOLDEN FOX',paint:'#f8c32c',accent:'#edfaff',roster:'D · A · D',identity:'Leve e ágil, voltada à aceleração.'},
+ {id:'goose',name:'WILD GOOSE',paint:'#218e54',accent:'#b476ff',roster:'A · B · C',identity:'Robusta e pesada, voltada ao combate físico.'}];
+const SHIP_MAP=Object.fromEntries(SHIPS.map(s=>[s.id,s]));
+const VARIANT_CODES=['A','B','C'];
+const VARIANTS={
+ falcon:{
+  A:{name:'Lança Delta',tag:'Interceptor de dardo com asa delta quebrada',build:falconA,
+   intent:'Fuselagem única dominante com proa quinada (seção em losango), cabine em gota sobre espinha dorsal, asa delta com strake, estabilizadores gêmeos inclinados e dupla propulsão integrada. Leitura: flecha contínua.',
+   params:[P('length','Comprimento da fuselagem',.82,1.22,1),P('width','Largura do casco central',.8,1.3,1),P('height','Altura / espessura do casco',.75,1.35,1),
+    P('noseLength','Comprimento da proa',.7,1.45,1,{affects:['nose']}),P('span','Envergadura',.75,1.35,1,{affects:['wings']}),P('sweep','Enflechamento externo',28,58,45,{step:1,unit:'°',affects:['wings']}),
+    P('dihedral','Diedro das asas',-8,12,3,{step:.5,unit:'°',affects:['wings']}),P('cockpitSize','Volume da cabine',.75,1.35,1,{affects:['cockpit']}),P('cockpitPos','Posição da cabine',-.5,.6,0,{unit:'u',affects:['cockpit']}),
+    P('finHeight','Altura dos estabilizadores',.6,1.5,1,{affects:['wings']}),P('finCant','Inclinação dos estabilizadores',0,38,18,{step:1,unit:'°',affects:['wings']}),P('engineSize','Tamanho dos motores',.75,1.35,1,{affects:['engines']})]},
+  B:{name:'Bi-Viga',tag:'Cápsula central + duas vigas-motor (twin-boom)',build:falconB,
+   intent:'Arquitetura em três corpos: cápsula de cabine curta e alta, duas vigas longas com motores e deriva própria, ponte alar e empenagem horizontal que fecha um vão vazado. Leitura superior em tridente com espaço negativo.',
+   params:[P('length','Comprimento da cápsula',.82,1.2,1),P('width','Largura da cápsula',.8,1.3,1),P('height','Altura dos cascos',.75,1.35,1),
+    P('noseLength','Comprimento da proa',.7,1.4,1,{affects:['nose']}),P('boomGap','Afastamento das vigas',1.05,1.8,1.32,{unit:'u',affects:['wings','engines']}),P('boomLength','Comprimento das vigas',.8,1.15,1,{affects:['wings','engines']}),
+    P('span','Envergadura externa',.7,1.4,1,{affects:['wings']}),P('sweep','Enflechamento externo',-15,45,22,{step:1,unit:'°',affects:['wings']}),P('cockpitSize','Volume da cabine',.8,1.35,1,{affects:['cockpit']}),
+    P('cockpitPos','Posição da cabine',-.5,.5,0,{unit:'u',affects:['cockpit']}),P('tailHeight','Altura da empenagem',.6,1.5,1,{affects:['wings']}),P('engineSize','Tamanho dos motores',.75,1.35,1,{affects:['engines']})]},
+  C:{name:'Ponta de Flecha',tag:'Corpo sustentador em chevron, perfil baixíssimo',build:falconC,
+   intent:'Corpo achatado de bordas cortantes que se funde a braços em chevron com pontas caídas; cabine facetada embutida, deriva dorsal única e banco de três bocais retangulares. Leitura frontal: lâmina fina; superior: ponta de flecha recortada.',
+   params:[P('length','Comprimento do corpo',.82,1.2,1),P('width','Largura do corpo central',.8,1.25,1),P('height','Espessura do corpo',.75,1.4,1),
+    P('noseLength','Comprimento da proa',.7,1.4,1,{affects:['nose']}),P('span','Envergadura dos braços',.8,1.25,1,{affects:['wings']}),P('sweep','Enflechamento do chevron',48,64,57,{step:1,unit:'°',affects:['wings']}),
+    P('tipDroop','Queda das pontas',0,80,40,{step:1,unit:'°',affects:['wings']}),P('cockpitSize','Volume da cabine',.75,1.35,1,{affects:['cockpit']}),P('cockpitPos','Posição da cabine',-.5,.5,0,{unit:'u',affects:['cockpit']}),
+    P('dorsalFin','Deriva dorsal',.3,1.4,1,{affects:['wings']}),P('bankWidth','Largura do banco de motores',.75,1.25,1,{affects:['engines']}),P('engineSize','Tamanho dos bocais',.75,1.35,1,{affects:['engines']})]}
+ },
+ fox:{
+  A:{name:'Agulha',tag:'Dragster-agulha com canards e cabine recuada',build:foxA,
+   intent:'Fuselagem extremamente longa e fina, proa-agulha, canards dianteiros, pequena delta traseira com winglets, cabine bem recuada e um motor axial dominante com dois boosters. Leitura: linha reta tensionada, massa concentrada atrás.',
+   params:[P('length','Comprimento da fuselagem',.85,1.2,1),P('width','Largura da fuselagem',.8,1.3,1),P('height','Altura da fuselagem',.8,1.35,1),
+    P('noseLength','Comprimento da agulha',.7,1.5,1,{affects:['nose']}),P('span','Envergadura',.75,1.35,1,{affects:['wings']}),P('sweep','Enflechamento',38,58,50,{step:1,unit:'°',affects:['wings']}),
+    P('canard','Tamanho dos canards',.4,1.5,1,{affects:['nose']}),P('cockpitSize','Volume da cabine',.75,1.35,1,{affects:['cockpit']}),P('cockpitPos','Posição da cabine',-.6,.6,0,{unit:'u',affects:['cockpit']}),
+    P('engineSize','Motor principal',.75,1.35,1,{affects:['engines']}),P('booster','Boosters laterais',.5,1.5,1,{affects:['engines']}),P('winglet','Altura dos winglets',.3,1.5,1,{affects:['wings']})]},
+  B:{name:'Ampulheta',tag:'Monoposto de aerofólios com pods externos',build:foxB,
+   intent:'Cintura estreita entre um aerofólio dianteiro largo e um conjunto traseiro largo (dois pods de propulsão em vigas + asa elevada em pilone). Cockpit aberto com santantônio. Leitura superior em ampulheta; perfil com asa alta.',
+   params:[P('length','Comprimento do monocoque',.85,1.2,1),P('width','Largura do monocoque',.8,1.3,1),P('height','Altura do monocoque',.8,1.35,1),
+    P('noseLength','Comprimento da proa',.6,1.5,1,{affects:['nose']}),P('foilSpan','Envergadura do aerofólio dianteiro',.7,1.35,1,{affects:['nose']}),P('sidepod','Volume dos sidepods',.6,1.4,1,{affects:['wings','cockpit']}),
+    P('podGap','Afastamento dos pods',1.2,1.9,1.45,{unit:'u',affects:['engines','wings']}),P('podSize','Tamanho dos pods/motores',.7,1.35,1,{affects:['engines']}),P('rearWingHeight','Altura da asa traseira',.3,1.4,.9,{affects:['wings']}),
+    P('rearWingSpan','Envergadura da asa traseira',.75,1.3,1,{affects:['wings']}),P('cockpitSize','Volume da cabine',.75,1.35,1,{affects:['cockpit']}),P('cockpitPos','Posição da cabine',-.5,.5,0,{unit:'u',affects:['cockpit']})]},
+  C:{name:'Kitsune',tag:'Gota compacta, asa invertida e duto anelar',build:foxC,
+   intent:'Corpo curto em gota com cabine avançada, asas de enflechamento negativo com aletas, duas "orelhas" dorsais inclinadas e um único motor dentro de um duto anelar sustentado por três suportes. Leitura superior em X; traseira circular.',
+   params:[P('length','Comprimento do corpo',.85,1.2,1),P('width','Largura do corpo',.8,1.25,1),P('height','Altura do corpo',.8,1.3,1),
+    P('noseLength','Comprimento da proa',.6,1.5,1,{affects:['nose']}),P('span','Envergadura',.75,1.35,1,{affects:['wings']}),P('forwardSweep','Enflechamento negativo',0,35,20,{step:1,unit:'°',affects:['wings']}),
+    P('earHeight','Altura das orelhas',.4,1.5,1,{affects:['cockpit']}),P('earCant','Abertura das orelhas',0,40,22,{step:1,unit:'°',affects:['cockpit']}),P('cockpitSize','Volume da cabine',.75,1.3,1,{affects:['cockpit']}),
+    P('cockpitPos','Posição da cabine',-.5,.4,0,{unit:'u',affects:['cockpit']}),P('ringSize','Diâmetro do duto/motor',.75,1.35,1,{affects:['engines']}),P('ringLength','Comprimento do duto',.6,1.5,1,{affects:['engines']})]}
+ },
+ goose:{
+  A:{name:'Aríete',tag:'Casco-caixa com arado em V e saias blindadas',build:gooseA,
+   intent:'Casco retangular de laterais planas, arado frontal em V inclinado mais largo que o casco, saias blindadas profundas, cabine em fenda sob capô e bloco de quatro motores em gaiola. Leitura: mais largo na frente, massa baixa.',
+   params:[P('length','Comprimento do casco',.85,1.2,1),P('width','Largura do casco',.85,1.3,1),P('height','Altura do casco',.8,1.3,1),
+    P('ramWidth','Largura do aríete',.8,1.35,1,{affects:['nose']}),P('ramSweep','Abertura em V do aríete',0,35,24,{step:1,unit:'°',affects:['nose']}),P('ramRake','Inclinação da face do aríete',12,55,32,{step:1,unit:'°',affects:['nose']}),
+    P('armor','Espessura da blindagem',.6,1.6,1,{affects:['nose','wings']}),P('skirtDepth','Profundidade das saias',.5,1.5,1,{affects:['wings']}),P('cockpitSize','Volume da cabine',.75,1.3,1,{affects:['cockpit']}),
+    P('cockpitPos','Posição da cabine',-.6,.5,0,{unit:'u',affects:['cockpit']}),P('engineSize','Tamanho dos motores',.75,1.3,1,{affects:['engines']}),P('rearScale','Proporção traseira',.8,1.25,1,{affects:['engines']})]},
+  B:{name:'Tanque Flutuante',tag:'Casco central entre dois sponsons de comprimento total',build:gooseB,
+   intent:'Dois flutuadores laterais retangulares, longos e independentes, com para-choques maciços, ligados ao casco por pontes; torre/cúpula blindada com visor em fenda e três motores (dois nos sponsons + um central). Leitura: retângulo largo e uniforme.',
+   params:[P('length','Comprimento do casco',.85,1.2,1),P('width','Largura do casco central',.8,1.25,1),P('height','Altura do casco',.8,1.3,1),
+    P('sponsonSize','Seção dos sponsons',.75,1.3,1,{affects:['wings','engines','nose']}),P('sponsonGap','Afastamento dos sponsons',0,.45,.15,{unit:'u',affects:['wings','engines','nose']}),P('sponsonLength','Comprimento dos sponsons',.85,1.12,1,{affects:['wings','engines','nose']}),
+    P('bumper','Massa dos para-choques',.4,1.5,1,{affects:['nose']}),P('armor','Espessura da blindagem',.6,1.6,1,{affects:['wings','engines']}),P('turretSize','Volume da torre/cabine',.75,1.3,1,{affects:['cockpit']}),
+    P('turretPos','Posição da torre',-.6,.6,0,{unit:'u',affects:['cockpit']}),P('engineSize','Motores dos sponsons',.75,1.3,1,{affects:['engines']}),P('mainEngine','Motor central',.7,1.35,1,{affects:['engines']})]},
+  C:{name:'Ombreira',tag:'Brigão corcunda com ombreiras de impacto',build:gooseC,
+   intent:'Casco em losango com espinha elevada (corcunda), ombreiras de impacto inclinadas que formam o ponto mais largo no meio da nave, presas inferiores, capô frontal que esconde a cabine e trio de bocais em triângulo. Leitura superior em losango.',
+   params:[P('length','Comprimento do casco',.85,1.2,1),P('width','Largura do casco',.85,1.3,1),P('height','Altura da corcunda',.8,1.35,1),
+    P('noseLength','Comprimento da proa',.5,1.5,1,{affects:['nose','cockpit']}),P('shoulderSize','Tamanho das ombreiras',.7,1.4,1,{affects:['wings']}),P('shoulderCant','Inclinação das ombreiras',0,35,16,{step:1,unit:'°',affects:['wings']}),
+    P('shoulderPos','Posição das ombreiras',-.6,.6,0,{unit:'u',affects:['wings']}),P('tuskLength','Comprimento das presas',.3,1.5,1,{affects:['nose']}),P('cockpitSize','Volume da cabine',.75,1.3,1,{affects:['cockpit']}),
+    P('cowlHeight','Altura do capô',.4,1.5,1,{affects:['cockpit']}),P('engineSize','Tamanho dos bocais',.75,1.3,1,{affects:['engines']}),P('rearScale','Proporção traseira',.8,1.25,1,{affects:['engines']})]}
+ }
+};
+function paramDefs(ship,v){return VARIANTS[ship][v].params;}
+function defaultsFor(ship,v){return Object.fromEntries(paramDefs(ship,v).map(d=>[d.id,d.def]));}
+function defaultParams(){const o={};for(const s of SHIPS){o[s.id]={};for(const v of VARIANT_CODES)o[s.id][v]=defaultsFor(s.id,v);}return o;}
+function fnv(arr,h=2166136261){for(let i=0;i<arr.length;i++){h=Math.imul(h^Math.round(arr[i]*1000),16777619)>>>0;}return h;}
+function buildMesh(ship,v,params){
+ const defs=paramDefs(ship,v),p={};
+ for(const d of defs){const x=Number(params?.[d.id]);p[d.id]=Number.isFinite(x)?clamp(x,d.min,d.max):d.def;}
+ const S=new Builder();VARIANTS[ship][v].build(p,S);
+ return {ship,variant:v,params:p,shapes:S.shapes};
+}
+function meshReport(mesh){
+ let min=[Infinity,Infinity,Infinity],max=[-Infinity,-Infinity,-Infinity],tris=0,h=2166136261;const parts={};
+ for(const k of PARTS)parts[k]={triangles:0,shapes:0,hash:2166136261};
+ for(const s of mesh.shapes){
+  const n=s.positions.length/9;tris+=n;h=fnv(s.positions,h);
+  const pr=parts[s.part];pr.triangles+=n;pr.shapes++;pr.hash=fnv(s.positions,pr.hash);
+  for(let i=0;i<s.positions.length;i+=3)for(let k=0;k<3;k++){const x=s.positions[i+k];if(x<min[k])min[k]=x;if(x>max[k])max[k]=x;}
+ }
+ for(const k of PARTS)parts[k].fingerprint=parts[k].hash.toString(16).padStart(8,'0');
+ return {triangles:tris,shapes:mesh.shapes.length,bounds:{min,max},fingerprint:h.toString(16).padStart(8,'0'),parts};
+}
+/* @gminus-approved-craft-geometry:end v1 */
+
+/* ==========================================================================
+   CONFIGURAÇÃO PADRÃO E ESTADO GLOBAL DO LABORATÓRIO
+   ========================================================================== */
+
+const CONFIG = {
+  alt: 'A', // 'A' | 'B' | 'C'
+  mode: 'single', // 'single' | 'compare'
+  aspect: '16:9', // '16:9' | '21:9' | 'mobile'
+  
+  camera: {
+    A: { dist: 10.5, height: 2.6, pitch: 6.0, fovBase: 76, fovSpeed: 26, bank: 0.85, lookAhead: 0.8, shake: 1.0 },
+    B: { dist: 12.0, height: 3.6, pitch: 4.0, fovBase: 70, fovSpeed: 10, bank: 0.15, lookAhead: 0.1, shake: 0.3 },
+    C: { dist: 15.0, height: 5.2, pitch: 14.0, fovBase: 82, fovSpeed: 18, bank: 0.45, lookAhead: 0.9, shake: 0.6 }
+  },
+
+  hud: {
+    A: { opacity: 0.95, scale: 1.0, holographicRadar: true, spatialThreats: true, trackChevrons: true },
+    B: { opacity: 1.00, scale: 1.0, leaderboardCount: 5, minimapSize: 145, telemetryDial: true, combatBadges: true },
+    C: { opacity: 0.92, scale: 1.0, threatSensitivity: 35, autoFadeCruise: true, dynamicVignette: true }
+  }
+};
+
+let state = structuredClone(CONFIG);
+let isPlaying = true;
+let simTime = 0.0;
+let animationFrameId = null;
+
+class RaceSimulation {
+  constructor() {
+    this.totalShips = 30;
+    this.totalLaps = 3;
+    this.trackLength = 2400.0;
+    this.ships = [];
+    this.initShips();
+    this.event = null;
+    this.eventTimer = 0;
+  }
+
+  initShips() {
+    this.ships = [];
+    const roster = [
+      { name: "BLUE FALCON (JOGADOR)", ship: "falcon", variant: "A", isPlayer: true },
+      { name: "WILD GOOSE (RIVAL)", ship: "goose", variant: "A", isRival: true },
+      { name: "GOLDEN FOX #03", ship: "fox", variant: "A" },
+      { name: "FIRE STINGRAY #04", ship: "falcon", variant: "B" },
+      { name: "WHITE CAT #05", ship: "fox", variant: "B" },
+      { name: "RED GAZELLE #06", ship: "goose", variant: "B" },
+      { name: "IRON TIGER #07", ship: "falcon", variant: "C" },
+      { name: "DEATH ANCHOR #08", ship: "goose", variant: "C" },
+      { name: "ASTRO ROBIN #09", ship: "fox", variant: "C" },
+      { name: "TWIN NORITTA #10", ship: "falcon", variant: "A" }
+    ];
+
+    for (let i = 0; i < this.totalShips; i++) {
+      const template = roster[i] || {
+        name: `CRAFT #${(i+1).toString().padStart(2, '0')}`,
+        ship: i % 3 === 0 ? "falcon" : i % 3 === 1 ? "fox" : "goose",
+        variant: ["A","B","C"][i % 3]
+      };
+      
+      const isPlayer = !!template.isPlayer;
+      const isRival = !!template.isRival;
+
+      this.ships.push({
+        id: i,
+        name: template.name,
+        shipModel: template.ship,
+        variant: template.variant,
+        isPlayer,
+        isRival,
+        dist: Math.max(0, (this.totalShips - i) * 16.0),
+        speed: isPlayer ? 1040 : 960 + (i % 7) * 20,
+        laneOffset: isPlayer ? 0.0 : ((i % 5) - 2) * 3.2,
+        rank: i + 1,
+        lap: 1,
+        shield: isPlayer ? 100 : 80,
+        boostActive: false,
+        driftActive: false,
+        attack: null,
+        offTrack: false,
+        wrongWay: false,
+        finished: false
+      });
+    }
+  }
+
+  update(dt) {
+    if (!isPlaying) return;
+    simTime += dt;
+    if (simTime > 180) simTime = 0;
+
+    if (this.eventTimer > 0) {
+      this.eventTimer -= dt;
+      if (this.eventTimer <= 0) this.event = null;
+    }
+
+    const player = this.ships[0];
+    const rival = this.ships[1];
+
+    if (this.event === 'boost') {
+      player.speed = 1420;
+      player.boostActive = true;
+      player.shield = Math.max(8, player.shield - dt * 22);
+    } else if (this.event === 'extreme') {
+      player.speed = 1420;
+    } else if (this.event === 'drift') {
+      player.speed = 1120;
+      player.driftActive = true;
+      player.laneOffset = Math.sin(simTime * 4.0) * 5.0;
+    } else if (this.event === 'side') {
+      player.attack = 'SIDE ATTACK';
+      player.laneOffset = 4.0;
+    } else if (this.event === 'spin') {
+      player.attack = 'SPIN ATTACK';
+    } else if (this.event === 'collision') {
+      player.speed = 480;
+      player.shield = Math.max(5, player.shield - 20);
+    } else if (this.event === 'lowshield') {
+      player.shield = 12;
+    } else if (this.event === 'wrongway') {
+      player.wrongWay = true;
+    } else if (this.event === 'offtrack') {
+      player.offTrack = true;
+      player.laneOffset = 13.0;
+    } else if (this.event === 'finish') {
+      player.finished = true;
+      player.lap = 3;
+    } else {
+      player.boostActive = false;
+      player.driftActive = false;
+      player.attack = null;
+      player.wrongWay = false;
+      player.offTrack = false;
+      player.speed = 1040 + Math.sin(simTime * 0.4) * 60;
+      player.laneOffset = Math.sin(simTime * 0.3) * 2.5;
+      if (player.shield < 100) player.shield = Math.min(100, player.shield + dt * 4);
+    }
+
+    const targetRivalDist = player.dist + (this.event === 'side' ? 5.0 : Math.sin(simTime * 0.25) * 25.0);
+    rival.dist += (targetRivalDist - rival.dist) * (dt * 2.5);
+    rival.speed = player.speed + (targetRivalDist > rival.dist ? 20 : -20);
+    rival.laneOffset = -player.laneOffset + (this.event === 'side' ? 3.5 : 2.0);
+
+    for (let i = 0; i < this.totalShips; i++) {
+      const s = this.ships[i];
+      if (i > 1) {
+        s.dist += (s.speed / 3.6) * dt;
+      } else if (i === 0) {
+        player.dist += (player.speed / 3.6) * dt;
+      }
+      s.lap = Math.min(3, Math.floor(s.dist / this.trackLength) + 1);
+    }
+
+    const sorted = [...this.ships].sort((a, b) => b.dist - a.dist);
+    sorted.forEach((ship, idx) => { ship.rank = idx + 1; });
+  }
+
+  trigger(eventName) {
+    this.event = eventName;
+    this.eventTimer = 4.0;
+    const player = this.ships[0];
+    if (eventName === 'boost') {
+      player.speed = 1420;
+      player.boostActive = true;
+    } else if (eventName === 'drift') {
+      player.driftActive = true;
+    } else if (eventName === 'lowshield') {
+      player.shield = 12;
+    } else if (eventName === 'wrongway') {
+      player.wrongWay = true;
+    }
+  }
+}
+
+const sim = new RaceSimulation();
+
+const v3 = {
+  sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+  add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+  scale: (a, k) => [a[0] * k, a[1] * k, a[2] * k],
+  norm: (a) => {
+    const l = Math.hypot(a[0], a[1], a[2]) || 1;
+    return [a[0] / l, a[1] / l, a[2] / l];
+  },
+  cross: (a, b) => [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0]
+  ],
+  dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+};
+
+function mat4Persp(fovy, aspect, near, far) {
+  const f = 1 / Math.tan(fovy / 2);
+  const o = new Float32Array(16);
+  o[0] = f / aspect;
+  o[5] = f;
+  o[10] = (far + near) / (near - far);
+  o[11] = -1;
+  o[14] = (2 * far * near) / (near - far);
+  return o;
+}
+
+function lookAt(eye, target, up = [0, 1, 0]) {
+  const z = v3.norm(v3.sub(eye, target));
+  const x = v3.norm(v3.cross(up, z));
+  const y = v3.cross(z, x);
+  const o = new Float32Array(16);
+  o[0] = x[0]; o[1] = y[0]; o[2] = z[0];
+  o[4] = x[1]; o[5] = y[1]; o[6] = z[1];
+  o[8] = x[2]; o[9] = y[2]; o[10] = z[2];
+  o[12] = -v3.dot(x, eye);
+  o[13] = -v3.dot(y, eye);
+  o[14] = -v3.dot(z, eye);
+  o[15] = 1;
+  return o;
+}
+
+const TRACK_SEGS = 240;
+const TRACK_WIDTH = 22.0;
+const trackPath = [];
+
+function sampleTrackSpline(u) {
+  const a = u * TAU;
+  const x = Math.sin(a) * 320 + Math.sin(a * 2) * 120;
+  const z = Math.cos(a) * 520 + Math.sin(a * 3) * 70;
+  const y = Math.sin(a * 2) * 26 + Math.cos(a * 4) * 12 + (u > 0.65 && u < 0.85 ? Math.sin((u - 0.65) / 0.2 * Math.PI) * 48 : 0);
+  return [x, y, z];
+}
+
+for (let i = 0; i < TRACK_SEGS; i++) {
+  const u = i / TRACK_SEGS;
+  const uNext = (i + 1) / TRACK_SEGS;
+  const uPrev = (i - 1 + TRACK_SEGS) / TRACK_SEGS;
+
+  const pt = sampleTrackSpline(u);
+  const ptNext = sampleTrackSpline(uNext);
+  const ptPrev = sampleTrackSpline(uPrev);
+
+  const T = v3.norm(v3.sub(ptNext, pt));
+  const curve = (T[0] * (ptNext[2] - ptPrev[2]) - T[2] * (ptNext[0] - ptPrev[0])) * 22;
+  const bank = clamp(curve, -0.48, 0.48);
+
+  const upWorld = [0, 1, 0];
+  const right0 = v3.norm(v3.cross(upWorld, T));
+  const up0 = v3.norm(v3.cross(T, right0));
+
+  const R = v3.norm([
+    right0[0] * Math.cos(bank) - up0[0] * Math.sin(bank),
+    right0[1] * Math.cos(bank) - up0[1] * Math.sin(bank),
+    right0[2] * Math.cos(bank) - up0[2] * Math.sin(bank)
+  ]);
+  const N = v3.norm(v3.cross(T, R));
+
+  trackPath.push({ pt, T, N, R, bank });
+}
+
+function getTrackFrameAt(dist) {
+  const normDist = ((dist % sim.trackLength) + sim.trackLength) % sim.trackLength;
+  const progress = normDist / sim.trackLength;
+  const idxFloat = progress * TRACK_SEGS;
+  const i0 = Math.floor(idxFloat) % TRACK_SEGS;
+  const i1 = (i0 + 1) % TRACK_SEGS;
+  const f = idxFloat - Math.floor(idxFloat);
+
+  const p0 = trackPath[i0], p1 = trackPath[i1];
+  return {
+    pt: [lerp(p0.pt[0], p1.pt[0], f), lerp(p0.pt[1], p1.pt[1], f), lerp(p0.pt[2], p1.pt[2], f)],
+    T: v3.norm([lerp(p0.T[0], p1.T[0], f), lerp(p0.T[1], p1.T[1], f), lerp(p0.T[2], p1.T[2], f)]),
+    N: v3.norm([lerp(p0.N[0], p1.N[0], f), lerp(p0.N[1], p1.N[1], f), lerp(p0.N[2], p1.N[2], f)]),
+    R: v3.norm([lerp(p0.R[0], p1.R[0], f), lerp(p0.R[1], p1.R[1], f), lerp(p0.R[2], p1.R[2], f)]),
+    bank: lerp(p0.bank, p1.bank, f)
+  };
+}
+
+let trackSvgPath = '';
+function computeTrackSvgPath() {
+  let d = '';
+  for (let i = 0; i < TRACK_SEGS; i++) {
+    const pt = trackPath[i].pt;
+    const sx = (60 + (pt[0] / 480) * 50).toFixed(1);
+    const sy = (60 + (pt[2] / 640) * 50).toFixed(1);
+    d += (i === 0 ? 'M ' : 'L ') + sx + ' ' + sy + ' ';
+  }
+  return d + 'Z';
+}
+trackSvgPath = computeTrackSvgPath();
+
+let canvas, gl;
+let trackVBO = null, trackCount = 0;
+let shipMeshCache = new Map();
+
+const TOON_VERT_SHADER = `
+precision highp float;
+attribute vec3 a_pos;
+attribute vec3 a_norm;
+attribute vec3 a_col;
+uniform mat4 u_vp;
+uniform mat4 u_model;
+uniform mat3 u_rot;
+uniform float u_outline;
+uniform float u_use_vcol;
+varying vec3 v_norm;
+varying vec3 v_world;
+varying vec3 v_vcol;
+
+void main(){
+  vec3 n = normalize(a_norm + vec3(0.0001));
+  vec3 p = a_pos + n * (u_outline * 0.045);
+  v_norm = normalize(u_rot * n);
+  v_vcol = a_col;
+  vec4 wPos = u_model * vec4(p, 1.0);
+  v_world = wPos.xyz;
+  gl_Position = u_vp * wPos;
+}`;
+
+const TOON_FRAG_SHADER = `
+precision highp float;
+uniform vec3 u_color;
+uniform float u_outline;
+uniform float u_use_vcol;
+uniform vec3 u_light;
+uniform vec3 u_view;
+varying vec3 v_norm;
+varying vec3 v_world;
+varying vec3 v_vcol;
+
+void main(){
+  if (u_outline > 0.5) {
+    gl_FragColor = vec4(0.02, 0.03, 0.07, 1.0);
+    return;
+  }
+  vec3 baseColor = (u_use_vcol > 0.5) ? v_vcol : u_color;
+  vec3 N = normalize(v_norm);
+  vec3 L = normalize(u_light);
+  vec3 V = normalize(u_view);
+  float nd = max(dot(N, L), 0.0);
+  float steps = floor((0.25 + 0.78 * nd) * 3.2) / 3.0;
+  vec3 c = baseColor * (0.45 + 1.15 * steps);
+
+  vec2 uv = mod(gl_FragCoord.xy, vec2(5.0));
+  float dotv = step(length(uv - 2.5), 1.35);
+  c *= 1.0 - 0.10 * dotv * (1.0 - steps);
+
+  float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
+  c += vec3(0.18, 0.52, 0.85) * rim * 0.45;
+
+  gl_FragColor = vec4(pow(clamp(c, 0.0, 1.0), vec3(0.85)), 1.0);
+}`;
+
+let program = null;
+let attribs = {}, uniforms = {};
+
+function initWebGL() {
+  canvas = document.getElementById('canvas3d');
+  if (!canvas) return false;
+  try {
+    gl = canvas.getContext('webgl', { antialias: true, alpha: false, depth: true });
+  } catch (e) {
+    gl = null;
+  }
+  if (!gl) return false;
+
+  const createShader = (type, src) => {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (gl.getShaderParameter && !gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      return null;
+    }
+    return s;
+  };
+
+  const vs = createShader(gl.VERTEX_SHADER, TOON_VERT_SHADER);
+  const fs = createShader(gl.FRAGMENT_SHADER, TOON_FRAG_SHADER);
+  if (!vs || !fs) return false;
+
+  program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+
+  if (gl.getProgramParameter && !gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    return false;
+  }
+
+  attribs = {
+    pos: gl.getAttribLocation(program, 'a_pos'),
+    norm: gl.getAttribLocation(program, 'a_norm'),
+    col: gl.getAttribLocation(program, 'a_col')
+  };
+  uniforms = {
+    vp: gl.getUniformLocation(program, 'u_vp'),
+    model: gl.getUniformLocation(program, 'u_model'),
+    rot: gl.getUniformLocation(program, 'u_rot'),
+    outline: gl.getUniformLocation(program, 'u_outline'),
+    useVcol: gl.getUniformLocation(program, 'u_use_vcol'),
+    color: gl.getUniformLocation(program, 'u_color'),
+    light: gl.getUniformLocation(program, 'u_light'),
+    view: gl.getUniformLocation(program, 'u_view')
+  };
+
+  buildTrackMesh();
+  buildShipMeshes();
+
+  if (gl.enable) gl.enable(gl.DEPTH_TEST);
+  if (gl.depthFunc) gl.depthFunc(gl.LEQUAL);
+  if (gl.clearColor) gl.clearColor(0.024, 0.032, 0.055, 1.0);
+  return true;
+}
+
+function buildTrackMesh() {
+  if (!gl) return;
+  const verts = [];
+  const halfW = TRACK_WIDTH / 2;
+
+  for (let i = 0; i < TRACK_SEGS; i++) {
+    const f0 = trackPath[i];
+    const f1 = trackPath[(i + 1) % TRACK_SEGS];
+
+    const pL0 = v3.add(f0.pt, v3.scale(f0.R, -halfW));
+    const pR0 = v3.add(f0.pt, v3.scale(f0.R, halfW));
+    const pL1 = v3.add(f1.pt, v3.scale(f1.R, -halfW));
+    const pR1 = v3.add(f1.pt, v3.scale(f1.R, halfW));
+
+    const kerbW = 1.8;
+    const kL0 = v3.add(f0.pt, v3.scale(f0.R, -halfW + kerbW));
+    const kR0 = v3.add(f0.pt, v3.scale(f0.R, halfW - kerbW));
+    const kL1 = v3.add(f1.pt, v3.scale(f1.R, -halfW + kerbW));
+    const kR1 = v3.add(f1.pt, v3.scale(f1.R, halfW - kerbW));
+
+    const n0 = f0.N, n1 = f1.N;
+
+    const pushTri = (a, b, c, na, nb, nc, col) => {
+      verts.push(
+        a[0], a[1], a[2], na[0], na[1], na[2], col[0], col[1], col[2],
+        b[0], b[1], b[2], nb[0], nb[1], nb[2], col[0], col[1], col[2],
+        c[0], c[1], c[2], nc[0], nc[1], nc[2], col[0], col[1], col[2]
+      );
+    };
+
+    const pushQuad = (p00, p10, p11, p01, norm0, norm1, col) => {
+      pushTri(p00, p10, p11, norm0, norm0, norm1, col);
+      pushTri(p00, p11, p01, norm0, norm1, norm1, col);
+    };
+
+    // 1. Asfalto Central (Pista Principal)
+    const roadCol = [0.07, 0.10, 0.18];
+    pushQuad(kL0, kR0, kR1, kL1, n0, n1, roadCol);
+
+    // 2. Zebras (Kerbs alternados neon/navy)
+    const isEven = (i % 4 < 2);
+    const kerbCol = isEven ? [0.39, 0.82, 1.0] : [0.08, 0.14, 0.25];
+    pushQuad(pL0, kL0, kL1, pL1, n0, n1, kerbCol);
+    pushQuad(kR0, pR0, pR1, kR1, n0, n1, kerbCol);
+
+    // 3. Faixa Tracejada Central
+    if (i % 3 === 0) {
+      const dashHalf = 0.35;
+      const dL0 = v3.add(f0.pt, v3.scale(f0.R, -dashHalf));
+      const dR0 = v3.add(f0.pt, v3.scale(f0.R, dashHalf));
+      const dL1 = v3.add(f1.pt, v3.scale(f1.R, -dashHalf));
+      const dR1 = v3.add(f1.pt, v3.scale(f1.R, dashHalf));
+      pushQuad(dL0, dR0, dR1, dL1, n0, n1, [0.45, 0.90, 1.0]);
+    }
+
+    // 4. Guardrails Laterais
+    const barH = 2.4;
+    const bL0 = v3.add(pL0, v3.scale(n0, barH));
+    const bL1 = v3.add(pL1, v3.scale(n1, barH));
+    const bR0 = v3.add(pR0, v3.scale(n0, barH));
+    const bR1 = v3.add(pR1, v3.scale(n1, barH));
+
+    const railCol = [0.12, 0.18, 0.30];
+    pushQuad(pL0, bL0, bL1, pL1, f0.R, f1.R, railCol);
+    pushQuad(pR0, pR1, bR1, bR0, v3.scale(f0.R,-1), v3.scale(f1.R,-1), railCol);
+  }
+
+  trackCount = verts.length / 9;
+  trackVBO = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, trackVBO);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
+}
+
+function buildShipMeshes() {
+  if (!gl) return;
+  const models = [
+    { key: 'falcon_A', ship: 'falcon', v: 'A', color: [0.14, 0.44, 0.98] },
+    { key: 'goose_A', ship: 'goose', v: 'A', color: [0.14, 0.62, 0.35] },
+    { key: 'fox_A', ship: 'fox', v: 'A', color: [0.98, 0.76, 0.18] }
+  ];
+
+  for (const m of models) {
+    const meshObj = buildMesh(m.ship, m.v);
+    let total = 0;
+    meshObj.shapes.forEach(s => total += s.positions.length / 3);
+    const data = new Float32Array(total * 9);
+    let offset = 0;
+    meshObj.shapes.forEach(s => {
+      for (let i = 0; i < s.positions.length; i += 3) {
+        data[offset++] = s.positions[i];
+        data[offset++] = s.positions[i+1];
+        data[offset++] = s.positions[i+2];
+        data[offset++] = s.normals[i];
+        data[offset++] = s.normals[i+1];
+        data[offset++] = s.normals[i+2];
+        data[offset++] = m.color[0];
+        data[offset++] = m.color[1];
+        data[offset++] = m.color[2];
+      }
+    });
+
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+
+    shipMeshCache.set(m.key, { vbo, count: total, color: m.color });
+  }
+}
+
+const lastViewData = {};
+
+function projectWorldToScreen(pos, vp) {
+  if (!vp) return null;
+  const x = pos[0], y = pos[1], z = pos[2];
+  const cx = vp[0]*x + vp[4]*y + vp[8]*z + vp[12];
+  const cy = vp[1]*x + vp[5]*y + vp[9]*z + vp[13];
+  const cz = vp[2]*x + vp[6]*y + vp[10]*z + vp[14];
+  const cw = vp[3]*x + vp[7]*y + vp[11]*z + vp[15];
+  if (cw <= 0.05) return null;
+  const nx = cx / cw, ny = cy / cw, nz = cz / cw;
+  return {
+    pctX: (nx * 0.5 + 0.5) * 100,
+    pctY: (1.0 - (ny * 0.5 + 0.5)) * 100,
+    inFrustum: nz > -1 && nz < 1 && Math.abs(nx) <= 1 && Math.abs(ny) <= 1,
+    dist: cw
+  };
+}
+
+function renderSceneToViewport(altKey, x, y, width, height) {
+  if (!gl || !program) return;
+
+  if (gl.viewport) gl.viewport(x, y, width, height);
+  if (gl.scissor) gl.scissor(x, y, width, height);
+  if (gl.enable) gl.enable(gl.SCISSOR_TEST);
+
+  const camCfg = state.camera[altKey];
+  const player = sim.ships[0];
+  const pFrame = getTrackFrameAt(player.dist);
+  const speedRatio = player.speed / 1500.0;
+
+  const fov = (camCfg.fovBase + speedRatio * camCfg.fovSpeed) * D2R;
+  const aspect = width / Math.max(1, height);
+  const proj = mat4Persp(fov, aspect, 0.2, 2200.0);
+
+  const craftWorld = v3.add(pFrame.pt, v3.add(v3.scale(pFrame.R, player.laneOffset), v3.scale(pFrame.N, 1.25)));
+
+  let eye, target, camUp;
+  if (altKey === 'A') {
+    const shake = (Math.random() - 0.5) * (sim.event === 'collision' ? 1.4 : 0.06) * camCfg.shake;
+    eye = v3.add(craftWorld, v3.add(v3.scale(pFrame.T, -camCfg.dist), v3.add(v3.scale(pFrame.N, camCfg.height + shake), v3.scale(pFrame.R, shake))));
+    target = v3.add(craftWorld, v3.add(v3.scale(pFrame.T, 6.0), v3.scale(pFrame.N, 0.5)));
+    camUp = pFrame.N;
+  } else if (altKey === 'B') {
+    eye = v3.add(craftWorld, v3.add(v3.scale(pFrame.T, -camCfg.dist), [0, camCfg.height, 0]));
+    target = v3.add(craftWorld, v3.scale(pFrame.T, 22.0));
+    camUp = [0, 1, 0];
+  } else {
+    eye = v3.add(craftWorld, v3.add(v3.scale(pFrame.T, -camCfg.dist), v3.scale(pFrame.N, camCfg.height)));
+    target = v3.add(craftWorld, v3.scale(pFrame.T, 26.0));
+    camUp = pFrame.N;
+  }
+
+  const view = lookAt(eye, target, camUp);
+  const vp = m4.mul(proj, view);
+
+  const rival = sim.ships[1];
+  const rFrame = getTrackFrameAt(rival.dist);
+  const rivalWorld = v3.add(rFrame.pt, v3.add(v3.scale(rFrame.R, rival.laneOffset), v3.scale(rFrame.N, 1.25)));
+
+  lastViewData[altKey] = {
+    vp,
+    craftWorld,
+    rivalWorld,
+    pFrame,
+    rFrame,
+    projCraft: projectWorldToScreen(craftWorld, vp),
+    projRival: projectWorldToScreen(rivalWorld, vp)
+  };
+
+  gl.useProgram(program);
+  if (uniforms.vp) gl.uniformMatrix4fv(uniforms.vp, false, vp);
+  if (uniforms.light) gl.uniform3fv(uniforms.light, [0.45, 0.93, 0.64]);
+  if (uniforms.view) gl.uniform3fv(uniforms.view, [0.31, 0.65, 0.73]);
+
+  if (trackVBO) {
+    gl.bindBuffer(gl.ARRAY_BUFFER, trackVBO);
+    if (attribs.pos >= 0) {
+      if (gl.enableVertexAttribArray) gl.enableVertexAttribArray(attribs.pos);
+      gl.vertexAttribPointer(attribs.pos, 3, gl.FLOAT, false, 36, 0);
+    }
+    if (attribs.norm >= 0) {
+      if (gl.enableVertexAttribArray) gl.enableVertexAttribArray(attribs.norm);
+      gl.vertexAttribPointer(attribs.norm, 3, gl.FLOAT, false, 36, 12);
+    }
+    if (attribs.col >= 0) {
+      if (gl.enableVertexAttribArray) gl.enableVertexAttribArray(attribs.col);
+      gl.vertexAttribPointer(attribs.col, 3, gl.FLOAT, false, 36, 24);
+    }
+
+    if (uniforms.model) gl.uniformMatrix4fv(uniforms.model, false, m4.I());
+    if (uniforms.rot) gl.uniformMatrix3fv(uniforms.rot, false, new Float32Array([1,0,0, 0,1,0, 0,0,1]));
+    if (uniforms.useVcol) gl.uniform1f(uniforms.useVcol, 1.0);
+    if (uniforms.outline) gl.uniform1f(uniforms.outline, 0.0);
+    gl.drawArrays(gl.TRIANGLES, 0, trackCount);
+  }
+
+  const drawCraft = (meshKey, worldPos, frame, rollOffset, color, isSpinning) => {
+    const m = shipMeshCache.get(meshKey);
+    if (!m) return;
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, m.vbo);
+    if (attribs.pos >= 0) {
+      if (gl.enableVertexAttribArray) gl.enableVertexAttribArray(attribs.pos);
+      gl.vertexAttribPointer(attribs.pos, 3, gl.FLOAT, false, 36, 0);
+    }
+    if (attribs.norm >= 0) {
+      if (gl.enableVertexAttribArray) gl.enableVertexAttribArray(attribs.norm);
+      gl.vertexAttribPointer(attribs.norm, 3, gl.FLOAT, false, 36, 12);
+    }
+    if (attribs.col >= 0) {
+      if (gl.enableVertexAttribArray) gl.enableVertexAttribArray(attribs.col);
+      gl.vertexAttribPointer(attribs.col, 3, gl.FLOAT, false, 36, 24);
+    }
+
+    const spinYaw = isSpinning ? (simTime * 18.0) : 0.0;
+    const basis = [
+      frame.R[0], frame.R[1], frame.R[2], 0,
+      frame.N[0], frame.N[1], frame.N[2], 0,
+      frame.T[0], frame.T[1], frame.T[2], 0,
+      worldPos[0], worldPos[1], worldPos[2], 1
+    ];
+
+    const localRot = m4.mul(m4.RY(spinYaw), m4.RZ(rollOffset));
+    const model = m4.mul(basis, localRot);
+
+    const rot3 = new Float32Array([
+      model[0], model[1], model[2],
+      model[4], model[5], model[6],
+      model[8], model[9], model[10]
+    ]);
+
+    if (uniforms.model) gl.uniformMatrix4fv(uniforms.model, false, new Float32Array(model));
+    if (uniforms.rot) gl.uniformMatrix3fv(uniforms.rot, false, rot3);
+    if (uniforms.useVcol) gl.uniform1f(uniforms.useVcol, 0.0);
+
+    // Outline pass
+    if (uniforms.outline) gl.uniform1f(uniforms.outline, 1.0);
+    gl.drawArrays(gl.TRIANGLES, 0, m.count);
+
+    // Fill pass
+    if (uniforms.outline) gl.uniform1f(uniforms.outline, 0.0);
+    if (uniforms.color) gl.uniform3fv(uniforms.color, color);
+    gl.drawArrays(gl.TRIANGLES, 0, m.count);
+  };
+
+  const playerRoll = (sim.event === 'drift' ? 0.35 : 0.12) * camCfg.bank;
+  drawCraft('falcon_A', craftWorld, pFrame, playerRoll, [0.14, 0.44, 0.98], sim.event === 'spin');
+  drawCraft('goose_A', rivalWorld, rFrame, 0.0, [0.14, 0.62, 0.35], false);
+
+  for (let i = 2; i < 8; i++) {
+    const opp = sim.ships[i];
+    const diff = opp.dist - player.dist;
+    if (Math.abs(diff) < 140.0) {
+      const oFrame = getTrackFrameAt(opp.dist);
+      const oPos = v3.add(oFrame.pt, v3.add(v3.scale(oFrame.R, opp.laneOffset), v3.scale(oFrame.N, 1.25)));
+      drawCraft('fox_A', oPos, oFrame, 0.0, [0.98, 0.76, 0.18], false);
+    }
+  }
+
+  if (gl.disable) gl.disable(gl.SCISSOR_TEST);
+}
+
+function getHUDHtml(alt) {
+  const p = sim.ships[0];
+  const r = sim.ships[1];
+  const speed = Math.round(p.speed);
+  const shield = Math.round(p.shield);
+  const rivalGap = Math.round(r.dist - p.dist);
+  const viewData = lastViewData[alt] || {};
+  const pProj = viewData.projCraft || { pctX: 50, pctY: 62 };
+  const rProj = viewData.projRival;
+
+  const m = Math.floor(simTime / 60);
+  const s = Math.floor(simTime % 60);
+  const ms = Math.floor((simTime % 1) * 100);
+  const timeStr = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${ms.toString().padStart(2,'0')}`;
+
+  if (alt === 'A') {
+    const crownX = clamp(pProj.pctX, 22, 78);
+    const crownY = clamp(pProj.pctY - 6, 22, 78);
+    const rivalVisible = rProj && rProj.inFrustum;
+    const rivalX = rivalVisible ? clamp(rProj.pctX, 6, 94) : (r.laneOffset > 0 ? 88 : 12);
+    const rivalY = rivalVisible ? clamp(rProj.pctY - 6, 10, 90) : 38;
+
+    const speedRatio = Math.min(1.0, speed / 1500.0);
+    const shieldRatio = Math.min(1.0, Math.max(0.0, shield / 100.0));
+    const speedArcLen = speedRatio * 180;
+    const shieldArcLen = shieldRatio * 140;
+
+    return `
+      <div class="hud-alt-a" style="opacity:${state.hud.A.opacity}">
+        <!-- Coroa Holográfica 3D sobre a Nave -->
+        <div class="diegetic-crown" style="left:${crownX}%; top:${crownY}%">
+          <svg viewBox="0 0 260 180">
+            <!-- Arco de Velocidade (traseira) -->
+            <path d="M 50 140 A 80 80 0 0 1 210 140" fill="none" stroke="rgba(100,210,255,0.2)" stroke-width="6" stroke-linecap="round"/>
+            <path d="M 50 140 A 80 80 0 0 1 210 140" fill="none" stroke="#64d2ff" stroke-width="6" stroke-linecap="round" stroke-dasharray="${speedArcLen} 250"/>
+            <!-- Arco de Escudo/Energia (borda superior) -->
+            <path d="M 65 60 A 70 70 0 0 1 195 60" fill="none" stroke="rgba(124,240,189,0.2)" stroke-width="4" stroke-linecap="round"/>
+            <path d="M 65 60 A 70 70 0 0 1 195 60" fill="none" stroke="${shield < 25 ? '#ff6ea7' : '#7cf0bd'}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${shieldArcLen} 220"/>
+          </svg>
+          <div class="crown-readout">
+            <div class="crown-speed">${speed}</div>
+            <div class="crown-unit">KM/H</div>
+            <div class="crown-subshield" style="color:${shield < 25 ? 'var(--mag)' : 'var(--mint)'}">ESCUDO ${shield}%</div>
+          </div>
+          <div class="crown-tactical">
+            <span class="crown-badge ${p.boostActive ? 'active' : ''}">BOOST</span>
+            <span class="crown-badge ${p.attack === 'SIDE ATTACK' ? 'active' : ''}">SIDE</span>
+            <span class="crown-badge ${p.attack === 'SPIN ATTACK' ? 'active' : ''}">SPIN</span>
+          </div>
+        </div>
+
+        <!-- Retícula Espacial de Combate 3D sobre o Rival -->
+        <div class="target-tag" style="left:${rivalX}%; top:${rivalY}%; opacity:${Math.abs(rivalGap) < 160 ? 1 : 0}">
+          <div class="target-tag-header">
+            <span class="nm">▶ ${r.name}</span>
+            <span class="dist">${rivalGap > 0 ? '+' : ''}${rivalGap}m</span>
+          </div>
+          <div class="target-tag-bar">
+            <div class="target-tag-bar-fill"></div>
+          </div>
+        </div>
+
+        <!-- Radar Orbital de Piso -->
+        <div class="diegetic-radar">
+          <svg viewBox="0 0 320 100">
+            <ellipse cx="160" cy="50" rx="140" ry="32" fill="rgba(8,16,28,0.65)" stroke="#64d2ff" stroke-width="1.5" stroke-dasharray="10 5"/>
+            <ellipse cx="160" cy="50" rx="75" ry="17" fill="none" stroke="rgba(100,210,255,0.35)" stroke-width="1"/>
+            <line x1="160" y1="30" x2="160" y2="70" stroke="rgba(100,210,255,0.3)" stroke-width="1"/>
+            <circle cx="160" cy="50" r="5" fill="#64d2ff"/>
+            <circle cx="${160 + (r.laneOffset * 9)}" cy="${50 - (rivalGap * 0.7)}" r="5.5" fill="#ff6ea7"/>
+            <line x1="160" y1="50" x2="${160 + (r.laneOffset * 9)}" y2="${50 - (rivalGap * 0.7)}" stroke="rgba(255,110,167,0.6)" stroke-width="1.2"/>
+          </svg>
+        </div>
+
+        <!-- Placa de Telemetria Inferior Esquerda -->
+        <div class="diegetic-bottom-left">
+          <div class="diegetic-pos">P${p.rank.toString().padStart(2,'0')} <span>/ 30</span></div>
+          <div class="diegetic-meta">VOLTA ${p.lap}/3 · TEMPO ${timeStr}</div>
+        </div>
+
+        <!-- Placa de Tempo Superior Direita -->
+        <div class="diegetic-time-plate">
+          <span>DELTA: <b>-0.42s</b></span>
+          <span>SETOR: <b>S2</b></span>
+        </div>
+
+        ${p.wrongWay ? '<div class="toast-alarm">⚠️ SENTIDO CONTRÁRIO</div>' : ''}
+        ${p.offTrack ? '<div class="toast-alarm">⚠️ FORA DA PISTA</div>' : ''}
+      </div>`;
+  } else if (alt === 'B') {
+    const top5 = sim.ships.slice(0, 5);
+    const pU = (((p.dist % sim.trackLength) + sim.trackLength) % sim.trackLength) / sim.trackLength;
+    const rU = (((r.dist % sim.trackLength) + sim.trackLength) % sim.trackLength) / sim.trackLength;
+    const pPt = sampleTrackSpline(pU);
+    const rPt = sampleTrackSpline(rU);
+    const pMapX = (60 + (pPt[0] / 480) * 50).toFixed(1);
+    const pMapY = (60 + (pPt[2] / 640) * 50).toFixed(1);
+    const rMapX = (60 + (rPt[0] / 480) * 50).toFixed(1);
+    const rMapY = (60 + (rPt[2] / 640) * 50).toFixed(1);
+
+    const otherBlips = sim.ships.slice(2, 20).map(s => {
+      const u = (((s.dist % sim.trackLength) + sim.trackLength) % sim.trackLength) / sim.trackLength;
+      const pt = sampleTrackSpline(u);
+      const x = (60 + (pt[0] / 480) * 50).toFixed(1);
+      const y = (60 + (pt[2] / 640) * 50).toFixed(1);
+      return `<circle cx="${x}" cy="${y}" r="1.6" fill="#8ca0bf" opacity="0.75"/>`;
+    }).join('');
+
+    return `
+      <div class="hud-alt-b" style="opacity:${state.hud.B.opacity}">
+        <!-- Leaderboard e Timing Tower -->
+        <div class="leaderboard">
+          <header><span>CLASSIFICAÇÃO</span> <span>GAP</span></header>
+          ${top5.map(s => `
+            <div class="leader-row ${s.isPlayer ? 'player' : s.isRival ? 'rival' : ''}">
+              <span class="rk">${s.rank}</span>
+              <span class="nm">${s.name}</span>
+              <span class="gap">${s.isPlayer ? '—' : `${s.dist > p.dist ? '-' : '+'}${Math.round(Math.abs(s.dist - p.dist))}m`}</span>
+            </div>`).join('')}
+        </div>
+
+        <!-- Minimapa Completo do Circuito -->
+        <div class="minimap-panel">
+          <svg viewBox="0 0 120 120">
+            <path d="${trackSvgPath}" fill="none" stroke="#203046" stroke-width="8" stroke-linejoin="round"/>
+            <path d="${trackSvgPath}" fill="none" stroke="#3d587c" stroke-width="2" stroke-linejoin="round"/>
+            ${otherBlips}
+            <circle cx="${rMapX}" cy="${rMapY}" r="3" fill="#ff6ea7"/>
+            <circle cx="${pMapX}" cy="${pMapY}" r="3.5" fill="#64d2ff"/>
+            <circle cx="${pMapX}" cy="${pMapY}" r="6.5" fill="none" stroke="#64d2ff" stroke-width="1.2" opacity="0.8"/>
+          </svg>
+          <div class="minimap-label">CIRCUITO 2.4 KM</div>
+        </div>
+
+        <!-- Faixa Central de Cronometragem -->
+        <div class="race-timing-header">
+          <span class="lap-badge">VOLTA ${p.lap}/3</span>
+          <span class="time-val">${timeStr}</span>
+          <span class="split-val">Δ -0.34s</span>
+        </div>
+
+        <!-- Cluster Tático de Combate -->
+        <div class="combat-cluster">
+          <div class="combat-tile ready ${p.boostActive ? 'active' : ''}"><span class="lbl">BOOST</span><b>${p.boostActive ? 'ATIVO' : 'PRONTO'}</b></div>
+          <div class="combat-tile ready ${p.attack === 'SIDE ATTACK' ? 'active' : ''}"><span class="lbl">SIDE ATTACK</span><b>PRONTO</b></div>
+          <div class="combat-tile ready ${p.attack === 'SPIN ATTACK' ? 'active' : ''}"><span class="lbl">SPIN ATTACK</span><b>PRONTO</b></div>
+        </div>
+
+        <!-- Painel de Instrumentos e Velocidade -->
+        <div class="instrument-cluster">
+          <div class="speedo-panel">
+            <div class="speedo-val">${speed}</div>
+            <div class="speedo-unit">KM/H · POSIÇÃO P${p.rank.toString().padStart(2,'0')}</div>
+          </div>
+          <div class="shield-bar-wrapper">
+            <div class="shield-bar-fill ${shield < 25 ? 'critical' : ''}" style="width:${shield}%"></div>
+            <div class="shield-bar-text"><span>ESCUDO / ENERGIA</span> <span>${shield}%</span></div>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    const isThreat = Math.abs(rivalGap) < 35;
+    return `
+      <div class="hud-alt-c" style="opacity:${state.hud.C.opacity}">
+        <!-- Arcos de Ameaça Periféricos -->
+        <div class="threat-arc left ${isThreat && r.laneOffset < 0 ? 'active' : ''}">
+          <span class="threat-arc-label">AMEAÇA FLANCO ESQ</span>
+        </div>
+        <div class="threat-arc right ${isThreat && r.laneOffset >= 0 ? 'active' : ''}">
+          <span class="threat-arc-label">AMEAÇA FLANCO DIR</span>
+        </div>
+
+        <!-- Fita de Status Minimalista (Topo) -->
+        <div class="minimal-topbar">
+          <span>POSIÇÃO <b>P${p.rank}/30</b></span>
+          <span class="lap">VOLTA <b>${p.lap}/3</b></span>
+          <span>TEMPO <b>${timeStr}</b></span>
+        </div>
+
+        <!-- Medidor de Drift e Slip Lateral -->
+        <div class="drift-gauge ${p.driftActive ? 'active' : ''}">
+          <span>⟲ DRIFT SLIP: 24° · TRAÇÃO 82%</span>
+        </div>
+
+        <!-- Arcos de Cruzeiro na Base (Discretos e Completos) -->
+        <div class="cruise-cluster">
+          <div class="cruise-gauge">
+            <div class="cruise-lbl">ESCUDO / ENERGIA</div>
+            <div class="cruise-val" style="color:${shield < 25 ? 'var(--mag)' : 'var(--mint)'}">${shield}%</div>
+            <div class="cruise-shield-bar">
+              <div class="cruise-shield-fill" style="width:${shield}%; background:${shield < 25 ? 'var(--mag)' : 'var(--mint)'}"></div>
+            </div>
+          </div>
+          <div class="cruise-gauge speed">
+            <div class="cruise-lbl">VELOCIDADE</div>
+            <div class="cruise-val">${speed}</div>
+            <div class="cruise-lbl">KM/H</div>
+          </div>
+        </div>
+
+        <!-- Banner de Eventos Contextuais -->
+        <div class="event-banner ${sim.event ? 'visible' : ''} ${p.wrongWay || p.offTrack || shield < 25 ? 'danger' : ''}">
+          ${p.wrongWay ? '⚠️ SENTIDO CONTRÁRIO' : p.offTrack ? '⚠️ FORA DA PISTA' : shield < 25 ? '⚠️ ESCUDO CRÍTICO (<20%)' : sim.event ? sim.event.toUpperCase() : ''}
+        </div>
+      </div>`;
+  }
+}
+
+let lastFrameTime = performance.now();
+let fpsCount = 0, fpsTimer = 0, currentFps = 60;
+
+function animationLoop(now) {
+  const dt = Math.min(0.05, (now - lastFrameTime) / 1000.0);
+  lastFrameTime = now;
+
+  fpsCount++;
+  fpsTimer += dt;
+  if (fpsTimer >= 0.5) {
+    currentFps = Math.round(fpsCount / fpsTimer);
+    fpsCount = 0;
+    fpsTimer = 0;
+  }
+
+  sim.update(dt);
+
+  if (canvas) {
+    const rect = canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : { width: canvas.width, height: canvas.height };
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const targetW = Math.max(1, Math.round(rect.width * dpr));
+    const targetH = Math.max(1, Math.round(rect.height * dpr));
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW;
+      canvas.height = targetH;
+    }
+  }
+
+  if (gl) {
+    if (gl.clear) gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    if (state.mode === 'single') {
+      renderSceneToViewport(state.alt, 0, 0, canvas.width, canvas.height);
+    } else {
+      const colW = Math.floor(canvas.width / 3);
+      renderSceneToViewport('A', 0, 0, colW, canvas.height);
+      renderSceneToViewport('B', colW, 0, colW, canvas.height);
+      renderSceneToViewport('C', colW * 2, 0, canvas.width - colW * 2, canvas.height);
+    }
+  }
+
+  updateHUDLayers();
+  updateTransportBar();
+  updateDiagnostics();
+
+  animationFrameId = requestAnimationFrame(animationLoop);
+}
+
+function updateHUDLayers() {
+  const singleLayer = document.getElementById('hudOverlay');
+  const compareGrid = document.getElementById('compareGrid');
+
+  if (state.mode === 'single') {
+    if (singleLayer) {
+      singleLayer.style.display = 'block';
+      singleLayer.innerHTML = getHUDHtml(state.alt);
+    }
+    if (compareGrid) compareGrid.style.display = 'none';
+  } else {
+    if (singleLayer) singleLayer.style.display = 'none';
+    if (compareGrid) {
+      compareGrid.style.display = 'grid';
+      const colA = document.getElementById('hudColA');
+      const colB = document.getElementById('hudColB');
+      const colC = document.getElementById('hudColC');
+      if (colA) colA.innerHTML = getHUDHtml('A');
+      if (colB) colB.innerHTML = getHUDHtml('B');
+      if (colC) colC.innerHTML = getHUDHtml('C');
+    }
+  }
+}
+
+function updateTransportBar() {
+  const p = sim.ships[0];
+  const r = sim.ships[1];
+
+  const m = Math.floor(simTime / 60);
+  const s = Math.floor(simTime % 60);
+  const ms = Math.floor((simTime % 1) * 100);
+  const timeStr = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}.${ms.toString().padStart(2,'0')}`;
+
+  const timeEl = document.getElementById('timeDisplay');
+  if (timeEl) timeEl.textContent = timeStr;
+
+  const slider = document.getElementById('timelineSlider');
+  if (slider && !slider.matches(':active')) {
+    slider.value = simTime;
+  }
+
+  const lapEl = document.getElementById('lapDisplay');
+  if (lapEl) lapEl.textContent = `Volta ${p.lap}/3`;
+
+  const barSpd = document.getElementById('barSpeed');
+  if (barSpd) barSpd.textContent = Math.round(p.speed);
+
+  const barPos = document.getElementById('barPos');
+  if (barPos) barPos.textContent = `P${p.rank.toString().padStart(2,'0')}`;
+
+  const barRiv = document.getElementById('barRival');
+  if (barRiv) {
+    const gap = Math.round(r.dist - p.dist);
+    barRiv.textContent = `${gap > 0 ? '+' : ''}${gap}m`;
+  }
+}
+
+function updateDiagnostics() {
+  const diagList = document.getElementById('diagList');
+  if (!diagList) return;
+  const p = sim.ships[0];
+  diagList.innerHTML = `
+    <dt>FPS</dt><dd>${currentFps}</dd>
+    <dt>Alternativa</dt><dd>${state.alt} (${state.mode})</dd>
+    <dt>Resolução</dt><dd>${canvas ? canvas.width : 0}×${canvas ? canvas.height : 0}</dd>
+    <dt>Competidores</dt><dd>30 ativos</dd>
+    <dt>Pista Triângulos</dt><dd>${trackCount}</dd>
+    <dt>Distância</dt><dd>${Math.round(p.dist)}m / ${sim.trackLength * 3}m</dd>
+    <dt>Evento Ativo</dt><dd>${sim.event || 'Nenhum'}</dd>
+  `;
+}
+
+function syncUI() {
+  document.querySelectorAll('#altGroup .btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.alt === state.alt);
+  });
+  const altCardTitles = {
+    A: "A — HUD Diegético / Cinematográfico",
+    B: "B — HUD Competitivo / Instrumental",
+    C: "C — HUD Contextual / Minimalista"
+  };
+  const altCardDescs = {
+    A: "Informações projetadas no espaço 3D ao redor da nave, radar orbital no piso, retículas espaciais e câmera cinematográfica. Prioridade: espetáculo e percepção da corrida.",
+    B: "Interface extremamente funcional e precisa (referência F-Zero GX / Wipeout). Leaderboard ao vivo, minimapa do circuito com 30 naves e cluster de velocidade/escudo.",
+    C: "Interface adaptativa que preserva o campo visual da corrida. Alertas periféricos de ameaça e hierarquia dinâmica durante boost, drift e colisões."
+  };
+  const titleEl = document.getElementById('altTitle');
+  const descEl = document.getElementById('altDesc');
+  if (titleEl) titleEl.textContent = altCardTitles[state.alt];
+  if (descEl) descEl.textContent = altCardDescs[state.alt];
+
+  document.querySelectorAll('#modeGroup .btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.mode === state.mode);
+  });
+
+  document.querySelectorAll('#aspectGroup .btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.aspect === state.aspect);
+  });
+  const aspectBox = document.getElementById('aspectBox');
+  if (aspectBox) aspectBox.dataset.aspect = state.aspect;
+
+  const camSliders = document.getElementById('camSliders');
+  if (camSliders) {
+    const c = state.camera[state.alt];
+    const defs = [
+      { id: 'dist', label: 'Distância', min: 6, max: 24, step: 0.5, unit: 'm' },
+      { id: 'height', label: 'Altura', min: 1, max: 8, step: 0.2, unit: 'm' },
+      { id: 'pitch', label: 'Inclinação (Pitch)', min: 0, max: 25, step: 1, unit: '°' },
+      { id: 'fovBase', label: 'FOV Base', min: 50, max: 100, step: 1, unit: '°' },
+      { id: 'fovSpeed', label: 'Escala FOV p/ Vel.', min: 0, max: 40, step: 1, unit: '°' },
+      { id: 'bank', label: 'Inclin. Curvas (Bank)', min: 0, max: 1.5, step: 0.05, unit: 'x' },
+      { id: 'shake', label: 'Tremor / Impacto', min: 0, max: 2, step: 0.1, unit: 'x' }
+    ];
+    camSliders.innerHTML = defs.map(d => `
+      <div class="control-row">
+        <header><span>${d.label}</span> <output id="cam_${d.id}_val">${c[d.id]}${d.unit}</output></header>
+        <input type="range" min="${d.min}" max="${d.max}" step="${d.step}" value="${c[d.id]}" data-cam="${d.id}">
+      </div>`).join('');
+
+    camSliders.querySelectorAll('input').forEach(inp => {
+      inp.oninput = () => {
+        const val = parseFloat(inp.value);
+        state.camera[state.alt][inp.dataset.cam] = val;
+        const out = document.getElementById(`cam_${inp.dataset.cam}_val`);
+        if (out) out.textContent = val + defs.find(d => d.id === inp.dataset.cam).unit;
+        updateJsonView();
+      };
+    });
+  }
+
+  const hudSliders = document.getElementById('hudSliders');
+  if (hudSliders) {
+    const h = state.hud[state.alt];
+    hudSliders.innerHTML = `
+      <div class="control-row">
+        <header><span>Opacidade do HUD</span> <output id="hud_op_val">${Math.round(h.opacity * 100)}%</output></header>
+        <input type="range" min="0.2" max="1.0" step="0.05" value="${h.opacity}" id="hudOpacityInp">
+      </div>
+      <div class="control-row">
+        <header><span>Escala de Elementos</span> <output id="hud_sc_val">${h.scale}x</output></header>
+        <input type="range" min="0.75" max="1.35" step="0.05" value="${h.scale}" id="hudScaleInp">
+      </div>
+    `;
+    const opInp = document.getElementById('hudOpacityInp');
+    if (opInp) {
+      opInp.oninput = () => {
+        state.hud[state.alt].opacity = parseFloat(opInp.value);
+        document.getElementById('hud_op_val').textContent = Math.round(state.hud[state.alt].opacity * 100) + '%';
+        updateJsonView();
+      };
+    }
+    const scInp = document.getElementById('hudScaleInp');
+    if (scInp) {
+      scInp.oninput = () => {
+        state.hud[state.alt].scale = parseFloat(scInp.value);
+        document.getElementById('hud_sc_val').textContent = state.hud[state.alt].scale + 'x';
+        updateJsonView();
+      };
+    }
+  }
+
+  const camLabel = document.getElementById('camActiveLabel');
+  if (camLabel) camLabel.textContent = `Alt ${state.alt}`;
+  const hudLabel = document.getElementById('hudActiveLabel');
+  if (hudLabel) hudLabel.textContent = `Alt ${state.alt}`;
+
+  updateJsonView();
+}
+
+function updateJsonView() {
+  const area = document.getElementById('jsonArea');
+  if (area && !area.matches(':focus')) {
+    area.value = JSON.stringify(exportConfig(), null, 2);
+  }
+}
+
+function exportConfig() {
+  return {
+    schema: LAB_SCHEMA,
+    schemaVersion: SCHEMA_VERSION,
+    alt: state.alt,
+    mode: state.mode,
+    aspect: state.aspect,
+    camera: state.camera,
+    hud: state.hud
+  };
+}
+
+function importConfig(jsonText) {
+  try {
+    const parsed = typeof jsonText === 'string' ? JSON.parse(jsonText) : jsonText;
+    if (parsed.schema !== LAB_SCHEMA) throw new Error(`Schema inválido: ${parsed.schema}`);
+    if (parsed.schemaVersion !== SCHEMA_VERSION && parsed.version !== SCHEMA_VERSION) throw new Error('Versão incompatível');
+    
+    if (parsed.alt && ['A','B','C'].includes(parsed.alt)) state.alt = parsed.alt;
+    if (parsed.mode && ['single','compare'].includes(parsed.mode)) state.mode = parsed.mode;
+    if (parsed.aspect && ['16:9','21:9','mobile'].includes(parsed.aspect)) state.aspect = parsed.aspect;
+    if (parsed.camera) state.camera = structuredClone(parsed.camera);
+    if (parsed.hud) state.hud = structuredClone(parsed.hud);
+    
+    syncUI();
+    const notice = document.getElementById('jsonNotice');
+    if (notice) notice.textContent = 'Configuração importada com sucesso!';
+    return true;
+  } catch (e) {
+    const notice = document.getElementById('jsonNotice');
+    if (notice) {
+      notice.textContent = `Erro: ${e.message}`;
+      notice.style.color = 'var(--err)';
+    }
+    return false;
+  }
+}
+
+function setupEventListeners() {
+  document.querySelectorAll('#altGroup .btn').forEach(b => {
+    b.onclick = () => {
+      state.alt = b.dataset.alt;
+      syncUI();
+    };
+  });
+
+  document.querySelectorAll('#modeGroup .btn').forEach(b => {
+    b.onclick = () => {
+      state.mode = b.dataset.mode;
+      syncUI();
+    };
+  });
+
+  document.querySelectorAll('#aspectGroup .btn').forEach(b => {
+    b.onclick = () => {
+      state.aspect = b.dataset.aspect;
+      syncUI();
+    };
+  });
+
+  document.querySelectorAll('.event-btn').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('.event-btn').forEach(eb => eb.classList.remove('active'));
+      b.classList.add('active');
+      sim.trigger(b.dataset.event);
+    };
+  });
+
+  const btnChase = document.getElementById('btnPresetChase');
+  if (btnChase) btnChase.onclick = () => {
+    state.camera[state.alt] = { dist: 12.0, height: 3.5, pitch: 4.0, fovBase: 70, fovSpeed: 10, bank: 0.15, lookAhead: 0.2, shake: 0.4 };
+    syncUI();
+  };
+  const btnCine = document.getElementById('btnPresetCinematic');
+  if (btnCine) btnCine.onclick = () => {
+    state.camera[state.alt] = { dist: 9.5, height: 2.2, pitch: 8.0, fovBase: 80, fovSpeed: 30, bank: 0.95, lookAhead: 0.8, shake: 1.0 };
+    syncUI();
+  };
+  const btnTrack = document.getElementById('btnPresetTrack');
+  if (btnTrack) btnTrack.onclick = () => {
+    state.camera[state.alt] = { dist: 16.0, height: 5.5, pitch: 15.0, fovBase: 84, fovSpeed: 16, bank: 0.4, lookAhead: 1.0, shake: 0.5 };
+    syncUI();
+  };
+
+  const btnResetCur = document.getElementById('btnResetCurrent');
+  if (btnResetCur) btnResetCur.onclick = () => {
+    state.camera[state.alt] = structuredClone(CONFIG.camera[state.alt]);
+    state.hud[state.alt] = structuredClone(CONFIG.hud[state.alt]);
+    syncUI();
+  };
+  const btnResetAll = document.getElementById('btnResetGlobal');
+  if (btnResetAll) btnResetAll.onclick = () => {
+    state = structuredClone(CONFIG);
+    sim.initShips();
+    simTime = 0;
+    syncUI();
+  };
+
+  const playPause = document.getElementById('btnPlayPause');
+  if (playPause) {
+    playPause.onclick = () => {
+      isPlaying = !isPlaying;
+      playPause.textContent = isPlaying ? 'Ⅱ Pausar' : '▶ Reproduzir';
+    };
+  }
+  const stepBtn = document.getElementById('btnStepFrame');
+  if (stepBtn) {
+    stepBtn.onclick = () => {
+      isPlaying = false;
+      if (playPause) playPause.textContent = '▶ Reproduzir';
+      sim.update(1 / 60);
+    };
+  }
+  const restartBtn = document.getElementById('btnRestart');
+  if (restartBtn) {
+    restartBtn.onclick = () => {
+      simTime = 0;
+      sim.initShips();
+    };
+  }
+  const slider = document.getElementById('timelineSlider');
+  if (slider) {
+    slider.oninput = () => {
+      simTime = parseFloat(slider.value);
+    };
+  }
+
+  const copyBtn = document.getElementById('btnCopyJson');
+  if (copyBtn) {
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(JSON.stringify(exportConfig(), null, 2));
+      const notice = document.getElementById('jsonNotice');
+      if (notice) notice.textContent = 'JSON copiado para a área de transferência!';
+    };
+  }
+  const applyBtn = document.getElementById('btnApplyJson');
+  if (applyBtn) {
+    applyBtn.onclick = () => {
+      const area = document.getElementById('jsonArea');
+      if (area) importConfig(area.value);
+    };
+  }
+  const dlBtn = document.getElementById('btnDownloadJson');
+  if (dlBtn) {
+    dlBtn.onclick = () => {
+      const blob = new Blob([JSON.stringify(exportConfig(), null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `gminus_hud_camera_p12_${state.alt.toLowerCase()}.json`;
+      a.click();
+    };
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (['INPUT','TEXTAREA'].includes(e.target.tagName)) return;
+    const k = e.key.toUpperCase();
+    if (['A','B','C'].includes(k)) {
+      state.alt = k;
+      syncUI();
+    } else if (k === 'M') {
+      state.mode = state.mode === 'single' ? 'compare' : 'single';
+      syncUI();
+    } else if (k === ' ') {
+      e.preventDefault();
+      isPlaying = !isPlaying;
+      if (playPause) playPause.textContent = isPlaying ? 'Ⅱ Pausar' : '▶ Reproduzir';
+    } else if (e.key >= '1' && e.key <= '9') {
+      const evs = ['normal','extreme','boost','drift','side','spin','collision','lowshield','curve'];
+      const ev = evs[parseInt(e.key) - 1];
+      if (ev) sim.trigger(ev);
+    }
+  });
+}
+
+/* ==========================================================================
+   HEADLESS TEST API (window.__GMINUS_HUD_CAMERA_LAB__)
+   ========================================================================== */
+
+window.__GMINUS_HUD_CAMERA_LAB__ = {
+  getState: () => structuredClone(state),
+  setAlternative: (alt) => { state.alt = alt; syncUI(); },
+  setMode: (mode) => { state.mode = mode; syncUI(); },
+  setAspect: (aspect) => { state.aspect = aspect; syncUI(); },
+  triggerEvent: (ev) => sim.trigger(ev),
+  stepTime: (dt) => sim.update(dt),
+  getSimState: () => ({ ships: sim.ships, player: sim.ships[0] }),
+  computeCameraMatrix: (alt, speed) => {
+    const camCfg = state.camera[alt];
+    const speedRatio = speed / 1500.0;
+    const fov = camCfg.fovBase + speedRatio * camCfg.fovSpeed;
+    return { fov, camCfg };
+  },
+  exportJSON: () => JSON.stringify({
+    schema: LAB_SCHEMA,
+    version: SCHEMA_VERSION,
+    artDirection: 'D-TOON-VECTOR-FLUX',
+    state: structuredClone(state)
+  }, null, 2),
+  importJSON: (jsonStr) => {
+    const o = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+    if (o.state) {
+      if (o.state.alt) state.alt = o.state.alt;
+      if (o.state.mode) state.mode = o.state.mode;
+      if (o.state.aspect) state.aspect = o.state.aspect;
+      if (o.state.camera) state.camera = structuredClone(o.state.camera);
+      if (o.state.hud) state.hud = structuredClone(o.state.hud);
+    }
+    syncUI();
+  },
+  exportConfig: () => exportConfig(),
+  importConfig: (json) => importConfig(json),
+  getSimulation: () => sim,
+  getDiagnostics: () => ({ fps: currentFps, trackCount, shipCount: sim.totalShips }),
+  setSimState: (patch) => { Object.assign(sim.ships[0], patch); }
+};
+
+/* ==========================================================================
+   INICIALIZAÇÃO DO LABORATÓRIO
+   ========================================================================== */
+
+function startLab() {
+  if (typeof window !== 'undefined' && window.location && window.location.search) {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('alt') && ['A','B','C'].includes(urlParams.get('alt').toUpperCase())) {
+        state.alt = urlParams.get('alt').toUpperCase();
+      }
+      if (urlParams.has('mode') && ['single','compare'].includes(urlParams.get('mode').toLowerCase())) {
+        state.mode = urlParams.get('mode').toLowerCase();
+      }
+      if (urlParams.has('aspect') && ['16:9','21:9','mobile'].includes(urlParams.get('aspect'))) {
+        state.aspect = urlParams.get('aspect');
+      }
+    } catch (e) {}
+  }
+  initWebGL();
+  setupEventListeners();
+  syncUI();
+  animationFrameId = requestAnimationFrame(animationLoop);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startLab);
+} else {
+  startLab();
+}
+</script>
+</body>
+</html>

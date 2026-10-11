@@ -1,0 +1,33 @@
+✔ P01 original parity on flat: acceleration (255.071729ms)
+✔ P01 original parity on flat: coast (214.367976ms)
+✔ P01 original parity on flat: brake (231.933989ms)
+✔ P01 original parity on flat: steer (200.798027ms)
+✔ P01 original parity on flat: drift (205.855317ms)
+✔ P01 original parity on flat: strafe (192.112423ms)
+✔ P01 original parity on flat: airbrakes (202.393541ms)
+✔ P01 original parity on flat: boost (227.704559ms)
+✔ geometry has finite real triangles, barriers, ten areas and an actual gap (46.716413ms)
+✔ suspension holds target without periodic bounce (442.820405ms)
+✔ full inverted loop is continuous (568.101797ms)
+✔ continuous wall/tube contact 4 (199.479972ms)
+✔ continuous wall/tube contact 6 (804.194579ms)
+✔ ramp launches, real gravity acts, landing remains above geometry (126.327934ms)
+✔ left/right yaw matches screen direction in contact and flight (46.831593ms)
+✔ 30/60/120 render cadences produce identical 120Hz states (872.049942ms)
+✔ high-speed sphere sweep prevents rail tunneling (1.078662ms)
+✔ v2 strict JSON roundtrip rejects old independent physics and invalid profiles (2.074901ms)
+✔ canonical geometry and full export remain in generated HTML (2.375482ms)
+✔ original P01 airborne parity: KeyX (61.401166ms)
+✔ original P01 airborne parity: KeyW (62.36176ms)
+✔ original P01 airborne parity: KeyS (61.13131ms)
+✔ quick released steering tap survives until the physical step (1.053434ms)
+✔ original P01 landing bonus/penalty parity: pitch 0 (21.560126ms)
+✔ original P01 landing bonus/penalty parity: pitch 1 (18.351049ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5703.864303

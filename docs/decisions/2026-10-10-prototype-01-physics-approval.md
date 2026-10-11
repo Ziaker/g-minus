@@ -44,3 +44,7 @@ Próximas fatias de física ainda necessárias:
 - `npm run build` deve concluir sem erro de TypeScript.
 - O laboratório deve abrir em `/prototypes/01_steering_profiles.html`.
 - Mudanças posteriores em pistas, visual ou VFX não podem ser justificadas por esta aprovação.
+
+## Complemento — 11/10/2026: extensão 3D aprovada
+
+O [P08 revisão 3](2026-10-11-prototype-08-physics-approval.md) foi aprovado como extensão do Perfil C: contato A, autoestabilização aérea e boost direcional. O P01 e seu export original permanecem intactos. A extensão não resolve as ambiguidades de precisão nem a divergência histórica de esterço deste registro com o export (ver [reconciliação](../audits/2026-10-10-prototype-01-profile-c-reconciliation.md)). Integração no jogo continua pendente; contato A é restrição geométrica, não aprovação de uma suspensão spring-damper.

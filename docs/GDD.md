@@ -42,7 +42,7 @@
 - **Freios [25]:** permitem curvas fechadas e manobras, além da redução de velocidade.
 - **Freios aerodinâmicos [26]:** comandos independentes à esquerda e à direita.
 - **Erros de trajetória [27]:** causam perda de velocidade.
-- **Altitude [28]:** ~~comportamento determinado pelos atributos das quatro peças componentes da nave.~~ **Superado em 10/10/2026:** as peças são exclusivamente cosméticas e não têm atributos ([decisão](decisions/2026-10-10-craft-parts-cosmetic-only.md)). A intenção é de equilíbrio competitivo entre naves; a regra de altitude e sua padronização estão **pendentes**. A flutuação e o contato com a pista serão revistos no Protótipo 08 ([roadmap](planning/2026-10-10-prototype-roadmap.md)). Não foi definido controle vertical manual; não adicioná-lo por inferência.
+- **Altitude [28]:** ~~comportamento determinado pelos atributos das quatro peças componentes da nave.~~ **Superado em 10/10/2026:** as peças são exclusivamente cosméticas e não têm atributos ([decisão](decisions/2026-10-10-craft-parts-cosmetic-only.md)). A intenção é de equilíbrio competitivo entre naves; a regra de altitude e sua padronização estão **pendentes**. A flutuação e o contato com a pista foram validados no Protótipo 08, aprovado em 11/10/2026 (integração pendente) ([roadmap](planning/2026-10-10-prototype-roadmap.md)). Em 11/10/2026 a revisão 4 do P08 aprovou ↓/S + boost para descida mais rápida e ↑ + boost para recuperar altitude; não é ajuste manual da altura de contato ([aprovação vigente](decisions/2026-10-11-prototype-08-air-control-approval.md)).
 - **Superfícies inclinadas/invertidas [29]:** exigem correções de pilotagem.
 - **Manobras avançadas [30]:** confirmadas, porém técnicas e comandos exatos ainda em aberto.
 - **Referência geral:** sensação arcade próxima de F-Zero GX, não uma exigência de replicar código-fonte, assets ou números sem validação.
@@ -152,6 +152,27 @@
 - **Alertas [98]:** priorizar animações para acontecimentos importantes.
 - **VFX [99]:** espetaculares, mas sem comprometer legibilidade e tomada de decisão.
 - **Menus [100]:** interface básica por ora; não fixar linguagem elaborada de HUD/menu sem prototipar.
+- **Protótipo 12 V2 (11/10/2026) — APROVADO PELO RESPONSÁVEL:** os **HUDs A (Flux Rush), B (Vector Tactical) e C (Apex Line)** e as **câmeras A (Cinética), B (Tática) e C (Pilotagem)** devem estar **presentes no jogo** como opções selecionáveis e independentes. Todas as opções do laboratório também vão para as configurações do jogo:
+  - tamanho do HUD e tamanho de cada módulo;
+  - módulos visíveis;
+  - espaçamento de texto e fonte;
+  - opções próprias de cada proposta;
+  - 8 cores por função com 7 paletas e aviso de contraste;
+  - os 16 parâmetros de cada câmera.
+
+  O padrão é a configuração JSON enviada pelo responsável (seleção padrão HUD C + câmera B). Detalhes:
+  - [registro e catálogo obrigatório](decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md);
+  - [laboratório](../prototypes/12_hud_camera_lab_v2.html);
+  - [especificação](specs/12_hud_camera_v2_spec.md).
+
+  Decisões que isso resolve:
+  - [91–92] câmeras selecionáveis por botão (três perspectivas em terceira pessoa);
+  - [93–95] movimento, FOV e sensação de velocidade conforme as câmeras aprovadas;
+  - [96] instrumentos dos três HUDs;
+  - [97] minimapa (A) e radar (B, C), desligáveis nas configurações;
+  - [98] alertas pelo diretor de prioridades P0–P3.
+
+  A pista e a corrida de teste do laboratório não aprovam física, IA nem regras. A integração em `src/game` está pendente: exige pedido explícito, vem depois da física do P08, usa a escala decidida em 11/10/2026 ([1 u = 1 m](decisions/2026-10-11-world-scale-1u-1m.md)) e valida a câmera no voo com o referencial estabilizado do P08 e os controles aéreos da revisão 4 (validação pendente). O P12 original continua rejeitado ([auditoria](audits/2026-10-11-prototype-12-audit.md)).
 
 ## 11. Política obrigatória de prototipação, telemetria e documentação [101–104]
 
@@ -171,11 +192,24 @@ Cada solicitação de protótipo deve entregar:
 
 **Decisão vigente — Protótipo 01 (10/10/2026):** o Perfil C — Inercial / Drift foi aprovado como baseline de física e dinâmica. A aprovação abrange o comportamento funcional proposto pelo laboratório e exclui visual, VFX, áudio e pistas. O registro e o estado de integração estão em [`docs/decisions/2026-10-10-prototype-01-physics-approval.md`](decisions/2026-10-10-prototype-01-physics-approval.md).
 
+**Decisão histórica — Protótipo 08 (11/10/2026):** aprovada a revisão 3: pilotagem terrestre do Perfil C, contato A sobre geometria 3D real, voo/pouso, autoestabilização gradual e boost aéreo direcionado pelo nariz para recuperar altitude. Escopo reduzido confirmado: extensão do P01, sem reconstruir três sistemas de pilotagem. Baseline reproduzível e limites em [aprovação P08](decisions/2026-10-11-prototype-08-physics-approval.md). Não aprova a pista técnica, HUD/câmera definitivos, hitboxes competitivas ou integração automática no jogo.
+
+**Decisão vigente — Protótipo 08, revisão 4 (11/10/2026):** no voo, ↓/S + boost acelera a descida e ↑ + boost permite subir; comando de pitch, direção, strafe e limite de descida durante o boost aumentam 30% (85 → 110,5 u/s na descida). Configurações antigas preservam os comandos anteriores na importação. [Aprovação e baseline JSON v5](decisions/2026-10-11-prototype-08-air-control-approval.md). Física do jogo principal não integrada.
+
 **Decisão vigente — Protótipo 05 (10/10/2026):** aprovadas as nove geometrias das três primeiras naves (Blue Falcon, Golden Fox e Wild Goose × A/B/C), com os valores padrão do laboratório como baseline. **Regra obrigatória:** todo protótipo futuro que envolva essas naves deve usar esses modelos, embutindo sem alterações o bloco geométrico canônico do laboratório 05. Cores por peça e uma opção de cores aleatórias ficam registradas como diretriz para protótipo próprio. Peças definitivas, atributos e integração no jogo continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-05-craft-geometry-approval.md`](decisions/2026-10-10-prototype-05-craft-geometry-approval.md).
 
 **Decisão vigente — Protótipo 06 (10/10/2026):** aprovado o **Sistema B — personalização de cor por função de material**: sete papéis (pintura, secundária, acento, estrutura, vidro, energia, marcação) aplicados à nave inteira dentro do pipeline D, com cores livres e controles de pipeline na baseline padrão do laboratório (mistura D 0,55, igual à v6). Os sistemas A (por grupo) e C (sorteio por semente) não foram escolhidos. Cores aleatórias, relação com as cores por peça [72, 78], escopo da pintura e integração continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-06-paint-system-approval.md`](decisions/2026-10-10-prototype-06-paint-system-approval.md).
 
 **Decisão vigente — Protótipo 04 V2 / VFX (10/10/2026):** aprovados: Propulsão A; Super Boost B (Corredor vetorial) **obrigatório no jogo** + A, D e E como **toggles in-game cumulativos** (C não aprovado); Spin Attack E com dimensão **desejada (provisória) de 130 % do raio de varredura do giro da nave (+30 %)**: **ainda não implementada**; o laboratório usa hoje raio externo = varredura + 0,35 u; Side Attack E modificado (afterimage mantido, descarga azul removida, speedlines laterais); Escudo D; Drift A/B/C/E selecionáveis com afterimage breve acima de 1300 km/h (D não aprovado); Colisão B/D; Dash E; Voo C/D; Velocidade A. Calibração aprovada = JSON enviado pelo responsável. A integração em `src/game`, o padrão dos toggles e a forma de seleção in-game continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-04-v2-vfx-approval.md`](decisions/2026-10-10-prototype-04-v2-vfx-approval.md).
+
+**Decisão vigente — Protótipo 12 V2 / HUD, câmera e interface (11/10/2026):** aprovados os **HUDs A, B e C**, as **câmeras A, B e C** e **todas as opções**, que devem estar **presentes no jogo**:
+- sliders de tamanho geral e por módulo;
+- visibilidade de módulos;
+- texto e fonte;
+- escolha de cores por função, com paletas e aviso de contraste;
+- parâmetros das câmeras.
+
+A configuração aprovada é o JSON enviado pelo responsável, guardado literalmente e como baseline reproduzível em `docs/decisions/`. A integração em `src/game` está pendente. Registro: [`docs/decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md`](decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md).
 
 **Decisão vigente — naves e peças cosméticas (10/10/2026):** as quatro peças são exclusivamente cosméticas, e não há diferença de atributos entre naves. Isso substitui [72–73] e o aspecto de desempenho de [28] e [74]. Hitboxes, massa, altitude e a aplicação global das configurações do Protótipo 07 estão pendentes. Registro: [`docs/decisions/2026-10-10-craft-parts-cosmetic-only.md`](decisions/2026-10-10-craft-parts-cosmetic-only.md).
 
@@ -240,11 +274,11 @@ Referências examinadas na branch principal em 2026-10-08:
 6. **[17,34,47]** Destino exato após sair da pista ou zerar a energia: K.O., recuperação ou regras condicionais. Também ficam pendentes os efeitos de impacto (leve, forte, fatal), destruição, paredes e queda (Protótipo 10).
 7. **[51–59]** Status da IA, seleção e persistência do rival, equipes e funcionamento do rubber banding.
 8. **[72–74]** Estrutura das quatro peças cosméticas: compatibilidade, montagem, cores por peça × Sistema B. Hitboxes, padronização de massa e altitude, e aplicação global das configurações do Protótipo 07 (os atributos foram superados em 10/10/2026).
-9. **[91–97]** Perspectivas de câmera, instrumentos de navegação e seus comportamentos de alternância (Protótipo 12).
+9. **[91–98]** ~~Perspectivas de câmera, instrumentos de navegação e alternância~~: **decididos pelo Protótipo 12 V2 (11/10/2026)**. Ainda pendentes: integração em `src/game` (requer autorização), câmera e HUD na eliminação (P10) e HUD de equipe [51].
 10. **[101–102]** Formatos específicos da configuração copiável, documentação de protótipos e ferramentas de telemetria/seed.
 11. **[6,76,80]** Progressão/recompensas/desbloqueios: deliberadamente adiados.
 12. **[104]** GitHub Pages: publicação atualmente não confirmada; não afirmar que o endereço previsto permite jogar.
-13. **[61–70]** Pistas: física 3D, contato, voo e pouso (Protótipo 08) e circuito de referência (Protótipo 09), seguidos do gate de jogabilidade. Nova suspensão: valores finais pendentes; o quique só é substituído com aprovação expressa.
+13. **[61–70]** Pistas: física 3D, contato, voo e pouso (Protótipo 08) e circuito de referência (Protótipo 09), seguidos do gate de jogabilidade. Contato A sem quique periódico e controles aéreos da revisão 4 aprovados no P08 em 11/10/2026; integração no jogo pendente. Isso não aprova uma suspensão spring-damper nem resolve ambiguidades anteriores do Perfil C.
 14. **[18,19,51–59,67]** Checkpoints, IA e equipes: questões organizadas no [roadmap](planning/2026-10-10-prototype-roadmap.md); nenhuma regra detalhada aprovada.
 
 **Alterações de gameplay e visuais efetuadas nesta etapa:** nenhuma. Este documento registra decisões e lacunas para prototipação futura.
