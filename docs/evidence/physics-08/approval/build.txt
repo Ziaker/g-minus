@@ -1,0 +1,21 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> g-minus@0.1.0 build
+> tsc --noEmit && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 26 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                   22.07 kB │ gzip:   4.79 kB
+dist/prototypes/03_neo_metropolis_visual.html     34.14 kB │ gzip:  12.84 kB
+dist/prototypes/07_pregame_physics_options.html   57.27 kB │ gzip:  14.98 kB
+dist/prototypes/04_craft_vfx.html                 67.91 kB │ gzip:  14.92 kB
+dist/prototypes/05_craft_geometry_lab.html       105.74 kB │ gzip:  35.61 kB
+dist/prototypes/06_craft_paint_lab.html          123.11 kB │ gzip:  41.54 kB
+dist/prototypes/04_craft_vfx_v2.html             142.37 kB │ gzip:  48.66 kB
+dist/prototypes/01_steering_profiles.html        197.10 kB │ gzip:  53.78 kB
+dist/assets/main-B_8Z9u3W.js                      56.10 kB │ gzip:  15.51 kB │ map:   179.39 kB
+dist/assets/three-CAfk-unF.js                    487.30 kB │ gzip: 122.95 kB │ map: 1,958.42 kB
+✓ built in 1.29s

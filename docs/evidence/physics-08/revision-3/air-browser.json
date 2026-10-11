@@ -1,0 +1,1067 @@
+{
+  "browser": "153.0.8010.0",
+  "errors": [],
+  "before": {
+    "mode": "A",
+    "p": [
+      -100,
+      180,
+      180
+    ],
+    "v": [
+      0,
+      -85,
+      180
+    ],
+    "up": [
+      1,
+      0,
+      0
+    ],
+    "f": [
+      0,
+      0,
+      1
+    ],
+    "normal": [
+      0,
+      1,
+      0
+    ],
+    "driver": {
+      "x": 0,
+      "z": 0,
+      "y": 0,
+      "yaw": 0,
+      "yawRate": 0,
+      "vx": 0,
+      "vz": 42,
+      "speed": 42,
+      "slip": 0,
+      "drift": false,
+      "slide": false,
+      "driftAngle": 0,
+      "driftTime": 0,
+      "roll": 0,
+      "pitch": 0,
+      "steerFiltered": 0,
+      "verticalVelocity": 0,
+      "shield": 100,
+      "boost": 0,
+      "boostFree": false,
+      "sideTime": 0,
+      "sideDuration": 0.31,
+      "sideDir": 0,
+      "isAirborne": false,
+      "onTrack": true
+    },
+    "time": 0,
+    "tick": 0,
+    "seed": 8,
+    "contact": false,
+    "event": "VOO",
+    "reason": "reset explícito",
+    "zone": 0,
+    "landings": 0,
+    "detachments": 0,
+    "impact": 0,
+    "lastImpact": 0,
+    "airTime": 0,
+    "magnetic": 0,
+    "suspension": 0,
+    "assist": 0,
+    "correction": 0,
+    "slip": 0,
+    "distance": 2.1,
+    "orientationError": 0,
+    "collisions": 0,
+    "stopped": false,
+    "trace": [],
+    "boost": 0,
+    "energy": 100,
+    "landingBonus": 0
+  },
+  "recovered": {
+    "mode": "A",
+    "p": [
+      -95.88042193143444,
+      282.90522174688886,
+      1341.9890354429476
+    ],
+    "v": [
+      0.06954697768946455,
+      120,
+      599.9999959693482
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "f": [
+      0,
+      0,
+      1
+    ],
+    "normal": [
+      0,
+      1,
+      0
+    ],
+    "driver": {
+      "x": -0.0005800998204541245,
+      "z": 5,
+      "y": 0,
+      "yaw": 0,
+      "yawRate": 0,
+      "vx": -0.06961197845449495,
+      "vz": 600,
+      "speed": 600.0000040381897,
+      "slip": -0.06961197845449495,
+      "drift": false,
+      "slide": false,
+      "driftAngle": -0.00011601996357025756,
+      "driftTime": 0,
+      "roll": 0,
+      "pitch": 1.3089969389957472,
+      "steerFiltered": 0,
+      "verticalVelocity": 120,
+      "shield": 77.00000000000136,
+      "boost": 0.40000000000000635,
+      "boostFree": false,
+      "sideTime": 0,
+      "sideDuration": 0.31,
+      "sideDir": 0,
+      "isAirborne": true,
+      "onTrack": false,
+      "tapSteerRemaining": 0,
+      "tapSteerDir": 0,
+      "tapThrottleRemaining": 0,
+      "tapStrafeRemaining": 0,
+      "tapStrafeDir": 0
+    },
+    "time": 2,
+    "tick": 240,
+    "seed": 8,
+    "contact": false,
+    "event": "VOO",
+    "reason": "reset explícito",
+    "zone": 0,
+    "landings": 0,
+    "detachments": 0,
+    "impact": 0,
+    "lastImpact": 0,
+    "airTime": 1.9999999999999953,
+    "magnetic": 0,
+    "suspension": 0,
+    "assist": 0,
+    "correction": 0,
+    "slip": -0.06961197845449495,
+    "distance": null,
+    "orientationError": 0,
+    "collisions": 0,
+    "stopped": false,
+    "trace": [
+      {
+        "tick": 12,
+        "p": [
+          -100.04447382268083,
+          172.58071695049284,
+          225.14757572480795
+        ],
+        "speed": 473.4155365984662,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 24,
+        "p": [
+          -100.21187642849797,
+          166.79444286540118,
+          274.0543986164559
+        ],
+        "speed": 508.6965755269401,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 36,
+        "p": [
+          -100.4005152346134,
+          162.28304521417778,
+          326.62868588021684
+        ],
+        "speed": 543.6497927285051,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 48,
+        "p": [
+          -100.40415592082017,
+          158.8864107013235,
+          382.7339628970475
+        ],
+        "speed": 577.4738555446602,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 60,
+        "p": [
+          -100.05275220591025,
+          156.5947010113814,
+          442.0108745526237
+        ],
+        "speed": 600.2541986494732,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 72,
+        "p": [
+          -99.32990444048596,
+          155.5730168359686,
+          502.0064481191424
+        ],
+        "speed": 600.0113791972946,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 84,
+        "p": [
+          -98.40181507929655,
+          156.06484343330146,
+          561.9992656655136
+        ],
+        "speed": 600.1313741019306,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 96,
+        "p": [
+          -97.59718981350393,
+          158.28902688287735,
+          621.9938148822238
+        ],
+        "speed": 600.7838927564665,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 108,
+        "p": [
+          -97.04693182776236,
+          162.41000408350902,
+          681.991260621905
+        ],
+        "speed": 602.1067163921102,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 120,
+        "p": [
+          -96.67183693468536,
+          168.55387029358792,
+          741.9900740876175
+        ],
+        "speed": 604.1724724886143,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 132,
+        "p": [
+          -96.41555151653473,
+          176.75874948419678,
+          801.9895201812293
+        ],
+        "speed": 606.9363098168163,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 144,
+        "p": [
+          -96.24042305211907,
+          187.02503582315722,
+          861.9892615390241
+        ],
+        "speed": 610.384200091515,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 156,
+        "p": [
+          -96.12074696429569,
+          198.90522174688883,
+          921.9891407577969
+        ],
+        "speed": 611.8823416311341,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 168,
+        "p": [
+          -96.03896334239168,
+          210.90522174688883,
+          981.989084352905
+        ],
+        "speed": 611.8823416311341,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 180,
+        "p": [
+          -95.98307397707765,
+          222.90522174688883,
+          1041.9890580113035
+        ],
+        "speed": 611.8823416311342,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 192,
+        "p": [
+          -95.94488009277617,
+          234.90522174688883,
+          1101.9890457094277
+        ],
+        "speed": 611.8823416311342,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 204,
+        "p": [
+          -95.91877896184879,
+          246.90522174688883,
+          1161.9890399642659
+        ],
+        "speed": 611.8823416311343,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 216,
+        "p": [
+          -95.9009418219947,
+          258.90522174688886,
+          1221.9890372811835
+        ],
+        "speed": 611.8823416311343,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 228,
+        "p": [
+          -95.88875217035391,
+          270.90522174688886,
+          1281.98903602814
+        ],
+        "speed": 611.8823416311343,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 240,
+        "p": [
+          -95.88042193143444,
+          282.90522174688886,
+          1341.9890354429476
+        ],
+        "speed": 611.8823416311342,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      }
+    ],
+    "boost": 0.40000000000000635,
+    "energy": 77.00000000000136,
+    "landingBonus": 0,
+    "airThrust": 260,
+    "levelError": 0,
+    "airHeading": [
+      0,
+      0,
+      1
+    ],
+    "airAim": [
+      0,
+      0.9659258262890684,
+      0.2588190451025208
+    ]
+  },
+  "neutral": {
+    "mode": "A",
+    "p": [
+      -95.86293362612412,
+      424.6734135736411,
+      2359.2023727824885
+    ],
+    "v": [
+      0.00003787937812048298,
+      -11.260415946377734,
+      470.6056014447857
+    ],
+    "up": [
+      0,
+      1,
+      0
+    ],
+    "f": [
+      0,
+      0,
+      1
+    ],
+    "normal": [
+      0,
+      1,
+      0
+    ],
+    "driver": {
+      "x": -3.1566148433735813e-7,
+      "z": 3.921713345373214,
+      "y": 0,
+      "yaw": 0,
+      "yawRate": 0,
+      "vx": -0.00003787937812048298,
+      "vz": 470.6056014447857,
+      "speed": 470.60560144478717,
+      "slip": -0.00003787937812048298,
+      "drift": false,
+      "slide": false,
+      "driftAngle": -8.049070815177523e-8,
+      "driftTime": 0,
+      "roll": 0,
+      "pitch": 0.003244679011785266,
+      "steerFiltered": 0,
+      "verticalVelocity": -11.260415946377734,
+      "shield": 75.20000000000161,
+      "boost": 0,
+      "boostFree": false,
+      "sideTime": 0,
+      "sideDuration": 0.31,
+      "sideDir": 0,
+      "isAirborne": true,
+      "onTrack": false,
+      "tapSteerRemaining": 0,
+      "tapSteerDir": 0,
+      "tapThrottleRemaining": 0,
+      "tapStrafeRemaining": 0,
+      "tapStrafeDir": 0
+    },
+    "time": 4,
+    "tick": 480,
+    "seed": 8,
+    "contact": false,
+    "event": "VOO",
+    "reason": "reset explícito",
+    "zone": 0,
+    "landings": 0,
+    "detachments": 0,
+    "impact": 0,
+    "lastImpact": 0,
+    "airTime": 3.9999999999999885,
+    "magnetic": 0,
+    "suspension": 0,
+    "assist": 0,
+    "correction": 0,
+    "slip": -0.00003787937812048298,
+    "distance": null,
+    "orientationError": 0,
+    "collisions": 0,
+    "stopped": false,
+    "trace": [
+      {
+        "tick": 12,
+        "p": [
+          -100.04447382268083,
+          172.58071695049284,
+          225.14757572480795
+        ],
+        "speed": 473.4155365984662,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 24,
+        "p": [
+          -100.21187642849797,
+          166.79444286540118,
+          274.0543986164559
+        ],
+        "speed": 508.6965755269401,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 36,
+        "p": [
+          -100.4005152346134,
+          162.28304521417778,
+          326.62868588021684
+        ],
+        "speed": 543.6497927285051,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 48,
+        "p": [
+          -100.40415592082017,
+          158.8864107013235,
+          382.7339628970475
+        ],
+        "speed": 577.4738555446602,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 60,
+        "p": [
+          -100.05275220591025,
+          156.5947010113814,
+          442.0108745526237
+        ],
+        "speed": 600.2541986494732,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 72,
+        "p": [
+          -99.32990444048596,
+          155.5730168359686,
+          502.0064481191424
+        ],
+        "speed": 600.0113791972946,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 84,
+        "p": [
+          -98.40181507929655,
+          156.06484343330146,
+          561.9992656655136
+        ],
+        "speed": 600.1313741019306,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 96,
+        "p": [
+          -97.59718981350393,
+          158.28902688287735,
+          621.9938148822238
+        ],
+        "speed": 600.7838927564665,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 108,
+        "p": [
+          -97.04693182776236,
+          162.41000408350902,
+          681.991260621905
+        ],
+        "speed": 602.1067163921102,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 120,
+        "p": [
+          -96.67183693468536,
+          168.55387029358792,
+          741.9900740876175
+        ],
+        "speed": 604.1724724886143,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 132,
+        "p": [
+          -96.41555151653473,
+          176.75874948419678,
+          801.9895201812293
+        ],
+        "speed": 606.9363098168163,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 144,
+        "p": [
+          -96.24042305211907,
+          187.02503582315722,
+          861.9892615390241
+        ],
+        "speed": 610.384200091515,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 156,
+        "p": [
+          -96.12074696429569,
+          198.90522174688883,
+          921.9891407577969
+        ],
+        "speed": 611.8823416311341,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 168,
+        "p": [
+          -96.03896334239168,
+          210.90522174688883,
+          981.989084352905
+        ],
+        "speed": 611.8823416311341,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 180,
+        "p": [
+          -95.98307397707765,
+          222.90522174688883,
+          1041.9890580113035
+        ],
+        "speed": 611.8823416311342,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 192,
+        "p": [
+          -95.94488009277617,
+          234.90522174688883,
+          1101.9890457094277
+        ],
+        "speed": 611.8823416311342,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 204,
+        "p": [
+          -95.91877896184879,
+          246.90522174688883,
+          1161.9890399642659
+        ],
+        "speed": 611.8823416311343,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 216,
+        "p": [
+          -95.9009418219947,
+          258.90522174688886,
+          1221.9890372811835
+        ],
+        "speed": 611.8823416311343,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 228,
+        "p": [
+          -95.88875217035391,
+          270.90522174688886,
+          1281.98903602814
+        ],
+        "speed": 611.8823416311343,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 240,
+        "p": [
+          -95.88042193143444,
+          282.90522174688886,
+          1341.9890354429476
+        ],
+        "speed": 611.8823416311342,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 252,
+        "p": [
+          -95.87474523938265,
+          294.90522174688886,
+          1401.9890351710567
+        ],
+        "speed": 611.8823416311342,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 264,
+        "p": [
+          -95.87091739949872,
+          306.90522174688886,
+          1461.98903504735
+        ],
+        "speed": 611.8823416311342,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 276,
+        "p": [
+          -95.8683568985102,
+          318.90522174688886,
+          1521.9890349919756
+        ],
+        "speed": 611.8823416311342,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 288,
+        "p": [
+          -95.86665213651489,
+          330.90522174688886,
+          1581.9890349674238
+        ],
+        "speed": 611.8823416311343,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 300,
+        "p": [
+          -95.8655003341233,
+          342.66511534892186,
+          1632.7454815147466
+        ],
+        "speed": 511.43899101751765,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 312,
+        "p": [
+          -95.86470433467605,
+          353.8382424900581,
+          1682.4713212378142
+        ],
+        "speed": 508.1413673086779,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 324,
+        "p": [
+          -95.86415422718828,
+          364.344012885129,
+          1732.0045221542773
+        ],
+        "speed": 504.85588900347864,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 336,
+        "p": [
+          -95.86377405324576,
+          374.1220896939328,
+          1781.3532345063095
+        ],
+        "speed": 501.58845188479,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 348,
+        "p": [
+          -95.8635113187261,
+          383.12758763013596,
+          1830.5179404877179
+        ],
+        "speed": 498.3522130586428,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 360,
+        "p": [
+          -95.86332974545104,
+          391.32722969217866,
+          1879.4986998916656
+        ],
+        "speed": 495.182413962058,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 372,
+        "p": [
+          -95.863204261924,
+          398.69528792538136,
+          1928.2955724918863
+        ],
+        "speed": 492.0929116640972,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 384,
+        "p": [
+          -95.86311754147707,
+          405.1817463307436,
+          1976.90861804269
+        ],
+        "speed": 489.0744597417979,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 396,
+        "p": [
+          -95.86305760981837,
+          410.76820473610576,
+          2025.3378962789689
+        ],
+        "speed": 486.21142992364815,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 408,
+        "p": [
+          -95.86301619163108,
+          415.45466314146796,
+          2073.583466916204
+        ],
+        "speed": 483.50657615850275,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 420,
+        "p": [
+          -95.86298756792407,
+          419.24112154683013,
+          2121.645389650474
+        ],
+        "speed": 480.96256008726033,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 432,
+        "p": [
+          -95.86296778635814,
+          422.1275799521923,
+          2169.5237241584555
+        ],
+        "speed": 478.581939565848,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 444,
+        "p": [
+          -95.86295411551001,
+          424.11403835755453,
+          2217.2185300974365
+        ],
+        "speed": 476.36715719182814,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 456,
+        "p": [
+          -95.86294466771963,
+          425.2004967629167,
+          2264.7298671053163
+        ],
+        "speed": 474.3205289377005,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 468,
+        "p": [
+          -95.86293813844347,
+          425.3869551682789,
+          2312.0577948006176
+        ],
+        "speed": 472.44423299962403,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      },
+      {
+        "tick": 480,
+        "p": [
+          -95.86293362612412,
+          424.6734135736411,
+          2359.2023727824885
+        ],
+        "speed": 470.74029897438714,
+        "height": null,
+        "contact": false,
+        "force": 0,
+        "assist": 0
+      }
+    ],
+    "boost": 0,
+    "energy": 75.20000000000161,
+    "landingBonus": 0,
+    "airThrust": 0,
+    "levelError": 0,
+    "airHeading": [
+      0,
+      0,
+      1
+    ],
+    "airAim": [
+      0,
+      0.0032446733184895815,
+      0.9999947360336735
+    ]
+  },
+  "checks": [
+    "air toggle and thrust slider",
+    "actual W + Down + A key recovery",
+    "nose up and positive vertical velocity",
+    "neutral auto-level and gravity after boost expires"
+  ],
+  "status": "EM AVALIAÇÃO — FÍSICA 3D NÃO APROVADA"
+}

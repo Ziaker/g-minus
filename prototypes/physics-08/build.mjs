@@ -1,0 +1,20 @@
+import './extract-profile.mjs';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
+const read=f=>fs.readFileSync(path.join(root,f),'utf8');
+const between=(s,a,b)=>{const i=s.indexOf(a),j=s.indexOf(b,i);if(i<0||j<i)throw Error(a);return s.slice(i,j);};
+const p05=read('prototypes/05_craft_geometry_lab.html'),p06=read('prototypes/06_craft_paint_lab.html'),vfx=read('prototypes/04_craft_vfx_v2.html');
+const geometry=between(p05,'/* @gminus-approved-craft-geometry:begin v1 */','/* @gminus-approved-craft-geometry:end v1 */')+'/* @gminus-approved-craft-geometry:end v1 */';
+const paint=between(p06,"const SYSTEMS=['A','B','C']",'// cores-base editáveis');
+const renderer=between(vfx,"const canvas=document.getElementById('view');",'/* VFX GEOMETRY');
+const fxRender=between(vfx,'const FIXED_FX_VS=', 'function tiles(');
+const helpers=read('prototypes/vfx-atelier/vfx-state.js').split('\n').filter(x=>/^function (eventParams|eventAt|simulatedPose|anchorData|cachedContact|contactAnchor)\(|^const CONTACT_CACHE=/.test(x)).join('\n');
+const baseline=JSON.parse(read('docs/decisions/2026-10-10-prototype-04-v2-vfx-approved-baseline.json')).effects;
+const ref=JSON.parse(read('docs/decisions/2026-10-10-prototype-01-profile-c-export.json'));
+const script=[geometry,paint,read('prototypes/physics-08/profile-c.generated.js'),read('prototypes/physics-08/core.js'),`const REFERENCE_EXPORT=${JSON.stringify(ref)}; const VFX_BASELINE=${JSON.stringify(baseline)};`,read('prototypes/physics-08/state.js'),renderer,helpers,read('prototypes/vfx-atelier/vfx-effects.js'),fxRender,read('prototypes/physics-08/ui.js')].join('\n');
+new vm.Script(script);
+const html=read('prototypes/physics-08/template.html').replace('/* EMBED */',script),dest=path.join(root,'prototypes/08_3d_physics_lab.html');
+if(process.argv.includes('--check')){if(fs.readFileSync(dest,'utf8')!==html)throw Error('HTML desatualizado');console.log('P08 HTML idêntico às fontes');}else{fs.writeFileSync(dest,html);console.log('P08 standalone:',Buffer.byteLength(html),'bytes');}

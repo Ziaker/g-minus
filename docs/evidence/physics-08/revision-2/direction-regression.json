@@ -1,0 +1,30 @@
+{
+  "browser": "153.0.8010.0",
+  "results": [
+    {
+      "key": "ArrowLeft",
+      "mode": "A",
+      "screenDisplacement": -0.6920637859237813,
+      "expected": "left"
+    },
+    {
+      "key": "ArrowRight",
+      "mode": "A",
+      "screenDisplacement": 0.6920637859237813,
+      "expected": "right"
+    },
+    {
+      "key": "KeyZ",
+      "mode": "A",
+      "screenDisplacement": -4.686798141666743,
+      "expected": "left"
+    },
+    {
+      "key": "KeyC",
+      "mode": "A",
+      "screenDisplacement": 4.686798141666743,
+      "expected": "right"
+    }
+  ],
+  "errors": []
+}
