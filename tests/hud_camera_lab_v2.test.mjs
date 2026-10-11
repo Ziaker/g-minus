@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import path from 'node:path';
+import {pathToFileURL} from 'node:url';
 import crypto from 'node:crypto';
 const repo=path.resolve(import.meta.dirname,'..');
 const FILE=path.join(repo,'prototypes/12_hud_camera_lab_v2.html');
@@ -238,7 +239,7 @@ test('15 · alternância rápida de HUD/câmera/vista/quadro sem regressão',()=
  assert.equal(A.digest(),digest);assert.equal(A.tick(),tick);assert.equal(gl.stats().buffers,plateau);for(const c of Object.values(A.cameras()))assert.ok([...c.eye,...c.up,c.fov].every(Number.isFinite));A.dispose();});
 
 test('16 · HTML gerado corresponde às fontes modulares e exibe o status aprovado',async()=>{
- const {buildLab}=await import(path.join(repo,'prototypes/hud-camera-lab/build.mjs'));assert.equal(buildLab(),html,'rode node prototypes/hud-camera-lab/build.mjs');
+ const {buildLab}=await import(pathToFileURL(path.join(repo,'prototypes/hud-camera-lab/build.mjs')).href);assert.equal(buildLab(),html,'rode node prototypes/hud-camera-lab/build.mjs');
  assert.match(html,/P12 V2 APROVADO · 11\/10\/2026/);assert.ok(!/Math\.random\(/.test(html.split('<script>')[1]),'sem aleatoriedade sem semente');
  const spec=fs.readFileSync(path.join(repo,'docs/specs/12_hud_camera_v2_spec.md'),'utf8');assert.match(spec,/APROVADO PELO RESPONSÁVEL/);assert.match(spec,/130 %/);assert.match(spec,/0,35/);});
 
