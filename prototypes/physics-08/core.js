@@ -88,8 +88,8 @@ function collide(course,old,s,radius=1){
  // Resolve initial overlap locally; never search a remote station or move along a spline.
  for(const t of course.candidates(s.p,radius+1)){const q=closest(s.p,t.a,t.b,t.c),d=V.sub(s.p,q),l=V.len(d);if(l<radius&&l>1e-7){const n=V.mul(d,1/l);s.p=V.add(s.p,V.mul(n,radius-l+.001));const vn=V.dot(s.v,n);if(vn<0)s.v=V.sub(s.v,V.mul(n,vn));}}
 }
-const AIR_PARAMS={levelRate:['Autoestabilização',30,240,120,5,'°/s'],pitchRate:['Controle de pitch aéreo',30,120,80,5,'°/s'],boostThrust:['Empuxo aéreo do boost',120,400,260,10,'u/s²'],boostTurn:['Direção durante boost aéreo',1,2.5,1.6,.1,'×'],maxClimb:['Limite de subida',50,180,120,5,'u/s']};
-function airDefaults(){return{enabled:true,...Object.fromEntries(Object.entries(AIR_PARAMS).map(([k,r])=>[k,r[3]]))};}
+const AIR_PARAMS={levelRate:['Autoestabilização',30,240,120,5,'°/s'],pitchRate:['Controle de pitch aéreo',30,120,80,5,'°/s'],boostThrust:['Empuxo aéreo do boost',120,400,260,10,'u/s²'],boostTurn:['Direção durante boost aéreo',1,2.5,1.6,.1,'×'],maxClimb:['Limite de subida',50,180,120,5,'u/s'],boostControl:['Controle aéreo extra com boost',1,1.6,1.3,.05,'×']};
+function airDefaults(){return{enabled:true,downToDive:true,...Object.fromEntries(Object.entries(AIR_PARAMS).map(([k,r])=>[k,r[3]]))};}
 function levelAirFrame(s,dt,rate){
  const worldUp=[0,1,0],horizontal=project(s.f,worldUp);if(V.len(horizontal)>.05)s.airHeading=V.norm(horizontal);
  const targetF=s.airHeading||[0,0,1],axis=V.cross(s.f,targetF),angle=Math.acos(clamp(V.dot(s.f,targetF),-1,1)),limit=rate*Math.PI/180*dt;
@@ -101,10 +101,11 @@ function levelAirFrame(s,dt,rate){
 }
 function noseDirection(s){return V.norm(rotate(s.f,V.norm(V.cross(s.f,s.up)),s.driver.pitch));}
 function assistedFlight(s,d,profile,keys,air,dt){
- const pull=keys.has('KeyS')||keys.has('ArrowDown'),dive=keys.has('KeyW')||keys.has('ArrowUp');
- // Pull-up takes precedence over W, allowing W + Down + boost to recover altitude.
+ const pull=air.downToDive?keys.has('ArrowUp'):keys.has('KeyS')||keys.has('ArrowDown');
+ const dive=air.downToDive?keys.has('KeyS')||keys.has('ArrowDown')||keys.has('KeyW'):keys.has('KeyW')||keys.has('ArrowUp');
+ // The imported v2-v4 mode retains Down/S to pull up; new v5 uses Down/S to dive.
  const pitchInput=pull?1:dive?-1:0;
- if(pitchInput)d.pitch=clamp(d.pitch+pitchInput*air.pitchRate*Math.PI/180*dt,-Math.PI/3,Math.PI*5/12);
+ if(pitchInput)d.pitch=clamp(d.pitch+pitchInput*air.pitchRate*(d.boost>0?air.boostControl||1:1)*Math.PI/180*dt,-Math.PI/3,Math.PI*5/12);
  else d.pitch*=Math.exp(-3*dt);
  if(!['ArrowLeft','ArrowRight','KeyZ','KeyC','KeyQ','KeyE'].some(k=>keys.has(k)))d.roll*=Math.exp(-5*dt);
  const gravity=d.onTrack?(profile.airborneGravity??90):(profile.fallGravity??90),speedNorm=d.speed/180;
@@ -113,7 +114,10 @@ function assistedFlight(s,d,profile,keys,air,dt){
  s.airAim=noseDirection(s);
  s.airThrust=d.boost>0?air.boostThrust:0;
  if(s.airThrust)s.v=V.add(s.v,V.mul(s.airAim,s.airThrust*dt));
- s.v[1]=clamp(s.v[1],-(profile.airDiveMaxSpeed||85),air.maxClimb);
+ // Ease the descent allowance back after boost, avoiding a one-frame speed snap.
+ s.diveAllowance=d.boost>0?air.boostControl||1:Math.max(1,(s.diveAllowance||1)-((air.boostControl||1)-1)*dt);
+ s.diveCap=(profile.airDiveMaxSpeed||85)*s.diveAllowance;
+ s.v[1]=clamp(s.v[1],-s.diveCap,air.maxClimb);
  const horizontal=Math.hypot(s.v[0],s.v[2]),cap=d.boost>0?profile.boostTopSpeed:profile.topSpeed;if(horizontal>cap){s.v[0]*=cap/horizontal;s.v[2]*=cap/horizontal;}
  d.verticalVelocity=s.v[1];
 }
@@ -135,17 +139,18 @@ function step(course,s,cfg,input={},profile=P01Profile.BASELINE,options={}){
  const vn=V.dot(s.v,baseN);d.x=0;d.z=0;d.yaw=0;d.vx=V.dot(s.v,baseR);d.vz=V.dot(s.v,baseF);d.speed=Math.hypot(d.vx,d.vz);d.isAirborne=!s.contact||landingNow;d.onTrack=!!h;
  const keys=new Set(input.keys||[]);
  // Programmed tests use the same key semantics as the P01 (positive steer/strafe = right).
- if(input.throttle)keys.add('KeyX');if(input.steer>0)keys.add('ArrowRight');if(input.steer<0)keys.add('ArrowLeft');if(input.strafe>0)keys.add('KeyC');if(input.strafe<0)keys.add('KeyZ');if(input.brake)keys.add('KeyS');if(input.drift)keys.add('Space');if(input.pitch>0)keys.add('ArrowDown');if(input.pitch<0)keys.add('ArrowUp');
+ if(input.throttle)keys.add('KeyX');if(input.steer>0)keys.add('ArrowRight');if(input.steer<0)keys.add('ArrowLeft');if(input.strafe>0)keys.add('KeyC');if(input.strafe<0)keys.add('KeyZ');if(input.brake)keys.add('KeyS');if(input.drift)keys.add('Space');if(input.pitch>0)keys.add(air.downToDive?'ArrowUp':'ArrowDown');if(input.pitch<0)keys.add(air.downToDive?'ArrowDown':'ArrowUp');
  if(input.boost)P01Profile.activateBoost(d,profile);
  const activeAir=air.enabled&&!s.contact,driveKeys=new Set(keys);
- if(activeAir){driveKeys.delete('KeyS');driveKeys.delete('ArrowDown');}
- const driveProfile=activeAir&&d.boost>0?{...profile,airSteerAuthority:(profile.airSteerAuthority||1.1)*air.boostTurn}:profile;
+ if(activeAir){driveKeys.delete('KeyS');driveKeys.delete('ArrowDown');if(air.downToDive)driveKeys.delete('ArrowUp');}
+ const driveProfile=activeAir&&d.boost>0?{...profile,airSteerAuthority:(profile.airSteerAuthority||1.1)*air.boostTurn*(air.boostControl||1),airStrafeThrust:(profile.airStrafeThrust||110)*(air.boostControl||1)}:profile;
  P01Profile.drive(d,driveProfile,driveKeys,dt,{...options,edges:input.edges||[]});
  s.f=V.norm(V.add(V.mul(baseF,Math.cos(d.yaw)),V.mul(baseR,Math.sin(d.yaw))));
  s.v=V.add(V.add(V.mul(baseR,d.vx),V.mul(baseF,d.vz)),V.mul(baseN,s.contact&&!landingNow?0:vn));
  if(activeAir)assistedFlight(s,d,profile,keys,air,dt);
  else if(!s.contact||landingNow){d.verticalVelocity=s.v[1];d.y=s.p[1];P01Profile.fly(d,profile,keys,dt,0);s.v[1]=d.verticalVelocity;}
  else{const pitchTarget=clamp(-(keys.has('KeyX')||keys.has('KeyW')||keys.has('ArrowUp')?.07:-.03)*(profile.pitchSensitivity||1)+(keys.has('KeyS')||keys.has('ArrowDown')||(keys.has('Space')&&!keys.has('ArrowLeft')&&!keys.has('ArrowRight'))?.16*(profile.pitchSensitivity||1):0),-.60,.60);d.pitch+=(pitchTarget-d.pitch)*(1-Math.exp(-(profile.pitchResponse||15.5)*dt));s.suspension=-vn/dt;}
+ if(!activeAir){s.diveAllowance=1;s.diveCap=profile.airDiveMaxSpeed||85;}
  let motionVelocity=s.v.slice();
  if(landingNow){s.landings++;const landingVelocity=V.dot(s.v,n);s.impact=Math.max(0,-landingVelocity);s.lastImpact=s.impact;const before=d.speed;d.isAirborne=false;d.onTrack=true;P01Profile.land(d,profile,landingVelocity,landingRoadPitch);s.landingBonus=d.speed-before;s.v=project(V.add(V.mul(baseR,d.vx),V.mul(baseF,d.vz)),n);motionVelocity=project(motionVelocity,n);}
  s.p=V.add(s.p,V.mul(motionVelocity,dt));
@@ -157,12 +162,14 @@ function step(course,s,cfg,input={},profile=P01Profile.BASELINE,options={}){
  if(s.p[1]<-500){s.stopped=true;s.event='QUEDA — R PARA RESET';}
  if(s.tick%12===0){s.trace.push({tick:s.tick,p:s.p.slice(),speed:V.len(s.v),height:s.distance,contact:s.contact,force:s.suspension,assist:0});if(s.trace.length>600)s.trace.shift();}
 }
-function newConfig(){return{schema:'gminus.physics08',version:3,status:STATUS,approval:'none',mode:'A',ship:'falcon',model:'A',zone:0,seed:8,startSpeed:42,camera:'chase',params:defaults(),profile:structuredClone(P01Profile.BASELINE),naturalStability:true,regeneration:false,air:airDefaults()};}
-function parseConfig(raw){const c=typeof raw==='string'?JSON.parse(raw):structuredClone(raw),base=newConfig();if(c.status==='EM AVALIAÇÃO — FÍSICA 3D NÃO APROVADA')c.status=STATUS;function keys(o,k){if(!o||typeof o!=='object'||Array.isArray(o)||Object.keys(o).sort().join('|')!==k.slice().sort().join('|'))throw Error('Chaves inválidas');}
- if(c.version===2){keys(c,Object.keys(base).filter(k=>k!=='air'));c.version=3;c.air={...airDefaults(),enabled:false};}
- if(c.version!==3)throw Error('JSON v3 exigido (v2 aceito sem assistência nova)');keys(c,Object.keys(base));if(c.schema!==base.schema||c.status!==STATUS||c.approval!=='none'||c.mode!=='A')throw Error('Identificador/status inválido');if(!['falcon','fox','goose'].includes(c.ship)||!['A','B','C'].includes(c.model)||!['chase','side','rear','inspect'].includes(c.camera)||typeof c.naturalStability!=='boolean'||typeof c.regeneration!=='boolean')throw Error('Seleção inválida');
+function newConfig(){return{schema:'gminus.physics08',version:5,status:STATUS,approval:'none',mode:'A',ship:'falcon',model:'A',zone:0,seed:8,startSpeed:42,camera:'chase',params:defaults(),profile:structuredClone(P01Profile.BASELINE),naturalStability:true,regeneration:false,air:airDefaults()};}
+function parseConfig(raw){const c=typeof raw==='string'?JSON.parse(raw):structuredClone(raw),base=newConfig();if(c.version===5&&c.status==='EM AVALIAÇÃO — CONTROLE AÉREO +30% NÃO APROVADO')c.status=STATUS;function keys(o,k){if(!o||typeof o!=='object'||Array.isArray(o)||Object.keys(o).sort().join('|')!==k.slice().sort().join('|'))throw Error('Chaves inválidas');}
+ if(c.version===2){keys(c,Object.keys(base).filter(k=>k!=='air'));c.air={...airDefaults(),enabled:false};delete c.air.boostControl;delete c.air.downToDive;}
+ if(c.version===2||c.version===3){keys(c.air,['enabled',...Object.keys(AIR_PARAMS).filter(k=>k!=='boostControl')]);c.air.boostControl=1;}
+ if(c.version===2||c.version===3||c.version===4){keys(c.air,['enabled',...Object.keys(AIR_PARAMS)]);c.air.downToDive=false;c.version=5;c.status=STATUS;}
+ if(c.version!==5)throw Error('JSON v5 exigido (v2-v4 aceitos com comandos anteriores)');keys(c,Object.keys(base));if(c.schema!==base.schema||c.status!==STATUS||c.approval!=='none'||c.mode!=='A')throw Error('Identificador/status inválido');if(!['falcon','fox','goose'].includes(c.ship)||!['A','B','C'].includes(c.model)||!['chase','side','rear','inspect'].includes(c.camera)||typeof c.naturalStability!=='boolean'||typeof c.regeneration!=='boolean')throw Error('Seleção inválida');
  if(!Number.isInteger(c.zone)||c.zone<0||c.zone>9||!Number.isInteger(c.seed)||c.seed<0||c.seed>4294967295||!Number.isFinite(c.startSpeed)||c.startSpeed<0||c.startSpeed>600)throw Error('Cenário inválido');keys(c.params,['A']);keys(c.params.A,ACTIVE.A);for(const k of ACTIVE.A){const v=c.params.A[k],r=PARAMS[k];if(!Number.isFinite(v)||v<r[1]||v>r[2])throw Error('Contato inválido: '+k);}
- keys(c.air,['enabled',...Object.keys(AIR_PARAMS)]);if(typeof c.air.enabled!=='boolean')throw Error('Assistência aérea inválida');for(const [k,r]of Object.entries(AIR_PARAMS)){const v=c.air[k];if(typeof v!=='number'||!Number.isFinite(v)||v<r[1]||v>r[2])throw Error('Controle aéreo inválido: '+k);}
+ keys(c.air,['enabled','downToDive',...Object.keys(AIR_PARAMS)]);if(typeof c.air.enabled!=='boolean'||typeof c.air.downToDive!=='boolean')throw Error('Assistência aérea inválida');for(const [k,r]of Object.entries(AIR_PARAMS)){const v=c.air[k];if(typeof v!=='number'||!Number.isFinite(v)||v<r[1]||v>r[2])throw Error('Controle aéreo inválido: '+k);}
  keys(c.profile,Object.keys(P01Profile.LIMITS));for(const [k,[min,max,step]]of Object.entries(P01Profile.LIMITS)){const v=c.profile[k];if(typeof v!=='number'||!Number.isFinite(v)||v<min||v>max||Math.abs(Math.round((v-min)/step)-(v-min)/step)>1e-3)throw Error('Perfil inválido: '+k);}return c;}
 function scripted(t,seed){const phase=(seed%17)*.01;return{throttle:true,steer:t>2+phase&&t<2.4+phase?1:t>2.4+phase&&t<2.8+phase?-1:0,drift:t>2.2&&t<2.6};}
 return{DT,STATUS,V,PARAMS,ACTIVE,defaults,Course,fresh,step,parseConfig,newConfig,scripted,closest,rotate,transport,profile:P01Profile,noseDirection,AIR_PARAMS,airDefaults,levelAirFrame};

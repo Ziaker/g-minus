@@ -5,6 +5,7 @@
 Aprovação expressa em 11/10/2026: [registro e escopo](../decisions/2026-10-11-prototype-08-physics-approval.md). Revisões e evidências anteriores preservam o estado histórico de avaliação.
 
 > **Atualização de 11/10/2026:** a especificação vigente combina [Revisão 2 — Perfil C + contato A](08_3d_physics_lab_revision2.md) e [Revisão 3 — recuperação aérea](08_3d_physics_lab_revision3.md), conforme escopo confirmado pelo responsável. O conteúdo abaixo preserva o histórico da revisão 1; os três sistemas independentes de pilotagem foram substituídos.
+> **Aprovação posterior:** [revisão 4 — descida com ↓/S + boost e controle aéreo +30%](08_3d_physics_lab_revision4.md), com [decisão e baseline JSON v5](../decisions/2026-10-11-prototype-08-air-control-approval.md). O texto anterior abaixo permanece como histórico; os comandos vigentes constam na revisão 4.
 
 ## Entrega e execução
 
@@ -85,7 +86,7 @@ npm run build
 CHROMIUM_EXECUTABLE=/caminho/chromium PLAYWRIGHT_MODULE=/caminho/playwright node prototypes/physics-08/browser-validation.cjs
 ```
 
-O gerador valida sintaxe e compõe HTML standalone. O build Vite do jogo continua com suas entradas anteriores; o P08 é entregue pelo gerador independente, sem integração ou publicação. Node/Playwright e Chromium são requisitos de validação, não dependências do HTML. Logs em `docs/evidence/physics-08`. Testes verificam malha finita, normais, lacuna, estabilidade em repouso, loop invertido, parede/tubo, voo/pouso, continuidade, colisão rápida, distinção dos modelos, oscilação legada, configuração e determinismo em 30/60/120 cadências. Os testes não cobrem todos os valores extremos ou todas as trajetórias dirigidas.
+O gerador valida sintaxe e compõe HTML standalone. A entrada `prototype08` inclui o HTML independente na distribuição Vite; isso não integra sua física em `src/game`. A publicação no GitHub Pages depende de atualização e verificação do deployment. Node/Playwright e Chromium são requisitos de validação, não dependências do HTML. Logs em `docs/evidence/physics-08`. Testes verificam malha finita, normais, lacuna, estabilidade em repouso, loop invertido, parede/tubo, voo/pouso, continuidade, colisão rápida, distinção dos modelos, oscilação legada, configuração e determinismo em 30/60/120 cadências. Os testes não cobrem todos os valores extremos ou todas as trajetórias dirigidas.
 
 ## O que ainda precisa de brainstorm e avaliação humana
 
