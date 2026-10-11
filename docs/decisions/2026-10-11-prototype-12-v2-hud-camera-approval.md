@@ -280,7 +280,7 @@ Os valores são do responsável e foram mantidos. Medições do laboratório nos
 - **Testes** em `tests/hud_camera_lab_v2.test.mjs`:
   - o teste 17 confere a baseline contra o JSON enviado, o padrão do laboratório, a importação do arquivo enviado, a presença de todas as opções neste catálogo e o registro no GDD;
   - o teste 12 mede o motor de layout na referência neutra.
-- **Integração em `src/game`: pendente.** O jogo principal ainda tem o HUD em DOM e a câmera única do código antigo. Nesta etapa ele não foi alterado: a instrução vigente é não mexer no jogo principal enquanto o Codex desenvolve o P08, e todas as aprovações anteriores (P01, P04 V2, P05, P06) seguem esse padrão. A integração precisa de autorização explícita para alterar `src/game` e deve seguir a seção 6.
+- **Integração em `src/game`: pendente.** O jogo principal ainda tem o HUD em DOM e a câmera única do código antigo. Nesta etapa ele não foi alterado: o P08 foi aprovado em 11/10/2026 (branch `prototype/08-3d-physics`, integração também pendente). A integração exige pedido explícito, deve vir depois da física do P08 e precisa: (a) definir a escala física do jogo (1 u = ? m) antes de exibir km/h; (b) validar a câmera do P12 no voo usando a orientação estabilizada do P08. A integração precisa de autorização explícita para alterar `src/game` e deve seguir a seção 6.
 
 ## 6. Critério de aceite da integração
 

@@ -390,4 +390,4 @@ O build embute, sem alteração e em escopo próprio, o bloco do P05, o resolved
 4. Toggles de Boost A/D/E: a configuração aprovada do P12 os mantém **ligados**. A forma de seleção in-game continua registrada como pendência do 04 V2.
 5. Escudo de adversários e janelas de ataque: **presentes no HUD B**, com o toggle `attackAssist` (ligado na configuração aprovada) e os alcances `bracketRange` e `threatRange` nas configurações.
 6. Aplicação do raio de 130 % do Spin E: **pendente** desde o 04 V2, sem mudança.
-7. Integração em `src/game`: **pendente**. Precisa de autorização para alterar o jogo principal (P08 em desenvolvimento) e deve seguir o critério de aceite do registro.
+7. Integração em `src/game`: **pendente**. Precisa de autorização para alterar o jogo principal (P08 aprovado em 11/10/2026, integração pendente; ver condições no registro de aprovação) e deve seguir o critério de aceite do registro.
