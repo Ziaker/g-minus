@@ -19,6 +19,7 @@ export default defineConfig({
         prototype05: resolve(__dirname, 'prototypes/05_craft_geometry_lab.html'),
         prototype06: resolve(__dirname, 'prototypes/06_craft_paint_lab.html'),
         prototype07: resolve(__dirname, 'prototypes/07_pregame_physics_options.html'),
+        prototype08: resolve(__dirname, 'prototypes/08_3d_physics_lab.html'),
         prototype12V2: resolve(__dirname, 'prototypes/12_hud_camera_lab_v2.html')
       },
       output: {
