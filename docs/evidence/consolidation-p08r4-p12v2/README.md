@@ -47,13 +47,22 @@ O campo `importV3` de `consolidacao-browser.json` registra uma tentativa com JSO
 
 As cadências e os tempos medidos sem GPU não são benchmark. Os ensaios não substituem a avaliação de pilotagem do responsável.
 
+## Rastreabilidade dos commits locais do P08
+
+Os registros de aprovação citam commits locais que não estão publicados neste repositório. Os SHAs históricos foram mantidos nesses registros. O Codex comparou os commits locais com os publicados e chegou às correspondências abaixo. A comparação não pode ser reproduzida aqui, porque os commits locais não foram publicados.
+
+| Commit local | Commit publicado | Conclusão do Codex |
+| :--- | :--- | :--- |
+| `399e8e5` (revisão 3 aprovada) | `64e3279` | física e pilotagem da revisão 3 preservadas; diferem status e compatibilidade de JSON |
+| `cbd9be9` (revisão 4 apresentada para aprovação) | `c4e2e38`, local, publicado como árvore em `36b5f24` | comportamento aprovado da revisão 4 preservado; diferem status, interface e compatibilidade de JSON |
+| `c4e2e38` | `f3b61f1` | nenhuma diferença funcional; só correção documental posterior |
+| `871cee3` | `f3b61f1` | árvores equivalentes |
+
+As correspondências são **funcionais**. Os pares `399e8e5`/`64e3279` e `cbd9be9`/`c4e2e38` **não** são idênticos byte a byte. As mensagens de commit declaram que `36b5f24` reproduz a árvore de `c4e2e38` e que `f3b61f1` reproduz a de `871cee3`.
+
 ## Pendências para a decisão de integração na `main`
 
-1. **Rastreabilidade dos commits locais do P08:**
-   - `399e8e5` (revisão 3), `cbd9be9` (revisão 4 apresentada para aprovação) e `c4e2e38` não estão publicados;
-   - `36b5f24` declara reproduzir a árvore de `c4e2e38`, posterior a `cbd9be9`;
-   - a equivalência com o código aprovado não está comprovada no repositório; a investigação está com o Codex;
-   - nenhuma referência foi substituída.
+1. **Rastreabilidade dos commits locais do P08:** esclarecida pelo Codex (registro abaixo); não é mais uma pendência de comprovação funcional.
 2. **Câmera do P12 no voo com os controles aéreos da revisão 4:** é requisito pendente de integração e **não foi validado**. Está registrado na [aprovação do P12 V2](../../decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md), item 7 da seção 6.
 3. **Parede 90° → loop:** o desprendimento sem esterço é previsto pela especificação, mas falta confirmação pilotada.
 4. **Pendências mantidas:**
