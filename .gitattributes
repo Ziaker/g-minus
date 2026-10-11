@@ -14,12 +14,6 @@
 # JSON (baselines aprovadas, configurações)
 *.json text eol=lf
 
-# CSS
-*.css text eol=lf
-
-# Documentos Markdown
-*.md text eol=lf
-
 # Arquivos binários — nunca converter
 *.png binary
 *.jpg binary
