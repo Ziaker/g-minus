@@ -4,7 +4,11 @@
    acelerador é modulado para manter a velocidade. Depois de 1 s de acomodação, mede-se
    1 s: velocidade média, taxa de guinada ω e raio efetivo R = v/ω. Se a velocidade não se
    mantém dentro de ±2 %, o ponto é marcado como não estabilizado (a direção limita a
-   velocidade sustentável). */
+   velocidade sustentável).
+   O contato é registrado em TODOS os passos do ensaio (acomodação e medição). Um ponto só é
+   válido para o envelope com contato contínuo: desprendimento seguido de pouso invalida o
+   ponto, mesmo que a nave termine apoiada. `perturb(k)` permite injetar entradas de teste
+   (por exemplo, o impulso de diagnóstico) para a verificação de regressão. */
 'use strict';
 const {loadP08}=require('./load-p08.cjs');
 const {buildSurface}=require('./surface.cjs');
@@ -15,22 +19,28 @@ function flatPad({length=4000,halfWidth=2000,spacing=7.5}={}){
  return buildSurface(S,[{id:'pad',name:'Plataforma de medição',index:0,start:0,length,station:0}],{halfWidth:()=>halfWidth,barrier:()=>false});
 }
 
-function measure(pad,target,duty,{settle=120,window=120,cycle=12}={}){
+function measure(pad,target,duty,{settle=120,window=120,cycle=12,perturb=null}={}){
  const {P,cfg,profile,air}=loadP08();
  const s=P.fresh(pad,'A',cfg,0,target,8,profile),on=Math.round(duty*cycle);
  const heading=()=>Math.atan2(s.v[0],s.v[2]);let h0=null,acc=0,sumV=0,minV=Infinity,maxV=0,slip=0,unwrap=0,prev=null;
+ let was=s.contact,ticksOff=0,detach=0,land=0;const contactEvents=[];
  for(let k=0;k<settle+window;k++){
   const v=Math.hypot(...s.v),keys=[];if(v<target)keys.push('KeyX');if(k%cycle<on)keys.push('ArrowLeft');
-  P.step(pad,s,cfg,{keys},profile,{air});
+  P.step(pad,s,cfg,{keys,...(perturb?perturb(k):{})},profile,{air});
+  if(!s.contact)ticksOff++;
+  if(was&&!s.contact){detach++;contactEvents.push({tick:s.tick,evento:'desprendimento'});}
+  if(!was&&s.contact){land++;contactEvents.push({tick:s.tick,evento:'pouso'});}
+  was=s.contact;
   const h=heading();if(prev!==null){let d=h-prev;if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;unwrap+=d;}prev=h;
   if(k===settle-1)h0=unwrap;
   if(k>=settle){const vv=Math.hypot(...s.v);sumV+=vv;minV=Math.min(minV,vv);maxV=Math.max(maxV,vv);slip=Math.max(slip,Math.abs(s.driver.slip||0));acc++;}
  }
  const vMean=sumV/acc,omega=Math.abs(unwrap-h0)/(window*P.DT),R=omega>1e-6?vMean/omega:Infinity;
- const stable=Math.abs(vMean-target)/target<=.02&&(maxV-minV)/target<=.04;
+ const stable=Math.abs(vMean-target)/target<=.02&&(maxV-minV)/target<=.04,continuous=ticksOff===0;
  return {alvo:target,kmh:Math.round(target*3.6),direcao:duty,velocidadeMedia:+vMean.toFixed(1),estabilizada:stable,
   omegaGrausS:+(omega*180/Math.PI).toFixed(2),raio:Number.isFinite(R)?+R.toFixed(1):null,aceleracaoLateral:+(vMean*omega).toFixed(0),
-  emContato:s.contact,slipMax:+slip.toFixed(2)};
+  contatoContinuo:continuous,passosSemContato:ticksOff,desprendimentos:detach,pousos:land,eventosContato:contactEvents,
+  emContatoNoFim:s.contact,validoParaEnvelope:continuous,slipMax:+slip.toFixed(2)};
 }
 
 function curveEnvelope({speeds=[200,300,400,500],duties=[.25,.5,.75,1]}={}){

@@ -7,14 +7,13 @@ const fs=require('node:fs'),path=require('node:path');
 const {loadP08}=require('./load-p08.cjs');
 const {runCompare}=require('./compat.cjs');
 const {validate}=require('./geometry.cjs');
-const {curveEnvelope}=require('./envelope.cjs');
+const {curveEnvelope,flatPad,measure}=require('./envelope.cjs');
 const {runPilot}=require('./pilot.cjs');
 const {makeTracker}=require('./frame.cjs');
-const {makeClassifier}=require('./detach.cjs');
+const {makeClassifier,p08IntentionalSegments}=require('./detach.cjs');
 const {makeLapTimer}=require('./timing.cjs');
 const {physicsCost}=require('./perf.cjs');
 
-const intentionalP08=st=>st.zone===7||st.zone===8; // rampa e lacuna da pista técnica do P08
 
 function classifierCases(C){
  const {P,cfg,profile,air}=loadP08(),out=[];
@@ -22,10 +21,11 @@ function classifierCases(C){
   {nome:'curva aberta sem direção',zone:1,speed:180,ticks:400,input:()=>({throttle:true})},
   {nome:'parede 90° → loop sem direção',zone:4,speed:300,ticks:400,input:()=>({throttle:true})},
   {nome:'tubo: volta de 360° com → mantida',zone:6,speed:250,ticks:600,input:(s,k)=>({throttle:true,keys:k>=40&&k<160?['ArrowRight']:[]})},
-  {nome:'rampa e lacuna (trecho intencional)',zone:7,speed:230,ticks:600,input:()=>({throttle:true})},
+  {nome:'rampa e lacuna (trecho intencional marcado)',zone:7,speed:230,ticks:600,input:()=>({throttle:true})},
+  {nome:'rampa: saída lateral antes da borda',zone:7,speed:230,ticks:400,input:()=>({throttle:true,steer:1})},
   {nome:'impulso de diagnóstico J',zone:0,speed:180,ticks:120,input:(s,k)=>({throttle:true,release:k===30})},
  ];
- for(const c of cases){const tr=makeTracker(C),cl=makeClassifier(C,tr,{intentional:intentionalP08});const s=P.fresh(C,'A',cfg,c.zone,c.speed,8,profile);
+ for(const c of cases){const tr=makeTracker(C),cl=makeClassifier(C,tr,{intentionalSegments:p08IntentionalSegments(C)});const s=P.fresh(C,'A',cfg,c.zone,c.speed,8,profile);
   for(let k=0;k<c.ticks&&!s.stopped;k++)cl.step(s,cfg,c.input(s,k),profile,{air});
   out.push({cenario:c.nome,...cl.summary(),eventos:cl.events.slice(0,6)});}
  return out;
@@ -47,7 +47,7 @@ function timerCheck(C){
 function pilotWallLoop(C){
  const end=C.zones[6].station-3,rows=[];
  for(const speed of [180,300,400,500])for(const delayMs of [0,250,350]){
-  const r=runPilot(C,{zone:4,speed,untilStation:end,pilot:{delayMs},intentional:intentionalP08});
+  const r=runPilot(C,{zone:4,speed,untilStation:end,pilot:{delayMs},intentionalSegments:p08IntentionalSegments(C)});
   rows.push({velocidadeInicial:speed,atrasoMs:delayMs,concluiu:r.concluiu,desprendimentos:r.desprendimentos.total,toques:r.toques,desvioMax:r.desvioMax,fracaoDirecao:r.fracaoDirecao});}
  return rows;
 }
@@ -59,6 +59,8 @@ function main(outDir){
   compatibilidade:runCompare(),
   geometriaPistaP08:validate(C),
   envelopeCurva:curveEnvelope(),
+  envelopeRegressaoContato:measure(flatPad(),300,.25,{perturb:k=>k===5?{release:true}:{}}),
+  trechosIntencionaisP08:p08IntentionalSegments(C),
   classificador:classifierCases(C),
   cronometro:timerCheck(C),
   pilotoParedeLoop:pilotWallLoop(C),

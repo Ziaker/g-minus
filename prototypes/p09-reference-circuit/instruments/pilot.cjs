@@ -10,9 +10,9 @@ const {makeClassifier}=require('./detach.cjs');
 
 const DEFAULT_PILOT=Object.freeze({delayMs:250,periodMs:100,k1:.02,k2:1,deadband:.3,maxPulse:1,targetSpeed:null});
 
-function runPilot(course,{zone=0,speed=300,untilStation,maxTicks=6000,pilot={},intentional,closed=false,onStep}={}){
+function runPilot(course,{zone=0,speed=300,untilStation,maxTicks=6000,pilot={},intentionalSegments=[],closed=false,onStep}={}){
  const {P,cfg,profile,air}=loadP08();const o={...DEFAULT_PILOT,...pilot};
- const tracker=makeTracker(course,{closed}),cls=makeClassifier(course,tracker,{intentional});
+ const tracker=makeTracker(course,{closed}),cls=makeClassifier(course,tracker,{intentionalSegments});
  const s=P.fresh(course,'A',cfg,zone,speed,8,profile),delay=Math.round(o.delayMs/1000/P.DT),period=Math.max(1,Math.round(o.periodMs/1000/P.DT));
  const hist=[];let pulse=0,dir=0,taps=0,steerTicks=0,maxLat=0,ticks=0,last=tracker.rel(s);
  for(;ticks<maxTicks;ticks++){

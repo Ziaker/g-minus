@@ -1,5 +1,5 @@
 {
- "data": "2026-10-11T22:13:40.776Z",
+ "data": "2026-10-11T22:29:37.843Z",
  "observacao": "Instrumentos de teste do P09 (etapa 0). Não definem regras de corrida, IA nem pistas.",
  "compatibilidade": {
   "malha": {
@@ -121,14 +121,53 @@
  "geometriaPistaP08": {
   "fechamento": "pista aberta (não se aplica)",
   "cobertura": {
-   "amostras": 14441,
+   "completa": true,
+   "amostras": 14889,
    "falhas": 0,
+   "naoAmostradas": 0,
+   "porCategoria": {
+    "plana": {
+     "secoes": 1271,
+     "amostras": 8897,
+     "falhas": 0
+    },
+    "tuboParcial": {
+     "secoes": 64,
+     "amostras": 448,
+     "falhas": 0
+    },
+    "tuboFechado": {
+     "secoes": 77,
+     "amostras": 5544,
+     "falhas": 0
+    }
+   },
    "primeirasFalhas": [],
-   "erroNormalMax": 0.4563,
+   "erroNormalMax": {
+    "plana": 0.2508,
+    "tuboParcial": 1.1138,
+    "tuboFechado": 0.4563
+   },
    "pior": {
-    "station": 1882,
-    "angle": 180
-   }
+    "plana": {
+     "station": 1948,
+     "u": 0
+    },
+    "tuboParcial": {
+     "station": 1700,
+     "u": 0.9
+    },
+    "tuboFechado": {
+     "station": 1882,
+     "angle": 180
+    }
+   },
+   "tuboParcialDecomposicao": {
+    "erroNoPlanoDaSecao": 0.7571,
+    "inclinacaoLongitudinalMalha": 24.592,
+    "inclinacaoLongitudinalAnalitica": 25.472
+   },
+   "observacao": "plana, tubo parcial (0 < tube < 1) e tubo fechado amostrados"
   },
   "transicoes": {
    "maiores": [
@@ -209,7 +248,13 @@
    "omegaGrausS": 35.58,
    "raio": 322.3,
    "aceleracaoLateral": 124,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 17.58
   },
   {
@@ -221,7 +266,13 @@
    "omegaGrausS": 56.46,
    "raio": 203,
    "aceleracaoLateral": 197,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 24.21
   },
   {
@@ -233,7 +284,13 @@
    "omegaGrausS": 73.63,
    "raio": 155.6,
    "aceleracaoLateral": 257,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 27.28
   },
   {
@@ -245,7 +302,13 @@
    "omegaGrausS": 89.22,
    "raio": 128.3,
    "aceleracaoLateral": 311,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 28.03
   },
   {
@@ -257,7 +320,13 @@
    "omegaGrausS": 36.58,
    "raio": 469.9,
    "aceleracaoLateral": 192,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 36.05
   },
   {
@@ -269,7 +338,13 @@
    "omegaGrausS": 58.21,
    "raio": 295,
    "aceleracaoLateral": 304,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 49.53
   },
   {
@@ -281,7 +356,13 @@
    "omegaGrausS": 76.68,
    "raio": 218.4,
    "aceleracaoLateral": 391,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 56.17
   },
   {
@@ -293,7 +374,13 @@
    "omegaGrausS": 95.01,
    "raio": 164.2,
    "aceleracaoLateral": 451,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 56.51
   },
   {
@@ -305,7 +392,13 @@
    "omegaGrausS": 32.03,
    "raio": 715.4,
    "aceleracaoLateral": 224,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 43.16
   },
   {
@@ -317,7 +410,13 @@
    "omegaGrausS": 50.94,
    "raio": 449.5,
    "aceleracaoLateral": 355,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 60.16
   },
   {
@@ -329,7 +428,13 @@
    "omegaGrausS": 67.51,
    "raio": 326.4,
    "aceleracaoLateral": 453,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 69.05
   },
   {
@@ -341,7 +446,13 @@
    "omegaGrausS": 84.31,
    "raio": 243.5,
    "aceleracaoLateral": 527,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 71.88
   },
   {
@@ -353,7 +464,13 @@
    "omegaGrausS": 27.66,
    "raio": 1035.7,
    "aceleracaoLateral": 241,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 46.74
   },
   {
@@ -365,7 +482,13 @@
    "omegaGrausS": 44,
    "raio": 650.7,
    "aceleracaoLateral": 384,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 65.75
   },
   {
@@ -377,7 +500,13 @@
    "omegaGrausS": 58.33,
    "raio": 477.3,
    "aceleracaoLateral": 495,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 75.97
   },
   {
@@ -389,8 +518,50 @@
    "omegaGrausS": 73.14,
    "raio": 360,
    "aceleracaoLateral": 587,
-   "emContato": true,
+   "contatoContinuo": true,
+   "passosSemContato": 0,
+   "desprendimentos": 0,
+   "pousos": 0,
+   "eventosContato": [],
+   "emContatoNoFim": true,
+   "validoParaEnvelope": true,
    "slipMax": 79.52
+  }
+ ],
+ "envelopeRegressaoContato": {
+  "alvo": 300,
+  "kmh": 1080,
+  "direcao": 0.25,
+  "velocidadeMedia": 310.8,
+  "estabilizada": false,
+  "omegaGrausS": 40.63,
+  "raio": 438.3,
+  "aceleracaoLateral": 220,
+  "contatoContinuo": false,
+  "passosSemContato": 212,
+  "desprendimentos": 1,
+  "pousos": 1,
+  "eventosContato": [
+   {
+    "tick": 6,
+    "evento": "desprendimento"
+   },
+   {
+    "tick": 218,
+    "evento": "pouso"
+   }
+  ],
+  "emContatoNoFim": true,
+  "validoParaEnvelope": false,
+  "slipMax": 41.73
+ },
+ "trechosIntencionaisP08": [
+  {
+   "id": "p08-borda-e-lacuna",
+   "from": 2015,
+   "to": 2074,
+   "kind": "lacuna",
+   "motivo": "P08: borda da 08 · Rampa / lançamento (seção 2023) e 09 · Voo / queda sem superfície (seções 2024–2074)"
   }
  ],
  "classificador": [
@@ -406,7 +577,14 @@
      "tick": 169,
      "time": 1.4083,
      "cause": "saida_borda",
+     "causaFisica": "saida_borda",
      "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      1.553,
+      2.1,
+      1312.865
+     ],
      "zone": 1,
      "station": 435,
      "lateral": -49.367,
@@ -431,7 +609,14 @@
      "tick": 260,
      "time": 2.1667,
      "cause": "saida_borda",
+     "causaFisica": "saida_borda",
      "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      547.2,
+      7.809,
+      3394.352
+     ],
      "zone": 5,
      "station": 1186,
      "lateral": 48.908,
@@ -456,7 +641,14 @@
      "tick": 141,
      "time": 1.175,
      "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
      "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      772.919,
+      47.464,
+      3627.292
+     ],
      "zone": 6,
      "station": 1776,
      "lateral": 10.276,
@@ -471,7 +663,14 @@
      "tick": 143,
      "time": 1.1917,
      "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
      "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      776.827,
+      45.562,
+      3629.03
+     ],
      "zone": 6,
      "station": 1777,
      "lateral": 13.634,
@@ -486,7 +685,14 @@
      "tick": 145,
      "time": 1.2083,
      "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
      "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      780.591,
+      43.363,
+      3630.917
+     ],
      "zone": 6,
      "station": 1778,
      "lateral": 16.815,
@@ -501,7 +707,14 @@
      "tick": 148,
      "time": 1.2333,
      "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
      "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      784.831,
+      39.748,
+      3634.353
+     ],
      "zone": 6,
      "station": 1780,
      "lateral": 20.075,
@@ -516,7 +729,14 @@
      "tick": 224,
      "time": 1.8667,
      "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
      "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      779.013,
+      49.123,
+      3669.857
+     ],
      "zone": 6,
      "station": 1791,
      "lateral": 5.668,
@@ -531,7 +751,14 @@
      "tick": 226,
      "time": 1.8833,
      "cause": "limite_reacao",
+     "causaFisica": "limite_reacao",
      "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      782.457,
+      47.983,
+      3668.684
+     ],
      "zone": 6,
      "station": 1791,
      "lateral": 9.296,
@@ -545,7 +772,7 @@
    ]
   },
   {
-   "cenario": "rampa e lacuna (trecho intencional)",
+   "cenario": "rampa e lacuna (trecho intencional marcado)",
    "total": 1,
    "porCausa": {
     "intencional": 1
@@ -556,11 +783,58 @@
      "tick": 87,
      "time": 0.725,
      "cause": "intencional",
+     "causaFisica": "sem_superficie",
      "unjustifiedCandidate": false,
+     "trecho": {
+      "id": "p08-borda-e-lacuna",
+      "tipo": "lacuna",
+      "motivo": "P08: borda da 08 · Rampa / lançamento (seção 2023) e 09 · Voo / queda sem superfície (seções 2024–2074)",
+      "secoes": [
+       2015,
+       2074
+      ]
+     },
+     "posicao": [
+      942.296,
+      54.736,
+      4333.413
+     ],
      "zone": 7,
      "station": 2023,
      "lateral": 0,
      "speed": 284.47,
+     "reactionNeeded": null,
+     "reactionLimit": 2500,
+     "normalSpeed": null,
+     "captureLimit": null,
+     "p08Reason": "sem superfície no alcance"
+    }
+   ]
+  },
+  {
+   "cenario": "rampa: saída lateral antes da borda",
+   "total": 1,
+   "porCausa": {
+    "saida_borda": 1
+   },
+   "candidatosInjustificados": 0,
+   "eventos": [
+    {
+     "tick": 83,
+     "time": 0.6917,
+     "cause": "saida_borda",
+     "causaFisica": "saida_borda",
+     "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      887.91,
+      45.42,
+      4318.266
+     ],
+     "zone": 7,
+     "station": 2013,
+     "lateral": -48.96,
+     "speed": 249.19,
      "reactionNeeded": null,
      "reactionLimit": 2500,
      "normalSpeed": null,
@@ -581,7 +855,14 @@
      "tick": 31,
      "time": 0.2583,
      "cause": "liberacao_teste",
+     "causaFisica": "liberacao_teste",
      "unjustifiedCandidate": false,
+     "trecho": null,
+     "posicao": [
+      0,
+      2.1,
+      83.416
+     ],
      "zone": 0,
      "station": 28,
      "lateral": 0,
@@ -729,29 +1010,29 @@
   "linhas": [
    {
     "naves": 1,
-    "msPorPasso": 0.701,
-    "msPorNave": 0.7009,
-    "orcamento120Hz": "8.4 %"
+    "msPorPasso": 0.624,
+    "msPorNave": 0.6243,
+    "orcamento120Hz": "7.5 %"
    },
    {
     "naves": 8,
-    "msPorPasso": 4.469,
-    "msPorNave": 0.5586,
-    "orcamento120Hz": "53.6 %"
+    "msPorPasso": 3.67,
+    "msPorNave": 0.4588,
+    "orcamento120Hz": "44 %"
    },
    {
     "naves": 16,
-    "msPorPasso": 6.914,
-    "msPorNave": 0.4321,
-    "orcamento120Hz": "83 %"
+    "msPorPasso": 8.78,
+    "msPorNave": 0.5488,
+    "orcamento120Hz": "105.4 %"
    },
    {
     "naves": 30,
-    "msPorPasso": 12.616,
-    "msPorNave": 0.4205,
-    "orcamento120Hz": "151.4 %"
+    "msPorPasso": 11.293,
+    "msPorNave": 0.3764,
+    "orcamento120Hz": "135.5 %"
    }
   ]
  },
- "duracaoS": 49.056
+ "duracaoS": 48.714
 }
