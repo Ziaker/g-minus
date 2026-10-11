@@ -172,7 +172,7 @@
   - [97] minimapa (A) e radar (B, C), desligáveis nas configurações;
   - [98] alertas pelo diretor de prioridades P0–P3.
 
-  A pista e a corrida de teste do laboratório não aprovam física, IA nem regras. A integração em `src/game` está pendente: exige pedido explícito, vem depois da física do P08, usa a escala decidida em 11/10/2026 ([1 u = 1 m](decisions/2026-10-11-world-scale-1u-1m.md)) e valida a câmera no voo com o referencial estabilizado do P08. O P12 original continua rejeitado ([auditoria](audits/2026-10-11-prototype-12-audit.md)).
+  A pista e a corrida de teste do laboratório não aprovam física, IA nem regras. A integração em `src/game` está pendente: exige pedido explícito, vem depois da física do P08, usa a escala decidida em 11/10/2026 ([1 u = 1 m](decisions/2026-10-11-world-scale-1u-1m.md)) e valida a câmera no voo com o referencial estabilizado do P08 e os controles aéreos da revisão 4 (validação pendente). O P12 original continua rejeitado ([auditoria](audits/2026-10-11-prototype-12-audit.md)).
 
 ## 11. Política obrigatória de prototipação, telemetria e documentação [101–104]
 

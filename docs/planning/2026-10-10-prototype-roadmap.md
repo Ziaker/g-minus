@@ -133,7 +133,7 @@ Este documento separa três tipos de conteúdo:
 | Energia [31–40] | escolha entre GX e X quando divergem |
 | Física (Protótipos 01 e 07) | 18 valores ambíguos, 12 divergências (esterço 89 × 56), 11 essenciais, avaliação visual do layout combinado |
 | VFX (04 V2) | padrão dos toggles e forma de seleção no jogo; implementação do Spin E +30 % |
-| HUD e câmera (P12 V2) | integração em `src/game` (pedido explícito, depois da física do P08); escala já decidida (1 u = 1 m, [decisão](../decisions/2026-10-11-world-scale-1u-1m.md)); câmera no voo com o referencial estabilizado do P08 e transição pista ↔ voo validada; HUD e câmera na eliminação (P10); HUD de equipe [51] |
+| HUD e câmera (P12 V2) | integração em `src/game` (pedido explícito, depois da física do P08); escala já decidida (1 u = 1 m, [decisão](../decisions/2026-10-11-world-scale-1u-1m.md)); câmera no voo com o referencial estabilizado do P08 e transição pista ↔ voo validada, usando os controles aéreos da revisão 4 (validação pendente); HUD e câmera na eliminação (P10); HUD de equipe [51] |
 
 ## 4. Protótipos futuros, depois do P12 (ordem a definir)
 
