@@ -1,6 +1,6 @@
 /* P12 V2 — CORE: vetores, RNG com semente, easing, molas e hash de estado.
    Depende somente de clamp/lerp/TAU do bloco geométrico aprovado do P05 (embutido antes). */
-const LAB_SCHEMA='gminus.p12v2.hud-camera-lab',LAB_VERSION=1;
+const LAB_SCHEMA='gminus.p12v2.hud-camera-lab',LAB_VERSION=2;
 const SIM_HZ=120,SIM_DT=1/SIM_HZ;
 const KMH=3.6;                       // 1 u = 1 m nesta bancada (convenção provisória, ver especificação §5)
 const vec={

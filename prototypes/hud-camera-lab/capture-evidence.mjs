@@ -38,6 +38,18 @@ const setCombo=([hud,cam,view,aspect,scen,dt])=>{const A=window.__GMINUS_P12V2__
   await p.click('#jsonOpen');const txt=await p.inputValue('#jsonText');await p.click('#jsonImport');const ok=await p.textContent('#jsonNotice');const badCfg=JSON.parse(txt);badCfg.camera.A.distance=-100;badCfg.camera.B.fovBase=999;await p.fill('#jsonText',JSON.stringify(badCfg,null,2));await p.click('#jsonImport');const bad=await p.textContent('#jsonNotice');await p.click('#jsonClose');
   await p.selectOption('#scenario','loop');await p.waitForTimeout(300);return {steps:steps.length,validImport:ok,invalidImport:bad,configAfter:await run(p,()=>window.__GMINUS_P12V2__.config().camera.A.distance)};})();
  report.checks.pageErrors=errors.slice();await p.close();}
+// 3b) sliders de tamanho por módulo e espaçamento de texto no máximo de teste (1,4 × e linhas 1,3 ×), sem sobreposição dentro dos módulos
+{const {p,errors}=await page(1600,900);
+ const big={A:['sizeSpeed','sizePosition','sizeEnergy','sizeMap','sizeAlerts','sizeBanner','sizeCombat'],B:['sizeHead','sizeLadder','sizeGauge','sizeRadar','sizeBrackets','sizeAlerts','sizeCombat'],C:['sizeStrip','sizePos','sizeTiming','sizeCluster','sizeRadar','sizeRival','sizeAlerts']};
+ for(const h of ['A','B','C'])await shot(p,`17-tamanhos-e-espacamento-hud-${h}`,([h,keys])=>{const A=window.__GMINUS_P12V2__;for(const k of keys)A.setHudParam(h,k,1.4);A.setHudParam(h,'letterSpacing',.3);A.setHudParam(h,'lineSpacing',1.3);A.setView('single');A.setAspect('fill');A.setHud(h);A.setCamera(h);A.seek(A.scenarioTime('duel')+2.2);},[h,big[h]]);
+ // cores por HUD: três paletas prontas diferentes no mesmo instante (C também com fonte monoespaçada e o módulo rival oculto)
+ const pal=await run(p,()=>window.__GMINUS_P12V2__.palettes);const roles=await run(p,()=>window.__GMINUS_P12V2__.colorRoles.map(r=>r[0]));
+ for(const [h,id,extra] of [['A','okabe',{}],['B','amber',{panelAlpha:1.3}],['C','phosphor',{font:'mono',showRival:false}]])
+  await shot(p,`18-cores-hud-${h}-${id}`,([h,c,extra,roles])=>{const A=window.__GMINUS_P12V2__;for(const k of Object.keys(A.config().hud[h]))if(k.startsWith('size'))A.setHudParam(h,k,1);A.setHudParam(h,'letterSpacing',.2);A.setHudParam(h,'lineSpacing',1);roles.forEach((k,i)=>A.setHudParam(h,k,c[i]));for(const [k,v] of Object.entries(extra))A.setHudParam(h,k,v);A.setHud(h);A.setCamera(h);A.seek(A.scenarioTime('duel')+2.2);},[h,pal[id].c,extra,roles]);
+ await run(p,()=>document.body.classList.remove('nopanel'));await p.click('[data-tab=hud]');await p.click('#tabbody .seg button:nth-child(2)');
+ for(const n of ['Geral','Tamanho dos módulos','Módulos visíveis','Texto'])await p.click(`details.sgrp > summary:has-text("${n}")`);
+ await shot(p,'19-painel-cores-hud-B',()=>{const A=window.__GMINUS_P12V2__;A.setHud('B');A.setCamera('B');const d=[...document.querySelectorAll('details.sgrp')].find(x=>x.textContent.includes('Cores e fundos'));if(d)d.scrollIntoView({block:'start'});},null);
+ report.checks.pageErrors_sizes=errors;await p.close();}
 // 4) proporções: 21:9 e 9:16 (layout retrato) com os três HUDs
 for(const [W,H,tag] of [[2560,1080,'21x9'],[1080,1920,'9x16']]){const {p,errors}=await page(W,H);for(const h of ['A','B','C'])await shot(p,`16-${tag}-hud-${h}`,setCombo,[h,h,'single','fill','defense',1.7]);report.checks['pageErrors_'+tag]=errors;await p.close();}
 fs.writeFileSync(path.join(OUT,'evidence.json'),JSON.stringify(report,null,2));

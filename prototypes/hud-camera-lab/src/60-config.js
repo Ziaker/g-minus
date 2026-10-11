@@ -2,12 +2,16 @@
    o texto é validado por inteiro e convertido num objeto novo; só então o estado é trocado.
    Nenhum JSON concede aprovação. */
 const HUDS={A:HUD_A,B:HUD_B,C:HUD_C};
+// cada HUD desenha (tela e mundo) com a própria paleta, fundos, contorno e fonte; o estado global é restaurado depois
+for(const H of Object.values(HUDS)){const d0=H.draw,w0=H.world;H.draw=function(g,w,h,M,cfg,MET){hudStyle(cfg);try{return d0.call(this,g,w,h,M,cfg,MET);}finally{hudStyle(null);}};
+ if(w0)H.world=function(A,M,cfg){hudStyle(cfg);try{return w0.call(this,A,M,cfg);}finally{hudStyle(null);}};}
+function hexColor(v,where){if(typeof v!=='string'||!/^#[0-9a-fA-F]{6}$/.test(v))throw Error(where+': cor deve ser "#rrggbb"');return v.toLowerCase();}
 const IDS=['A','B','C'];
 const VIEW_MODES=['single','split','hud3','cam3','matrix'],ASPECTS=['fill','16:9','21:9','9:16'],RATES=[.25,.5,1];
 const LAB_STATUS='EM AVALIAÇÃO — P12 V2 NÃO APROVADO · ESTE JSON NÃO CONCEDE APROVAÇÃO';
 const VFX_OPTIONS={drift:['A','B','C','E'],collision:['B','D'],flight:['C','D'],light:['world','camera']};
 const RECOMMENDED=[{id:'AA',hud:'A',camera:'A',name:'Arcade épico',why:'Linguagem cinética com câmera de sensação: o HUD reage às mesmas forças que a câmera exagera.'},{id:'BB',hud:'B',camera:'B',name:'Combate tático',why:'Câmera elevada mostra o pelotão que o anel de ameaças e os colchetes descrevem.'},{id:'CC',hud:'C',camera:'C',name:'Competição precisa',why:'A câmera preditiva mostra o ápice que a faixa de previsão anuncia.'}];
-function hudDefaults(id){const H=HUDS[id],o={};for(const p of H.params)o[p.id]=p.def;for(const [k,v] of Object.entries(H.toggles||{}))o[k]=v;for(const [k,v] of Object.entries(H.selects||{}))o[k]=v[0];return o;}
+function hudDefaults(id){const H=HUDS[id],o={};for(const p of H.params)o[p.id]=p.def;for(const [k,v] of Object.entries(H.toggles||{}))o[k]=v;for(const [k,v] of Object.entries(H.selects||{}))o[k]=v[0];for(const [k,v] of Object.entries(H.colors||{}))o[k]=v;return o;}
 function defaultConfig(){return {schema:LAB_SCHEMA,version:LAB_VERSION,status:LAB_STATUS,geometry:'prototype-05/v1',artDirection:'D-TOON-VECTOR-FLUX',paintSystem:'B',vfxBaseline:'prototype-04-v2/approved-calibration',
  selection:{hud:'A',camera:'A',view:'single',aspect:'fill',left:{hud:'A',camera:'A'},right:{hud:'C',camera:'C'}},
  hud:{A:hudDefaults('A'),B:hudDefaults('B'),C:hudDefaults('C')},camera:{A:{...CAM_DEFAULTS.A},B:{...CAM_DEFAULTS.B},C:{...CAM_DEFAULTS.C}},
@@ -18,8 +22,8 @@ function exact(o,keys,where){if(!isObj(o))throw Error(where+': deve ser um objet
 function num(v,min,max,where,int=false){if(typeof v!=='number'||!Number.isFinite(v))throw Error(where+': deve ser número finito');if(v<min||v>max)throw Error(where+': '+v+' fora de ['+min+', '+max+']');if(int&&!Number.isInteger(v))throw Error(where+': deve ser inteiro');return v;}
 function bool(v,where){if(typeof v!=='boolean')throw Error(where+': deve ser booleano');return v;}
 function oneOf(v,list,where){if(!list.includes(v))throw Error(where+': valor inválido "'+v+'"');return v;}
-function parseHud(id,o,where){const H=HUDS[id],keys=[...H.params.map(p=>p.id),...Object.keys(H.toggles||{}),...Object.keys(H.selects||{})];exact(o,keys,where);const out={};
- for(const p of H.params)out[p.id]=num(o[p.id],p.min,p.max,where+'.'+p.id);for(const k of Object.keys(H.toggles||{}))out[k]=bool(o[k],where+'.'+k);for(const [k,v] of Object.entries(H.selects||{}))out[k]=oneOf(o[k],v,where+'.'+k);return out;}
+function parseHud(id,o,where){const H=HUDS[id],keys=[...H.params.map(p=>p.id),...Object.keys(H.toggles||{}),...Object.keys(H.selects||{}),...Object.keys(H.colors||{})];exact(o,keys,where);const out={};
+ for(const p of H.params)out[p.id]=num(o[p.id],p.min,p.max,where+'.'+p.id);for(const k of Object.keys(H.toggles||{}))out[k]=bool(o[k],where+'.'+k);for(const [k,v] of Object.entries(H.selects||{}))out[k]=oneOf(o[k],v,where+'.'+k);for(const k of Object.keys(H.colors||{}))out[k]=hexColor(o[k],where+'.'+k);return out;}
 function parseCam(id,o,where){const defs=camParamDefs(id);exact(o,defs.map(d=>d.id),where);const out={};for(const d of defs)out[d.id]=num(o[d.id],d.min,d.max,where+'.'+d.id);return out;}
 function parseConfigText(text){let o;try{o=JSON.parse(text);}catch(e){throw Error('JSON sintaticamente inválido — '+e.message);}return parseConfigObject(o);}
 function parseConfigObject(o){const ref=defaultConfig();exact(o,Object.keys(ref),'configuração');

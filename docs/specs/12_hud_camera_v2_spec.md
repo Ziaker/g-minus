@@ -69,7 +69,7 @@ Todos são desenhados em Canvas 2D sobre o viewport (nenhum nó DOM recriado por
 - **Cunha direcional de dano** em volta do centro, persistência `damagePersist`, com quantidade e tipo (lateral, giro, colisão, barreira).
 - **Ataque iminente:** "ATAQUE ◀ 0,18 S" — tempo até o contato calculado da fase real do atacante.
 - **Medidor de potência:** arco externo de velocidade, marca ouro no limite da curva atual, arco interno de **blocos de impulso** (cada bloco = 14 % = um impulso), com trilha de dano.
-- **Escada tática:** líder + posições ±`ladderSize`, com **intervalo medido** (tempo entre as duas naves no mesmo ponto da pista).
+- **Escada tática:** líder + posições ±`ladderRows`, com **intervalo medido** (tempo entre as duas naves no mesmo ponto da pista).
 - **Radar local:** pista real em volta (bordas amostradas a cada 8 m, no plano da nave), naves como triângulos, alcance `radarRange`, deslocado para mostrar mais a frente; modo circuito mostra o traçado inteiro.
 
 ### 3.3 HUD C — Apex Line (precisão competitiva · tempo)
@@ -165,62 +165,184 @@ Mapeamentos: suavização → taxa de posição `lerp(40, 2,2)` /s; inércia →
 
 Toda animação usa o **tempo da simulação**: com pausa ela congela, e duas combinações no mesmo instante mostram o mesmo quadro. HUD A usa ultrapassagem e cinética; B, movimentos lineares e informação estável; C, saídas curtas sem ultrapassagem.
 
-## 9. Configuração JSON (schema `gminus.p12v2.hud-camera-lab`, versão 1)
+## 9. Configuração JSON (schema `gminus.p12v2.hud-camera-lab`, versão 2)
 
-Campos: `schema`, `version`, `status` (fixo, "não concede aprovação"), `geometry` = `prototype-05/v1`, `artDirection` = `D-TOON-VECTOR-FLUX`, `paintSystem` = `B`, `vfxBaseline` = `prototype-04-v2/approved-calibration`, `selection` (hud, camera, view, aspect, left, right), `hud.A|B|C`, `camera.A|B|C`, `vfx` (drift A/B/C/E, collision B/D, flight C/D, boost.A/D/E, speedLines, light), `race` (seed 1–2³¹−1, laps 1–5, ships 12–30), `playback` (scenario, time, rate). A importação exige chaves exatas, tipos, faixas e opções aprovadas (por exemplo, Boost C e Drift D são rejeitados). É **atômica**: qualquer erro rejeita tudo e não altera configuração nem simulação. A interface e a API usam a mesma função.
+Campos: `schema`, `version`, `status` (fixo, "não concede aprovação"), `geometry` = `prototype-05/v1`, `artDirection` = `D-TOON-VECTOR-FLUX`, `paintSystem` = `B`, `vfxBaseline` = `prototype-04-v2/approved-calibration`, `selection` (hud, camera, view, aspect, left, right), `hud.A|B|C`, `camera.A|B|C`, `vfx` (drift A/B/C/E, collision B/D, flight C/D, boost.A/D/E, speedLines, light), `race` (seed 1–2³¹−1, laps 1–5, ships 12–30), `playback` (scenario, time, rate). A importação exige chaves exatas, tipos, faixas e opções aprovadas (por exemplo, Boost C e Drift D são rejeitados). É **atômica**: qualquer erro rejeita tudo e não altera configuração nem simulação. A interface e a API usam a mesma função. A versão 2 adicionou tamanho por módulo, espaçamento de texto, fonte, cores por função, opacidade dos fundos, contorno e visibilidade por módulo, e renomeou `ladderSize` para `ladderRows`. Arquivos da versão 1 são rejeitados pela regra de chaves exatas.
 
-### 9.1 Sliders dos HUDs
+### 9.1 Controles dos HUDs
+
+No painel, os controles de cada HUD ficam em seções recolhíveis, cada uma com o botão **restaurar**:
+
+- **Geral:** inclui o **Tamanho do HUD** (0,5–2 ×), que multiplica todos os módulos.
+- **Tamanho dos módulos:** um slider de 0,6–1,6 × por módulo, que se soma ao tamanho geral.
+- **Módulos visíveis:** mostra ou oculta cada módulo.
+- **Texto:** espaçamento entre letras, espaçamento entre linhas e fonte do texto de sistema.
+- **Cores e fundos:** ver 9.2.
+- **Seção própria da proposta** e **Opções**.
+
+Os layouts são **medidos**: colunas, painéis e caixas se ajustam à largura real do texto e às linhas empilhadas. Por isso, nenhum tamanho, espaçamento ou fonte faz textos do mesmo módulo se sobreporem. Um módulo oculto continua medido, mas não é desenhado (contexto "fantasma"), então os outros não mudam de lugar. O teste 05c verifica isso.
 
 **HUD A — Flux Rush**
 
-| Controle | id | Faixa | Padrão |
-| :--- | :--- | :--- | ---: |
-| Escala | `scale` | 0,7–1,4 × | 1 |
-| Opacidade | `opacity` | 0,4–1 | 1 |
-| Intensidade cinética | `kinetic` | 0–1,5 × | 1 |
-| Peso da tinta | `inkWeight` | 0–2 × | 1 |
-| Desalinhamento de impressão | `misregistration` | 0–2 × | 1 |
-| Linhas de foco | `focusLines` | 0–1 | 0,6 |
-| Retícula | `halftone` | 0–1 | 0,55 |
-| Duração das faixas | `bannerHold` | 0,6–1,8 × | 1 |
-| Margem de segurança | `safeArea` | 0–8 % | 3 |
-| Minimapa | `minimap` | liga/desliga | ligado |
+| Seção | Controle | id | Faixa | Padrão |
+| :--- | :--- | :--- | :--- | ---: |
+| Geral | Tamanho do HUD | `scale` | 0,5–2 × | 1 |
+| Geral | Opacidade | `opacity` | 0,4–1 | 1 |
+| Geral | Margem de segurança | `safeArea` | 0–8 % | 3 |
+| Tamanho dos módulos | Velocímetro e lâmina | `sizeSpeed` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Posição | `sizePosition` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Painel de energia e volta | `sizeEnergy` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Minimapa | `sizeMap` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Adesivos de alerta | `sizeAlerts` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Faixas de volta, largada e chegada | `sizeBanner` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Marcas de combate e rival | `sizeCombat` | 0,6–1,6 × | 1 |
+| Texto | Espaçamento entre letras | `letterSpacing` | 0,05–0,5 | 0,2 |
+| Texto | Espaçamento entre linhas | `lineSpacing` | 0,8–1,6 × | 1 |
+| Cores e fundos | Opacidade dos fundos | `panelAlpha` | 0–1,6 × | 1 |
+| Estilo e movimento | Intensidade cinética | `kinetic` | 0–1,5 × | 1 |
+| Estilo e movimento | Peso da tinta | `inkWeight` | 0–2 × | 1 |
+| Estilo e movimento | Desalinhamento de impressão | `misregistration` | 0–2 × | 1 |
+| Estilo e movimento | Linhas de foco | `focusLines` | 0–1 | 0,6 |
+| Estilo e movimento | Retícula | `halftone` | 0–1 | 0,55 |
+| Estilo e movimento | Duração das faixas | `bannerHold` | 0,6–1,8 × | 1 |
+| Módulos visíveis | Velocímetro e lâmina | `showSpeed` | liga/desliga | ligado |
+| Módulos visíveis | Posição | `showPosition` | liga/desliga | ligado |
+| Módulos visíveis | Energia e impulsos | `showEnergy` | liga/desliga | ligado |
+| Módulos visíveis | Volta e tempos | `showLap` | liga/desliga | ligado |
+| Módulos visíveis | Minimapa | `minimap` | liga/desliga | ligado |
+| Módulos visíveis | Marcas de combate, rival e curvas | `showCombat` | liga/desliga | ligado |
+| Módulos visíveis | Faixas de volta, largada e chegada | `showBanner` | liga/desliga | ligado |
+| Módulos visíveis | Alertas e chamadas | `showAlerts` | liga/desliga | ligado |
+| Módulos visíveis | Efeitos de borda (foco, impacto, ameaça, borda aberta) | `showEffects` | liga/desliga | ligado |
+| Texto | Fonte do texto de sistema | `font` | Condensada (padrão) / Larga / Monoespaçada | Condensada (padrão) |
+| Cores e fundos | Cor: Primária (informação, escudo, ciano da identidade) | `colPrimary` | #rrggbb | `#43f0de` |
+| Cores e fundos | Cor: Destaque (impulso, volta final, ameaça) | `colAccent` | #rrggbb | `#ff4794` |
+| Cores e fundos | Cor: Aviso (rival, curvas, energia baixa) | `colWarn` | #rrggbb | `#ffa636` |
+| Cores e fundos | Cor: Perigo (alertas P0, energia crítica) | `colDanger` | #rrggbb | `#ff2a4f` |
+| Cores e fundos | Cor: Texto principal (números e rótulos) | `colText` | #rrggbb | `#fff3d6` |
+| Cores e fundos | Cor: Texto secundário (legendas e unidades) | `colMuted` | #rrggbb | `#8d87b5` |
+| Cores e fundos | Cor: Especial (melhor volta, salto, recordes) | `colSpecial` | #rrggbb | `#c06bff` |
+| Cores e fundos | Cor: Fundo e contorno (painéis e contorno da tinta) | `colPanel` | #rrggbb | `#07060f` |
 
 **HUD B — Vector Tactical**
 
-| Controle | id | Faixa | Padrão |
-| :--- | :--- | :--- | ---: |
-| Escala | `scale` | 0,7–1,4 × | 1 |
-| Opacidade | `opacity` | 0,4–1 | 1 |
-| Alcance de ameaças | `threatRange` | 40–200 m | 110 |
-| Raio do anel | `ringRadius` | 6–16 m | 10,5 |
-| Alcance dos colchetes | `bracketRange` | 40–320 m | 180 |
-| Alcance do radar | `radarRange` | 120–600 m | 280 |
-| Escada tática | `ladderSize` | ±1–4 | 2 |
-| Persistência do indicador de dano | `damagePersist` | 0,4–2,5 s | 1,2 |
-| Opacidade da camada no mundo | `worldOpacity` | 0–1 | 0,85 |
-| Margem de segurança | `safeArea` | 0–8 % | 3 |
-| Radar | `radar` | liga/desliga | ligado |
-| Indicadores de janela de ataque | `attackAssist` | liga/desliga | ligado |
-| Modo do radar | `radarMode` | local / circuito | local |
+| Seção | Controle | id | Faixa | Padrão |
+| :--- | :--- | :--- | :--- | ---: |
+| Geral | Tamanho do HUD | `scale` | 0,5–2 × | 1 |
+| Geral | Opacidade | `opacity` | 0,4–1 | 1 |
+| Geral | Margem de segurança | `safeArea` | 0–8 % | 3 |
+| Tamanho dos módulos | Cabeçalho (posição e volta) | `sizeHead` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Escada tática | `sizeLadder` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Medidor de potência | `sizeGauge` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Radar | `sizeRadar` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Rótulos dos colchetes | `sizeBrackets` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Chamadas táticas | `sizeAlerts` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Dano e ataque iminente | `sizeCombat` | 0,6–1,6 × | 1 |
+| Texto | Espaçamento entre letras | `letterSpacing` | 0,05–0,5 | 0,2 |
+| Texto | Espaçamento entre linhas | `lineSpacing` | 0,8–1,6 × | 1 |
+| Cores e fundos | Opacidade dos fundos | `panelAlpha` | 0–1,6 × | 1 |
+| Cores e fundos | Contorno do texto | `outline` | 0–2 × | 1 |
+| Leitura espacial | Alcance de ameaças | `threatRange` | 40–200 m | 110 |
+| Leitura espacial | Raio do anel | `ringRadius` | 6–16 m | 10,5 |
+| Leitura espacial | Opacidade da camada no mundo | `worldOpacity` | 0–1 | 0,85 |
+| Leitura espacial | Alcance dos colchetes | `bracketRange` | 40–320 m | 180 |
+| Leitura espacial | Alcance do radar | `radarRange` | 120–600 m | 280 |
+| Leitura espacial | Linhas da escada | `ladderRows` | 1–4 ± | 2 |
+| Leitura espacial | Persistência do indicador de dano | `damagePersist` | 0,4–2,5 s | 1,2 |
+| Módulos visíveis | Cabeçalho (posição e volta) | `showHead` | liga/desliga | ligado |
+| Módulos visíveis | Escada tática | `showLadder` | liga/desliga | ligado |
+| Módulos visíveis | Medidor de potência | `showGauge` | liga/desliga | ligado |
+| Módulos visíveis | Radar | `radar` | liga/desliga | ligado |
+| Módulos visíveis | Colchetes sobre adversários | `showBrackets` | liga/desliga | ligado |
+| Módulos visíveis | Ameaças fora da tela e ataque iminente | `showThreats` | liga/desliga | ligado |
+| Módulos visíveis | Indicador direcional de dano | `showDamage` | liga/desliga | ligado |
+| Módulos visíveis | Alertas e chamadas | `showAlerts` | liga/desliga | ligado |
+| Opções | Indicadores de janela de ataque | `attackAssist` | liga/desliga | ligado |
+| Opções | Modo do radar | `radarMode` | Local (relativo) / Circuito inteiro | Local (relativo) |
+| Texto | Fonte do texto de sistema | `font` | Condensada (padrão) / Larga / Monoespaçada | Condensada (padrão) |
+| Cores e fundos | Cor: Primária (informação, escudo, ciano da identidade) | `colPrimary` | #rrggbb | `#43f0de` |
+| Cores e fundos | Cor: Destaque (impulso, volta final, ameaça) | `colAccent` | #rrggbb | `#ff4794` |
+| Cores e fundos | Cor: Aviso (rival, curvas, energia baixa) | `colWarn` | #rrggbb | `#ffa636` |
+| Cores e fundos | Cor: Perigo (alertas P0, energia crítica) | `colDanger` | #rrggbb | `#ff2a4f` |
+| Cores e fundos | Cor: Texto principal (números e rótulos) | `colText` | #rrggbb | `#fff3d6` |
+| Cores e fundos | Cor: Texto secundário (legendas e unidades) | `colMuted` | #rrggbb | `#8d87b5` |
+| Cores e fundos | Cor: Especial (melhor volta, salto, recordes) | `colSpecial` | #rrggbb | `#c06bff` |
+| Cores e fundos | Cor: Fundo e contorno (painéis e contorno da tinta) | `colPanel` | #rrggbb | `#07060f` |
 
 **HUD C — Apex Line**
 
-| Controle | id | Faixa | Padrão |
-| :--- | :--- | :--- | ---: |
-| Escala | `scale` | 0,7–1,4 × | 1 |
-| Opacidade | `opacity` | 0,4–1 | 1 |
-| Janela da previsão (tempo) | `forecastSeconds` | 2–12 s | 7 |
-| Alcance máximo da previsão | `forecastRange` | 800–4000 m | 2400 |
-| Largura da faixa de previsão | `stripWidth` | 0,35–0,9 × tela | 0,5 |
-| Janela do módulo rival | `rivalWindow` | 0,3–3 s | 1 |
-| Opacidade em cruzeiro | `dimLevel` | 0,15–0,9 | 0,4 |
-| Margem de segurança | `safeArea` | 0–8 % | 3 |
-| Recolher em cruzeiro | `autoHide` | liga/desliga | ligado |
-| Radar | `radar` | liga/desliga | ligado |
-| Marcadores de frenagem/ápice | `trackMarkers` | liga/desliga | ligado |
-| Referência do delta | `deltaRef` | melhor / última | melhor |
-| Escala da previsão | `forecastMode` | tempo / distância | tempo |
+| Seção | Controle | id | Faixa | Padrão |
+| :--- | :--- | :--- | :--- | ---: |
+| Geral | Tamanho do HUD | `scale` | 0,5–2 × | 1 |
+| Geral | Opacidade | `opacity` | 0,4–1 | 1 |
+| Geral | Margem de segurança | `safeArea` | 0–8 % | 3 |
+| Tamanho dos módulos | Faixa de previsão | `sizeStrip` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Posição e intervalos | `sizePos` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Tempo, delta e setores | `sizeTiming` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Velocidade, escudo e impulsos | `sizeCluster` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Radar | `sizeRadar` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Módulo rival | `sizeRival` | 0,6–1,6 × | 1 |
+| Tamanho dos módulos | Alertas, largada e chegada | `sizeAlerts` | 0,6–1,6 × | 1 |
+| Texto | Espaçamento entre letras | `letterSpacing` | 0,05–0,5 | 0,2 |
+| Texto | Espaçamento entre linhas | `lineSpacing` | 0,8–1,6 × | 1 |
+| Cores e fundos | Opacidade dos fundos | `panelAlpha` | 0–1,6 × | 1 |
+| Cores e fundos | Contorno do texto | `outline` | 0–2 × | 1 |
+| Previsão e contexto | Janela da previsão (tempo) | `forecastSeconds` | 2–12 s | 7 |
+| Previsão e contexto | Alcance máximo da previsão | `forecastRange` | 800–4000 m | 2400 |
+| Previsão e contexto | Largura da faixa de previsão | `stripWidth` | 0,35–0,9 × tela | 0,5 |
+| Previsão e contexto | Janela do módulo rival | `rivalWindow` | 0,3–3 s | 1 |
+| Previsão e contexto | Opacidade em cruzeiro | `dimLevel` | 0,15–0,9 | 0,4 |
+| Módulos visíveis | Faixa de previsão | `showStrip` | liga/desliga | ligado |
+| Módulos visíveis | Posição e intervalos | `showPos` | liga/desliga | ligado |
+| Módulos visíveis | Tempo, delta e setores | `showTiming` | liga/desliga | ligado |
+| Módulos visíveis | Velocidade, escudo e impulsos | `showCluster` | liga/desliga | ligado |
+| Módulos visíveis | Radar | `radar` | liga/desliga | ligado |
+| Módulos visíveis | Módulo rival | `showRival` | liga/desliga | ligado |
+| Módulos visíveis | Alertas e chamadas | `showAlerts` | liga/desliga | ligado |
+| Opções | Recolher módulos em cruzeiro | `autoHide` | liga/desliga | ligado |
+| Opções | Marcadores de frenagem/ápice na pista | `trackMarkers` | liga/desliga | ligado |
+| Opções | Referência do delta | `deltaRef` | Melhor volta / Última volta | Melhor volta |
+| Opções | Escala da previsão | `forecastMode` | Tempo até chegar / Distância | Tempo até chegar |
+| Texto | Fonte do texto de sistema | `font` | Condensada (padrão) / Larga / Monoespaçada | Condensada (padrão) |
+| Cores e fundos | Cor: Primária (informação, escudo, ciano da identidade) | `colPrimary` | #rrggbb | `#43f0de` |
+| Cores e fundos | Cor: Destaque (impulso, volta final, ameaça) | `colAccent` | #rrggbb | `#ff4794` |
+| Cores e fundos | Cor: Aviso (rival, curvas, energia baixa) | `colWarn` | #rrggbb | `#ffa636` |
+| Cores e fundos | Cor: Perigo (alertas P0, energia crítica) | `colDanger` | #rrggbb | `#ff2a4f` |
+| Cores e fundos | Cor: Texto principal (números e rótulos) | `colText` | #rrggbb | `#fff3d6` |
+| Cores e fundos | Cor: Texto secundário (legendas e unidades) | `colMuted` | #rrggbb | `#8d87b5` |
+| Cores e fundos | Cor: Especial (melhor volta, salto, recordes) | `colSpecial` | #rrggbb | `#c06bff` |
+| Cores e fundos | Cor: Fundo e contorno (painéis e contorno da tinta) | `colPanel` | #rrggbb | `#07060f` |
+
+### 9.2 Cores por HUD
+
+Cada HUD guarda **8 cores por função** no JSON (`#rrggbb`, validadas na importação). Durante o desenho daquele HUD, elas substituem os papéis da paleta, inclusive a camada no mundo de B e C. Depois, a paleta global é restaurada, e um HUD nunca herda as cores de outro (teste 05c). As funções são:
+
+- **Primária:** informação e escudo.
+- **Destaque:** impulso, volta final e ameaça.
+- **Aviso:** rival, curvas e energia baixa.
+- **Perigo:** alertas P0 e energia crítica.
+- **Texto principal.**
+- **Texto secundário.**
+- **Especial:** melhor volta e salto.
+- **Fundo e contorno:** fundo dos painéis e tinta.
+
+Também estão na seção **Opacidade dos fundos** (0–1,6 ×) e, em B e C, **Contorno do texto** (0–2 ×). Em A, o contorno já é o "Peso da tinta". O painel tem ainda:
+
+- **Paletas prontas:** aplicam as 8 cores de uma vez.
+- **Contraste WCAG ao vivo:** texto ≥ 4,5:1; primária, secundário e perigo ≥ 3:1, contra o fundo dos painéis, com aviso ⚠ quando falha.
+- **Aplicar cores e fundos aos 3 HUDs.**
+
+Todas as paletas prontas passam no contraste (teste 05c). O padrão de todos os HUDs é Flux · D-TOON, sem mudança visual em relação à versão anterior. Exceção: em B, os alertas P0 passaram de rosa-destaque para a cor de perigo, e a melhor volta passou para a cor especial.
+
+| Paleta | Primária | Destaque | Aviso | Perigo | Texto | Secundário | Especial | Fundo | Contraste do texto |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | ---: |
+| Flux · padrão D-TOON | `#43f0de` | `#ff4794` | `#ffa636` | `#ff2a4f` | `#fff3d6` | `#8d87b5` | `#c06bff` | `#07060f` | 18,3:1 |
+| Alto contraste | `#00f0ff` | `#ff4fd8` | `#ffd400` | `#ff3b30` | `#ffffff` | `#d0d0e0` | `#c4a0ff` | `#000000` | 21,0:1 |
+| Daltonismo · Okabe-Ito | `#56b4e9` | `#cc79a7` | `#f0e442` | `#ff8c1a` | `#ffffff` | `#a9b6c4` | `#9ab8ff` | `#05070d` | 20,1:1 |
+| Âmbar monocromático | `#ffb000` | `#ffd27a` | `#ff8a00` | `#ff3d00` | `#ffe7b8` | `#a8875a` | `#ffcf66` | `#0d0700` | 16,6:1 |
+| Gelo | `#7fd8ff` | `#b28cff` | `#ffd36b` | `#ff4d6d` | `#eaf6ff` | `#8aa1b8` | `#a9c7ff` | `#050a12` | 18,1:1 |
+| Vapor | `#01cdfe` | `#ff71ce` | `#fffb96` | `#ff3864` | `#fdf0ff` | `#b29ccf` | `#b967ff` | `#0b0418` | 18,3:1 |
+| Fósforo verde | `#39ff88` | `#c2ff4d` | `#ffd84d` | `#ff4d4d` | `#e8ffe8` | `#7fae8a` | `#7dffd4` | `#020a05` | 19,0:1 |
 
 ## 10. Arquitetura
 
@@ -241,7 +363,7 @@ O build embute, sem alteração e em escopo próprio, o bloco do P05, o resolved
 
 ## 11. Testes e evidências
 
-`npm test` executa 18 testes do P12 V2: bloco P05 (SHA-256 e impressões), cópias exatas do 06 e do 04 V2, pintura de cada nave pelo `resolveLivery`, saída dos três HUDs e das três câmeras, independência das nove combinações, efeito de todos os sliders, opções e seletores (HUD e câmera), "para cima" contínuo e nave sempre enquadrada no loop, classificação dos 30, coerência de velocidade/distância/voltas/cronômetro, coerência telemetria ↔ VFX ↔ HUD, determinismo e busca, JSON válido/inválido/atômico, prioridades com eventos simultâneos, legibilidade e sobreposição em seis resoluções (16:9, 21:9, 9:16), orçamento de desempenho, ciclo de vida WebGL (contexto simulado: buffers estáveis, perda/restauração, liberação total), alternância rápida e HTML em dia com as fontes. As evidências de navegador real estão em [`docs/evidence/12_hud_camera_lab_v2/`](../evidence/12_hud_camera_lab_v2/README.md).
+`npm test` executa 19 testes do P12 V2: bloco P05 (SHA-256 e impressões), cópias exatas do 06 e do 04 V2, pintura de cada nave pelo `resolveLivery`, saída dos três HUDs e das três câmeras, independência das nove combinações, efeito de todos os sliders, opções, seletores e cores (HUD e câmera), cores isoladas por HUD, paletas com contraste WCAG e módulos ocultos sem mudança de layout, "para cima" contínuo e nave sempre enquadrada no loop, classificação dos 30, coerência de velocidade/distância/voltas/cronômetro, coerência telemetria ↔ VFX ↔ HUD, determinismo e busca, JSON válido/inválido/atômico, prioridades com eventos simultâneos, legibilidade e sobreposição em seis resoluções (16:9, 21:9, 9:16), orçamento de desempenho, ciclo de vida WebGL (contexto simulado: buffers estáveis, perda/restauração, liberação total), alternância rápida e HTML em dia com as fontes. As evidências de navegador real estão em [`docs/evidence/12_hud_camera_lab_v2/`](../evidence/12_hud_camera_lab_v2/README.md).
 
 ## 12. Limitações verdadeiras
 

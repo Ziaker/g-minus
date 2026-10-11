@@ -83,9 +83,28 @@ test('05 · todos os sliders, opções e seletores de HUD alteram a saída desen
  for(let t=20;t<170;t+=.5){L.seek(t);const T=L.telemetry(),nc=T.forecast.find(f=>f.kind==='corner'&&f.dist>0);if(!L.messages('C').length&&!T.nearby.some(o=>o.threat||o.dist<25)&&!T.drift.on&&!T.crit&&nc&&nc.dist/(T.speed/3.6)>5.5&&!T.forecast.some(f=>f.kind==='corner'&&f.dist<=0&&f.dist+f.len>0)){times.push(t);break;}}
  const frames=times;
  const failures=[];
- for(const h of ['A','B','C']){const H=L.huds[h];const knobs=[...H.params.map(p=>[p.id,p.min,p.max]),...Object.keys(H.toggles||{}).map(k=>[k,false,true]),...Object.entries(H.selects||{}).map(([k,v])=>[k,v[0],v[1]])];
+ for(const h of ['A','B','C']){const H=L.huds[h];const knobs=[...H.params.map(p=>[p.id,p.min,p.max]),...Object.keys(H.toggles||{}).map(k=>[k,false,true]),...Object.entries(H.selects||{}).map(([k,v])=>[k,v[0],v[1]]),...Object.keys(H.colors||{}).map(k=>[k,'#102030','#f0e0d0'])];
   for(const [k,lo,hi] of knobs){let changed=false;for(const t of frames){L.seek(t);const draw=v=>{L.setHudParam(h,k,v);const g=mock2d();L.drawHud(h,g,1920,1080,'A');return g.ops.join('|')+JSON.stringify(L.hudWorld(h,'A'));};const a=draw(lo),b=draw(hi);L.setHudParam(h,k,base.hud[h][k]);if(a!==b){changed=true;break;}}if(!changed)failures.push(h+'.'+k);}}
  assert.deepEqual(failures,[]);});
+
+test('05c · cores por HUD: paletas legíveis, cor só no HUD que desenha, módulos ocultos sem mudar o layout',()=>{
+ // toda paleta pronta passa no contraste WCAG contra o próprio fundo (texto 4,5:1; primária, secundário e perigo 3:1)
+ const roles=L.colorRoles.map(r=>r[0]);for(const [id,P] of Object.entries(L.palettes)){assert.equal(P.c.length,roles.length);const c=Object.fromEntries(roles.map((k,i)=>[k,P.c[i]]));
+  assert.ok(L.contrast(c.colText,c.colPanel)>=4.5,id+' texto');for(const k of ['colPrimary','colMuted','colDanger'])assert.ok(L.contrast(c[k],c.colPanel)>=3,id+' '+k);}
+ const base=json(L.config()),before=JSON.stringify(L.hudColorsNow());L.seek(L.scenarioTime('defense')+1.4);
+ // paleta aplicada ao HUD B não vaza para A nem para o estado global
+ const drawA=()=>{const g=mock2d();L.drawHud('A',g,1920,1080,'A');return g.ops.join('|');};const a0=drawA();
+ for(const k of roles)L.setHudParam('B',k,'#12ab34');const g=mock2d();L.drawHud('B',g,1920,1080,'A');assert.ok(g.ops.join('|').includes('#12ab34')||g.ops.join('|').includes('18,171,52'),'cor escolhida chega ao desenho');
+ assert.equal(JSON.stringify(L.hudColorsNow()),before,'paleta global restaurada após o desenho');assert.equal(drawA(),a0,'HUD A não herda as cores do B');
+ assert.throws(()=>L.setHudParam('A','colText','azul'));
+ // ocultar cada módulo muda o desenho, mas não as caixas de layout dos outros módulos
+ for(const h of ['A','B','C']){const H=L.huds[h],shows=Object.keys(H.toggles).filter(k=>k.startsWith('show'));const g0=mock2d();const M0=L.drawHud(h,g0,1920,1080,'A');
+  for(const k of shows){L.setHudParam(h,k,false);const g1=mock2d();const M1=L.drawHud(h,g1,1920,1080,'A');L.setHudParam(h,k,true);
+   assert.deepEqual(M1.boxes,M0.boxes,h+'.'+k+' mudou o layout');}
+  for(const k of shows)L.setHudParam(h,k,false);if('radar' in H.toggles)L.setHudParam(h,'radar',false);if('minimap' in H.toggles)L.setHudParam(h,'minimap',false);
+  const ge=mock2d();L.drawHud(h,ge,1920,1080,'A');const paint=ops=>ops.filter(o=>/^(fill|stroke|fillText|strokeText|fillRect|strokeRect)\(/.test(o)).length;
+  assert.ok(paint(ge.ops)<paint(g0.ops)*.1,h+': com todos os módulos ocultos quase nada é pintado ('+paint(ge.ops)+' de '+paint(g0.ops)+')');}
+ L.importJSON(JSON.stringify(base));});
 
 test('05b · todos os sliders das três câmeras alteram o enquadramento',()=>{
  const windows=['loop','jump','impact','defense','highspeed','traffic'].map(id=>L.camContexts(L.scenarioTime(id)+1.6,1.6));windows.push(L.camContexts(playerEvent('driftStart').t+.5,1.5));windows.push(L.camContexts(playerEvent('boostStart').t+.8,1.5));
@@ -153,14 +172,14 @@ test('09 · busca, pausa e repetição reproduzíveis (determinismo bit a bit da
 
 test('10 · JSON versionado, estrito e atômico (inválidos rejeitados sem mutação parcial)',()=>{
  const A=lab();A.seek(12);const before=A.exportJSON(),digest=A.digest(),cfg0=JSON.parse(before);
- const cases={'distância -100':o=>o.camera.A.distance=-100,'FOV 999':o=>o.camera.B.fovBase=999,'sem câmera B':o=>delete o.camera.B,'sem hud C':o=>delete o.hud.C,'chave extra':o=>o.approved=true,'status alterado':o=>o.status='APROVADO','versão':o=>o.version=2,'schema':o=>o.schema='x',
+ const cases={'distância -100':o=>o.camera.A.distance=-100,'FOV 999':o=>o.camera.B.fovBase=999,'sem câmera B':o=>delete o.camera.B,'sem hud C':o=>delete o.hud.C,'chave extra':o=>o.approved=true,'status alterado':o=>o.status='APROVADO','versão':o=>o.version=1,'schema':o=>o.schema='x','cor inválida':o=>o.hud.A.colPrimary='red','cor ausente':o=>delete o.hud.B.colText,'fonte desconhecida':o=>o.hud.C.font='comic',
   'geometria':o=>o.geometry='prototype-05/v2','pintura':o=>o.paintSystem='A','string numérica':o=>o.hud.A.scale='1','NaN':o=>o.hud.B.ringRadius=null,'semente não inteira':o=>o.race.seed=2.5,'voltas':o=>o.race.laps=9,'hud inexistente':o=>o.selection.hud='D','vista':o=>o.selection.view='quad',
   'boost C':o=>o.vfx.boost.C=true,'drift D (não aprovado)':o=>o.vfx.drift='D','colisão A':o=>o.vfx.collision='A','toggle não booleano':o=>o.hud.A.minimap=1,'select inválido':o=>o.hud.C.deltaRef='média','cenário':o=>o.playback.scenario='x','taxa':o=>o.playback.rate=3,'parcial válido + inválido':o=>{o.hud.A.scale=1.2;o.camera.C.pitch=99;}};
  for(const [name,mut] of Object.entries(cases)){const o=JSON.parse(before);mut(o);assert.throws(()=>A.importJSON(JSON.stringify(o)),undefined,name);assert.equal(A.exportJSON(),before,name+': configuração intacta');assert.equal(A.digest(),digest,name+': simulação intacta');}
  assert.throws(()=>A.importJSON('{"schema":'));assert.equal(A.exportJSON(),before);
  const ok=JSON.parse(before);ok.hud.A.scale=1.2;ok.camera.C.pitch=9;ok.selection.hud='C';ok.vfx.drift='E';ok.vfx.boost.D=false;A.importJSON(JSON.stringify(ok));const after=JSON.parse(A.exportJSON());assert.deepEqual(after,ok);
  assert.deepEqual(Object.keys(cfg0).sort(),['artDirection','camera','geometry','hud','paintSystem','playback','race','schema','selection','status','version','vfx','vfxBaseline']);
- assert.equal(cfg0.version,1);assert.match(cfg0.status,/NÃO APROVADO/);});
+ assert.equal(cfg0.version,2);assert.match(cfg0.status,/NÃO APROVADO/);});
 
 test('11 · eventos simultâneos: P0 sempre visível, capacidade por HUD respeitada, prioridade e fusão',()=>{
  const I=L.internals;const ships=[{id:0,s:100,lane:0,v:300,crit:true,inRecharge:false,finished:false,rank:5}];for(let i=1;i<30;i++)ships.push({id:i,s:0,lane:0,v:300,crit:false,inRecharge:false,finished:false,rank:i+1});

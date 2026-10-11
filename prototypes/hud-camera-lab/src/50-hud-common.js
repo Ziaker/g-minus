@@ -33,24 +33,26 @@ const GLYPHS={
 const ACCENTS={'Á':['A','acute'],'À':['A','grave'],'Â':['A','circ'],'Ã':['A','tilde'],'É':['E','acute'],'Ê':['E','circ'],'Í':['I','acute'],'Ó':['O','acute'],'Ô':['O','circ'],'Õ':['O','tilde'],'Ú':['U','acute'],'Ç':['C','cedil']};
 const ACCENT_P={acute:[[[2.4,-1],[4,-2.8]]],grave:[[[2,-2.8],[3.6,-1]]],circ:[[[1.4,-1],[3,-2.8],[4.6,-1]]],tilde:[[[.8,-1.4],[2,-2.6],[4,-1.4],[5.2,-2.6]]],cedil:[[[3,10],[3,11.4],[1.8,12.2]]]};
 function glyphOf(ch){const g=GLYPHS[ch];if(g)return g;const a=ACCENTS[ch];if(a){const b=GLYPHS[a[0]];return {w:b.w,p:[...b.p,...ACCENT_P[a[1]].map(l=>l.map(([x,y])=>[x*(b.w/6),y]))]};}return GLYPHS['?'];}
-function vtextWidth(str,size,track=.18){const k=size/10;let w=0;for(const ch of String(str).toUpperCase())w+=(glyphOf(ch).w+1.6+track*10)*k;return Math.max(0,w-(1.6+track*10)*k);}
+let _TRACK=null;   // espaçamento entre letras do HUD em desenho (slider)
+function hudTrack(v){_TRACK=v??null;}
+function vtextWidth(str,size,track=_TRACK??.18){const k=size/10;let w=0;for(const ch of String(str).toUpperCase())w+=(glyphOf(ch).w+1.6+track*10)*k;return Math.max(0,w-(1.6+track*10)*k);}
 // desenha texto vetorial; opções: align, skew, weight (fração da altura), color, ink, inkW, track, alpha, chroma ([dx,dy] de desalinhamento ciano/rosa)
 let _MET=null;   // coletor de métricas de texto ativo durante um draw de teste
 function hudBegin(M){_MET=M||null;}
 function vtext(g,str,x,y,size,o={}){
- str=String(str).toUpperCase();if(_MET)_MET.texts.push({id:'text',size,x,y,str});const k=size/10,track=o.track??.18,w=vtextWidth(str,size,track),skew=o.skew??-.2;
+ str=String(str).toUpperCase();if(_MET)_MET.texts.push({id:'text',size,x,y,str});const k=size/10,track=o.track??(_TRACK??.18),w=vtextWidth(str,size,track),skew=o.skew??-.2;
  const x0=o.align==='right'?x-w:o.align==='center'?x-w/2:x,lw=Math.max(1,size*(o.weight??.13));
  const path=()=>{g.beginPath();let cx=x0;const fills=[];for(const ch of str){const gl=glyphOf(ch);for(const line of gl.p){line.forEach(([gx,gy],i)=>{const X=cx+gx*k+(-skew)*(10-gy)*k,Y=y-size+gy*k;i?g.lineTo(X,Y):g.moveTo(X,Y);});}if(gl.fill)fills.push([cx,gl]);cx+=(gl.w+1.6+track*10)*k;}return fills;};
  g.save();g.globalAlpha*=(o.alpha??1);g.lineCap='square';g.lineJoin='miter';g.miterLimit=3;
  const strokePass=(color,width,dx=0,dy=0)=>{g.translate(dx,dy);const fills=path();g.strokeStyle=color;g.lineWidth=width;g.stroke();for(const [cx,gl] of fills){g.beginPath();for(const line of gl.p)line.forEach(([gx,gy],i)=>{const X=cx+gx*k+(-skew)*(10-gy)*k,Y=y-size+gy*k;i?g.lineTo(X,Y):g.moveTo(X,Y);});g.fillStyle=color;g.fill();g.stroke();}g.translate(-dx,-dy);};
  if(o.chroma&&(o.chroma[0]||o.chroma[1])){strokePass(HUDC.cyan,lw,o.chroma[0],-o.chroma[1]);strokePass(HUDC.pink,lw,-o.chroma[0],o.chroma[1]);}
- if(o.ink!==false&&(o.inkW??1)>0)strokePass(o.ink||HUDC.ink,lw+Math.max(1.5,size*.1)*(o.inkW??1));
+ if(o.ink!==false&&(o.inkW??1)*_INK>0)strokePass(o.ink||HUDC.ink,lw+Math.max(1.5,size*.1)*(o.inkW??1)*_INK);
  strokePass(o.color||HUDC.paper,lw);
  g.restore();return w;}
 /* ---------------- texto de sistema (rótulos longos) ---------------- */
-const HUD_FONT="'Bahnschrift','DIN Alternate','Barlow Semi Condensed','Roboto Condensed','Arial Narrow',system-ui,sans-serif";
+let HUD_FONT="'Bahnschrift','DIN Alternate','Barlow Semi Condensed','Roboto Condensed','Arial Narrow',system-ui,sans-serif";
 function stext(g,str,x,y,size,o={}){if(_MET)_MET.texts.push({id:'text',size,x,y,str});g.save();g.globalAlpha*=(o.alpha??1);g.font=(o.weight||600)+' '+size+'px '+HUD_FONT;g.textAlign=o.align||'left';g.textBaseline=o.base||'alphabetic';if(o.track!==undefined&&'letterSpacing' in g)g.letterSpacing=o.track+'px';
- if(o.ink!==false){g.lineJoin='round';g.strokeStyle=o.ink||HUDC.ink;g.lineWidth=Math.max(2,size*.22)*(o.inkW??1);g.strokeText(str,x,y);}g.fillStyle=o.color||HUDC.paper;g.fillText(str,x,y);g.restore();}
+ if(o.ink!==false&&_INK>0){g.lineJoin='round';g.strokeStyle=o.ink||HUDC.ink;g.lineWidth=Math.max(2,size*.22)*(o.inkW??1)*_INK;g.strokeText(str,x,y);}g.fillStyle=o.color||HUDC.paper;g.fillText(str,x,y);g.restore();}
 /* ---------------- formas ---------------- */
 function poly(g,pts,fill,stroke,lw){g.beginPath();pts.forEach(([x,y],i)=>i?g.lineTo(x,y):g.moveTo(x,y));g.closePath();if(fill){g.fillStyle=fill;g.fill();}if(stroke){g.strokeStyle=stroke;g.lineWidth=lw||1;g.stroke();}}
 function para(x,y,w,h,sk){return [[x+sk,y],[x+w+sk,y],[x+w,y+h],[x,y+h]];}       // paralelogramo inclinado
@@ -91,3 +93,50 @@ function trackMap2D(){if(_map2d)return _map2d;const n=TRACK.n,t0=[TRACK.T[0],TRA
  _map2d={pts:P,at,aspect:(mxx-mnx)/(mxy-mny)};return _map2d;}
 // pose de uma nave relativa ao jogador no plano local (frente, direita) — para radares
 function relPlanar(PP,pos){const d=vec.sub(pos,PP.p);return [vec.dot(d,PP.R),vec.dot(d,PP.T)];}
+// largura medida de texto de sistema (mesma fonte de stext)
+function stextW(g,str,size,weight=600){if(!g.measureText)return String(str).length*size*.55;g.save();g.font=weight+' '+size+'px '+HUD_FONT;const w=g.measureText(String(str)).width;g.restore();return Number.isFinite(w)?w:String(str).length*size*.55;}
+// parâmetros comuns de tamanho/espaçamento (grupos do painel)
+const HPG=(group,id,label,min,max,step,def,unit='',desc='')=>({group,id,label,min,max,step,def,unit,desc});
+const SIZE=(id,label,desc='')=>HPG('Tamanho dos módulos',id,label,.6,1.6,.01,1,'×',desc);
+const TEXT_PARAMS=()=>[HPG('Texto','letterSpacing','Espaçamento entre letras',.05,.5,.01,.2,'','distância entre caracteres da fonte vetorial'),HPG('Texto','lineSpacing','Espaçamento entre linhas',.8,1.6,.01,1,'×','distância vertical entre linhas de cada módulo')];
+
+/* ---------------- cores, fundos, contorno e fonte por HUD (aplicados só durante o desenho daquele HUD) ---------------- */
+// funções de cor: cada uma substitui um papel da paleta HUDC enquanto o HUD desenha (e as cores da camada no mundo)
+const HUD_COLOR_ROLES=[['colPrimary','Primária','informação, escudo, ciano da identidade'],['colAccent','Destaque','impulso, volta final, ameaça'],['colWarn','Aviso','rival, curvas, energia baixa'],['colDanger','Perigo','alertas P0, energia crítica'],
+ ['colText','Texto principal','números e rótulos'],['colMuted','Texto secundário','legendas e unidades'],['colSpecial','Especial','melhor volta, salto, recordes'],['colPanel','Fundo e contorno','painéis e contorno da tinta']];
+const HUD_PALETTES={
+ flux:{name:'Flux · padrão D-TOON',c:['#43f0de','#ff4794','#ffa636','#ff2a4f','#fff3d6','#8d87b5','#c06bff','#07060f']},
+ contrast:{name:'Alto contraste',c:['#00f0ff','#ff4fd8','#ffd400','#ff3b30','#ffffff','#d0d0e0','#c4a0ff','#000000']},
+ okabe:{name:'Daltonismo · Okabe-Ito',c:['#56b4e9','#cc79a7','#f0e442','#ff8c1a','#ffffff','#a9b6c4','#9ab8ff','#05070d']},
+ amber:{name:'Âmbar monocromático',c:['#ffb000','#ffd27a','#ff8a00','#ff3d00','#ffe7b8','#a8875a','#ffcf66','#0d0700']},
+ ice:{name:'Gelo',c:['#7fd8ff','#b28cff','#ffd36b','#ff4d6d','#eaf6ff','#8aa1b8','#a9c7ff','#050a12']},
+ vapor:{name:'Vapor',c:['#01cdfe','#ff71ce','#fffb96','#ff3864','#fdf0ff','#b29ccf','#b967ff','#0b0418']},
+ phosphor:{name:'Fósforo verde',c:['#39ff88','#c2ff4d','#ffd84d','#ff4d4d','#e8ffe8','#7fae8a','#7dffd4','#020a05']}};
+const hudColorDefaults=()=>Object.fromEntries(HUD_COLOR_ROLES.map(([k],i)=>[k,HUD_PALETTES.flux.c[i]]));
+const HUD_FONTS={condensed:HUD_FONT,wide:"'Segoe UI','Helvetica Neue',Arial,system-ui,sans-serif",mono:"ui-monospace,'JetBrains Mono','Cascadia Mono',Consolas,monospace"};
+const HUD_HEX_RE=/^#[0-9a-f]{6}$/;
+function hudHexRgb(h){const n=parseInt(String(h).slice(1,7),16);return [n>>16&255,n>>8&255,n&255];}
+const _rgbaCache=new Map();
+function rgbaOf(hex,a){a=Math.round(clamp(+a,0,1)*1000)/1000;const k=hex+a;let v=_rgbaCache.get(k);if(!v){const [r,g,b]=hudHexRgb(hex);v='rgba('+r+','+g+','+b+','+a+')';if(_rgbaCache.size>4000)_rgbaCache.clear();_rgbaCache.set(k,v);}return v;}
+function mixHex(a,b,t){const A=hudHexRgb(a),B=hudHexRgb(b);return '#'+A.map((x,i)=>Math.round(lerp(x,B[i],t)).toString(16).padStart(2,'0')).join('');}
+// contraste WCAG 2.x entre duas cores
+function luminance(hex){return hudHexRgb(hex).map(v=>{v/=255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4;}).reduce((s,v,i)=>s+v*[.2126,.7152,.0722][i],0);}
+function contrastRatio(a,b){const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
+let _PANEL_A=1,_INK=1;
+const hudBg=a=>rgbaOf(HUDC.ink,a*_PANEL_A);   // fundo de painel na cor/opacidade escolhidas
+const HUDC_BASE={...HUDC};let _HUDV_BASE=null;
+function hudStyle(cfg){
+ if(!_HUDV_BASE)_HUDV_BASE=Object.fromEntries(Object.entries(HUDV).map(([k,v])=>[k,[...v]]));
+ if(!cfg){Object.assign(HUDC,HUDC_BASE);for(const k in _HUDV_BASE)HUDV[k].splice(0,3,..._HUDV_BASE[k]);_PANEL_A=1;_INK=1;HUD_FONT=HUD_FONTS.condensed;return;}
+ const c=k=>HUD_HEX_RE.test(cfg[k]||'')?cfg[k]:HUDC_BASE[{colPrimary:'cyan',colAccent:'pink',colWarn:'gold',colDanger:'danger',colText:'paper',colMuted:'mute',colSpecial:'violet',colPanel:'ink'}[k]];
+ const P={cyan:c('colPrimary'),pink:c('colAccent'),magenta:c('colAccent'),gold:c('colWarn'),danger:c('colDanger'),paper:c('colText'),mute:c('colMuted'),violet:c('colSpecial'),ink:c('colPanel')};
+ P.ink2=mixHex(P.ink,P.violet,.1);P.deep=mixHex(P.ink,P.violet,.18);Object.assign(HUDC,P);
+ const v3=h=>hudHexRgb(h).map(x=>x/255);for(const [k,role] of [['cyan','cyan'],['pink','pink'],['gold','gold'],['paper','paper'],['ink','ink']])if(HUDV[k])HUDV[k].splice(0,3,...v3(P[role]));
+ _PANEL_A=cfg.panelAlpha??1;_INK=cfg.outline??1;HUD_FONT=HUD_FONTS[cfg.font]||HUD_FONTS.condensed;}
+// visibilidade por módulo: um módulo oculto desenha num contexto "fantasma" (mede, não pinta), então o layout dos outros não muda
+function hudVis(G0){let ghost=null;const make=()=>{const st={};return new Proxy(st,{get(t,k){if(k==='measureText')return s=>{if(!G0.measureText)return {width:String(s).length*10};G0.save();G0.font=t.font||G0.font;const m=G0.measureText(s);G0.restore();return m;};
+  if(k==='createPattern'||k==='createLinearGradient'||k==='createRadialGradient')return (...a)=>typeof G0[k]==='function'?G0[k](...a):(k==='createPattern'?null:{addColorStop(){}});
+  if(k in t)return t[k];return typeof G0[k]==='function'?()=>{}:G0[k];},set(t,k,v){t[k]=v;return true;}});};
+ return on=>on?G0:(ghost||(ghost=make()));}
+// parâmetros comuns de cor/fundo/contorno
+const STYLE_PARAMS=(outline=true)=>[HPG('Cores e fundos','panelAlpha','Opacidade dos fundos',0,1.6,.01,1,'×','multiplica a opacidade de todos os painéis'),...(outline?[HPG('Cores e fundos','outline','Contorno do texto',0,2,.01,1,'×','espessura da tinta em volta do texto')]:[])];

@@ -107,12 +107,38 @@ function ctl(def,value,onValue){const box=el('div',{className:'ctl'}),id='c'+(++
  const lab=el('label',{htmlFor:id},def.label);lab.append(out);const inp=el('input',{type:'range',id,min:def.min,max:def.max,step:def.step,value});inp.oninput=()=>{const v=Number(inp.value);onValue(v);out.textContent=fmt(v);};box.append(lab,inp);if(def.desc)box.append(el('small',{},def.desc));return box;}
 function chk(label,value,on){const i=el('input',{type:'checkbox',checked:value});i.onchange=()=>on(i.checked);return el('label',{className:'chk'},i,label);}
 function sel(label,list,value,on,names){const s=el('select',{});for(const v of list)s.add(new Option(names?names[v]||v:v,v));s.value=value;s.onchange=()=>on(s.value);return el('div',{className:'row'},el('span',{textContent:label,style:'flex:0 0 46%;font-size:11.5px;color:#d4d0e6'}),s);}
+const GROUP_CLOSED=new Set();
+const MODULE_TOGGLES=new Set(['showSpeed','showPosition','showEnergy','showLap','minimap','showCombat','showBanner','showAlerts','showEffects','showHead','showLadder','showGauge','radar','showBrackets','showThreats','showDamage','showStrip','showPos','showTiming','showCluster','showRival']);
+// cores do HUD: paletas prontas, uma cor por função, contraste WCAG ao vivo e cópia para os três HUDs
+function colorPanel(d,H,hc){
+ const pal=el('div',{className:'palettes'});for(const [id,P] of Object.entries(HUD_PALETTES)){const sw=el('span',{className:'sw'});for(const c of P.c)sw.append(el('i',{style:'background:'+c}));
+  pal.append(el('button',{className:'pal',title:'Aplicar a paleta '+P.name,on:{click:e=>{e.preventDefault();HUD_COLOR_ROLES.forEach(([k],i)=>{hc[k]=P.c[i];});renderTab();}}},el('b',{textContent:P.name}),sw));}
+ d.append(el('p',{className:'note',textContent:'Paletas prontas (aplicam as 8 cores; depois ajuste cada uma):'}),pal);
+ const report=el('p',{className:'contrast'});
+ const upd=()=>{const bgc=hc.colPanel,rows=[['texto',hc.colText,4.5],['primária',hc.colPrimary,3],['secundário',hc.colMuted,3],['perigo',hc.colDanger,3]];report.replaceChildren();
+  for(const [n,c,min] of rows){const r=contrastRatio(c,bgc),ok=r>=min;report.append(el('span',{className:ok?'ok':'bad',title:'mínimo recomendado '+min+':1 (WCAG)',textContent:n+' '+r.toFixed(1)+':1 '+(ok?'✓':'⚠')}));}};
+ for(const [k,label,desc] of HUD_COLOR_ROLES){const hex=el('code',{textContent:hc[k]}),inp=el('input',{type:'color',value:hc[k]});inp.oninput=()=>{hc[k]=inp.value.toLowerCase();hex.textContent=hc[k];upd();};
+  d.append(el('div',{className:'colrow'},inp,el('span',{},el('b',{textContent:label}),el('small',{textContent:desc})),hex));}
+ upd();d.append(el('p',{className:'note',textContent:'Contraste contra o fundo dos painéis:'}),report);
+ d.append(el('div',{className:'row'},el('button',{textContent:'Aplicar cores e fundos aos 3 HUDs',on:{click:e=>{e.preventDefault();for(const id of IDS){for(const [k] of HUD_COLOR_ROLES)LAB.cfg.hud[id][k]=hc[k];for(const k of ['panelAlpha','outline'])if(k in LAB.cfg.hud[id]&&k in hc)LAB.cfg.hud[id][k]=hc[k];}renderTab();}}})));}
 function renderTab(){const b=$('tabbody');b.replaceChildren();document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x.dataset.tab===TAB));const cfg=LAB.cfg;
  const pick=(cur,set)=>{const s=el('div',{className:'seg'});for(const id of IDS){const x=el('button',{textContent:id,on:{click:()=>{set(id);renderTab();}}});x.classList.toggle('on',id===cur);s.append(x);}return s;};
  if(TAB==='hud'){const H=HUDS[EDIT_HUD];b.append(el('p',{className:'eyebrow',textContent:'Editar HUD (independente do selecionado)'}),pick(EDIT_HUD,v=>EDIT_HUD=v),el('div',{className:'card'},el('div',{className:'tag',textContent:'HUD '+H.id+' · '+H.tag}),el('h3',{textContent:H.name}),el('p',{textContent:H.intent})));
-  b.append(el('p',{className:'eyebrow',textContent:'Sliders próprios'}));for(const p of H.params)b.append(ctl(p,cfg.hud[EDIT_HUD][p.id],v=>{cfg.hud[EDIT_HUD][p.id]=v;}));
-  for(const k of Object.keys(H.toggles||{}))b.append(chk(TOGGLE_LABEL[k]||k,cfg.hud[EDIT_HUD][k],v=>{cfg.hud[EDIT_HUD][k]=v;}));
-  for(const [k,list] of Object.entries(H.selects||{}))b.append(sel(SELECT_LABEL[k]||k,list,cfg.hud[EDIT_HUD][k],v=>{cfg.hud[EDIT_HUD][k]=v;},SELECT_NAMES[k]));
+  // seções recolhíveis (estado aberto/fechado fica na sessão), cada uma com "restaurar"
+  const hc=cfg.hud[EDIT_HUD],defs=hudDefaults(EDIT_HUD);
+  const section=(name,keys,fill)=>{const key=EDIT_HUD+':'+name,d=el('details',{className:'sgrp'});d.open=!GROUP_CLOSED.has(key);d.ontoggle=()=>{d.open?GROUP_CLOSED.delete(key):GROUP_CLOSED.add(key);};
+   const reset=el('button',{className:'mini',textContent:'restaurar',title:'Restaurar os valores padrão desta seção',on:{click:e=>{e.preventDefault();for(const k of keys)hc[k]=defs[k];renderTab();}}});
+   d.append(el('summary',{},el('span',{textContent:name+' · '+keys.length}),reset));fill(d);b.append(d);};
+  const groups=new Map();for(const p of H.params){const k=p.group||'Geral';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(p);}
+  const toggleKeys=Object.keys(H.toggles||{}),modKeys=toggleKeys.filter(k=>MODULE_TOGGLES.has(k)),optKeys=toggleKeys.filter(k=>!MODULE_TOGGLES.has(k)),colorKeys=Object.keys(H.colors||{});
+  const sliders=(d,list)=>{for(const p of list)d.append(ctl(p,hc[p.id],v=>{hc[p.id]=v;}));};
+  for(const [name,list] of groups){
+   if(name==='Cores e fundos'){section(name,[...list.map(p=>p.id),...colorKeys],d=>{colorPanel(d,H,hc);sliders(d,list);});continue;}
+   if(name==='Texto'){section(name,[...list.map(p=>p.id),'font'],d=>{sliders(d,list);d.append(sel(SELECT_LABEL.font,H.selects.font,hc.font,v=>{hc.font=v;},SELECT_NAMES.font));});continue;}
+   section(name,list.map(p=>p.id),d=>sliders(d,list));
+   if(name==='Tamanho dos módulos')section('Módulos visíveis',modKeys,d=>{for(const k of modKeys)d.append(chk(TOGGLE_LABEL[k]||k,hc[k],v=>{hc[k]=v;}));d.append(el('p',{className:'note',textContent:'Ocultar um módulo não move os outros: o layout continua o mesmo, só sem desenhar o módulo.'}));});}
+  const selKeys=Object.keys(H.selects||{}).filter(k=>k!=='font');
+  if(optKeys.length||selKeys.length)section('Opções',[...optKeys,...selKeys],d=>{for(const k of optKeys)d.append(chk(TOGGLE_LABEL[k]||k,hc[k],v=>{hc[k]=v;}));for(const k of selKeys)d.append(sel(SELECT_LABEL[k]||k,H.selects[k],hc[k],v=>{hc[k]=v;},SELECT_NAMES[k]));});
   b.append(el('div',{className:'row'},el('button',{textContent:'Restaurar HUD '+EDIT_HUD,on:{click:()=>{cfg.hud[EDIT_HUD]=hudDefaults(EDIT_HUD);renderTab();}}})));}
  else if(TAB==='cam'){const C=CAM_META[EDIT_CAM];b.append(el('p',{className:'eyebrow',textContent:'Editar câmera (independente do HUD)'}),pick(EDIT_CAM,v=>EDIT_CAM=v),el('div',{className:'card'},el('div',{className:'tag',textContent:'Câmera '+EDIT_CAM+' · '+C.tag}),el('h3',{textContent:C.name}),el('p',{textContent:C.intent})));
   b.append(el('p',{className:'eyebrow',textContent:'Sliders próprios (valores experimentais; física P08 pendente)'}));for(const d of camParamDefs(EDIT_CAM))b.append(ctl(d,cfg.camera[EDIT_CAM][d.id],v=>{cfg.camera[EDIT_CAM][d.id]=v;}));
@@ -136,9 +162,9 @@ function renderTab(){const b=$('tabbody');b.replaceChildren();document.querySele
   el('div',{className:'card'},el('h3',{textContent:'Bases aprovadas usadas sem alteração'}),el('p',{textContent:'Geometria P05 (bloco canônico v1 e nove impressões), pintura Sistema B do P06 (resolveLivery com baseline do pipeline), renderizador D do P06, VFX do 04 V2 com calibração aprovada. Competidores extras reutilizam as nove geometrias como instâncias de demonstração.'})),
   el('div',{className:'card'},el('h3',{textContent:'Teclado'}),el('p',{textContent:'Espaço reproduz/pausa · ←/→ quadro (Shift: 1 s) · Home reinicia · 1/2/3 HUD · Q/W/E câmera · V vista · X alterna comparação · F tela cheia · P painel · D diagnóstico · [ ] cenário'})));}
 }
-const TOGGLE_LABEL={minimap:'Minimapa',radar:'Radar',attackAssist:'Indicadores de janela de ataque',autoHide:'Recolher módulos em cruzeiro',trackMarkers:'Marcadores de frenagem/ápice na pista'};
-const SELECT_LABEL={radarMode:'Modo do radar',deltaRef:'Referência do delta',forecastMode:'Escala da previsão'};
-const SELECT_NAMES={radarMode:{local:'Local (relativo)',circuit:'Circuito inteiro'},deltaRef:{best:'Melhor volta',last:'Última volta'},forecastMode:{time:'Tempo até chegar',distance:'Distância'}};
+const TOGGLE_LABEL={showSpeed:'Velocímetro e lâmina',showPosition:'Posição',showEnergy:'Energia e impulsos',showLap:'Volta e tempos',showCombat:'Marcas de combate, rival e curvas',showBanner:'Faixas de volta, largada e chegada',showAlerts:'Alertas e chamadas',showEffects:'Efeitos de borda (foco, impacto, ameaça, borda aberta)',showHead:'Cabeçalho (posição e volta)',showLadder:'Escada tática',showGauge:'Medidor de potência',showBrackets:'Colchetes sobre adversários',showThreats:'Ameaças fora da tela e ataque iminente',showDamage:'Indicador direcional de dano',showStrip:'Faixa de previsão',showPos:'Posição e intervalos',showTiming:'Tempo, delta e setores',showCluster:'Velocidade, escudo e impulsos',showRival:'Módulo rival',minimap:'Minimapa',radar:'Radar',attackAssist:'Indicadores de janela de ataque',autoHide:'Recolher módulos em cruzeiro',trackMarkers:'Marcadores de frenagem/ápice na pista'};
+const SELECT_LABEL={font:'Fonte do texto de sistema',radarMode:'Modo do radar',deltaRef:'Referência do delta',forecastMode:'Escala da previsão'};
+const SELECT_NAMES={font:{condensed:'Condensada (padrão)',wide:'Larga',mono:'Monoespaçada'},radarMode:{local:'Local (relativo)',circuit:'Circuito inteiro'},deltaRef:{best:'Melhor volta',last:'Última volta'},forecastMode:{time:'Tempo até chegar',distance:'Distância'}};
 function syncUI(){if(HEADLESS)return;const s=LAB.cfg.selection;const mark=(id,v)=>$(id).querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));mark('hudSel',s.view==='single'?(LAB.flip?s.right.hud:s.hud):'');mark('camSel',s.view==='single'?(LAB.flip?s.right.camera:s.camera):'');mark('viewSel',s.view);mark('aspectSel',s.aspect);
  $('scenario').value=LAB.cfg.playback.scenario;$('rate').value=String(LAB.cfg.playback.rate);$('play').textContent=LAB.playing?'Ⅱ':'▶';$('diag').hidden=!LAB.diag;LAB.stageKey='';renderTab();}
 function updateLabels(cells){const box=$('labels');box.replaceChildren();if(cells.length<2&&!LAB.flip)return;for(const c of cells){const d=el('div',{className:'cell'});Object.assign(d.style,{left:c.x+'px',top:c.y+'px',width:c.w+'px',height:c.h+'px'});d.append(el('span',{textContent:'HUD '+c.hud+' · '+HUDS[c.hud].name+'  /  CÂM '+c.camera+' · '+CAM_META[c.camera].name}));box.append(d);}}
@@ -165,13 +191,13 @@ const API={version:LAB_VERSION,
  config:()=>deepClone(LAB.cfg),exportJSON,importJSON,parse:parseConfigText,defaults:defaultConfig,
  setHud:id=>{oneOf(id,IDS,'hud');LAB.cfg.selection.hud=id;LAB.toggles++;syncUI();},setCamera:id=>{oneOf(id,IDS,'camera');LAB.cfg.selection.camera=id;LAB.toggles++;syncUI();},
  setView:v=>{oneOf(v,VIEW_MODES,'view');LAB.cfg.selection.view=v;syncUI();},setAspect:a=>{oneOf(a,ASPECTS,'aspect');LAB.cfg.selection.aspect=a;syncUI();},
- setHudParam:(id,k,v)=>{const p=HUDS[id].params.find(p=>p.id===k);if(p)LAB.cfg.hud[id][k]=num(v,p.min,p.max,k);else if(k in (HUDS[id].toggles||{}))LAB.cfg.hud[id][k]=bool(v,k);else if(k in (HUDS[id].selects||{}))LAB.cfg.hud[id][k]=oneOf(v,HUDS[id].selects[k],k);else throw Error('parâmetro desconhecido '+k);},
+ setHudParam:(id,k,v)=>{const p=HUDS[id].params.find(p=>p.id===k);if(p)LAB.cfg.hud[id][k]=num(v,p.min,p.max,k);else if(k in (HUDS[id].toggles||{}))LAB.cfg.hud[id][k]=bool(v,k);else if(k in (HUDS[id].selects||{}))LAB.cfg.hud[id][k]=oneOf(v,HUDS[id].selects[k],k);else if(k in (HUDS[id].colors||{}))LAB.cfg.hud[id][k]=hexColor(v,k);else throw Error('parâmetro desconhecido '+k);},
  setCamParam:(id,k,v)=>{const d=camParamDefs(id).find(d=>d.id===k);if(!d)throw Error('parâmetro desconhecido '+k);LAB.cfg.camera[id][k]=num(v,d.min,d.max,k);},
  play:()=>{LAB.playing=true;},pause:()=>{LAB.playing=false;},step:(n=1)=>{for(let i=0;i<n;i++)stepLive();},seek:t=>seekTime(t),seekTick,scenario:id=>gotoScenario(id),scenarioTime,
  tick:()=>LAB.race.state.tick,time:()=>raceTime(LAB.race.state),digest:()=>stateDigest(LAB.race.state),recordAll:()=>{recordUntil(Infinity);return LAB.race.recordedTick;},
  telemetry:()=>telemetry(LAB.race,LAB.race.state,{deltaRef:LAB.cfg.hud.C.deltaRef}),messages:hud=>hudMessages(LAB.race.state.director,hud,raceTime(LAB.race.state)).map(o=>({type:o.m.type,prio:o.m.prio,age:o.age,exit:o.exit,data:o.m.data})),
  cameras:()=>Object.fromEntries(IDS.map(id=>[id,deepClone(camView(LAB.rigs[id]))])),layout:(W,H)=>layoutCells(W,H,LAB.cfg).map(c=>({...c})),
- race:()=>LAB.race,state:()=>LAB.race.state,track:()=>TRACK,sim:SIM,scenarios:SCENARIOS,huds:HUDS,camMeta:CAM_META,camParams:camParamDefs,
+ race:()=>LAB.race,state:()=>LAB.race.state,track:()=>TRACK,sim:SIM,scenarios:SCENARIOS,huds:HUDS,palettes:HUD_PALETTES,colorRoles:HUD_COLOR_ROLES,hudColorsNow:()=>({...HUDC}),contrast:contrastRatio,camMeta:CAM_META,camParams:camParamDefs,
  // desenha um HUD num contexto 2D fornecido (Canvas real ou simulado) e devolve métricas de legibilidade
  drawHud:(id,g,W,H,camId)=>{const F=buildFrame(LAB.race,LAB.race.state,renderOpts());const tele=telemetry(LAB.race,LAB.race.state,{deltaRef:LAB.cfg.hud.C.deltaRef});LAB.tele=tele;const cell={x:0,y:0,w:W,h:H},mats=camMatrices(camView(LAB.rigs[camId||LAB.cfg.selection.camera]),W/H),MET=metricsSink();HUDS[id].draw(g,W,H,hudModel(id,cell,mats,F),LAB.cfg.hud[id],MET);return MET;},
  hudWorld:(id,camId)=>{const F=buildFrame(LAB.race,LAB.race.state,renderOpts());LAB.tele=telemetry(LAB.race,LAB.race.state,{deltaRef:LAB.cfg.hud.C.deltaRef});const mats=camMatrices(camView(LAB.rigs[camId||'A']),16/9),a=new VFX.Arena(24000);if(HUDS[id].world)HUDS[id].world(a,hudModel(id,{x:0,y:0,w:1600,h:900},mats,F),LAB.cfg.hud[id]);return Array.from(a.data.subarray(0,a.count*7));},

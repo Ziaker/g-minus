@@ -1,6 +1,6 @@
 # Evidências de navegador — Protótipo 12 V2 (EM AVALIAÇÃO — NÃO APROVADO)
 
-Geradas em 11/10/2026 por [`prototypes/hud-camera-lab/capture-evidence.mjs`](../../../prototypes/hud-camera-lab/capture-evidence.mjs), com Chromium 1194 headless, **WebGL 1.0 real** (ANGLE/SwiftShader, rasterização em CPU) e o arquivo `prototypes/12_hud_camera_lab_v2.html` aberto direto do disco. Viewport de 1600 × 900, exceto as capturas `16-*`. As medições estão em [`evidence.json`](evidence.json).
+Geradas em 11/10/2026 (regeneradas após os sliders de tamanho por módulo e as cores por HUD) por [`prototypes/hud-camera-lab/capture-evidence.mjs`](../../../prototypes/hud-camera-lab/capture-evidence.mjs), com Chromium 1194 headless, **WebGL 1.0 real** (ANGLE/SwiftShader, rasterização em CPU) e o arquivo `prototypes/12_hud_camera_lab_v2.html` aberto direto do disco. Viewport de 1600 × 900, exceto as capturas `16-*`. As medições estão em [`evidence.json`](evidence.json).
 
 São evidências de funcionamento e de comparação no mesmo instante, **não** aprovação artística nem benchmark de GPU.
 
@@ -32,6 +32,15 @@ São evidências de funcionamento e de comparação no mesmo instante, **não** 
 
 - `15-laboratorio-painel.jpg`: painel de calibração aberto sobre o palco.
 - `16-21x9-hud-{A,B,C}.jpg`: 2560 × 1080. `16-9x16-hud-{A,B,C}.jpg`: 1080 × 1920 (layout retrato). Cada HUD com a câmera de mesma letra.
+
+## Sliders de tamanho e espaçamento
+
+- `17-tamanhos-e-espacamento-hud-{A,B,C}.jpg`: disputa com o rival. Cada HUD tem todos os sliders de tamanho por módulo em 1,4 ×, espaçamento entre letras de 0,3 e entre linhas de 1,3 ×. Os layouts são medidos, então colunas e painéis crescem com o texto.
+
+## Cores por HUD
+
+- `18-cores-hud-{A,B,C}-*.jpg`: mesmo instante, três paletas prontas. A usa Daltonismo · Okabe-Ito. B usa Âmbar com fundos a 1,3 ×, e a camada no mundo também muda. C usa Fósforo verde, fonte monoespaçada e módulo rival oculto.
+- `19-painel-cores-hud-B.jpg`: seção "Cores e fundos" do painel, com paletas, 8 cores por função e contraste WCAG ao vivo.
 
 ## Medições (`evidence.json`)
 
