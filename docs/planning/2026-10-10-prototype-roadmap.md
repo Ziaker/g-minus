@@ -110,7 +110,7 @@ Este documento separa três tipos de conteúdo:
   - configuração padrão = JSON do responsável;
   - [registro e catálogo obrigatório](../decisions/2026-10-11-prototype-12-v2-hud-camera-approval.md).
 
-  A integração em `src/game` está pendente: exige pedido explícito, vem depois da física do P08 (aprovada em 11/10/2026) e depende da escala física e da validação da câmera no voo.
+  A integração em `src/game` está pendente: exige pedido explícito, vem depois da física do P08 (aprovada em 11/10/2026) e depende da validação da câmera no voo. A escala física foi decidida em 11/10/2026: 1 u = 1 m.
 - **[Recomendação]** Avaliar com situações reais de corrida e combate (circuito de referência e P10).
 
 ## 3. Questões abertas
@@ -133,7 +133,7 @@ Este documento separa três tipos de conteúdo:
 | Energia [31–40] | escolha entre GX e X quando divergem |
 | Física (Protótipos 01 e 07) | 18 valores ambíguos, 12 divergências (esterço 89 × 56), 11 essenciais, avaliação visual do layout combinado |
 | VFX (04 V2) | padrão dos toggles e forma de seleção no jogo; implementação do Spin E +30 % |
-| HUD e câmera (P12 V2) | integração em `src/game` (pedido explícito, depois da física do P08); escala física do jogo (1 u = ? m) antes de exibir km/h; câmera no voo com o referencial estabilizado do P08 e transição pista ↔ voo validada; HUD e câmera na eliminação (P10); HUD de equipe [51] |
+| HUD e câmera (P12 V2) | integração em `src/game` (pedido explícito, depois da física do P08); escala já decidida (1 u = 1 m, [decisão](../decisions/2026-10-11-world-scale-1u-1m.md)); câmera no voo com o referencial estabilizado do P08 e transição pista ↔ voo validada; HUD e câmera na eliminação (P10); HUD de equipe [51] |
 
 ## 4. Protótipos futuros, depois do P12 (ordem a definir)
 

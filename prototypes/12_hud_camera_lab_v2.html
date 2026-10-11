@@ -1249,7 +1249,7 @@ const P12_APPROVED={"schema":"gminus.p12v2.hud-camera-lab","version":2,"status":
    Depende somente de clamp/lerp/TAU do bloco geométrico aprovado do P05 (embutido antes). */
 const LAB_SCHEMA='gminus.p12v2.hud-camera-lab',LAB_VERSION=2;
 const SIM_HZ=120,SIM_DT=1/SIM_HZ;
-const KMH=3.6;                       // 1 u = 1 m nesta bancada (convenção provisória, ver especificação §5)
+const KMH=3.6;                       // 1 u = 1 m (escala oficial, docs/decisions/2026-10-11-world-scale-1u-1m.md)
 const vec={
  add:(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]],
  sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
