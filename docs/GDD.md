@@ -42,7 +42,7 @@
 - **Freios [25]:** permitem curvas fechadas e manobras, além da redução de velocidade.
 - **Freios aerodinâmicos [26]:** comandos independentes à esquerda e à direita.
 - **Erros de trajetória [27]:** causam perda de velocidade.
-- **Altitude [28]:** comportamento determinado pelos atributos das quatro peças componentes da nave. Não foi definido controle vertical manual; não adicioná-lo por inferência.
+- **Altitude [28]:** ~~comportamento determinado pelos atributos das quatro peças componentes da nave.~~ **Superado em 10/10/2026:** as peças são exclusivamente cosméticas e não têm atributos ([decisão](decisions/2026-10-10-craft-parts-cosmetic-only.md)). A intenção é de equilíbrio competitivo entre naves; a regra de altitude e sua padronização estão **pendentes**. A flutuação e o contato com a pista serão revistos no Protótipo 08 ([roadmap](planning/2026-10-10-prototype-roadmap.md)). Não foi definido controle vertical manual; não adicioná-lo por inferência.
 - **Superfícies inclinadas/invertidas [29]:** exigem correções de pilotagem.
 - **Manobras avançadas [30]:** confirmadas, porém técnicas e comandos exatos ainda em aberto.
 - **Referência geral:** sensação arcade próxima de F-Zero GX, não uma exigência de replicar código-fonte, assets ou números sem validação.
@@ -110,12 +110,13 @@
 
 - **Modelos [71]:** dez veículos inicialmente, com paletas de cores diferentes.
 - **Estrutura modular [72,78]:** quatro peças componentes intercambiáveis por nave; jogador pode alterar as quatro peças e suas cores separadamente.
-- **Parâmetros [72]:** as peças determinam diferenças de desempenho, incluindo velocidade máxima, aceleração, controle, resistência, ataque, eficiência de boost e demais atributos citados na pergunta. **Os nomes e as funções precisas das quatro peças não foram definidos; não inventar categorias.**
-- **Diversidade de desempenho [73]:** combinar equilíbrio geral com especializações relevantes. O grau de diferença exige prototipação; não decidir valores finais silenciosamente.
-- **Impactos físicos [74]:** tamanho e massa da nave devem influenciar colisões e manobras.
+- **Decisão de 10/10/2026 — naves e peças exclusivamente cosméticas:** a escolha de nave e de peças não concede vantagem de velocidade, aceleração, boost, resistência, ataque ou dirigibilidade. Ficam preservadas as geometrias do Protótipo 05 e o Sistema B de pintura. Registro: [decisão](decisions/2026-10-10-craft-parts-cosmetic-only.md). O código atual ainda diferencia as naves ([auditoria](audits/2026-10-10-craft-stats-divergence.md)).
+- **Parâmetros [72]:** ~~as peças determinam diferenças de desempenho, incluindo velocidade máxima, aceleração, controle, resistência, ataque, eficiência de boost e demais atributos citados na pergunta.~~ **Superado em 10/10/2026:** as peças são exclusivamente cosméticas. **Os nomes, as funções, a compatibilidade e as regras de montagem das quatro peças não foram definidos; não inventar categorias.**
+- **Diversidade de desempenho [73]:** ~~combinar equilíbrio geral com especializações relevantes.~~ **Superado em 10/10/2026:** não há diferença de atributos ou status entre naves.
+- **Impactos físicos [74]:** ~~tamanho e massa da nave devem influenciar colisões e manobras.~~ **Superado em 10/10/2026** quanto à vantagem de desempenho. Intenção de equilíbrio competitivo: diferenças cosméticas não devem criar vantagens físicas ocultas. **Pendentes:** a padronização exata da massa e a definição técnica das hitboxes, que depende de prototipação.
 - **Habilidades especiais exclusivas [75]:** não por ora.
 - **Desbloqueios [76]:** adiado/irrelevante por ora.
-- **Progressão numérica [77]:** atributos fixos; sem melhorias permanentes de desempenho.
+- **Progressão numérica [77]:** sem melhorias permanentes de desempenho. ("Atributos fixos" perdeu o sentido desde 10/10/2026: não há atributos por nave.)
 - **Pilotos/personagens [79]:** não por ora; foco nas naves.
 - **Recordes, medalhas e recompensas [80]:** adiado/irrelevante por ora.
 
@@ -176,6 +177,10 @@ Cada solicitação de protótipo deve entregar:
 
 **Decisão vigente — Protótipo 04 V2 / VFX (10/10/2026):** aprovados: Propulsão A; Super Boost B (Corredor vetorial) **obrigatório no jogo** + A, D e E como **toggles in-game cumulativos** (C não aprovado); Spin Attack E com dimensão **desejada (provisória) de 130 % do raio de varredura do giro da nave (+30 %)**: **ainda não implementada**; o laboratório usa hoje raio externo = varredura + 0,35 u; Side Attack E modificado (afterimage mantido, descarga azul removida, speedlines laterais); Escudo D; Drift A/B/C/E selecionáveis com afterimage breve acima de 1300 km/h (D não aprovado); Colisão B/D; Dash E; Voo C/D; Velocidade A. Calibração aprovada = JSON enviado pelo responsável. A integração em `src/game`, o padrão dos toggles e a forma de seleção in-game continuam pendentes. Registro: [`docs/decisions/2026-10-10-prototype-04-v2-vfx-approval.md`](decisions/2026-10-10-prototype-04-v2-vfx-approval.md).
 
+**Decisão vigente — naves e peças cosméticas (10/10/2026):** as quatro peças são exclusivamente cosméticas, e não há diferença de atributos entre naves. Isso substitui [72–73] e o aspecto de desempenho de [28] e [74]. Hitboxes, massa, altitude e a aplicação global das configurações do Protótipo 07 estão pendentes. Registro: [`docs/decisions/2026-10-10-craft-parts-cosmetic-only.md`](decisions/2026-10-10-craft-parts-cosmetic-only.md).
+
+**Decisão vigente — sequência de protótipos (10/10/2026):** P08 física 3D, contato, voo e pouso → P09 circuito de referência → P10 impactos, destruição e K.O. → P11 Clash → P12 HUD, câmera e interface. Antes do combate avançado (P10 e P11), um **gate de jogabilidade** exige uma corrida completa e divertida, perto de 3 minutos. O P08 revisa o quique da flutuação, preservando os valores do Perfil C para comparação. O Clash mantém o mashing [45] como referência, com três implementações distintas. Recomendações técnicas e questões abertas: [`docs/planning/2026-10-10-prototype-roadmap.md`](planning/2026-10-10-prototype-roadmap.md).
+
 ### 11.2 Telemetria e depuração [102]
 
 Deve existir um sistema de telemetria e debug que facilite o teste do jogador e de todos os comportamentos de IA, inclusive situações difíceis de reproduzir. Requisitos explícitos:
@@ -217,7 +222,7 @@ Referências examinadas na branch principal em 2026-10-08:
 | Combate | Side-Attack e colisões em Game.ts/Vehicle.ts | Falta projetar/validar sistema de clash e rebotes definidos |
 | IA | Trajetória variada e comportamentos probabilísticos em Vehicle.ts | Faltam personalidades, rival dedicado, atributos e equipes |
 | Pistas | Uma curva/circuito declarado em Track.ts | Cinco pistas, bifurcações e diversidade geométrica |
-| Naves | Um modelo geométrico base parametrizado | Dez modelos e quatro peças customizáveis |
+| Naves | Um modelo geométrico base parametrizado | Dez modelos e quatro peças customizáveis, **exclusivamente cosméticas** (decisão de 10/10/2026; o código ainda diferencia o desempenho, ver a [auditoria](audits/2026-10-10-craft-stats-divergence.md)) |
 | Direção visual | Materiais e iluminação neon, geometria simples | Anime/low-poly, contorno preto, cel shading, estilo japonês |
 | Câmara | Câmera de perseguição com FOV variável | Alternância configurável de perspectivas e refinamento |
 | HUD | Velocidade, escudo, posição, volta, K.O. | Cronômetro, distâncias e minimapa/radar conforme escolha |
@@ -229,15 +234,17 @@ Referências examinadas na branch principal em 2026-10-08:
 
 1. **[8–9]** Campeonato e definição de multiplayer: perguntas não respondidas. Equipes são confirmadas, mas modalidade humana/IA não.
 2. **[21]** Definição detalhada dos três perfis de resposta da direção.
-3. **[28,30]** Nomes/funções das quatro peças, regras de altitude e lista de manobras avançadas.
+3. **[28,30]** Nomes/funções das quatro peças (cosméticas), regras de altitude e lista de manobras avançadas.
 4. **[31–40]** Quando F-Zero GX e X divergem, escolher comportamento; estabelecer valores e exceções por protótipos antes de codificar.
-5. **[45]** Mecânica precisa do clash, janela de input, controles, equilíbrio contra IA, duração e desfecho.
-6. **[47]** Destino exato após sair da pista: K.O., recuperação ou regras condicionais.
+5. **[45]** Mecânica precisa do clash, janela de input, controles, equilíbrio contra IA, duração e desfecho. O Protótipo 11 explora três implementações com mashing.
+6. **[17,34,47]** Destino exato após sair da pista ou zerar a energia: K.O., recuperação ou regras condicionais. Também ficam pendentes os efeitos de impacto (leve, forte, fatal), destruição, paredes e queda (Protótipo 10).
 7. **[51–59]** Status da IA, seleção e persistência do rival, equipes e funcionamento do rubber banding.
-8. **[72–74]** Estrutura das quatro peças, atributos, limites de composição e regras de colisão com tamanho/massa.
-9. **[91–97]** Perspectivas de câmera, instrumentos de navegação e seus comportamentos de alternância.
+8. **[72–74]** Estrutura das quatro peças cosméticas: compatibilidade, montagem, cores por peça × Sistema B. Hitboxes, padronização de massa e altitude, e aplicação global das configurações do Protótipo 07 (os atributos foram superados em 10/10/2026).
+9. **[91–97]** Perspectivas de câmera, instrumentos de navegação e seus comportamentos de alternância (Protótipo 12).
 10. **[101–102]** Formatos específicos da configuração copiável, documentação de protótipos e ferramentas de telemetria/seed.
 11. **[6,76,80]** Progressão/recompensas/desbloqueios: deliberadamente adiados.
 12. **[104]** GitHub Pages: publicação atualmente não confirmada; não afirmar que o endereço previsto permite jogar.
+13. **[61–70]** Pistas: física 3D, contato, voo e pouso (Protótipo 08) e circuito de referência (Protótipo 09), seguidos do gate de jogabilidade. Nova suspensão: valores finais pendentes; o quique só é substituído com aprovação expressa.
+14. **[18,19,51–59,67]** Checkpoints, IA e equipes: questões organizadas no [roadmap](planning/2026-10-10-prototype-roadmap.md); nenhuma regra detalhada aprovada.
 
 **Alterações de gameplay e visuais efetuadas nesta etapa:** nenhuma. Este documento registra decisões e lacunas para prototipação futura.

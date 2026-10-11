@@ -27,7 +27,9 @@ Aqui não existem lasers ou projéteis. As disputas são decididas na trajetóri
 
 ## 🏎️ Máquinas & Estatísticas (Body / Boost / Grip)
 
-Assim como no clássico, cada máquina possui atributos distintos que moldam a pilotagem:
+> **Decisão de 10/10/2026:** naves e peças serão **exclusivamente cosméticas**, sem diferença de desempenho ([decisão](docs/decisions/2026-10-10-craft-parts-cosmetic-only.md)). A tabela abaixo descreve **o código atual**, que ainda não foi alterado ([auditoria](docs/audits/2026-10-10-craft-stats-divergence.md)). Os pilotos citados não fazem parte do design (GDD [79]).
+
+No código atual, cada máquina ainda possui atributos distintos que moldam a pilotagem:
 
 | Máquina | Piloto | Body (Peso/Blindagem) | Boost (Turbo) | Grip (Aderência) | Estilo de Pilotagem |
 | :--- | :--- | :---: | :---: | :---: | :--- |
@@ -37,7 +39,7 @@ Assim como no clássico, cada máquina possui atributos distintos que moldam a p
 | **Fire Stingray** | Samurai Goroh | **A** | **D** | **B** | Excelente velocidade final e blindagem maciça. |
 
 ### ⚙️ Engine Settings (Aceleração vs Velocidade Máxima)
-Antes da largada, ajuste o balanço do motor no seletor:
+Antes da largada, ajuste o balanço do motor no seletor (manter ou não esse ajuste é uma questão aberta no [roadmap](docs/planning/2026-10-10-prototype-roadmap.md)):
 - **Foco em Aceleração**: Recuperação rápida após colisões e saídas de curva.
 - **Foco em Velocidade Máxima**: Tração superior nas retas longas.
 
@@ -135,6 +137,8 @@ Distribuído sob a licença MIT. Consulte o arquivo `LICENSE` para mais detalhes
 Validação: `npm test` executa regressões de input, geometria, combate, pads, chegada e laboratórios; `npm run build` verifica TypeScript antes do Vite. Os laboratórios de prototipação (`/prototypes/01_steering_profiles.html`, `/prototypes/02_craft_visuals.html`, `/prototypes/02_ship_visuals_v6_webgl.html`, `/prototypes/03_neo_metropolis_visual.html`, `/prototypes/04_craft_vfx.html`, `/prototypes/05_craft_geometry_lab.html` e `/prototypes/06_craft_paint_lab.html`, `/prototypes/07_pregame_physics_options.html`) rodam de forma independente e podem ser abertos diretamente no navegador.
 
 As decisões atuais de gameplay, visual e processo de desenvolvimento estão registradas no **[GDD inicial](docs/GDD.md)**. O documento diferencia requisitos definidos, detalhes pendentes e recursos já presentes no código; não significa que os novos recursos estejam implementados.
+
+**Roadmap de protótipos (10/10/2026):** [P08 física 3D, contato, voo e pouso → P09 circuito de referência → P10 impactos, destruição e K.O. → P11 Clash → P12 HUD, câmera e interface](docs/planning/2026-10-10-prototype-roadmap.md). Antes do combate avançado, um gate de jogabilidade exige uma corrida completa e divertida. O roadmap separa decisões do responsável, recomendações técnicas e questões abertas. Nenhum desses protótipos existe ainda.
 
 **Regra de desenvolvimento:** toda feature passa por protótipo HTML com **3 alternativas distintas**, sliders independentes e configuração copiável/colável, acompanhada de especificação completa e aprovação **antes** de ser integrada ao jogo. A integração deve ser fiel à versão aprovada. Novas mudanças exigem consulta ao repositório atualizado, atualização documental, telemetria/debug e atualização do README.
 

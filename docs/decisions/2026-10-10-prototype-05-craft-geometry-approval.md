@@ -71,6 +71,8 @@ O responsável pediu para **considerar a possibilidade de dar cores diferentes a
 
 - As **quatro peças intercambiáveis** definitivas (nomes, funções, encaixes, atributos): os quatro grupos visuais continuam provisórios.
 - Atributos, massa, colisão, física ou balanceamento ligados às formas.
+
+> **Nota de 10/10/2026:** a [decisão de naves e peças exclusivamente cosméticas](2026-10-10-craft-parts-cosmetic-only.md) supera a ideia de atributos e de desempenho ligados às formas. As peças são cosméticas, e as geometrias aprovadas acima continuam preservadas. Hitboxes, massa e montagem continuam pendentes.
 - A paleta final por nave e por peça (a fórmula de pigmento da v6 continua sendo a da direção D).
 - Os modos de diagnóstico de renderização do laboratório (luz que acompanha a câmera, contorno contínuo/estrutural, "cor pura").
 - A **integração no jogo** (`src/game/Vehicle.ts`): os modelos atuais do jogo continuam inalterados. A integração é uma etapa futura, que deve reproduzir a baseline e verificar as impressões digitais.
