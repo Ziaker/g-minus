@@ -58,7 +58,7 @@ Este documento separa três tipos de conteúdo:
 
 ### P08 — Física 3D, contato, voo e pouso
 
-**[Decisão — 11/10/2026] Concluído e aprovado no laboratório, revisão 3:** Perfil C + contato A e recuperação aérea. O responsável confirmou a redução de escopo para extensão do P01; as recomendações de comparação abaixo ficam como histórico, não obrigação vigente de reconstruir três pilotagens. [Aprovação, baseline e limites](../decisions/2026-10-11-prototype-08-physics-approval.md). Integração pendente; o próximo item da sequência permanece P09, sem início automático nesta entrega.
+**[Decisão — 11/10/2026] Concluído e aprovado no laboratório, revisão 4:** Perfil C + contato A, recuperação aérea e descida com ↓/S + boost (controle +30%). O responsável confirmou a redução de escopo para extensão do P01; as recomendações de comparação abaixo ficam como histórico, não obrigação vigente de reconstruir três pilotagens. [Aprovação vigente, baseline e limites](../decisions/2026-10-11-prototype-08-air-control-approval.md). Integração pendente; o próximo item da sequência permanece P09, sem início automático nesta entrega.
 
 - **[Recomendação]** Comparar as alternativas pelo que o jogador sente, não pela arquitetura. Escolher pela sensação, não pela sofisticação técnica: se o híbrido for melhor que um corpo totalmente livre, ele vence.
 - **[Recomendação]** Três alternativas:
@@ -115,7 +115,7 @@ Este documento separa três tipos de conteúdo:
 | Peças | nomes, funções, compatibilidade, montagem; cores por peça × Sistema B; cores aleatórias |
 | Spin E | o raio visual (varredura +30 %, provisório) depende da nave; o raio de jogo é igual para todas |
 | Balanço do motor | manter ou não o ajuste pré-corrida de aceleração × velocidade |
-| Contato e voo (P08) | Contato A sem quique e recuperação aérea aprovados em 11/10/2026; integração pendente. Ambiguidades do Perfil C e hitboxes competitivas permanecem abertas. |
+| Contato e voo (P08) | Contato A sem quique e controle aéreo da revisão 4 aprovados em 11/10/2026; integração pendente. Ambiguidades do Perfil C e hitboxes competitivas permanecem abertas. |
 | Eliminação e recuperação [17, 34, 47] | energia zero, saída da pista, reaparecimento × eliminação, colocação dos eliminados, convivência com [20] |
 | Impactos (P10) | limites entre leve, forte e fatal; câmera e HUD na eliminação; Colisão B/D vale para paredes? |
 | Clash [45] | entrada, desempate, duração, direção do lançamento, interação com Side e Spin, IA, fogo amigo em equipes |
@@ -141,7 +141,7 @@ Este documento separa três tipos de conteúdo:
 | Sistema | Registro |
 | :--- | :--- |
 | Toon Vector Flux D | [aprovação](../specs/02_toon_vector_flux_approval.md) |
-| P08 revisão 3: contato A e recuperação aérea (integração pendente) | [decisão](../decisions/2026-10-11-prototype-08-physics-approval.md) |
+| P08 revisão 4: contato A, subida e descida com boost (integração pendente) | [decisão](../decisions/2026-10-11-prototype-08-air-control-approval.md) |
 | Física Perfil C (baseline; reconciliação numérica pendente) | [decisão](../decisions/2026-10-10-prototype-01-physics-approval.md) |
 | Nove geometrias do Protótipo 05 e bloco canônico (uso obrigatório) | [decisão](../decisions/2026-10-10-prototype-05-craft-geometry-approval.md) |
 | Sistema B de pintura | [decisão](../decisions/2026-10-10-prototype-06-paint-system-approval.md) |

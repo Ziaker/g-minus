@@ -55,3 +55,7 @@ Na revisão 3 foram executados 116 testes (31 P08), build TypeScript/Vite, teste
 **Aprovação do protótipo não significa integração executada.** `src/` não é alterado nesta entrega. A publicação dos arquivos e desta decisão no repositório mantém o laboratório separado. A próxima integração deve ser explicitamente solicitada, preservar o comportamento aprovado e documentar divergências antes de modificá-lo.
 
 Revalidação após o registro de aprovação: **117/117 testes passaram** (32 P08), incluindo importação de JSON com status antigo e identidade do snapshot padrão; build TypeScript/Vite concluído. Logs preservados em [`docs/evidence/physics-08/approval/`](../evidence/physics-08/approval/). Não foi feita nova avaliação de dirigibilidade nesta etapa documental; a aprovação humana acima se refere à revisão 3 entregue.
+
+## Decisão posterior — revisão 4 (11/10/2026)
+
+A revisão 3 acima permanece como registro histórico do código e dos comandos aprovados à época. O responsável aprovou depois o controle aéreo com ↓/S + boost para mergulhar e ↑ + boost para subir, com ganho de 30% durante o boost. Consulte a [aprovação da revisão 4 e seu baseline JSON v5](2026-10-11-prototype-08-air-control-approval.md). A física do jogo principal continua sem integração nesta entrega.
