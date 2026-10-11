@@ -1,0 +1,31 @@
+# Política de finais de linha — G-MINUS
+# Arquivos de código, fontes e HTMLs gerados que exigem comparações exatas
+# devem sempre usar LF, independentemente da plataforma de checkout.
+
+# Código JavaScript/TypeScript
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.ts text eol=lf
+
+# HTMLs gerados e fontes aprovadas
+*.html text eol=lf
+
+# JSON (baselines aprovadas, configurações)
+*.json text eol=lf
+
+# Arquivos binários — nunca converter
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.mp4 binary
+*.webm binary
+*.wav binary
+*.mp3 binary
