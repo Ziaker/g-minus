@@ -2,7 +2,7 @@
 
 **Estado:** P08 APROVADO — INTEGRAÇÃO PENDENTE. [Decisão e baseline](../decisions/2026-10-11-prototype-08-air-control-approval.md).
 
-Esta revisão parte do P08 revisão 3 aprovado em 11/10/2026. Não altera o Perfil C, a pilotagem apoiada, a geometria, a física do jogo principal ou o registro histórico de aprovação da revisão 3. A revisão 3 continua disponível na branch `prototype/08-3d-physics`.
+Esta revisão parte do P08 revisão 3 aprovado em 11/10/2026. Não altera o Perfil C, a pilotagem apoiada, a geometria, a física do jogo principal ou o registro histórico de aprovação da revisão 3. A revisão 3 continua reproduzível no commit publicado `64e3279` e no histórico da branch `prototype/08-3d-physics`.
 
 ## Alteração jogável
 
